@@ -11,43 +11,89 @@
   <!-- 3D 渲染畫布 -->
   <canvas id="renderCanvas"></canvas>
 
-  <!-- 頂部 HUD (學生護照、等級、經驗值、排行榜、雲端狀態、操作引導) -->
+  <!-- 頂部 HUD (RPG 簡約單行佈局：左側冒險者徽章卡，右側魔法護照與冒險選單) -->
   <div id="hudBar">
-    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-      <button id="studentProfileBtn" class="student-hud-btn" onclick="toggleStudentModal()" type="button" title="點此查看/切換學生護照身分">
-        <span id="studentProfileBtnLabel">🎒 點此登入護照</span>
-      </button>
-      <button id="magicPassportBtn" class="hud-btn passport-btn-highlight" onclick="togglePassportModal()" type="button" title="翻開數位魔法護照手帳">
-        <span>📘</span> 魔法護照
-      </button>
-      <button id="worldMapBtn" class="hud-btn map-btn-highlight" onclick="toggleWorldMapModal()" type="button" title="開啟五大情境空間星圖">
-        <span>🗺️</span> 空間星圖
-      </button>
-      <div id="hudCurrentZoneTag" class="zone-badge" onclick="toggleWorldMapModal()" title="目前所在空間 (點此開啟星圖)">
-        <span id="hudCurrentZoneLabel">🏰 見習學徒書齋</span>
+    <!-- 左側：整合式冒險者個人卡 (點擊展開個人學籍與狀態面板) -->
+    <div id="playerAdventurerPill" class="hud-adventurer-card" onclick="toggleStudentModal()" role="button" tabindex="0" title="點此查看個人學籍、雲端狀態與等級成就">
+      <div class="adventurer-avatar-box">
+        <span class="adventurer-avatar-icon">🎒</span>
+        <span id="cloudStatusDot" class="status-dot dot-local" title="雲端狀態：單機模式"></span>
       </div>
-      <div class="hud-pill">
-        <span id="hudLevelLabel" class="hud-title">等級 1 • 童趣魔法使</span>
-        <div class="xp-bar-container">
-          <div id="hudXpFill" class="xp-bar-fill"></div>
+      <div class="adventurer-meta">
+        <div class="adventurer-top-row">
+          <span id="studentProfileBtnLabel" class="adventurer-name">點此登入護照</span>
+          <span id="hudLevelLabel" class="adventurer-lv-tag">等級 1 • 童趣魔法使</span>
         </div>
-        <span id="hudXpLabel" class="xp-text">0 XP</span>
+        <div class="adventurer-bottom-row">
+          <div class="mini-xp-bar-container">
+            <div id="hudXpFill" class="xp-bar-fill" style="width: 0%;"></div>
+          </div>
+          <span id="hudXpLabel" class="mini-xp-text">0 XP</span>
+        </div>
       </div>
+      <!-- 舊相容性 DOM 元素 (保證既有外部呼叫與標籤更新相容無虞) -->
+      <button id="studentProfileBtn" style="display: none;" onclick="toggleStudentModal()" type="button"></button>
+      <div id="hudCurrentZoneTag" style="display: none;"><span id="hudCurrentZoneLabel">🏰 見習學徒書齋</span></div>
     </div>
 
-    <div style="display: flex; gap: 8px; align-items: center;">
-      <button id="leaderboardBtn" class="hud-btn" onclick="toggleLeaderboardModal()" type="button">
-        <span>🏆</span> 榮譽榜
+    <!-- 右側：核心快捷鈕 (📘 魔法護照 + ⚙️ 系統選單) -->
+    <div class="hud-quick-actions">
+      <button id="magicPassportBtn" class="hud-btn passport-btn-highlight" onclick="togglePassportModal()" type="button" title="翻開數位魔法護照手帳">
+        <span>📘</span> <span class="btn-text">魔法護照</span>
       </button>
-      <div id="cloudStatusPill" class="cloud-status-pill mode-local" onclick="toggleCloudConfigModal()" title="雲端同步狀態 (點此設定)">
-        <span>⚪</span> 單機模式
+      <button id="systemMenuBtn" class="hud-btn system-menu-btn" onclick="toggleSystemMenu()" type="button" title="開啟系統選單 (音樂、榮譽榜、星圖、指南、雲端)">
+        <span id="systemMenuBtnIcon">⚙️</span> <span class="btn-text">選單</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 冒險系統快捷抽屜面板 (System Menu Drawer) -->
+  <div id="systemMenuDrawer" class="system-drawer" style="display: none;">
+    <div class="system-drawer-backdrop" onclick="closeSystemMenu()"></div>
+    <div class="system-drawer-content parchment-card">
+      <div class="system-drawer-header">
+        <div class="drawer-title">⚙️ 冒險使系統選單</div>
+        <button class="modal-close-btn" type="button" onclick="closeSystemMenu()" aria-label="關閉">✕</button>
       </div>
-      <button id="bgmToggleBtn" class="hud-btn" onclick="toggleMusic()" type="button">
-        <span id="bgmIcon">🎵</span> 音樂
-      </button>
-      <button id="guideBtn" class="hud-btn" onclick="toggleGuideModal()" type="button">
-        <span>📖</span> 指南
-      </button>
+      <div class="system-drawer-grid">
+        <button id="bgmToggleBtn" class="drawer-action-btn" onclick="toggleMusic()" type="button">
+          <span id="bgmIcon" class="drawer-btn-icon">🎵</span>
+          <div class="drawer-btn-info">
+            <span class="drawer-btn-title">背景音樂</span>
+            <span id="bgmStatusLabel" class="drawer-btn-sub">點擊開關旋律</span>
+          </div>
+        </button>
+
+        <button id="leaderboardBtn" class="drawer-action-btn" onclick="toggleLeaderboardModal(); closeSystemMenu();" type="button">
+          <span class="drawer-btn-icon">🏆</span>
+          <div class="drawer-btn-info">
+            <span class="drawer-btn-title">空間榮譽榜</span>
+            <span class="drawer-btn-sub">查看全班通關競賽</span>
+          </div>
+        </button>
+
+        <button id="worldMapBtn" class="drawer-action-btn map-btn-highlight" onclick="toggleWorldMapModal(); closeSystemMenu();" type="button">
+          <span class="drawer-btn-icon">🗺️</span>
+          <div class="drawer-btn-info">
+            <span class="drawer-btn-title">空間星圖</span>
+            <span class="drawer-btn-sub">五大場景快速旅行</span>
+          </div>
+        </button>
+
+        <button id="guideBtn" class="drawer-action-btn" onclick="toggleGuideModal(); closeSystemMenu();" type="button">
+          <span class="drawer-btn-icon">📖</span>
+          <div class="drawer-btn-info">
+            <span class="drawer-btn-title">逃脫指南</span>
+            <span class="drawer-btn-sub">觸控操作與按鍵說明</span>
+          </div>
+        </button>
+      </div>
+
+      <div class="drawer-footer-row">
+        <div id="cloudStatusPill" class="cloud-status-pill mode-local" onclick="toggleCloudConfigModal(); closeSystemMenu();" title="雲端同步狀態 (點此設定)">
+          <span>⚪</span> 單機模式 (點此設定學校雲端)
+        </div>
+      </div>
     </div>
   </div>
 
@@ -266,6 +312,17 @@
         登入您的班級座號，通關成績與收集的單字將即時同步至學校 Google 試算表！
       </p>
 
+      <!-- 當前冒險者狀態速覽條 -->
+      <div id="studentModalProfileBanner" class="student-profile-banner" style="display: flex; align-items: center; justify-content: space-between; background: #fefce8; border: 1.5px solid #fcd34d; border-radius: 12px; padding: 10px 14px; margin-top: 10px; margin-bottom: 8px; text-align: left;">
+        <div>
+          <div style="font-weight: 800; font-size: 14px; color: var(--warm-brown);" id="studentModalNameDisplay">冒險者：未登入 (訪客體驗)</div>
+          <div style="font-size: 12px; color: #8c7361; margin-top: 2px;" id="studentModalLevelDisplay">等級 1 • 童趣魔法使 (0 XP)</div>
+        </div>
+        <div id="studentModalCloudDisplay" class="cloud-status-pill mode-local" style="font-size: 11px; padding: 4px 8px;">
+          <span>⚪</span> 單機模式
+        </div>
+      </div>
+
       <form id="studentLoginForm" onsubmit="submitStudentLogin(event)" style="margin-top: 10px;">
         <div class="form-grid">
           <div class="form-group">
@@ -411,15 +468,15 @@
 
   <!-- 核心庫與遊戲腳本 -->
   <script src="three.min.js"></script>
-  <script src="vocab-data.js?v=20260911_v3"></script>
-  <script src="vocab-passport-bank.js?v=20260911_v3"></script>
-  <script src="speech-manager.js?v=20260911_v3"></script>
-  <script src="audio-manager.js?v=20260911_v3"></script>
-  <script src="touch-controls.js?v=20260911_v3"></script>
-  <script src="cloud-sync-manager.js?v=20260911_v3"></script>
-  <script src="spatial-zone-manager.js?v=20260911_v3"></script>
-  <script src="minimap-manager.js?v=20260911_v3"></script>
-  <script src="world-3d.js?v=20260911_v3"></script>
+  <script src="vocab-data.js?v=20260911_v4"></script>
+  <script src="vocab-passport-bank.js?v=20260911_v4"></script>
+  <script src="speech-manager.js?v=20260911_v4"></script>
+  <script src="audio-manager.js?v=20260911_v4"></script>
+  <script src="touch-controls.js?v=20260911_v4"></script>
+  <script src="cloud-sync-manager.js?v=20260911_v4"></script>
+  <script src="spatial-zone-manager.js?v=20260911_v4"></script>
+  <script src="minimap-manager.js?v=20260911_v4"></script>
+  <script src="world-3d.js?v=20260911_v4"></script>
 
   <script>
     let curLeaderboardTab = 'school';
@@ -580,7 +637,60 @@
     function toggleMusic() {
       if (window.audioManager) {
         const isPlaying = window.audioManager.toggleBgm();
-        document.getElementById('bgmIcon').textContent = isPlaying ? '🔊' : '🔇';
+        const icon = document.getElementById('bgmIcon');
+        if (icon) icon.textContent = isPlaying ? '🔊' : '🔇';
+        const label = document.getElementById('bgmStatusLabel');
+        if (label) label.textContent = isPlaying ? '播放中 (點擊靜音)' : '已靜音 (點擊播放)';
+      }
+    }
+
+    function toggleSystemMenu() {
+      const drawer = document.getElementById('systemMenuDrawer');
+      if (!drawer) return;
+      const isOpening = drawer.style.display !== 'flex';
+      drawer.style.display = isOpening ? 'flex' : 'none';
+      if (isOpening) {
+        if (window.cloudSyncManager) {
+          window.cloudSyncManager.updateCloudStatusIndicator();
+        }
+        if (window.audioManager) {
+          const isPlaying = !window.audioManager.isMuted && window.audioManager.bgmPlaying;
+          const label = document.getElementById('bgmStatusLabel');
+          if (label) label.textContent = isPlaying ? '播放中 (點擊靜音)' : '已靜音 (點擊播放)';
+          const icon = document.getElementById('bgmIcon');
+          if (icon) icon.textContent = isPlaying ? '🔊' : '🔇';
+        }
+      }
+      if (window.audioManager) window.audioManager.playSfx('click');
+    }
+
+    function closeSystemMenu() {
+      const drawer = document.getElementById('systemMenuDrawer');
+      if (drawer) drawer.style.display = 'none';
+    }
+
+    function updateProfileModalSummary() {
+      const nameDisp = document.getElementById('studentModalNameDisplay');
+      const lvlDisp = document.getElementById('studentModalLevelDisplay');
+      const cloudDisp = document.getElementById('studentModalCloudDisplay');
+
+      const p = (window.cloudSyncManager && window.cloudSyncManager.profile) || null;
+      if (nameDisp) {
+        if (p && !p.isGuest) {
+          nameDisp.textContent = `冒險者：${p.classId}班 ${p.seatNo}號 ${p.name}`;
+        } else {
+          nameDisp.textContent = `冒險者：訪客體驗模式`;
+        }
+      }
+      if (lvlDisp) {
+        const lvl = p ? p.level : 1;
+        const xp = p ? p.xp : 0;
+        lvlDisp.textContent = `等級 ${lvl} • 童趣魔法使 (${xp} XP)`;
+      }
+      if (cloudDisp && window.cloudSyncManager) {
+        const isOnline = !!window.cloudSyncManager.gasUrl;
+        cloudDisp.innerHTML = isOnline ? '<span>🟢</span> 雲端已同步' : '<span>⚪</span> 單機模式';
+        cloudDisp.className = isOnline ? 'cloud-status-pill mode-online' : 'cloud-status-pill mode-local';
       }
     }
 
@@ -596,6 +706,7 @@
       modal.style.display = isOpening ? 'flex' : 'none';
       if (isOpening) {
         initLoginFormOptions();
+        updateProfileModalSummary();
       }
       if (window.audioManager) window.audioManager.playSfx('click');
     }

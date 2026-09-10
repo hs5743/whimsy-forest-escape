@@ -24,9 +24,12 @@ class MinimapManager {
       container.id = 'minimapContainer';
       container.className = 'minimap-wrapper';
       container.innerHTML = `
-        <div class="minimap-header" onclick="toggleWorldMapModal()" title="點擊展開大地圖世界">
-          <span id="minimapZoneName" class="minimap-zone-title">🏰 見習書齋</span>
-          <span class="minimap-expand-hint">🗺️ 大地圖</span>
+        <div class="minimap-header">
+          <div class="minimap-title-wrap" onclick="toggleWorldMapModal()" title="點擊展開大地圖世界">
+            <span id="minimapZoneName" class="minimap-zone-title">🏰 見習書齋</span>
+            <span class="minimap-expand-hint">🗺️ 大地圖</span>
+          </div>
+          <button id="minimapToggleBtn" class="minimap-toggle-btn" type="button" title="收合/展開小地圖" onclick="if(window.world3D && window.world3D.minimap) window.world3D.minimap.toggleCollapse(event)">▾</button>
         </div>
         <div class="minimap-frame" onclick="toggleWorldMapModal()" title="點擊展開大地圖世界">
           <canvas id="minimapCanvas" width="140" height="140"></canvas>
@@ -45,6 +48,22 @@ class MinimapManager {
     if (this.canvas) {
       this.ctx = this.canvas.getContext('2d');
       this.size = this.canvas.width;
+    }
+  }
+
+  toggleCollapse(e) {
+    if (e) e.stopPropagation();
+    this.isCollapsed = !this.isCollapsed;
+    if (this.container) {
+      if (this.isCollapsed) {
+        this.container.classList.add('minimap-collapsed');
+      } else {
+        this.container.classList.remove('minimap-collapsed');
+      }
+    }
+    const btn = document.getElementById('minimapToggleBtn');
+    if (btn) {
+      btn.textContent = this.isCollapsed ? '▴' : '▾';
     }
   }
 

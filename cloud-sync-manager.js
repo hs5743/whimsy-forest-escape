@@ -379,7 +379,7 @@ class CloudSyncManager {
   // 更新 HUD 上面的雲端連線狀態圖示
   updateCloudStatusIndicator(justSent = false) {
     const indicator = document.getElementById('cloudStatusPill');
-    if (!indicator) return;
+    const dot = document.getElementById('cloudStatusDot');
 
     let pendingCount = 0;
     try {
@@ -388,17 +388,35 @@ class CloudSyncManager {
     } catch (e) {}
 
     if (!this.gasUrl) {
-      indicator.innerHTML = `<span>⚪</span> 單機模式`;
-      indicator.title = '未設定 GAS 網址，紀錄僅保存在此設備。點此設定雲端連線。';
-      indicator.className = 'cloud-status-pill mode-local';
+      if (indicator) {
+        indicator.innerHTML = `<span>⚪</span> 單機模式`;
+        indicator.title = '未設定 GAS 網址，紀錄僅保存在此設備。點此設定雲端連線。';
+        indicator.className = 'cloud-status-pill mode-local';
+      }
+      if (dot) {
+        dot.className = 'status-dot dot-local';
+        dot.title = '雲端連線：單機模式';
+      }
     } else if (pendingCount > 0) {
-      indicator.innerHTML = `<span>🟡</span> 暫存 ${pendingCount} 筆待傳`;
-      indicator.title = `有 ${pendingCount} 筆通關資料將在連線順暢時自動補傳。`;
-      indicator.className = 'cloud-status-pill mode-pending';
+      if (indicator) {
+        indicator.innerHTML = `<span>🟡</span> 暫存 ${pendingCount} 筆待傳`;
+        indicator.title = `有 ${pendingCount} 筆通關資料將在連線順暢時自動補傳。`;
+        indicator.className = 'cloud-status-pill mode-pending';
+      }
+      if (dot) {
+        dot.className = 'status-dot dot-pending';
+        dot.title = `雲端連線：暫存 ${pendingCount} 筆待傳`;
+      }
     } else {
-      indicator.innerHTML = `<span>🟢</span> 雲端已同步`;
-      indicator.title = '已成功連線至 Google 試算表！';
-      indicator.className = 'cloud-status-pill mode-online';
+      if (indicator) {
+        indicator.innerHTML = `<span>🟢</span> 雲端已同步`;
+        indicator.title = '已成功連線至 Google 試算表！';
+        indicator.className = 'cloud-status-pill mode-online';
+      }
+      if (dot) {
+        dot.className = 'status-dot dot-online';
+        dot.title = '雲端連線：Google 試算表已同步';
+      }
     }
   }
 }

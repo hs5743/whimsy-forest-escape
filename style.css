@@ -44,16 +44,308 @@ body, html {
 /* ================================================= */
 #hudBar {
   position: absolute;
-  top: 14px;
-  left: 14px;
-  right: 14px;
-  z-index: 10;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  z-index: 20;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: nowrap;
+  gap: 10px;
   pointer-events: none;
+  height: 44px;
 }
 
+/* 左側：冒險者身分卡徽章 (整合學生姓名、等級、經驗值與雲端燈號) */
+.hud-adventurer-card {
+  background: rgba(255, 251, 242, 0.94);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 2px solid #dfc79b;
+  border-radius: 26px;
+  padding: 4px 12px 4px 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  max-width: 320px;
+  min-height: 42px;
+}
+
+.hud-adventurer-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+  border-color: #d97706;
+}
+
+.hud-adventurer-card:active {
+  transform: scale(0.96);
+}
+
+.adventurer-avatar-box {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border: 2px solid #d97706;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.adventurer-avatar-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* 狀態呼吸圓點 (雲端連線狀態) */
+.status-dot {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid #fff;
+  transition: all 0.3s ease;
+}
+
+.status-dot.dot-online {
+  background-color: #10b981;
+  box-shadow: 0 0 6px #10b981;
+  animation: pulseGreenDot 2s infinite ease-in-out;
+}
+
+.status-dot.dot-pending {
+  background-color: #f59e0b;
+  box-shadow: 0 0 6px #f59e0b;
+  animation: pulseYellowDot 1.5s infinite ease-in-out;
+}
+
+.status-dot.dot-local {
+  background-color: #9ca3af;
+}
+
+@keyframes pulseGreenDot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  50% { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0); }
+}
+
+@keyframes pulseYellowDot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+  50% { box-shadow: 0 0 0 4px rgba(245, 158, 11, 0); }
+}
+
+.adventurer-meta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.adventurer-top-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.adventurer-name {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--warm-brown);
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.adventurer-lv-tag {
+  font-size: 11px;
+  font-weight: 900;
+  color: #7c2d12;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 10px;
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+
+.adventurer-bottom-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mini-xp-bar-container {
+  width: 80px;
+  height: 7px;
+  background: #e2d3be;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.mini-xp-text {
+  font-size: 10px;
+  font-weight: 800;
+  color: #047857;
+  font-family: monospace;
+  white-space: nowrap;
+}
+
+/* 右側快捷區 */
+.hud-quick-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: auto;
+  flex-shrink: 0;
+}
+
+.system-menu-btn {
+  background: rgba(255, 251, 242, 0.94);
+  border: 2px solid #dfc79b;
+  color: var(--warm-brown);
+}
+
+/* ================================================= */
+/* 冒險者系統選單抽屜 (System Menu Drawer) */
+/* ================================================= */
+.system-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 100;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 60px 14px 14px;
+  animation: fadeInDrawer 0.2s ease-out;
+}
+
+.system-drawer-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+}
+
+.system-drawer-content {
+  position: relative;
+  width: 320px;
+  max-width: 90vw;
+  background: rgba(255, 251, 242, 0.98);
+  border: 2px solid #dfc79b;
+  border-radius: 20px;
+  padding: 16px 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  z-index: 2;
+  animation: slideDownMenu 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes fadeInDrawer {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideDownMenu {
+  from { transform: translateY(-16px) scale(0.96); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.system-drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px dashed #dfc79b;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+}
+
+.drawer-title {
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--warm-brown);
+}
+
+.system-drawer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.drawer-action-btn {
+  background: #fff;
+  border: 2px solid #e2d3be;
+  border-radius: 14px;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.drawer-action-btn:hover {
+  border-color: #d97706;
+  background: #fefce8;
+  transform: translateY(-2px);
+}
+
+.drawer-action-btn:active {
+  transform: scale(0.95);
+}
+
+.drawer-btn-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.drawer-btn-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.drawer-btn-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--warm-brown);
+}
+
+.drawer-btn-sub {
+  font-size: 10px;
+  font-weight: 600;
+  color: #8c7361;
+}
+
+.drawer-footer-row {
+  display: flex;
+  justify-content: center;
+  border-top: 1px dashed #e2d3be;
+  padding-top: 10px;
+}
+
+/* 相容性舊樣式類別 (保證既有組件正常顯示) */
 .hud-pill {
   background: rgba(255, 251, 242, 0.92);
   backdrop-filter: blur(8px);
@@ -665,7 +957,7 @@ body, html {
 }
 
 /* ================================================= */
-/* 響應式優化 (平板橫直螢幕) */
+/* 響應式優化 (平板與手機螢幕適配) */
 /* ================================================= */
 @media (max-width: 768px) {
   .parchment-card {
@@ -683,6 +975,65 @@ body, html {
     top: 8px;
     left: 8px;
     right: 8px;
+    height: 40px;
+    gap: 6px;
+  }
+  .hud-adventurer-card {
+    padding: 3px 8px 3px 4px;
+    min-height: 38px;
+    gap: 6px;
+    max-width: 220px;
+  }
+  .adventurer-avatar-box {
+    width: 28px;
+    height: 28px;
+  }
+  .adventurer-avatar-icon {
+    font-size: 15px;
+  }
+  .adventurer-name {
+    font-size: 12px;
+    max-width: 90px;
+  }
+  .adventurer-lv-tag {
+    font-size: 10px;
+    padding: 0 4px;
+  }
+  .mini-xp-bar-container {
+    width: 50px;
+    height: 6px;
+  }
+  .mini-xp-text {
+    font-size: 9px;
+  }
+  .hud-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+    gap: 4px;
+  }
+  .system-drawer {
+    padding: 50px 8px 8px;
+  }
+  .system-drawer-content {
+    width: 280px;
+  }
+}
+
+@media (max-width: 480px) {
+  .adventurer-name {
+    max-width: 75px;
+  }
+  .adventurer-lv-tag {
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mini-xp-bar-container {
+    width: 42px;
+  }
+  .hud-btn {
+    padding: 5px 8px;
+    font-size: 11px;
   }
 }
 
@@ -1732,14 +2083,15 @@ body, html {
 /* ================================================= */
 .minimap-wrapper {
   position: absolute;
-  top: 72px;
+  top: 60px;
   right: 14px;
   z-index: 15;
   background: rgba(255, 251, 242, 0.94);
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 2px solid #dfc79b;
   border-radius: 20px;
-  padding: 8px 10px 6px;
+  padding: 6px 8px 6px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
   display: flex;
   flex-direction: column;
@@ -1755,9 +2107,47 @@ body, html {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 8px;
-  cursor: pointer;
+  gap: 6px;
   padding: 0 2px;
+}
+
+.minimap-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.minimap-toggle-btn {
+  background: #fef3c7;
+  border: 1px solid #d97706;
+  color: #7c2d12;
+  border-radius: 8px;
+  padding: 0 6px;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+  line-height: 18px;
+  transition: all 0.2s ease;
+}
+
+.minimap-toggle-btn:hover {
+  background: #fde68a;
+  transform: scale(1.08);
+}
+
+.minimap-toggle-btn:active {
+  transform: scale(0.92);
+}
+
+.minimap-wrapper.minimap-collapsed .minimap-frame,
+.minimap-wrapper.minimap-collapsed .minimap-coord-bar {
+  display: none !important;
+}
+
+.minimap-wrapper.minimap-collapsed {
+  border-radius: 14px;
+  padding: 4px 8px;
 }
 
 .minimap-zone-title {
@@ -1831,17 +2221,24 @@ body, html {
 
 @media (max-width: 768px) {
   .minimap-wrapper {
-    top: 64px;
-    right: 10px;
-    padding: 6px 8px 4px;
+    top: 52px;
+    right: 8px;
+    padding: 4px 6px 4px;
   }
   .minimap-frame {
-    width: 105px;
-    height: 105px;
+    width: 90px;
+    height: 90px;
   }
   .minimap-zone-title {
-    max-width: 70px;
+    max-width: 60px;
     font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .minimap-frame {
+    width: 82px;
+    height: 82px;
   }
 }
 
