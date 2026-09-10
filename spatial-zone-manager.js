@@ -1,6 +1,6 @@
 // 空間情境管理器 (SpatialZoneManager)
 // 支援五大多元生活與奇幻空間動態切換：書齋、市集、花園、操場、車站
-// 全面搭載高品質 AI 材質皮膚 (Cobblestone, Awning, Grass, Marble, Track, Brick, Clock, Locomotive)
+// 突破死板四方邊框！打造開闊全景地平線、自然有機邊界與情境化邊緣傳送大門
 
 class SpatialZoneManager {
   constructor(world) {
@@ -29,9 +29,9 @@ class SpatialZoneManager {
         icon: '🍎',
         topic: 'Food, Numbers & Adjectives',
         reqLevel: 2,
-        desc: '洋溢著果香與笑聲的戶外市集，在蔬果攤位與天平秤間學習食物與數字！',
+        desc: '歐陸童話城鎮廣場，四周環繞磚木老街屋，在蔬果攤位與天平秤間探索學習！',
         words: ['APPLE', 'BANANA', 'BREAD', 'MILK', 'SWEET', 'OPEN'],
-        spawnPos: [0, 1.6, 3.5],
+        spawnPos: [0, 1.6, 4.0],
         spawnYaw: 0
       },
       'zone3': {
@@ -41,9 +41,9 @@ class SpatialZoneManager {
         icon: '🐰',
         topic: 'Animals, Nature & Actions',
         reqLevel: 3,
-        desc: '繁花盛開的精靈花園，圍繞著石造噴泉，與可愛兔子和飛鳥練習口說！',
+        desc: '背倚遠古群山晴空的開闊森林秘境，巨木奇石環抱，與小白兔與青鳥快樂對話！',
         words: ['RABBIT', 'BIRD', 'TREE', 'WATER', 'OPEN'],
-        spawnPos: [0, 1.6, 3.5],
+        spawnPos: [0, 1.6, 4.0],
         spawnYaw: 0
       },
       'zone4': {
@@ -53,9 +53,9 @@ class SpatialZoneManager {
         icon: '⚽',
         topic: 'Sports, Actions & Body',
         reqLevel: 4,
-        desc: '彩色旗幟飄揚的體育操場，沿著跑道挑戰運動指令，衝向終點冠軍拱門！',
+        desc: '開闊的校園標準運動場，西側看台彩旗飄揚，沿環形跑道奔向終點勝利拱門！',
         words: ['SOCCER', 'BALL', 'RUN', 'JUMP', 'OPEN'],
-        spawnPos: [0, 1.6, 3.5],
+        spawnPos: [0, 1.6, 4.0],
         spawnYaw: 0
       },
       'zone5': {
@@ -65,9 +65,9 @@ class SpatialZoneManager {
         icon: '🚂',
         topic: 'Time, Places & Transport',
         reqLevel: 5,
-        desc: '暮色下佇立著巨型時鐘的復古車站，準備登上通往大魔導士殿堂的列車！',
+        desc: '暮色下巨型鐵道穹頂月台，雙軌鋼軌延伸至星空群山，蒸汽特快車正蓄勢待發！',
         words: ['TIME', 'CLOCK', 'TRAIN', 'MORNING', 'OPEN'],
-        spawnPos: [0, 1.6, 3.5],
+        spawnPos: [-1.0, 1.6, 4.0],
         spawnYaw: 0
       }
     };
@@ -83,8 +83,10 @@ class SpatialZoneManager {
     this.tex = {
       marketCobble: loader.load('assets/textures/tex-market-cobble.jpg'),
       marketAwning: loader.load('assets/textures/tex-market-awning.jpg'),
+      townFacade: loader.load('assets/textures/tex-town-facade.jpg'),
       gardenGrass: loader.load('assets/textures/tex-garden-grass.jpg'),
       marbleFountain: loader.load('assets/textures/tex-marble-fountain.jpg'),
+      forestVista: loader.load('assets/textures/tex-forest-vista.jpg'),
       runningTrack: loader.load('assets/textures/tex-running-track.jpg'),
       stationBrick: loader.load('assets/textures/tex-station-brick.jpg'),
       clockFace: loader.load('assets/textures/tex-clocktower-face.jpg'),
@@ -95,18 +97,22 @@ class SpatialZoneManager {
       alchemySlate: loader.load('assets/textures/tex-alchemy-slate.jpg')
     };
 
-    // 配置紋理重複與平鋪模式
+    // 配置紋理重複平鋪
     this.tex.marketCobble.wrapS = THREE.RepeatWrapping;
     this.tex.marketCobble.wrapT = THREE.RepeatWrapping;
-    this.tex.marketCobble.repeat.set(7, 7);
+    this.tex.marketCobble.repeat.set(10, 10);
 
     this.tex.marketAwning.wrapS = THREE.RepeatWrapping;
     this.tex.marketAwning.wrapT = THREE.RepeatWrapping;
     this.tex.marketAwning.repeat.set(2, 1);
 
+    this.tex.townFacade.wrapS = THREE.RepeatWrapping;
+    this.tex.townFacade.wrapT = THREE.RepeatWrapping;
+    this.tex.townFacade.repeat.set(1, 1);
+
     this.tex.gardenGrass.wrapS = THREE.RepeatWrapping;
     this.tex.gardenGrass.wrapT = THREE.RepeatWrapping;
-    this.tex.gardenGrass.repeat.set(8, 8);
+    this.tex.gardenGrass.repeat.set(12, 12);
 
     this.tex.marbleFountain.wrapS = THREE.RepeatWrapping;
     this.tex.marbleFountain.wrapT = THREE.RepeatWrapping;
@@ -114,11 +120,11 @@ class SpatialZoneManager {
 
     this.tex.runningTrack.wrapS = THREE.RepeatWrapping;
     this.tex.runningTrack.wrapT = THREE.RepeatWrapping;
-    this.tex.runningTrack.repeat.set(6, 6);
+    this.tex.runningTrack.repeat.set(8, 8);
 
     this.tex.stationBrick.wrapS = THREE.RepeatWrapping;
     this.tex.stationBrick.wrapT = THREE.RepeatWrapping;
-    this.tex.stationBrick.repeat.set(5, 5);
+    this.tex.stationBrick.repeat.set(8, 8);
 
     this.tex.stoneWall.wrapS = THREE.RepeatWrapping;
     this.tex.stoneWall.wrapT = THREE.RepeatWrapping;
@@ -214,23 +220,22 @@ class SpatialZoneManager {
 
   // ==========================================
   // Zone 2: 陽光微風市集 (Bazaar Marketplace)
+  // 概念：歐陸中世紀城鎮廣場，三面圍繞老街屋街景，東側城門通往城外
   // ==========================================
   buildZone2_Market(group) {
     this.initTextures();
 
-    // 1. 光照：溫暖金黃日光與天光
-    const sunLight = new THREE.DirectionalLight(0xfffaed, 1.35);
-    sunLight.position.set(12, 18, 10);
+    // 1. 光照：溫暖地中海午後斜陽
+    const sunLight = new THREE.DirectionalLight(0xfffaed, 1.4);
+    sunLight.position.set(16, 22, 14);
     sunLight.castShadow = true;
-    sunLight.shadow.mapSize.width = 1024;
-    sunLight.shadow.mapSize.height = 1024;
     group.add(sunLight);
 
-    const hemiLight = new THREE.HemisphereLight(0xffedd5, 0x9a3412, 0.65);
+    const hemiLight = new THREE.HemisphereLight(0xffedd5, 0x9a3412, 0.7);
     group.add(hemiLight);
 
-    // 2. 地面：歐風陽光鵝卵石露天廣場 (AI 寫實鵝卵石皮膚)
-    const groundGeo = new THREE.PlaneGeometry(28, 28);
+    // 2. 地面：開闊無盡的歐陸古鎮鵝卵石街區 (60m x 60m 廣闊無死板方框)
+    const groundGeo = new THREE.PlaneGeometry(64, 64);
     const groundMat = new THREE.MeshStandardMaterial({
       map: this.tex.marketCobble,
       roughness: 0.85,
@@ -241,71 +246,160 @@ class SpatialZoneManager {
     ground.receiveShadow = true;
     group.add(ground);
 
-    // 3. 邊界：古石牆基底與木柵欄與轉角鐵藝燈柱
-    this.buildMarketPerimeter(group, 14);
+    // 3. 城鎮真實街屋立面建築群 (Townhouse Blocks) - 形成天然開闊市集背景
+    this.buildTownStreetBlocks(group);
 
-    // 4. 水果帳篷攤位 A (左側：蘋果與水果區 - APPLE)
-    this.buildDetailedMarketStall(group, -4.5, 0, -1.2, 'apple', '🍎 甜美紅蘋果攤 (APPLE)', 'stall_apple', () => {
+    // 4. 自然有機分布的市集攤位 (Asymmetrical Organic Layout)
+    // 蘋果攤位 (左前方，稍微斜向中央)
+    this.buildDetailedMarketStall(group, -4.6, 0, -0.8, 'apple', '🍎 甜美紅蘋果攤 (APPLE)', 'stall_apple', () => {
       this.world.openSpeechCard('APPLE', () => {
         this.world.addXP(60);
         this.world.addInventory('ITEM_APPLE', '🍎 甜脆紅蘋果', '#ef4444');
       });
-    });
+    }, 0.25);
 
-    // 5. 水果帳篷攤位 B (右側：香蕉與黃色水果區 - BANANA)
-    this.buildDetailedMarketStall(group, 4.5, 0, -1.2, 'banana', '🍌 活力金香蕉 (BANANA)', 'stall_banana', () => {
+    // 香蕉天平攤位 (右側前方，斜向廣場)
+    this.buildDetailedMarketStall(group, 4.5, 0, 1.2, 'banana', '🍌 活力金香蕉 (BANANA)', 'stall_banana', () => {
       this.world.openSpeechCard('BANANA', () => {
         this.world.addXP(60);
         this.world.addInventory('ITEM_BANANA', '🍌 香甜金香蕉', '#eab308');
       });
-    });
+    }, -0.35);
 
-    // 6. 烘焙長棍手推車 (中央左側：BREAD)
-    this.buildDetailedCart(group, -2.0, 0, -4.0, 'bread', '🥖 剛出爐的烤麵包 (BREAD)', 'cart_bread', () => {
+    // 烘焙手推車 (左後方街角屋簷下)
+    this.buildDetailedCart(group, -3.2, 0, -5.2, 'bread', '🥖 剛出爐的烤麵包 (BREAD)', 'cart_bread', () => {
       this.world.openSpeechCard('BREAD', () => {
         this.world.addXP(60);
         this.world.addInventory('ITEM_BREAD', '🥖 麥香長法棍', '#b45309');
       });
-    });
+    }, 0.2);
 
-    // 7. 牧場鮮奶與蜂蜜推車 (中央右側：MILK)
-    this.buildDetailedCart(group, 2.0, 0, -4.0, 'milk', '🥛 香濃鮮牛奶 (MILK)', 'cart_milk', () => {
+    // 牧場鮮奶與蜂蜜台 (右後方街角)
+    this.buildDetailedCart(group, 3.6, 0, -3.5, 'milk', '🥛 香濃鮮牛奶 (MILK)', 'cart_milk', () => {
       this.world.openSpeechCard('MILK', () => {
         this.world.addXP(60);
         this.world.addInventory('ITEM_MILK', '🥛 牧場鮮牛奶', '#60a5fa');
       });
-    });
+    }, -0.15);
 
-    // 8. 攤位間彩色三角形慶典吊旗
-    this.buildBuntingFlags(group, [-4.5, 2.7, -1.2], [4.5, 2.7, -1.2]);
+    // 5. 街屋與攤位間交錯懸掛的節慶三角彩旗
+    this.buildBuntingFlags(group, [-4.6, 3.2, -0.8], [4.5, 3.2, 1.2]);
+    this.buildBuntingFlags(group, [-7.0, 4.5, -4.0], [-3.2, 2.6, -5.2]);
 
-    // 9. 出口通道：堅固石橋木造吊橋閘門 (OPEN)
-    this.buildDrawbridgePortal(group, 0, 0, -7.0, '🏰 市集通往精靈花園的吊橋 (OPEN)', 'OPEN', () => {
-      this.world.showToast('🎉 恭喜！市集商人讚許你的英語發音，放下吊橋，解鎖前往花園！');
+    // 6. 城鎮石造防禦城門吊橋 (移至東北角邊緣，融入城鎮城牆！)
+    this.buildDrawbridgePortal(group, 6.8, 0, -8.0, '🏰 前往精靈花園的城門吊橋 (OPEN)', 'OPEN', () => {
+      this.world.showToast('🎉 恭喜！市集衛兵降下城門吊橋，解鎖前往精靈花園！');
       this.switchZone('zone3');
-    });
+    }, -0.35);
 
     // 市集陽光浮塵粒子
-    this.addFloatingParticles(group, 0xffedd5, 120, 24, 5);
+    this.addFloatingParticles(group, 0xffedd5, 140, 36, 6);
+  }
+
+  // [市集] 建造周圍圍繞的歐風中世紀街屋與巷道 (打破方框)
+  buildTownStreetBlocks(group) {
+    const facadeMat = new THREE.MeshStandardMaterial({
+      map: this.tex.townFacade,
+      roughness: 0.8
+    });
+    const stoneMat = new THREE.MeshStandardMaterial({ map: this.tex.stoneWall, roughness: 0.85 });
+    const woodMat = new THREE.MeshStandardMaterial({ map: this.tex.woodDesk, roughness: 0.7 });
+
+    // 北面連排街屋 (留出東北向城門開口)
+    const northBuilding = new THREE.Group();
+    northBuilding.position.set(-4.0, 0, -10.5);
+
+    const mainBody = new THREE.Mesh(new THREE.BoxGeometry(16, 7.5, 3.5), facadeMat);
+    mainBody.position.y = 3.75;
+    mainBody.castShadow = true;
+    northBuilding.add(mainBody);
+
+    // 歐風斜屋頂 (Sloping Roof with Slate)
+    const roof = new THREE.Mesh(new THREE.ConeGeometry(11.5, 3.0, 4), stoneMat);
+    roof.position.y = 8.5;
+    roof.rotation.y = Math.PI / 4;
+    roof.scale.set(1.1, 1.0, 0.45);
+    northBuilding.add(roof);
+
+    // 煙囪 (Chimneys)
+    [-4.0, 2.5].forEach(cx => {
+      const chimney = new THREE.Mesh(new THREE.BoxGeometry(0.7, 2.2, 0.7), stoneMat);
+      chimney.position.set(cx, 9.5, 0);
+      northBuilding.add(chimney);
+    });
+    group.add(northBuilding);
+
+    // 西面街屋街區 (沿西側延伸)
+    const westBuilding = new THREE.Group();
+    westBuilding.position.set(-11.5, 0, 0);
+    westBuilding.rotation.y = Math.PI / 2;
+
+    const westBody = new THREE.Mesh(new THREE.BoxGeometry(18, 7.2, 3.5), facadeMat);
+    westBody.position.y = 3.6;
+    westBuilding.add(westBody);
+
+    const westRoof = new THREE.Mesh(new THREE.ConeGeometry(12.8, 2.8, 4), stoneMat);
+    westRoof.position.y = 8.2;
+    westRoof.rotation.y = Math.PI / 4;
+    westRoof.scale.set(1.1, 1.0, 0.45);
+    westBuilding.add(westRoof);
+    group.add(westBuilding);
+
+    // 南側入口街景 (身後是有深度的小巷街角)
+    const southBlock = new THREE.Group();
+    southBlock.position.set(-3.0, 0, 11.5);
+
+    const southBody = new THREE.Mesh(new THREE.BoxGeometry(14, 6.8, 3.0), facadeMat);
+    southBody.position.y = 3.4;
+    southBlock.add(southBody);
+    group.add(southBlock);
+
+    // 街道散落的木桶、木箱、路燈 (增加生動真實感)
+    const barrelCoords = [[-6.8, -3.0], [-7.2, 1.0], [5.5, 4.5], [2.2, -7.5]];
+    barrelCoords.forEach(([bx, bz]) => {
+      const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.4, 0.9, 10), woodMat);
+      barrel.position.set(bx, 0.45, bz);
+      group.add(barrel);
+    });
+
+    // 廣場典雅黑鐵路燈
+    const lampCoords = [[-3.5, 2.5], [3.2, 3.5], [-2.0, -7.2], [5.8, -4.5]];
+    lampCoords.forEach(([lx, lz]) => {
+      const lampPost = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 3.2, 8), woodMat);
+      lampPost.position.set(lx, 1.6, lz);
+      group.add(lampPost);
+
+      const lampHead = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.2, 0.14, 0.45, 6),
+        new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xf59e0b, emissiveIntensity: 0.7 })
+      );
+      lampHead.position.set(lx, 3.3, lz);
+      group.add(lampHead);
+
+      const lampLight = new THREE.PointLight(0xfde68a, 1.1, 8);
+      lampLight.position.set(lx, 3.3, lz);
+      group.add(lampLight);
+    });
   }
 
   // ==========================================
   // Zone 3: 守護獸之森花園 (Beast Sanctuary Garden)
+  // 概念：廣袤自然精靈林間空地，背倚無垠蒼翠群山全景，巨木怪石自然環抱
   // ==========================================
   buildZone3_Garden(group) {
     this.initTextures();
 
-    // 1. 光照：晨曦柔和天光與林間光斑
-    const sunLight = new THREE.DirectionalLight(0xfef9c3, 1.2);
-    sunLight.position.set(8, 16, 6);
+    // 1. 光照：晨曦透過林間灑落的柔和金色光斑
+    const sunLight = new THREE.DirectionalLight(0xfef9c3, 1.3);
+    sunLight.position.set(12, 20, 8);
     sunLight.castShadow = true;
     group.add(sunLight);
 
-    const hemiLight = new THREE.HemisphereLight(0xdcfce7, 0x14532d, 0.75);
+    const hemiLight = new THREE.HemisphereLight(0xdcfce7, 0x14532d, 0.8);
     group.add(hemiLight);
 
-    // 2. 地面：童話野花繁生茵茵草坪 (AI 寫實草坪皮膚)
-    const grassGeo = new THREE.PlaneGeometry(28, 28);
+    // 2. 地面：開闊無界限的童話綠茵野花草坪 (70m x 70m)
+    const grassGeo = new THREE.PlaneGeometry(72, 72);
     const grassMat = new THREE.MeshStandardMaterial({
       map: this.tex.gardenGrass,
       roughness: 0.9,
@@ -316,142 +410,299 @@ class SpatialZoneManager {
     grass.receiveShadow = true;
     group.add(grass);
 
-    // 3. 鋪設弧形石板步道
-    this.buildGardenStonePaths(group);
+    // 3. 北面遠景群山與陽光全景立體天幕 (Panoramic Mountain Vista)
+    this.buildPanoramicHorizon(group);
 
-    // 4. 邊界：歐風白色石雕古典欄杆與轉角雕花石盆
-    this.buildGardenBalustrade(group, 14);
+    // 4. 自然林線與巨石群 (徹底取代死板圍欄，呈現自然森林邊緣)
+    this.buildOrganicForestPerimeter(group);
 
-    // 5. 散落草地的 3D 盛開小花叢
+    // 5. 蜿蜒自然的碎石石板步道
+    this.buildWindingStonePath(group);
+
+    // 6. 散落各處的 3D 盛開野花叢
     this.buildScatteredFlowers(group);
 
-    // 6. 中央雙層雕花大理石噴泉 (WATER)
-    this.buildMarbleFountain(group, 0, 0, -0.5, '⛲ 清涼純淨的活泉水 (WATER)', 'poi_water', () => {
+    // 7. 奇幻自然景觀與互動對象 (非對稱自然分布)
+    // 中央微偏左：雙層雕花大理石噴泉 (WATER)
+    this.buildMarbleFountain(group, -0.5, 0, -1.2, '⛲ 清涼純淨的活泉水 (WATER)', 'poi_water', () => {
       this.world.openSpeechCard('WATER', () => {
         this.world.addXP(60);
       });
     });
 
-    // 7. 草地上毛茸茸的白兔抱著胡蘿蔔 (RABBIT)
-    this.buildSculptedRabbit(group, -3.8, 0, -1.8, '🐰 正在草地上蹦跳的兔子 (RABBIT)', 'RABBIT', () => {
+    // 右前方野花丘陵：守護白兔抱胡蘿蔔 (RABBIT)
+    this.buildSculptedRabbit(group, 3.8, 0, 0.6, '🐰 正在草地上蹦跳的兔子 (RABBIT)', 'RABBIT', () => {
       this.world.openSpeechCard('RABBIT', () => {
         this.world.addXP(70);
       });
     });
 
-    // 8. 棲息於常春藤羅馬石柱上的歌唱青鳥 (BIRD)
-    this.buildBirdOnPedestal(group, 3.8, 0, -1.8, '🐦 枝頭歌唱的青鳥 (BIRD)', 'BIRD', () => {
+    // 左側青草地：常春藤羅馬石柱與青鳥 (BIRD)
+    this.buildBirdOnPedestal(group, -4.5, 0, 1.5, '🐦 枝頭歌唱的青鳥 (BIRD)', 'BIRD', () => {
       this.world.openSpeechCard('BIRD', () => {
         this.world.addXP(70);
       });
     });
 
-    // 9. 盤根錯節的千年精靈守護巨樹 (TREE)
-    this.buildAncientWorldTree(group, -5.2, 0, 2.5, '🌳 茂密的精靈古樹 (TREE)', 'TREE', () => {
+    // 右後方：千年精靈古樹 (TREE) - 高聳入雲，樹枝掛提燈
+    this.buildAncientWorldTree(group, 4.8, 0, -4.5, '🌳 茂密的精靈古樹 (TREE)', 'TREE', () => {
       this.world.openSpeechCard('TREE', () => {
         this.world.addXP(60);
       });
     });
 
-    // 10. 出口通道：攀附盛開玫瑰的鐵藝拱門 (OPEN)
-    this.buildRoseArchPortal(group, 0, 0, -7.0, '🌸 繁花纏繞的精靈拱門 (OPEN)', 'OPEN', () => {
-      this.world.showToast('🎉 花園小精靈施展魔法推開拱門，解鎖前往操場！');
+    // 8. 自然林間穿梭拱門 (西北側幽徑出口，隱現於古木與玫瑰藤蔓間！)
+    this.buildRoseArchPortal(group, -6.5, 0, -8.0, '🌸 通往冒險操場的精靈古徑 (OPEN)', 'OPEN', () => {
+      this.world.showToast('🎉 森林古樹撥開枝枒，微風輕拂，解鎖前往活力操場！');
       this.switchZone('zone4');
-    });
+    }, 0.35);
 
-    // 綠意精靈螢火微光
-    this.addFloatingParticles(group, 0x86efac, 140, 24, 4.5);
+    // 飄浮發光精靈孢子微粒
+    this.addFloatingParticles(group, 0x86efac, 160, 36, 5.5);
+  }
+
+  // [花園] 建造遠方綿延群山與晨光天幕 (Panoramic Horizon Backdrop)
+  buildPanoramicHorizon(group) {
+    const vistaGeo = new THREE.PlaneGeometry(68, 26);
+    const vistaMat = new THREE.MeshBasicMaterial({
+      map: this.tex.forestVista,
+      transparent: true,
+      opacity: 0.95
+    });
+    const vistaMesh = new THREE.Mesh(vistaGeo, vistaMat);
+    vistaMesh.position.set(0, 12, -26);
+    group.add(vistaMesh);
+  }
+
+  // [花園] 自然有機林線與苔石環抱 (取代四方圍欄)
+  buildOrganicForestPerimeter(group) {
+    const woodMat = new THREE.MeshStandardMaterial({ map: this.tex.woodDesk, roughness: 0.85 });
+    const pineLeafMat = new THREE.MeshStandardMaterial({ color: 0x14532d, roughness: 0.8 });
+    const oakLeafMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.75 });
+    const rockMat = new THREE.MeshStandardMaterial({ map: this.tex.stoneWall, roughness: 0.9 });
+
+    // 沿著周圍不規則環狀排列 24+ 棵松樹與闊葉巨木
+    for (let i = 0; i < 28; i++) {
+      const angle = (i / 28) * Math.PI * 2;
+      const radius = 13.5 + Math.sin(i * 1.8) * 2.5; // 自然波浪狀起伏半徑
+      const tx = Math.cos(angle) * radius;
+      const tz = Math.sin(angle) * radius;
+
+      // 避開西北方出口通道
+      if (tx < -4 && tz < -6) continue;
+
+      const treeGroup = new THREE.Group();
+      treeGroup.position.set(tx, 0, tz);
+
+      const height = 5.5 + Math.random() * 3.5;
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.45, height * 0.4, 8), woodMat);
+      trunk.position.y = height * 0.2;
+      treeGroup.add(trunk);
+
+      if (i % 2 === 0) {
+        // 松樹造型 (多層圓錐)
+        for (let t = 0; t < 3; t++) {
+          const cone = new THREE.Mesh(
+            new THREE.ConeGeometry(2.0 - t * 0.4, 2.2, 8),
+            pineLeafMat
+          );
+          cone.position.y = height * 0.35 + t * 1.4;
+          treeGroup.add(cone);
+        }
+      } else {
+        // 闊葉古木造型 (多面體葉叢)
+        const bush = new THREE.Mesh(new THREE.DodecahedronGeometry(2.2), oakLeafMat);
+        bush.position.y = height * 0.55;
+        treeGroup.add(bush);
+      }
+      group.add(treeGroup);
+    }
+
+    // 周圍錯落安放苔蘚巨石 (Mossy Boulders)
+    const boulderCoords = [
+      [-9.0, -3.5], [-8.5, 4.0], [-2.0, 11.5], [8.5, 6.0],
+      [9.5, -2.5], [7.0, -9.0], [-3.5, -11.0]
+    ];
+    boulderCoords.forEach(([rx, rz]) => {
+      const boulder = new THREE.Mesh(new THREE.DodecahedronGeometry(1.4), rockMat);
+      boulder.position.set(rx, 0.7, rz);
+      boulder.rotation.set(Math.random(), Math.random(), Math.random());
+      group.add(boulder);
+    });
+  }
+
+  // [花園] 蜿蜒自然的石板步道
+  buildWindingStonePath(group) {
+    const stoneMat = new THREE.MeshStandardMaterial({ map: this.tex.stoneWall, roughness: 0.85 });
+    // 從玩家起點 (0, 0, 4) 蜿蜒穿行至噴泉與林間
+    for (let t = 0; t < 16; t++) {
+      const z = 4.0 - t * 0.75;
+      const x = Math.sin(t * 0.45) * 1.8;
+      const step = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.55, 0.05, 8), stoneMat);
+      step.position.set(x, 0.03, z);
+      step.receiveShadow = true;
+      group.add(step);
+    }
   }
 
   // ==========================================
   // Zone 4: 活力冒險操場 (Athletic Sports Field)
+  // 概念：開闊的校園體育場，西側看台、北側記分板，跑道終點金色拱門
   // ==========================================
   buildZone4_Athletic(group) {
     this.initTextures();
 
-    // 1. 光照：晴空萬里體育場日光
-    const sunLight = new THREE.DirectionalLight(0xffffff, 1.4);
-    sunLight.position.set(10, 22, 10);
+    // 1. 光照：晴朗運動場清晨烈日
+    const sunLight = new THREE.DirectionalLight(0xffffff, 1.45);
+    sunLight.position.set(14, 25, 12);
     sunLight.castShadow = true;
     group.add(sunLight);
 
-    const hemiLight = new THREE.HemisphereLight(0xe0f2fe, 0x15803d, 0.7);
+    const hemiLight = new THREE.HemisphereLight(0xe0f2fe, 0x15803d, 0.75);
     group.add(hemiLight);
 
-    // 2. 地面：外部紅色標準 PU 跑道 (AI 寫實跑道皮膚)
-    const trackGeo = new THREE.PlaneGeometry(28, 28);
+    // 2. 地面：開闊校園草坪 (70m x 70m)
+    const outerGrass = new THREE.Mesh(
+      new THREE.PlaneGeometry(72, 72),
+      new THREE.MeshStandardMaterial({ map: this.tex.gardenGrass, roughness: 0.88 })
+    );
+    outerGrass.rotation.x = -Math.PI / 2;
+    outerGrass.receiveShadow = true;
+    group.add(outerGrass);
+
+    // 3. 橢圓形標準紅色 PU 跑道 (AI 寫實跑道皮膚)
+    const trackGeo = new THREE.RingGeometry(8.5, 14.5, 32);
     const trackMat = new THREE.MeshStandardMaterial({
       map: this.tex.runningTrack,
-      roughness: 0.82,
-      metalness: 0.05
+      roughness: 0.82
     });
     const track = new THREE.Mesh(trackGeo, trackMat);
     track.rotation.x = -Math.PI / 2;
+    track.position.y = 0.02;
     track.receiveShadow = true;
     group.add(track);
 
-    // 3. 中央足球修剪綠茵草坪
-    const innerTurfGeo = new THREE.PlaneGeometry(16, 16);
-    const innerTurfMat = new THREE.MeshStandardMaterial({
-      map: this.tex.gardenGrass,
-      roughness: 0.85
-    });
-    const innerTurf = new THREE.Mesh(innerTurfGeo, innerTurfMat);
+    // 4. 中央足球綠茵草坪
+    const innerTurf = new THREE.Mesh(
+      new THREE.PlaneGeometry(16, 16),
+      new THREE.MeshStandardMaterial({ color: 0x22c55e, roughness: 0.8 })
+    );
     innerTurf.rotation.x = -Math.PI / 2;
     innerTurf.position.y = 0.03;
     innerTurf.receiveShadow = true;
     group.add(innerTurf);
 
-    // 草坪白色邊線與禁區劃線
     this.buildSoccerFieldLines(group);
 
-    // 4. 四角體育館高聳照明燈塔與看台
-    this.buildStadiumStructures(group, 14);
+    // 5. 體育場設施（西側階梯看台、高聳投光燈架、記分牌）
+    this.buildStadiumSurroundings(group);
 
-    // 5. 3D 擬真足球門與經典黑白五角皮革足球 (BALL / SOCCER)
-    this.buildSoccerGoalAndBall(group, 0, 0, -4.5, '⚽ 草地上的足球 (SOCCER / BALL)', 'BALL', () => {
+    // 6. 運動器材與球門 (合理自然分布)
+    // 球門與足球 (位於內場偏北方)
+    this.buildSoccerGoalAndBall(group, -1.2, 0, -4.0, '⚽ 草地上的足球 (SOCCER / BALL)', 'BALL', () => {
       this.world.openSpeechCard('BALL', () => {
         this.world.addXP(60);
       });
     });
 
-    // 6. 跑道起跑線金屬助跑器與接力棒 (RUN)
-    this.buildStartingBlocks(group, -4.2, 0, 0, '🏃 起跑線加速奔跑 (RUN)', 'RUN', () => {
+    // 跑道直道上的起跑助跑線 (左側直道跑道)
+    this.buildStartingBlocks(group, -5.2, 0, 1.2, '🏃 起跑線加速奔跑 (RUN)', 'RUN', () => {
       this.world.openSpeechCard('RUN', () => {
         this.world.addXP(60);
       });
     });
 
-    // 7. 體育跳高安全海綿厚墊與木質跳箱 (JUMP)
-    this.buildJumpEquipment(group, 4.2, 0, 0, '🦘 體育跳箱與跳躍 (JUMP)', 'JUMP', () => {
+    // 田徑跳躍場 (右側草坪區)
+    this.buildJumpEquipment(group, 3.8, 0, 1.2, '🦘 體育跳箱與跳躍 (JUMP)', 'JUMP', () => {
       this.world.openSpeechCard('JUMP', () => {
         this.world.addXP(60);
       });
     });
 
-    // 8. 出口通道：金色凱旋桂冠勝利拱門 (OPEN)
-    this.buildTrophyArchPortal(group, 0, 0, -7.0, '🏆 終點冠軍金色拱門 (OPEN)', 'OPEN', () => {
-      this.world.showToast('🎉 裁判揮舞旗幟，恭喜突破體育操場，前往星光車站！');
+    // 7. 出口通道：田徑跑道衝刺終點「冠軍金色拱門」(移至東北側彎道終點線！)
+    this.buildTrophyArchPortal(group, 7.2, 0, -6.5, '🏆 終點衝線冠軍金色拱門 (OPEN)', 'OPEN', () => {
+      this.world.showToast('🎉 裁判長鳴哨！以驚人速度衝過終點線，前往星光車站！');
       this.switchZone('zone5');
+    }, -0.4);
+  }
+
+  // [操場] 西側觀眾階梯看台與高聳照明燈塔
+  buildStadiumSurroundings(group) {
+    const steelMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.8, roughness: 0.3 });
+    const woodMat = new THREE.MeshStandardMaterial({ map: this.tex.woodDesk, roughness: 0.7 });
+    const boardMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5 });
+
+    // 西側大看台 (Bleachers Grandstand) - 階梯式座位
+    const grandstand = new THREE.Group();
+    grandstand.position.set(-13.5, 0, 0);
+
+    for (let r = 0; r < 4; r++) {
+      const step = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.45 * (r + 1), 16), steelMat);
+      step.position.set(r * 1.0, (0.45 * (r + 1)) / 2, 0);
+      grandstand.add(step);
+
+      const seat = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.1, 15.6), woodMat);
+      seat.position.set(r * 1.0, 0.45 * (r + 1) + 0.05, 0);
+      grandstand.add(seat);
+    }
+    group.add(grandstand);
+
+    // 北面巨型電子記分牌 (Electronic Scoreboard)
+    const scoreboard = new THREE.Group();
+    scoreboard.position.set(0, 0, -14.0);
+
+    const p1 = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 6.0, 8), steelMat);
+    p1.position.set(-3.0, 3.0, 0);
+    scoreboard.add(p1);
+
+    const p2 = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 6.0, 8), steelMat);
+    p2.position.set(3.0, 3.0, 0);
+    scoreboard.add(p2);
+
+    const board = new THREE.Mesh(new THREE.BoxGeometry(7.2, 3.2, 0.4), boardMat);
+    board.position.set(0, 5.0, 0);
+    scoreboard.add(board);
+
+    // 記分牌頂部彩旗
+    this.buildBuntingFlags(scoreboard, [-3.5, 6.8, 0], [3.5, 6.8, 0]);
+    group.add(scoreboard);
+
+    // 四座高聳金屬格構投光燈柱
+    const lightTowers = [[-12.0, -11.0], [12.0, -11.0], [-12.0, 11.0], [12.0, 11.0]];
+    lightTowers.forEach(([lx, lz]) => {
+      const p = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.32, 9.0, 8), steelMat);
+      p.position.set(lx, 4.5, lz);
+      group.add(p);
+
+      const head = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.8, 0.6), steelMat);
+      head.position.set(lx, 9.0, lz);
+      head.lookAt(0, 0, 0);
+      group.add(head);
+
+      const bulb = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.6), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+      bulb.position.set(lx, 9.0, lz);
+      bulb.lookAt(0, 0, 0);
+      group.add(bulb);
     });
   }
 
   // ==========================================
   // Zone 5: 星光鐘樓車站 (Clocktower Train Station)
+  // 概念：開闊的星空鐵道樞紐，大鐘樓聳立北端，蒸汽列車停靠右側，登車門即終點
   // ==========================================
   buildZone5_Station(group) {
     this.initTextures();
 
-    // 1. 光照：深邃暮色與月台煤氣燈暖光
-    const moonLight = new THREE.DirectionalLight(0x93c5fd, 0.6);
-    moonLight.position.set(10, 18, -10);
+    // 1. 光照：深邃午夜星光與月台煤氣燈暖光
+    const moonLight = new THREE.DirectionalLight(0x93c5fd, 0.7);
+    moonLight.position.set(12, 22, -10);
     group.add(moonLight);
 
-    const hemiLight = new THREE.HemisphereLight(0x312e81, 0x1e1b4b, 0.5);
+    const hemiLight = new THREE.HemisphereLight(0x312e81, 0x1e1b4b, 0.6);
     group.add(hemiLight);
 
-    // 2. 地面：維多利亞月台復古紅磚 (AI 寫實紅磚皮膚)
-    const platGeo = new THREE.PlaneGeometry(28, 28);
+    // 2. 地面：開闊月台復古紅磚與延伸至遠方的軌道基底 (64m x 64m)
+    const platGeo = new THREE.PlaneGeometry(64, 64);
     const platMat = new THREE.MeshStandardMaterial({
       map: this.tex.stationBrick,
       roughness: 0.8,
@@ -462,125 +713,106 @@ class SpatialZoneManager {
     platform.receiveShadow = true;
     group.add(platform);
 
-    // 3. 雙軌火車鐵道、枕木與碎石基床 (右側延伸)
-    this.buildTrainRailwayBed(group, 5.5);
+    // 3. 雙軌火車鐵道、枕木與碎石基床 (自月台右側貫穿延伸至遠方隧道)
+    this.buildTrainRailwayBed(group, 5.2);
 
-    // 4. 月台黃黑警戒斑馬線與鑄鐵安全護欄
-    this.buildStationPerimeter(group, 14);
+    // 4. 維多利亞拱頂鐵道鋼構雨棚 (Overhead Iron Truss Roof Frame)
+    this.buildStationRoofStructure(group);
 
-    // 5. 巨型四層維多利亞紅磚天文時鐘塔 (TIME / CLOCK)
-    this.buildAstronomicalClockTower(group, 0, 0, -5.5, '🕰️ 月台巨型天文時鐘 (TIME / CLOCK)', 'TIME', () => {
+    // 5. 西側候車大廳紅磚建築立面
+    this.buildStationTerminalBuilding(group);
+
+    // 6. 巨型四層維多利亞紅磚天文時鐘塔 (TIME / CLOCK) - 矗立於月台北側樞紐
+    this.buildAstronomicalClockTower(group, -2.8, 0, -8.5, '🕰️ 月台巨型天文時鐘 (TIME / CLOCK)', 'TIME', () => {
       this.world.openSpeechCard('TIME', () => {
         this.world.addXP(80);
       });
     });
 
-    // 6. 3D 魔法極光蒸汽火車頭 (TRAIN)
-    this.buildSteamLocomotive(group, 5.5, 0, -2.5, '🚂 魔法星光特快列車 (TRAIN)', 'TRAIN', () => {
+    // 7. 3D 魔法星光蒸汽特快車頭 (TRAIN) - 停泊於鐵道上
+    this.buildSteamLocomotive(group, 5.2, 0, -3.2, '🚂 魔法星光特快列車 (TRAIN)', 'TRAIN', () => {
       this.world.openSpeechCard('TRAIN', () => {
         this.world.addXP(80);
       });
     });
 
-    // 7. 復古鑄鐵晨曦煤氣路燈與候車長椅 (MORNING)
-    this.buildGasLampAndBench(group, -4.2, 0, 0, '🌅 照亮晨曦的月台路燈 (MORNING)', 'MORNING', () => {
+    // 8. 鑄鐵晨曦煤氣路燈與候車長椅 (MORNING) - 位於月台左側步道
+    this.buildGasLampAndBench(group, -4.5, 0, 1.0, '🌅 照亮晨曦的月台路燈 (MORNING)', 'MORNING', () => {
       this.world.openSpeechCard('MORNING', () => {
         this.world.addXP(80);
       });
     });
 
-    // 8. 出口通道：列車頭等車廂登車門 (OPEN)
-    this.buildTrainCarriageDoorPortal(group, 0, 0, 6.0, '🚂 前往大魔導士殿堂的列車門 (OPEN)', 'OPEN', () => {
+    // 9. 出口通道：蒸汽列車「頭等客車登車大門」(移至火車車廂側門，自然登車體驗！)
+    this.buildTrainCarriageDoorPortal(group, 4.8, 0, 2.2, '🚂 登上通往大魔導士殿堂的列車門 (OPEN)', 'OPEN', () => {
       this.world.showToast('🎉 汽笛長鳴！恭喜完成全維度英語護照試煉！');
       if (this.world) this.world.triggerEscapeCelebration();
     });
 
-    // 飄浮星塵微粒
-    this.addFloatingParticles(group, 0xfde047, 160, 24, 6);
+    // 飄浮星光塵埃微粒
+    this.addFloatingParticles(group, 0xfde047, 180, 36, 7);
+  }
+
+  // [車站] 建造維多利亞鋼鐵拱型雨棚桁架 (打破四方方框，營造宏偉車站感)
+  buildStationRoofStructure(group) {
+    const ironMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.85, roughness: 0.3 });
+
+    // 4 跨巨大的鐵道圓拱鋼架 (橫跨月台與鐵軌)
+    [-8, -2, 4, 10].forEach(z => {
+      const arch = new THREE.Mesh(new THREE.TorusGeometry(7.2, 0.14, 8, 20, Math.PI), ironMat);
+      arch.position.set(0.5, 5.2, z);
+      arch.rotation.z = 0;
+      group.add(arch);
+
+      // 支撐鋼柱
+      [-6.5, 7.5].forEach(x => {
+        const col = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.2, 5.5, 8), ironMat);
+        col.position.set(x, 2.75, z);
+        group.add(col);
+      });
+    });
+  }
+
+  // [車站] 建造西側月台大廳牆面與窗景
+  buildStationTerminalBuilding(group) {
+    const brickMat = new THREE.MeshStandardMaterial({ map: this.tex.stationBrick, roughness: 0.8 });
+    const woodMat = new THREE.MeshStandardMaterial({ map: this.tex.woodDesk, roughness: 0.7 });
+
+    const wall = new THREE.Mesh(new THREE.BoxGeometry(1.2, 7.5, 24), brickMat);
+    wall.position.set(-10.5, 3.75, 0);
+    group.add(wall);
+
+    // 發光暖黃拱窗
+    const windowMat = new THREE.MeshStandardMaterial({
+      color: 0xfef08a,
+      emissive: 0xf59e0b,
+      emissiveIntensity: 0.65,
+      roughness: 0.3
+    });
+    [-6, 0, 6].forEach(wz => {
+      const win = new THREE.Mesh(new THREE.PlaneGeometry(0.1, 2.8), windowMat);
+      win.position.set(-9.85, 4.2, wz);
+      win.rotation.y = Math.PI / 2;
+      group.add(win);
+    });
+
+    // 車站時刻表木牌 (Timetable Board)
+    const board = new THREE.Mesh(new THREE.BoxGeometry(0.2, 1.6, 2.4), woodMat);
+    board.position.set(-9.8, 3.2, -3.0);
+    group.add(board);
   }
 
   // ==========================================
   // 模組化精緻景物建造器 (High-Fidelity Builders)
   // ==========================================
 
-  // [市集] 石牆基底與木柵欄與轉角燈柱
-  buildMarketPerimeter(group, halfSize) {
-    const stoneWallMat = new THREE.MeshStandardMaterial({
-      map: this.tex.stoneWall,
-      roughness: 0.85
-    });
-    const woodMat = new THREE.MeshStandardMaterial({
-      map: this.tex.woodDesk,
-      roughness: 0.7
-    });
-
-    // 四周矮石牆基座
-    const wallThick = 0.5;
-    const wallHeight = 0.8;
-    const wallLength = halfSize * 2;
-
-    const nWall = new THREE.Mesh(new THREE.BoxGeometry(wallLength, wallHeight, wallThick), stoneWallMat);
-    nWall.position.set(0, wallHeight / 2, -halfSize);
-    group.add(nWall);
-
-    const sWall = new THREE.Mesh(new THREE.BoxGeometry(wallLength, wallHeight, wallThick), stoneWallMat);
-    sWall.position.set(0, wallHeight / 2, halfSize);
-    group.add(sWall);
-
-    const eWall = new THREE.Mesh(new THREE.BoxGeometry(wallThick, wallHeight, wallLength), stoneWallMat);
-    eWall.position.set(halfSize, wallHeight / 2, 0);
-    group.add(eWall);
-
-    const wWall = new THREE.Mesh(new THREE.BoxGeometry(wallThick, wallHeight, wallLength), stoneWallMat);
-    wWall.position.set(-halfSize, wallHeight / 2, 0);
-    group.add(wWall);
-
-    // 石牆上的木質圍欄柱
-    for (let i = -halfSize + 2; i < halfSize; i += 2.5) {
-      if (Math.abs(i) < 2) continue; // 留出通道空隙
-      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.8, 8), woodMat);
-      post.position.set(i, wallHeight + 0.4, -halfSize);
-      group.add(post);
-
-      const rail = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.08, 0.06), woodMat);
-      rail.position.set(i + 1.25, wallHeight + 0.6, -halfSize);
-      group.add(rail);
-    }
-
-    // 四角柱石造燈台
-    const corners = [
-      [-halfSize, -halfSize],
-      [halfSize, -halfSize],
-      [-halfSize, halfSize],
-      [halfSize, halfSize]
-    ];
-    corners.forEach(([cx, cz]) => {
-      const pColumn = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.8, 0.8), stoneWallMat);
-      pColumn.position.set(cx, 0.9, cz);
-      group.add(pColumn);
-
-      const lantern = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.2, 0.15, 0.45, 6),
-        new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xf59e0b, emissiveIntensity: 0.6 })
-      );
-      lantern.position.set(cx, 2.05, cz);
-      group.add(lantern);
-
-      const pLight = new THREE.PointLight(0xfde68a, 0.8, 8);
-      pLight.position.set(cx, 2.1, cz);
-      group.add(pLight);
-    });
-  }
-
   // [市集] 擬真水果帳篷攤位 (蘋果/香蕉)
-  buildDetailedMarketStall(group, x, y, z, fruitType, label, id, onClick) {
+  buildDetailedMarketStall(group, x, y, z, fruitType, label, id, onClick, rotationY = 0) {
     const stall = new THREE.Group();
     stall.position.set(x, y, z);
+    stall.rotation.y = rotationY;
 
-    const woodMat = new THREE.MeshStandardMaterial({
-      map: this.tex.woodDesk,
-      roughness: 0.65
-    });
+    const woodMat = new THREE.MeshStandardMaterial({ map: this.tex.woodDesk, roughness: 0.65 });
 
     // 1. 厚實木質櫃檯與腳架
     const tableTop = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.15, 1.6), woodMat);
@@ -596,7 +828,7 @@ class SpatialZoneManager {
       stall.add(leg);
     });
 
-    // 2. 攤位 4 根挑高頂棚立柱
+    // 2. 攤位 4 根挑高立柱
     const poleGeo = new THREE.BoxGeometry(0.1, 1.8, 0.1);
     [[-1.35, -0.65], [1.35, -0.65], [-1.35, 0.65], [1.35, 0.65]].forEach(([px, pz]) => {
       const pole = new THREE.Mesh(poleGeo, woodMat);
@@ -604,7 +836,7 @@ class SpatialZoneManager {
       stall.add(pole);
     });
 
-    // 3. 彩色條紋帆布遮陽棚 (AI 寫實布料皮膚)
+    // 3. 紅白條紋遮陽棚
     const canopyMat = new THREE.MeshStandardMaterial({
       map: this.tex.marketAwning,
       roughness: 0.7,
@@ -615,7 +847,7 @@ class SpatialZoneManager {
     roof.rotation.y = Math.PI / 4;
     stall.add(roof);
 
-    // 垂墜荷葉邊 (Front Scalloped Valance)
+    // 垂墜荷葉邊
     const valance = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.25, 0.05), canopyMat);
     valance.position.set(0, 2.7, 0.85);
     stall.add(valance);
@@ -638,7 +870,6 @@ class SpatialZoneManager {
       const appleMatGreen = new THREE.MeshStandardMaterial({ color: 0x65a30d, roughness: 0.4 });
       const stemMat = new THREE.MeshStandardMaterial({ color: 0x451a03 });
 
-      // 堆滿一顆顆帶果蒂與葉子的紅蘋果與青蘋果
       for (let i = 0; i < 9; i++) {
         const appleGroup = new THREE.Group();
         const isGreen = (i % 4 === 0);
@@ -656,7 +887,6 @@ class SpatialZoneManager {
         stall.add(appleGroup);
       }
     } else if (fruitType === 'banana') {
-      // 鮮黃彎月形香蕉串與黃銅天平秤
       const bananaMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.45 });
       const tipMat = new THREE.MeshStandardMaterial({ color: 0x4d7c0f });
 
@@ -705,30 +935,20 @@ class SpatialZoneManager {
   }
 
   // [市集] 擬真雙輪木造推車 (烤麵包/鮮奶蜂蜜)
-  buildDetailedCart(group, x, y, z, cartType, label, id, onClick) {
+  buildDetailedCart(group, x, y, z, cartType, label, id, onClick, rotationY = 0) {
     const cart = new THREE.Group();
     cart.position.set(x, y, z);
+    cart.rotation.y = rotationY;
 
     const woodMat = new THREE.MeshStandardMaterial({ map: this.tex.woodDesk, roughness: 0.7 });
     const ironMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8, roughness: 0.3 });
 
-    // 1. 推車底盤與把手
+    // 底盤與把手
     const chassis = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.2, 1.1), woodMat);
     chassis.position.y = 0.65;
     cart.add(chassis);
 
-    // 兩根斜把手
-    const handleL = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.2, 8), woodMat);
-    handleL.position.set(-0.6, 0.7, 0.9);
-    handleL.rotation.x = -0.5;
-    cart.add(handleL);
-
-    const handleR = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.2, 8), woodMat);
-    handleR.position.set(0.6, 0.7, 0.9);
-    handleR.rotation.x = -0.5;
-    cart.add(handleR);
-
-    // 2. 兩側復古輪輻木大輪 (8 根木輪輻 + 鐵輪框)
+    // 大車輪
     [-0.9, 0.9].forEach(wx => {
       const wheelGroup = new THREE.Group();
       wheelGroup.position.set(wx, 0.5, 0);
@@ -745,40 +965,26 @@ class SpatialZoneManager {
         spoke.rotation.z = (s * Math.PI) / 4;
         wheelGroup.add(spoke);
       }
-
       cart.add(wheelGroup);
     });
 
-    // 3. 貨物與裝飾
     if (cartType === 'bread') {
-      // 編織藤籃與金黃長法棍、圓形酸種麵包
       const basketMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
       const basket = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.35, 0.35, 12), basketMat);
       basket.position.set(0, 0.9, 0);
       cart.add(basket);
 
       const crustMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.65 });
-      // 法棍麵包 (Baguettes)
       [-0.15, 0, 0.15].forEach((bx, idx) => {
         const baguette = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.7, 10), crustMat);
         baguette.position.set(bx, 1.2, (idx - 1) * 0.08);
         baguette.rotation.x = 0.35 + idx * 0.1;
-        baguette.rotation.z = -0.2 + idx * 0.15;
         cart.add(baguette);
       });
     } else if (cartType === 'milk') {
-      // 玻璃牛奶瓶 (透亮白色) 與金黃琥珀蜂蜜罐
-      const glassMat = new THREE.MeshStandardMaterial({
-        color: 0xffffff,
-        roughness: 0.1,
-        metalness: 0.1,
-        transparent: true,
-        opacity: 0.85
-      });
       const milkLiquidMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 });
       const honeyMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.2, transparent: true, opacity: 0.9 });
 
-      // 4 瓶鮮奶
       [[-0.3, -0.2], [0.3, -0.2], [-0.3, 0.2], [0.3, 0.2]].forEach(([mx, mz]) => {
         const bottle = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 0.42, 12), milkLiquidMat);
         bottle.position.set(mx, 0.95, mz);
@@ -789,13 +995,11 @@ class SpatialZoneManager {
         cart.add(cap);
       });
 
-      // 中央一罈黃金蜂蜜
       const honeyPot = new THREE.Mesh(new THREE.SphereGeometry(0.2, 12, 12), honeyMat);
       honeyPot.position.set(0, 0.95, 0);
       cart.add(honeyPot);
     }
 
-    // 4. 互動包圍盒
     const hitBox = new THREE.Mesh(
       new THREE.BoxGeometry(2.2, 1.8, 1.6),
       new THREE.MeshBasicMaterial({ visible: false })
@@ -808,7 +1012,7 @@ class SpatialZoneManager {
     group.add(cart);
   }
 
-  // [市集] 彩色慶典吊旗三角旗繩
+  // [市集] 彩色慶典吊旗
   buildBuntingFlags(group, startPos, endPos) {
     const flagColors = [0xef4444, 0x3b82f6, 0xf59e0b, 0x10b981, 0x8b5cf6];
     const dx = (endPos[0] - startPos[0]) / 8;
@@ -830,35 +1034,36 @@ class SpatialZoneManager {
     }
   }
 
-  // [市集] 古堡護城石橋木造吊橋大門 (Exit Drawbridge)
-  buildDrawbridgePortal(group, x, y, z, label, exitWord, onUnlocked) {
+  // [市集] 古堡護城石橋木造吊橋大門 (Exit Portal - 融入邊緣城牆)
+  buildDrawbridgePortal(group, x, y, z, label, exitWord, onUnlocked, rotationY = 0) {
     const portal = new THREE.Group();
     portal.position.set(x, y, z);
+    portal.rotation.y = rotationY;
 
     const stoneMat = new THREE.MeshStandardMaterial({ map: this.tex.stoneWall, roughness: 0.85 });
     const woodMat = new THREE.MeshStandardMaterial({ map: this.tex.woodDesk, roughness: 0.7 });
     const ironMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.9, roughness: 0.2 });
 
-    // 兩側拱門防禦石塔
-    const towerL = new THREE.Mesh(new THREE.BoxGeometry(1.2, 4.8, 1.2), stoneMat);
-    towerL.position.set(-2.2, 2.4, 0);
+    // 兩側防禦石塔
+    const towerL = new THREE.Mesh(new THREE.BoxGeometry(1.4, 5.2, 1.4), stoneMat);
+    towerL.position.set(-2.2, 2.6, 0);
     portal.add(towerL);
 
-    const towerR = new THREE.Mesh(new THREE.BoxGeometry(1.2, 4.8, 1.2), stoneMat);
-    towerR.position.set(2.2, 2.4, 0);
+    const towerR = new THREE.Mesh(new THREE.BoxGeometry(1.4, 5.2, 1.4), stoneMat);
+    towerR.position.set(2.2, 2.6, 0);
     portal.add(towerR);
 
-    // 頂部石拱橋過梁
-    const lintel = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.8, 1.0), stoneMat);
-    lintel.position.set(0, 4.4, 0);
+    // 石拱過梁
+    const lintel = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.9, 1.2), stoneMat);
+    lintel.position.set(0, 4.8, 0);
     portal.add(lintel);
 
-    // 重型鐵條鑲嵌木製吊橋門板
-    const gateDoor = new THREE.Mesh(new THREE.BoxGeometry(3.2, 3.8, 0.2), woodMat);
+    // 吊橋門板
+    const gateDoor = new THREE.Mesh(new THREE.BoxGeometry(3.2, 4.0, 0.25), woodMat);
     gateDoor.position.set(0, 2.0, 0);
     portal.add(gateDoor);
 
-    // 兩根斜拉沉重鐵鍊
+    // 斜拉鐵鍊
     [-1.5, 1.5].forEach(cx => {
       const chain = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 4.2, 6), ironMat);
       chain.position.set(cx, 2.6, 0.6);
@@ -866,27 +1071,20 @@ class SpatialZoneManager {
       portal.add(chain);
     });
 
-    // 兩座燃燒火盆
+    // 燃燒火盆
     [-2.2, 2.2].forEach(tx => {
       const brazier = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.2, 0.3, 8), ironMat);
-      brazier.position.set(tx, 2.8, 0.7);
+      brazier.position.set(tx, 3.2, 0.8);
       portal.add(brazier);
 
-      const fireCore = new THREE.Mesh(
-        new THREE.SphereGeometry(0.16, 8, 8),
-        new THREE.MeshStandardMaterial({ color: 0xf97316, emissive: 0xef4444, emissiveIntensity: 0.9 })
-      );
-      fireCore.position.set(tx, 3.0, 0.7);
-      portal.add(fireCore);
-
-      const fLight = new THREE.PointLight(0xf97316, 1.2, 6);
-      fLight.position.set(tx, 3.1, 0.7);
+      const fLight = new THREE.PointLight(0xf97316, 1.3, 6);
+      fLight.position.set(tx, 3.5, 0.8);
       portal.add(fLight);
     });
 
     // 發光解鎖魔法結界
     const runeBarrier = new THREE.Mesh(
-      new THREE.PlaneGeometry(3.0, 3.6),
+      new THREE.PlaneGeometry(3.0, 3.8),
       new THREE.MeshStandardMaterial({
         color: 0x38bdf8,
         transparent: true,
@@ -899,9 +1097,8 @@ class SpatialZoneManager {
     runeBarrier.position.set(0, 2.0, 0.15);
     portal.add(runeBarrier);
 
-    // 互動包圍盒
     const hitBox = new THREE.Mesh(
-      new THREE.BoxGeometry(4.0, 4.0, 1.8),
+      new THREE.BoxGeometry(4.2, 4.2, 2.0),
       new THREE.MeshBasicMaterial({ visible: false })
     );
     hitBox.position.y = 2.0;
@@ -924,89 +1121,6 @@ class SpatialZoneManager {
     group.add(portal);
   }
 
-  // [花園] 白色古典雕花石欄杆與雕花石盆 (Balustrade)
-  buildGardenBalustrade(group, halfSize) {
-    const marbleMat = new THREE.MeshStandardMaterial({
-      map: this.tex.marbleFountain,
-      roughness: 0.45,
-      metalness: 0.05
-    });
-
-    const railGeo = new THREE.BoxGeometry(halfSize * 2, 0.18, 0.25);
-    const baseGeo = new THREE.BoxGeometry(halfSize * 2, 0.2, 0.3);
-
-    // 南北基石與扶手
-    [-halfSize, halfSize].forEach(z => {
-      const base = new THREE.Mesh(baseGeo, marbleMat);
-      base.position.set(0, 0.1, z);
-      group.add(base);
-
-      const rail = new THREE.Mesh(railGeo, marbleMat);
-      rail.position.set(0, 0.85, z);
-      group.add(rail);
-
-      // 細長花瓶柱 (Balusters)
-      for (let x = -halfSize + 1.2; x < halfSize; x += 1.6) {
-        if (Math.abs(x) < 2.5 && z < 0) continue; // 北邊出口預留寬通道
-        const baluster = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.65, 8), marbleMat);
-        baluster.position.set(x, 0.48, z);
-        group.add(baluster);
-      }
-    });
-
-    // 東西兩側基石與扶手
-    [-halfSize, halfSize].forEach(x => {
-      const baseE = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.2, halfSize * 2), marbleMat);
-      baseE.position.set(x, 0.1, 0);
-      group.add(baseE);
-
-      const railE = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.18, halfSize * 2), marbleMat);
-      railE.position.set(x, 0.85, 0);
-      group.add(railE);
-
-      for (let z = -halfSize + 1.2; z < halfSize; z += 1.6) {
-        const baluster = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.65, 8), marbleMat);
-        baluster.position.set(x, 0.48, z);
-        group.add(baluster);
-      }
-    });
-
-    // 四角柱石花盆 (Urns with Flowers)
-    const corners = [
-      [-halfSize, -halfSize], [halfSize, -halfSize],
-      [-halfSize, halfSize], [halfSize, halfSize]
-    ];
-    corners.forEach(([cx, cz]) => {
-      const plinth = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.1, 0.7), marbleMat);
-      plinth.position.set(cx, 0.55, cz);
-      group.add(plinth);
-
-      const urn = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.15, 0.4, 12), marbleMat);
-      urn.position.set(cx, 1.25, cz);
-      group.add(urn);
-
-      // 石盆內盛開紅粉小花
-      const flowerBush = new THREE.Mesh(
-        new THREE.DodecahedronGeometry(0.32),
-        new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.8 })
-      );
-      flowerBush.position.set(cx, 1.5, cz);
-      group.add(flowerBush);
-    });
-  }
-
-  // [花園] 弧形碎石踏步石板路
-  buildGardenStonePaths(group) {
-    const stoneMat = new THREE.MeshStandardMaterial({ map: this.tex.stoneWall, roughness: 0.85 });
-    // 從玩家起點 (0, 0, 3.5) 鋪往中央噴泉 (0, 0, 0)
-    for (let z = 3.5; z >= -0.5; z -= 0.7) {
-      const step = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.5, 0.04, 8), stoneMat);
-      step.position.set(Math.sin(z * 2) * 0.15, 0.02, z);
-      step.receiveShadow = true;
-      group.add(step);
-    }
-  }
-
   // [花園] 散落花園草坪的 3D 盛開小花
   buildScatteredFlowers(group) {
     const petalMatWhite = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6 });
@@ -1015,7 +1129,8 @@ class SpatialZoneManager {
 
     const flowerCoords = [
       [-2.5, -0.8], [-1.8, 1.5], [2.2, 1.2], [3.0, -1.0],
-      [-4.0, 1.0], [4.5, 0.5], [-2.0, -3.2], [2.5, -3.5]
+      [-4.0, 1.0], [4.5, 0.5], [-2.0, -3.2], [2.5, -3.5],
+      [-5.5, 3.5], [5.0, 3.2], [0.5, 2.8], [-3.2, -5.5]
     ];
 
     flowerCoords.forEach(([fx, fz], idx) => {
@@ -1048,13 +1163,11 @@ class SpatialZoneManager {
       metalness: 0.08
     });
 
-    // 1. 底層八角形雕花大水池
     const baseBasin = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.6, 0.6, 16), marbleMat);
     baseBasin.position.y = 0.3;
     baseBasin.castShadow = true;
     fountain.add(baseBasin);
 
-    // 水池清澈水面 (Shimmering Water)
     const waterMat = new THREE.MeshStandardMaterial({
       color: 0x38bdf8,
       roughness: 0.08,
@@ -1066,26 +1179,19 @@ class SpatialZoneManager {
     poolWater.position.y = 0.55;
     fountain.add(poolWater);
 
-    // 2. 中央雕花羅馬柱座
     const centralPillar = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.5, 1.4, 12), marbleMat);
     centralPillar.position.y = 1.2;
     fountain.add(centralPillar);
 
-    // 3. 上層精巧小水盤
     const upperBasin = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 0.9, 0.3, 16), marbleMat);
     upperBasin.position.y = 1.9;
     fountain.add(upperBasin);
 
-    const upperWater = new THREE.Mesh(new THREE.CylinderGeometry(1.05, 1.05, 0.04, 16), waterMat);
-    upperWater.position.y = 2.02;
-    fountain.add(upperWater);
-
-    // 4. 頂端蓮蓬出水噴頭 (Spout Finial)
     const finial = new THREE.Mesh(new THREE.SphereGeometry(0.22, 10, 10), marbleMat);
     finial.position.y = 2.2;
     fountain.add(finial);
 
-    // 5. 噴泉動態湧水微粒
+    // 湧水微粒
     const sprayCount = 45;
     const sprayGeo = new THREE.BufferGeometry();
     const sprayPos = new Float32Array(sprayCount * 3);
@@ -1095,16 +1201,9 @@ class SpatialZoneManager {
       sprayPos[i + 2] = (Math.random() - 0.5) * 0.4;
     }
     sprayGeo.setAttribute('position', new THREE.BufferAttribute(sprayPos, 3));
-    const sprayMat = new THREE.PointsMaterial({
-      color: 0xe0f2fe,
-      size: 0.06,
-      transparent: true,
-      opacity: 0.85
-    });
-    const sprayPoints = new THREE.Points(sprayGeo, sprayMat);
+    const sprayPoints = new THREE.Points(sprayGeo, new THREE.PointsMaterial({ color: 0xe0f2fe, size: 0.06, transparent: true, opacity: 0.85 }));
     fountain.add(sprayPoints);
 
-    // 水滴跳動動畫
     this.world.animators.push((time) => {
       const pos = sprayGeo.attributes.position.array;
       for (let i = 0; i < sprayCount * 3; i += 3) {
@@ -1115,7 +1214,6 @@ class SpatialZoneManager {
       poolWater.position.y = 0.55 + Math.sin(time * 3) * 0.01;
     });
 
-    // 6. 互動感應外盒
     const hitBox = new THREE.Mesh(
       new THREE.CylinderGeometry(2.8, 2.8, 2.6, 12),
       new THREE.MeshBasicMaterial({ visible: false })
@@ -1139,7 +1237,7 @@ class SpatialZoneManager {
     const carrotMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.45 });
     const greenMat = new THREE.MeshStandardMaterial({ color: 0x22c55e, roughness: 0.6 });
 
-    // 1. 綠色小丘底座
+    // 綠色花草小丘
     const mound = new THREE.Mesh(
       new THREE.CylinderGeometry(0.9, 1.1, 0.25, 12),
       new THREE.MeshStandardMaterial({ map: this.tex.gardenGrass, roughness: 0.9 })
@@ -1147,7 +1245,6 @@ class SpatialZoneManager {
     mound.position.y = 0.125;
     rabbit.add(mound);
 
-    // 2. 兔子本體 (身體 + 圓頭)
     const body = new THREE.Mesh(new THREE.SphereGeometry(0.38, 14, 14), furMat);
     body.position.y = 0.48;
     body.scale.set(1.0, 1.1, 1.15);
@@ -1157,7 +1254,7 @@ class SpatialZoneManager {
     head.position.set(0, 0.82, 0.2);
     rabbit.add(head);
 
-    // 3. 兩隻豎起長耳朵 (帶粉紅內耳)
+    // 長耳朵
     [-0.1, 0.1].forEach(ex => {
       const ear = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.35, 0.05), furMat);
       ear.position.set(ex, 1.15, 0.15);
@@ -1170,7 +1267,7 @@ class SpatialZoneManager {
       rabbit.add(inEar);
     });
 
-    // 4. 眼睛與小圓尾巴
+    // 眼睛與尾巴
     [-0.1, 0.1].forEach(eyeX => {
       const eye = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 8), eyeMat);
       eye.position.set(eyeX, 0.88, 0.42);
@@ -1181,7 +1278,7 @@ class SpatialZoneManager {
     tail.position.set(0, 0.45, -0.4);
     rabbit.add(tail);
 
-    // 5. 懷中抱著的大胡蘿蔔
+    // 懷中抱著的大胡蘿蔔
     const carrot = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.35, 8), carrotMat);
     carrot.position.set(0.15, 0.58, 0.35);
     carrot.rotation.z = -0.5;
@@ -1192,7 +1289,6 @@ class SpatialZoneManager {
     carrotTop.rotation.z = -0.5;
     rabbit.add(carrotTop);
 
-    // 6. 互動包圍盒
     const hitBox = new THREE.Mesh(
       new THREE.CylinderGeometry(0.9, 0.9, 1.5, 8),
       new THREE.MeshBasicMaterial({ visible: false })
@@ -1202,7 +1298,6 @@ class SpatialZoneManager {
     rabbit.add(hitBox);
     this.world.interactables.push(hitBox);
 
-    // 兔子輕微呼吸與蹦跳動畫
     this.world.animators.push((time) => {
       head.rotation.y = Math.sin(time * 2) * 0.12;
       body.position.y = 0.48 + Math.abs(Math.sin(time * 3)) * 0.04;
@@ -1216,12 +1311,8 @@ class SpatialZoneManager {
     const birdGroup = new THREE.Group();
     birdGroup.position.set(x, y, z);
 
-    const marbleMat = new THREE.MeshStandardMaterial({
-      map: this.tex.marbleFountain,
-      roughness: 0.4
-    });
+    const marbleMat = new THREE.MeshStandardMaterial({ map: this.tex.marbleFountain, roughness: 0.4 });
 
-    // 1. 羅馬雕花石柱
     const plinth = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.3, 0.8), marbleMat);
     plinth.position.y = 0.15;
     birdGroup.add(plinth);
@@ -1234,19 +1325,15 @@ class SpatialZoneManager {
     capital.position.y = 2.2;
     birdGroup.add(capital);
 
-    // 常春藤綠葉環繞
+    // 常春藤綠葉
     const ivyMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.7 });
     for (let v = 0; v < 6; v++) {
       const ivy = new THREE.Mesh(new THREE.DodecahedronGeometry(0.12), ivyMat);
-      ivy.position.set(
-        Math.sin(v * 1.3) * 0.3,
-        0.5 + v * 0.28,
-        Math.cos(v * 1.3) * 0.3
-      );
+      ivy.position.set(Math.sin(v * 1.3) * 0.3, 0.5 + v * 0.28, Math.cos(v * 1.3) * 0.3);
       birdGroup.add(ivy);
     }
 
-    // 2. 歌唱青鳥 (Bluebird)
+    // 青鳥
     const bird = new THREE.Group();
     bird.position.set(0, 2.45, 0);
 
@@ -1254,7 +1341,6 @@ class SpatialZoneManager {
     const bellyMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 });
     const beakMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.3 });
 
-    // 身軀與圓頭
     const body = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 10), blueFeatherMat);
     body.scale.set(1.0, 1.1, 1.4);
     bird.add(body);
@@ -1267,13 +1353,11 @@ class SpatialZoneManager {
     head.position.set(0, 0.15, 0.14);
     bird.add(head);
 
-    // 鳥喙
     const beak = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.1, 6), beakMat);
     beak.position.set(0, 0.14, 0.28);
     beak.rotation.x = Math.PI / 2;
     bird.add(beak);
 
-    // 尾羽
     const tail = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.02, 0.22), blueFeatherMat);
     tail.position.set(0, 0.02, -0.22);
     tail.rotation.x = -0.3;
@@ -1281,7 +1365,6 @@ class SpatialZoneManager {
 
     birdGroup.add(bird);
 
-    // 3. 互動感應外盒
     const hitBox = new THREE.Mesh(
       new THREE.CylinderGeometry(0.9, 0.9, 2.8, 8),
       new THREE.MeshBasicMaterial({ visible: false })
@@ -1291,7 +1374,6 @@ class SpatialZoneManager {
     birdGroup.add(hitBox);
     this.world.interactables.push(hitBox);
 
-    // 鳥兒擺頭唱歌動畫
     this.world.animators.push((time) => {
       head.rotation.y = Math.sin(time * 3) * 0.25;
       bird.position.y = 2.45 + Math.sin(time * 4) * 0.02;
@@ -1305,22 +1387,14 @@ class SpatialZoneManager {
     const tree = new THREE.Group();
     tree.position.set(x, y, z);
 
-    const woodMat = new THREE.MeshStandardMaterial({
-      map: this.tex.woodDesk,
-      roughness: 0.85
-    });
-    const leafMat = new THREE.MeshStandardMaterial({
-      color: 0x166534,
-      roughness: 0.75
-    });
+    const woodMat = new THREE.MeshStandardMaterial({ map: this.tex.woodDesk, roughness: 0.85 });
+    const leafMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.75 });
 
-    // 1. 粗壯主樹幹與巨大根系
     const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.95, 3.2, 10), woodMat);
     trunk.position.y = 1.6;
     trunk.castShadow = true;
     tree.add(trunk);
 
-    // 四向突出的大樹根
     [0, Math.PI / 2, Math.PI, Math.PI * 1.5].forEach(ang => {
       const root = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.5, 1.4), woodMat);
       root.position.set(Math.sin(ang) * 0.9, 0.25, Math.cos(ang) * 0.9);
@@ -1328,7 +1402,6 @@ class SpatialZoneManager {
       tree.add(root);
     });
 
-    // 2. 多重分層茂密樹冠 (Layered Organic Canopies)
     const canopy1 = new THREE.Mesh(new THREE.DodecahedronGeometry(2.4), leafMat);
     canopy1.position.set(0, 4.0, 0);
     tree.add(canopy1);
@@ -1341,9 +1414,11 @@ class SpatialZoneManager {
     canopy3.position.set(0.9, 4.6, -0.5);
     tree.add(canopy3);
 
-    // 3. 樹枝懸掛的溫暖發光精靈吊燈
-    const lanternMat = new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xf59e0b, emissiveIntensity: 0.8 });
-    const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 8), lanternMat);
+    // 精靈提燈
+    const lamp = new THREE.Mesh(
+      new THREE.SphereGeometry(0.2, 8, 8),
+      new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xf59e0b, emissiveIntensity: 0.8 })
+    );
     lamp.position.set(1.2, 3.0, 0.5);
     tree.add(lamp);
 
@@ -1351,7 +1426,6 @@ class SpatialZoneManager {
     lampLight.position.set(1.2, 3.0, 0.5);
     tree.add(lampLight);
 
-    // 4. 互動包圍盒
     const hitBox = new THREE.Mesh(
       new THREE.CylinderGeometry(2.2, 2.2, 4.8, 8),
       new THREE.MeshBasicMaterial({ visible: false })
@@ -1364,28 +1438,26 @@ class SpatialZoneManager {
     group.add(tree);
   }
 
-  // [花園] 玫瑰攀藤鍛鐵拱門通道 (Exit Rose Arch)
-  buildRoseArchPortal(group, x, y, z, label, exitWord, onUnlocked) {
+  // [花園] 玫瑰攀藤鍛鐵古樹拱門 (Exit Portal - 自然林間穿梭路徑)
+  buildRoseArchPortal(group, x, y, z, label, exitWord, onUnlocked, rotationY = 0) {
     const portal = new THREE.Group();
     portal.position.set(x, y, z);
+    portal.rotation.y = rotationY;
 
     const ironMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4 });
     const roseMat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.5 });
     const leafMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.7 });
 
-    // 左右兩根鐵藝雙圓管立柱
     [-1.6, 1.6].forEach(px => {
       const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 3.8, 8), ironMat);
       pillar.position.set(px, 1.9, 0);
       portal.add(pillar);
     });
 
-    // 頂部拱圈
     const arch = new THREE.Mesh(new THREE.TorusGeometry(1.6, 0.08, 8, 16, Math.PI), ironMat);
     arch.position.set(0, 3.8, 0);
     portal.add(arch);
 
-    // 蔓生綠藤與粉紅玫瑰
     for (let r = 0; r < 12; r++) {
       const ang = (r / 12) * Math.PI;
       const rx = Math.cos(ang) * 1.6;
@@ -1399,7 +1471,6 @@ class SpatialZoneManager {
       portal.add(leaf);
     }
 
-    // 花園自然微光結界門扉
     const door = new THREE.Mesh(
       new THREE.PlaneGeometry(2.8, 3.8),
       new THREE.MeshStandardMaterial({
@@ -1438,58 +1509,19 @@ class SpatialZoneManager {
     group.add(portal);
   }
 
-  // [操場] 草坪足球白色邊線與禁區線
+  // [操場] 足球劃線
   buildSoccerFieldLines(group) {
     const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    // 外邊線
     const border = new THREE.Mesh(new THREE.RingGeometry(7.8, 7.9, 4), lineMat);
     border.rotation.x = -Math.PI / 2;
     border.rotation.z = Math.PI / 4;
     border.position.y = 0.035;
     group.add(border);
 
-    // 中圈
     const centerCircle = new THREE.Mesh(new THREE.RingGeometry(2.4, 2.48, 24), lineMat);
     centerCircle.rotation.x = -Math.PI / 2;
     centerCircle.position.y = 0.035;
     group.add(centerCircle);
-  }
-
-  // [操場] 體育場四角照明燈塔與側邊看台
-  buildStadiumStructures(group, halfSize) {
-    const steelMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8, roughness: 0.3 });
-    const woodMat = new THREE.MeshStandardMaterial({ map: this.tex.woodDesk, roughness: 0.7 });
-
-    // 四角高聳投光燈架
-    const corners = [
-      [-halfSize + 1.5, -halfSize + 1.5], [halfSize - 1.5, -halfSize + 1.5],
-      [-halfSize + 1.5, halfSize - 1.5], [halfSize - 1.5, halfSize - 1.5]
-    ];
-    corners.forEach(([tx, tz]) => {
-      const tower = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.28, 7.0, 8), steelMat);
-      tower.position.set(tx, 3.5, tz);
-      group.add(tower);
-
-      const lampHead = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.6, 0.4), steelMat);
-      lampHead.position.set(tx, 7.0, tz);
-      lampHead.lookAt(0, 0, 0);
-      group.add(lampHead);
-
-      const bulb = new THREE.Mesh(
-        new THREE.PlaneGeometry(1.0, 0.4),
-        new THREE.MeshBasicMaterial({ color: 0xffffff })
-      );
-      bulb.position.set(tx, 7.0, tz);
-      bulb.lookAt(0, 0, 0);
-      group.add(bulb);
-    });
-
-    // 西側木造觀眾階梯看台 (Bleachers)
-    for (let row = 0; row < 3; row++) {
-      const bench = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.1, 8.0), woodMat);
-      bench.position.set(-halfSize + 2.0 + row * 0.7, 0.4 + row * 0.4, 0);
-      group.add(bench);
-    }
   }
 
   // [操場] 擬真足球門與經典黑白五角足球 (SOCCER / BALL)
@@ -1500,7 +1532,6 @@ class SpatialZoneManager {
     const postMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
     const netMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, wireframe: true, transparent: true, opacity: 0.4 });
 
-    // 門柱 (2 根直柱 + 1 根橫樑)
     const postL = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.4, 12), postMat);
     postL.position.set(-2.0, 1.2, 0);
     goalGroup.add(postL);
@@ -1514,35 +1545,26 @@ class SpatialZoneManager {
     crossbar.rotation.z = Math.PI / 2;
     goalGroup.add(crossbar);
 
-    // 後方球網罩 (Net)
     const netBox = new THREE.Mesh(new THREE.BoxGeometry(4.0, 2.4, 1.4), netMat);
     netBox.position.set(0, 1.2, -0.7);
     goalGroup.add(netBox);
 
-    // 經典黑白足球 (Classic Soccer Ball)
+    // 經典足球
     const ballGroup = new THREE.Group();
     ballGroup.position.set(0, 0.24, 1.2);
 
-    const ballMatWhite = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35 });
-    const ballMatBlack = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.35 });
-
-    const ballBase = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 16), ballMatWhite);
+    const ballBase = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 16), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35 }));
     ballGroup.add(ballBase);
 
-    // 五角黑色皮塊
+    const ballMatBlack = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.35 });
     for (let p = 0; p < 6; p++) {
       const patch = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.02, 5), ballMatBlack);
-      patch.position.set(
-        Math.sin(p * 1.05) * 0.22,
-        Math.cos(p * 1.05) * 0.22,
-        (p % 2 === 0 ? 0.08 : -0.08)
-      );
+      patch.position.set(Math.sin(p * 1.05) * 0.22, Math.cos(p * 1.05) * 0.22, (p % 2 === 0 ? 0.08 : -0.08));
       patch.lookAt(ballGroup.position);
       ballGroup.add(patch);
     }
     goalGroup.add(ballGroup);
 
-    // 互動包圍盒
     const hitBox = new THREE.Mesh(
       new THREE.BoxGeometry(4.4, 2.8, 3.0),
       new THREE.MeshBasicMaterial({ visible: false })
@@ -1563,15 +1585,10 @@ class SpatialZoneManager {
     const steelMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8, roughness: 0.3 });
     const batonMat = new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.7, roughness: 0.2 });
 
-    // 地面白色起跑線
-    const startLine = new THREE.Mesh(
-      new THREE.BoxGeometry(2.4, 0.02, 0.2),
-      new THREE.MeshBasicMaterial({ color: 0xffffff })
-    );
+    const startLine = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.02, 0.2), new THREE.MeshBasicMaterial({ color: 0xffffff }));
     startLine.position.set(0, 0.02, 0);
     runGroup.add(startLine);
 
-    // 左右兩只斜角助跑踏板 (Starting Blocks)
     [-0.3, 0.3].forEach(bx => {
       const block = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.15, 0.3), steelMat);
       block.position.set(bx, 0.08, 0.35);
@@ -1579,13 +1596,11 @@ class SpatialZoneManager {
       runGroup.add(block);
     });
 
-    // 鮮紅金屬接力棒 (Relay Baton)
     const baton = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.55, 12), batonMat);
     baton.position.set(0, 0.18, -0.4);
     baton.rotation.z = Math.PI / 2;
     runGroup.add(baton);
 
-    // 互動包圍盒
     const hitBox = new THREE.Mesh(
       new THREE.BoxGeometry(2.0, 1.2, 2.0),
       new THREE.MeshBasicMaterial({ visible: false })
@@ -1598,12 +1613,11 @@ class SpatialZoneManager {
     group.add(runGroup);
   }
 
-  // [操場] 體育跳高安全海綿墊與木質跳箱 (JUMP)
+  // [操場] 體育跳高海綿墊與木質跳箱 (JUMP)
   buildJumpEquipment(group, x, y, z, label, id, onClick) {
     const jumpGroup = new THREE.Group();
     jumpGroup.position.set(x, y, z);
 
-    // 1. 藍色厚實高跳防跌落海綿墊 (Crash Mat)
     const matMesh = new THREE.Mesh(
       new THREE.BoxGeometry(2.4, 0.5, 1.8),
       new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.6 })
@@ -1611,7 +1625,6 @@ class SpatialZoneManager {
     matMesh.position.set(0, 0.25, 0);
     jumpGroup.add(matMesh);
 
-    // 2. 兩側刻度立柱與紅白色橫竿
     const poleMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.7 });
     [-1.2, 1.2].forEach(px => {
       const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.8, 8), poleMat);
@@ -1619,27 +1632,20 @@ class SpatialZoneManager {
       jumpGroup.add(pole);
     });
 
-    const crossbar = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.02, 0.02, 2.4, 8),
-      new THREE.MeshStandardMaterial({ color: 0xef4444 })
-    );
+    const crossbar = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 2.4, 8), new THREE.MeshStandardMaterial({ color: 0xef4444 }));
     crossbar.position.set(0, 1.35, -1.0);
     crossbar.rotation.z = Math.PI / 2;
     jumpGroup.add(crossbar);
 
-    // 3. 旁邊的瑞典四層木質跳箱 (Vaulting Box)
     const woodMat = new THREE.MeshStandardMaterial({ map: this.tex.woodDesk, roughness: 0.7 });
-    const vaultTopMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.5 });
-
     const vaultBox = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.65, 1.2), woodMat);
     vaultBox.position.set(-1.8, 0.325, 0.2);
     jumpGroup.add(vaultBox);
 
-    const leatherTop = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.15, 1.25), vaultTopMat);
+    const leatherTop = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.15, 1.25), new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.5 }));
     leatherTop.position.set(-1.8, 0.725, 0.2);
     jumpGroup.add(leatherTop);
 
-    // 4. 互動包圍盒
     const hitBox = new THREE.Mesh(
       new THREE.BoxGeometry(3.6, 2.2, 3.0),
       new THREE.MeshBasicMaterial({ visible: false })
@@ -1652,25 +1658,20 @@ class SpatialZoneManager {
     group.add(jumpGroup);
   }
 
-  // [操場] 金色凱旋桂冠勝利拱門 (Exit Trophy Arch)
-  buildTrophyArchPortal(group, x, y, z, label, exitWord, onUnlocked) {
+  // [操場] 金色凱旋桂冠勝利拱門 (Exit Portal - 移至跑道終點線邊緣)
+  buildTrophyArchPortal(group, x, y, z, label, exitWord, onUnlocked, rotationY = 0) {
     const portal = new THREE.Group();
     portal.position.set(x, y, z);
+    portal.rotation.y = rotationY;
 
-    const goldMat = new THREE.MeshStandardMaterial({
-      color: 0xfacc15,
-      metalness: 0.85,
-      roughness: 0.25
-    });
+    const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.85, roughness: 0.25 });
 
-    // 兩側羅馬式雕花金柱
     [-1.8, 1.8].forEach(px => {
       const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.4, 4.0, 12), goldMat);
       pillar.position.set(px, 2.0, 0);
       portal.add(pillar);
     });
 
-    // 拱形橫樑與中央巨大金色獎盃桂冠飾徽
     const topBar = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.7, 0.8), goldMat);
     topBar.position.set(0, 4.35, 0);
     portal.add(topBar);
@@ -1679,21 +1680,16 @@ class SpatialZoneManager {
     starEmblem.position.set(0, 5.0, 0);
     portal.add(starEmblem);
 
-    // 兩側奧林匹克勝利火炬台
     [-1.8, 1.8].forEach(tx => {
       const torch = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.15, 0.5, 8), goldMat);
       torch.position.set(tx, 4.2, 0.5);
       portal.add(torch);
 
-      const flame = new THREE.Mesh(
-        new THREE.SphereGeometry(0.18, 8, 8),
-        new THREE.MeshStandardMaterial({ color: 0xf97316, emissive: 0xef4444, emissiveIntensity: 0.9 })
-      );
+      const flame = new THREE.Mesh(new THREE.SphereGeometry(0.18, 8, 8), new THREE.MeshStandardMaterial({ color: 0xf97316, emissive: 0xef4444, emissiveIntensity: 0.9 }));
       flame.position.set(tx, 4.5, 0.5);
       portal.add(flame);
     });
 
-    // 燦爛金色通關結界
     const door = new THREE.Mesh(
       new THREE.PlaneGeometry(3.2, 4.0),
       new THREE.MeshStandardMaterial({
@@ -1732,48 +1728,39 @@ class SpatialZoneManager {
     group.add(portal);
   }
 
-  // [車站] 雙軌火車鐵道、枕木與碎石基床
+  // [車站] 雙軌火車鐵道、枕木與碎石基床 (貫通延伸至遠方)
   buildTrainRailwayBed(group, trackX) {
     const gravelMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.95 });
     const sleeperMat = new THREE.MeshStandardMaterial({ map: this.tex.woodDesk, roughness: 0.85 });
     const steelRailMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.9, roughness: 0.2 });
 
-    // 碎石基床道碴 (Ballast)
-    const bed = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.1, 28), gravelMat);
-    bed.position.set(trackX, 0.05, 0);
+    // 碎石基床道碴 (長達 60 米)
+    const bed = new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.12, 60), gravelMat);
+    bed.position.set(trackX, 0.06, 0);
     bed.receiveShadow = true;
     group.add(bed);
 
-    // 深色木質軌枕 (Sleepers)
-    for (let z = -14; z <= 14; z += 1.1) {
-      const sleeper = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.14, 0.3), sleeperMat);
-      sleeper.position.set(trackX, 0.12, z);
+    // 深色木枕木
+    for (let z = -28; z <= 28; z += 1.2) {
+      const sleeper = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.14, 0.32), sleeperMat);
+      sleeper.position.set(trackX, 0.14, z);
       group.add(sleeper);
     }
 
-    // 兩條銀白鋼軌 (Steel Rails)
-    [-0.9, 0.9].forEach(rx => {
-      const rail = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.16, 28), steelRailMat);
-      rail.position.set(trackX + rx, 0.24, 0);
+    // 兩條銀白鋼軌
+    [-0.95, 0.95].forEach(rx => {
+      const rail = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.18, 60), steelRailMat);
+      rail.position.set(trackX + rx, 0.26, 0);
       group.add(rail);
     });
-  }
 
-  // [車站] 月台黃黑警戒斑馬線與鑄鐵圍欄
-  buildStationPerimeter(group, halfSize) {
-    const cautionMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.5 });
-    const curbMat = new THREE.MeshStandardMaterial({ map: this.tex.stoneWall, roughness: 0.8 });
-
-    // 月台邊緣石階 (與鐵軌接壤處)
-    const curb = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.3, halfSize * 2), curbMat);
-    curb.position.set(3.2, 0.15, 0);
-    group.add(curb);
-
-    // 黃色安全線條
-    const line = new THREE.Mesh(new THREE.PlaneGeometry(0.15, halfSize * 2), cautionMat);
-    line.rotation.x = -Math.PI / 2;
-    line.position.set(2.8, 0.02, 0);
-    group.add(line);
+    // 遠端山洞隧道剪影 (Tunnel Entrance Silhouette)
+    const tunnel = new THREE.Mesh(
+      new THREE.RingGeometry(2.8, 6.5, 16),
+      new THREE.MeshStandardMaterial({ map: this.tex.stationBrick, roughness: 0.9 })
+    );
+    tunnel.position.set(trackX, 3.2, -29.8);
+    group.add(tunnel);
   }
 
   // [車站] 巨型維多利亞四層天文時鐘塔 (TIME / CLOCK)
@@ -1781,71 +1768,52 @@ class SpatialZoneManager {
     const tower = new THREE.Group();
     tower.position.set(x, y, z);
 
-    const brickMat = new THREE.MeshStandardMaterial({
-      map: this.tex.stationBrick,
-      roughness: 0.8
-    });
-    const stoneTrimMat = new THREE.MeshStandardMaterial({
-      map: this.tex.stoneWall,
-      roughness: 0.6
-    });
-    const roofCopperMat = new THREE.MeshStandardMaterial({
-      color: 0x0f766e,
-      metalness: 0.5,
-      roughness: 0.4
-    });
+    const brickMat = new THREE.MeshStandardMaterial({ map: this.tex.stationBrick, roughness: 0.8 });
+    const stoneTrimMat = new THREE.MeshStandardMaterial({ map: this.tex.stoneWall, roughness: 0.6 });
+    const roofCopperMat = new THREE.MeshStandardMaterial({ color: 0x0f766e, metalness: 0.5, roughness: 0.4 });
 
-    // 1. 四層紅磚塔身
-    const towerBody = new THREE.Mesh(new THREE.BoxGeometry(3.6, 8.5, 3.6), brickMat);
-    towerBody.position.y = 4.25;
+    const towerBody = new THREE.Mesh(new THREE.BoxGeometry(3.8, 9.5, 3.8), brickMat);
+    towerBody.position.y = 4.75;
     towerBody.castShadow = true;
     tower.add(towerBody);
 
-    // 石造腰線飾帶
-    [2.8, 5.8].forEach(ly => {
-      const trim = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.25, 3.8), stoneTrimMat);
+    [3.2, 6.8].forEach(ly => {
+      const trim = new THREE.Mesh(new THREE.BoxGeometry(4.1, 0.3, 4.1), stoneTrimMat);
       trim.position.y = ly;
       tower.add(trim);
     });
 
-    // 2. 尖頂青銅瓦屋頂 (Copper Mansard Spire)
-    const roof = new THREE.Mesh(new THREE.ConeGeometry(2.8, 3.5, 4), roofCopperMat);
-    roof.position.y = 10.25;
+    const roof = new THREE.Mesh(new THREE.ConeGeometry(3.0, 4.0, 4), roofCopperMat);
+    roof.position.y = 11.5;
     roof.rotation.y = Math.PI / 4;
     tower.add(roof);
 
-    // 3. 巨型正面星光天文時鐘盤 (AI 寫實天文鐘面皮膚)
-    const dialMat = new THREE.MeshStandardMaterial({
-      map: this.tex.clockFace,
-      roughness: 0.35,
-      metalness: 0.25
-    });
-    const clockDial = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.3, 0.12, 24), dialMat);
+    // 正面天文鐘面
+    const dialMat = new THREE.MeshStandardMaterial({ map: this.tex.clockFace, roughness: 0.35, metalness: 0.25 });
+    const clockDial = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 0.12, 24), dialMat);
     clockDial.rotation.x = Math.PI / 2;
-    clockDial.position.set(0, 6.2, 1.86);
+    clockDial.position.set(0, 7.2, 1.96);
     tower.add(clockDial);
 
-    // 3D 黃銅時針與分針 (動態旋轉)
+    // 3D 黃銅時針與分針 (動態旋轉走時)
     const brassMat = new THREE.MeshStandardMaterial({ color: 0xfef08a, metalness: 0.8, roughness: 0.2 });
-    const hourHand = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.6, 0.04), brassMat);
-    hourHand.position.set(0, 6.2, 1.95);
+    const hourHand = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.65, 0.04), brassMat);
+    hourHand.position.set(0, 7.2, 2.05);
     tower.add(hourHand);
 
-    const minuteHand = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.9, 0.04), brassMat);
-    minuteHand.position.set(0, 6.2, 1.96);
+    const minuteHand = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.95, 0.04), brassMat);
+    minuteHand.position.set(0, 7.2, 2.06);
     tower.add(minuteHand);
 
-    // 4. 互動包圍盒
     const hitBox = new THREE.Mesh(
-      new THREE.BoxGeometry(4.2, 9.0, 4.2),
+      new THREE.BoxGeometry(4.5, 10.0, 4.5),
       new THREE.MeshBasicMaterial({ visible: false })
     );
-    hitBox.position.y = 4.5;
+    hitBox.position.y = 5.0;
     hitBox.userData = { id, label, onClick };
     tower.add(hitBox);
     this.world.interactables.push(hitBox);
 
-    // 時鐘動態走時動畫
     this.world.animators.push((time) => {
       minuteHand.rotation.z = -time * 0.8;
       hourHand.rotation.z = -time * 0.06;
@@ -1861,58 +1829,49 @@ class SpatialZoneManager {
 
     const blackIronMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.4, metalness: 0.7 });
     const brassMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.3, metalness: 0.85 });
-    const frontTexMat = new THREE.MeshStandardMaterial({
-      map: this.tex.locomotive,
-      roughness: 0.5,
-      metalness: 0.3
-    });
+    const frontTexMat = new THREE.MeshStandardMaterial({ map: this.tex.locomotive, roughness: 0.5, metalness: 0.3 });
 
-    // 1. 巨大圓柱形蒸汽鍋爐 (Boiler)
-    const boiler = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.1, 5.0, 16), blackIronMat);
+    // 圓筒蒸汽鍋爐
+    const boiler = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.1, 5.2, 16), blackIronMat);
     boiler.rotation.x = Math.PI / 2;
     boiler.position.set(0, 1.6, 0);
     train.add(boiler);
 
-    // 黃銅加固圈 (Brass Bands)
     [-1.5, 0, 1.5].forEach(bz => {
       const band = new THREE.Mesh(new THREE.TorusGeometry(1.12, 0.04, 8, 20), brassMat);
       band.position.set(0, 1.6, bz);
       train.add(band);
     });
 
-    // 2. 火車頭正面圓形蓋板 (AI 寫實火車頭正面皮膚)
+    // 車頭蓋板
     const frontDisc = new THREE.Mesh(new THREE.CylinderGeometry(1.08, 1.08, 0.2, 20), frontTexMat);
     frontDisc.rotation.x = Math.PI / 2;
-    frontDisc.position.set(0, 1.6, 2.5);
+    frontDisc.position.set(0, 1.6, 2.6);
     train.add(frontDisc);
 
-    // 3. 耀眼車頭大燈 (Headlight) 與前射光束
-    const headlight = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.28, 0.22, 0.4, 12),
-      new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xfef08a, emissiveIntensity: 1.0 })
-    );
+    // 車頭大燈
+    const headlight = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.22, 0.4, 12), new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xfef08a, emissiveIntensity: 1.0 }));
     headlight.rotation.x = Math.PI / 2;
-    headlight.position.set(0, 2.5, 2.4);
+    headlight.position.set(0, 2.5, 2.5);
     train.add(headlight);
 
-    const headSpot = new THREE.SpotLight(0xfef08a, 2.2, 18, Math.PI / 6, 0.4);
-    headSpot.position.set(0, 2.5, 2.5);
-    headSpot.target.position.set(0, 1.0, 10.0);
+    const headSpot = new THREE.SpotLight(0xfef08a, 2.2, 20, Math.PI / 6, 0.4);
+    headSpot.position.set(0, 2.5, 2.6);
+    headSpot.target.position.set(0, 1.0, 12.0);
     train.add(headSpot);
     train.add(headSpot.target);
 
-    // 4. 排障鐵柵 (Cowcatcher / Pilot Grill)
+    // 排障器
     const cowcatcher = new THREE.Mesh(new THREE.ConeGeometry(1.4, 1.0, 4), blackIronMat);
-    cowcatcher.position.set(0, 0.5, 2.8);
+    cowcatcher.position.set(0, 0.5, 2.9);
     cowcatcher.rotation.x = Math.PI / 4;
     train.add(cowcatcher);
 
-    // 5. 煙囪與動態蒸汽微粒 (Smokestack & Steam)
+    // 煙囪與動態蒸汽
     const chimney = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.2, 0.9, 12), blackIronMat);
     chimney.position.set(0, 2.9, 1.6);
     train.add(chimney);
 
-    // 蒸汽微粒
     const steamCount = 30;
     const steamGeo = new THREE.BufferGeometry();
     const steamPos = new Float32Array(steamCount * 3);
@@ -1922,16 +1881,10 @@ class SpatialZoneManager {
       steamPos[i + 2] = 1.6 + (Math.random() - 0.5) * 0.4;
     }
     steamGeo.setAttribute('position', new THREE.BufferAttribute(steamPos, 3));
-    const steamMat = new THREE.PointsMaterial({
-      color: 0xf1f5f9,
-      size: 0.22,
-      transparent: true,
-      opacity: 0.65
-    });
-    const steamPoints = new THREE.Points(steamGeo, steamMat);
+    const steamPoints = new THREE.Points(steamGeo, new THREE.PointsMaterial({ color: 0xf1f5f9, size: 0.22, transparent: true, opacity: 0.65 }));
     train.add(steamPoints);
 
-    // 6. 巨大鐵動輪 (6 個大鋼輪)
+    // 6 具大動輪
     [-1.15, 1.15].forEach(wx => {
       [-1.6, 0, 1.6].forEach(wz => {
         const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.15, 16), blackIronMat);
@@ -1941,14 +1894,12 @@ class SpatialZoneManager {
       });
     });
 
-    // 7. 後方駕駛室 (Cab)
     const cab = new THREE.Mesh(new THREE.BoxGeometry(2.4, 2.6, 2.0), blackIronMat);
     cab.position.set(0, 2.0, -2.4);
     train.add(cab);
 
-    // 8. 互動感應外盒
     const hitBox = new THREE.Mesh(
-      new THREE.BoxGeometry(3.0, 3.6, 6.5),
+      new THREE.BoxGeometry(3.2, 3.6, 6.8),
       new THREE.MeshBasicMaterial({ visible: false })
     );
     hitBox.position.y = 1.8;
@@ -1956,7 +1907,6 @@ class SpatialZoneManager {
     train.add(hitBox);
     this.world.interactables.push(hitBox);
 
-    // 蒸汽緩緩上升動畫
     this.world.animators.push((time) => {
       const pos = steamGeo.attributes.position.array;
       for (let i = 0; i < steamCount * 3; i += 3) {
@@ -1977,20 +1927,13 @@ class SpatialZoneManager {
     const ironMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.9, roughness: 0.2 });
     const woodMat = new THREE.MeshStandardMaterial({ map: this.tex.woodDesk, roughness: 0.7 });
 
-    // 1. 維多利亞雕花燈柱
     const post = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.14, 3.4, 8), ironMat);
     post.position.y = 1.7;
     lampGroup.add(post);
 
-    // 六角玻璃煤氣燈頭
     const lantern = new THREE.Mesh(
       new THREE.CylinderGeometry(0.24, 0.16, 0.5, 6),
-      new THREE.MeshStandardMaterial({
-        color: 0xfef08a,
-        emissive: 0xf59e0b,
-        emissiveIntensity: 0.8,
-        roughness: 0.2
-      })
+      new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xf59e0b, emissiveIntensity: 0.8, roughness: 0.2 })
     );
     lantern.position.y = 3.5;
     lampGroup.add(lantern);
@@ -1999,7 +1942,6 @@ class SpatialZoneManager {
     pLight.position.y = 3.5;
     lampGroup.add(pLight);
 
-    // 2. 候車深木鑄鐵長椅 (Bench)
     const benchSeat = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.08, 0.5), woodMat);
     benchSeat.position.set(0, 0.45, 0.6);
     lampGroup.add(benchSeat);
@@ -2008,7 +1950,6 @@ class SpatialZoneManager {
     benchBack.position.set(0, 0.8, 0.82);
     lampGroup.add(benchBack);
 
-    // 3. 互動感應外盒
     const hitBox = new THREE.Mesh(
       new THREE.BoxGeometry(2.4, 3.8, 1.8),
       new THREE.MeshBasicMaterial({ visible: false })
@@ -2021,7 +1962,7 @@ class SpatialZoneManager {
     group.add(lampGroup);
   }
 
-  // [車站] 列車頭等車廂登車大門 (Exit Carriage Portal)
+  // [車站] 蒸汽列車「客車登車門」作為通關傳送門 (自然情境化出口)
   buildTrainCarriageDoorPortal(group, x, y, z, label, exitWord, onUnlocked) {
     const portal = new THREE.Group();
     portal.position.set(x, y, z);
@@ -2029,29 +1970,37 @@ class SpatialZoneManager {
     const coachMat = new THREE.MeshStandardMaterial({ color: 0x7f1d1d, roughness: 0.4, metalness: 0.2 });
     const brassMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.85 });
 
-    // 車廂兩側金邊木門框
-    const frameL = new THREE.Mesh(new THREE.BoxGeometry(0.4, 3.6, 0.4), coachMat);
-    frameL.position.set(-1.4, 1.8, 0);
+    // 車廂側門框
+    const frameL = new THREE.Mesh(new THREE.BoxGeometry(0.3, 3.2, 0.3), coachMat);
+    frameL.position.set(-1.1, 1.6, 0);
     portal.add(frameL);
 
-    const frameR = new THREE.Mesh(new THREE.BoxGeometry(0.4, 3.6, 0.4), coachMat);
-    frameR.position.set(1.4, 1.8, 0);
+    const frameR = new THREE.Mesh(new THREE.BoxGeometry(0.3, 3.2, 0.3), coachMat);
+    frameR.position.set(1.1, 1.6, 0);
     portal.add(frameR);
 
-    const topArch = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.5, 0.4), coachMat);
-    topArch.position.set(0, 3.6, 0);
+    const topArch = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.4, 0.3), coachMat);
+    topArch.position.set(0, 3.2, 0);
     portal.add(topArch);
 
-    // 黃銅迎賓扶手
-    [-1.2, 1.2].forEach(hx => {
-      const rail = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.6, 8), brassMat);
-      rail.position.set(hx, 1.5, 0.3);
+    // 黃銅迎賓把手與迎賓紅地毯
+    [-0.9, 0.9].forEach(hx => {
+      const rail = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.4, 8), brassMat);
+      rail.position.set(hx, 1.2, 0.3);
       portal.add(rail);
     });
 
-    // 敞開的金色星光登車結界門 (OPEN)
+    const carpet = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.8, 3.0),
+      new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.8 })
+    );
+    carpet.rotation.x = -Math.PI / 2;
+    carpet.position.set(0, 0.03, 1.5);
+    portal.add(carpet);
+
+    // 敞開的金色星光車門結界
     const door = new THREE.Mesh(
-      new THREE.PlaneGeometry(2.4, 3.3),
+      new THREE.PlaneGeometry(1.9, 2.9),
       new THREE.MeshStandardMaterial({
         color: 0xfef08a,
         transparent: true,
@@ -2061,14 +2010,14 @@ class SpatialZoneManager {
         emissiveIntensity: 0.4
       })
     );
-    door.position.y = 1.65;
+    door.position.y = 1.5;
     portal.add(door);
 
     const hitBox = new THREE.Mesh(
-      new THREE.BoxGeometry(3.2, 3.8, 1.6),
+      new THREE.BoxGeometry(2.8, 3.6, 2.0),
       new THREE.MeshBasicMaterial({ visible: false })
     );
-    hitBox.position.y = 1.9;
+    hitBox.position.y = 1.6;
     hitBox.userData = {
       id: 'exit_portal_' + this.currentZoneId,
       label,

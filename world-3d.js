@@ -692,10 +692,10 @@ class World3D {
         let minZ = -5.4, maxZ = this.gameState.doorOpened ? 20.0 : 5.2;
 
         if (this.zoneManager && this.zoneManager.currentZoneId !== 'zone1') {
-          minX = -12.8;
-          maxX = 12.8;
-          minZ = -12.8;
-          maxZ = 12.8;
+          minX = -14.5;
+          maxX = 14.5;
+          minZ = -14.5;
+          maxZ = 14.5;
         }
 
         if (nextPos.x > minX && nextPos.x < maxX) {
