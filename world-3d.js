@@ -644,7 +644,51 @@ class World3D {
     }
   }
 
-  // 推進第一人稱移動與碰撞邊界
+  // 精準空間碰撞偵測：判定位置 (x, z) 是否與外邊界、實體建築、圍牆、火車與障礙物衝突
+  isPositionBlocked(x, z, radius = 0.45) {
+    // 1. 空間外邊界檢查
+    const bounds = (this.zoneManager && typeof this.zoneManager.getZoneBounds === 'function')
+      ? this.zoneManager.getZoneBounds()
+      : { minX: -5.4, maxX: 5.4, minZ: -5.4, maxZ: (this.gameState && this.gameState.doorOpened ? 20.0 : 5.2) };
+
+    // Zone 1 見習書齋密室特殊邊界：若石門開啟並走向花田 (z > 5.2)
+    if ((!this.zoneManager || this.zoneManager.currentZoneId === 'zone1') && z > 5.2) {
+      if (x - radius < -4.5 || x + radius > 4.5 || z + radius > bounds.maxZ) {
+        return true;
+      }
+    } else {
+      if (x - radius < bounds.minX || x + radius > bounds.maxX ||
+          z - radius < bounds.minZ || z + radius > bounds.maxZ) {
+        return true;
+      }
+    }
+
+    // 2. 空間障礙物碰撞體檢查 (Box AABB 與 Circle 圓柱實體)
+    const colliders = (this.zoneManager && typeof this.zoneManager.getColliders === 'function')
+      ? this.zoneManager.getColliders()
+      : [];
+
+    for (let i = 0; i < colliders.length; i++) {
+      const c = colliders[i];
+      if (c.type === 'box') {
+        if (x + radius > c.minX && x - radius < c.maxX &&
+            z + radius > c.minZ && z - radius < c.maxZ) {
+          return true;
+        }
+      } else if (c.type === 'circle') {
+        const dx = x - c.x;
+        const dz = z - c.z;
+        const minDist = c.radius + radius;
+        if (dx * dx + dz * dz < minDist * minDist) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  // 推進第一人稱移動與實體障礙物碰撞 (支援平滑滑牆 Smooth Wall-Sliding，徹底防止穿牆穿火車)
   updatePlayer(delta) {
     // 彈窗開啟時暫停視角旋轉與走動，防止誤觸
     const modal = document.getElementById('speechModal');
@@ -685,25 +729,31 @@ class World3D {
           .addScaledVector(forwardDir, move.forward * this.player.speed * delta)
           .addScaledVector(rightDir, move.right * this.player.speed * delta);
 
-        const nextPos = this.player.pos.clone().add(moveStep);
+        const currentX = this.player.pos.x;
+        const currentZ = this.player.pos.z;
+        const targetX = currentX + moveStep.x;
+        const targetZ = currentZ + moveStep.z;
+        const radius = this.player.radius || 0.45;
 
-        // 空間碰撞邊界 (若門已開，允許往南走出花田；若在 Zone 2~5 廣闊空間，自動擴展邊界)
-        let minX = -5.4, maxX = 5.4;
-        let minZ = -5.4, maxZ = this.gameState.doorOpened ? 20.0 : 5.2;
+        let newX = currentX;
+        let newZ = currentZ;
 
-        if (this.zoneManager && this.zoneManager.currentZoneId !== 'zone1') {
-          minX = -14.5;
-          maxX = 14.5;
-          minZ = -14.5;
-          maxZ = 14.5;
+        // 1. 若全向移動不受阻，直接前進
+        if (!this.isPositionBlocked(targetX, targetZ, radius)) {
+          newX = targetX;
+          newZ = targetZ;
+        } else {
+          // 2. 遭遇固體障礙物阻擋：進行獨立軸向滑行計算 (Smooth Wall-Sliding)
+          if (!this.isPositionBlocked(targetX, currentZ, radius)) {
+            newX = targetX;
+          }
+          if (!this.isPositionBlocked(currentX, targetZ, radius)) {
+            newZ = targetZ;
+          }
         }
 
-        if (nextPos.x > minX && nextPos.x < maxX) {
-          this.player.pos.x = nextPos.x;
-        }
-        if (nextPos.z > minZ && nextPos.z < maxZ) {
-          this.player.pos.z = nextPos.z;
-        }
+        this.player.pos.x = newX;
+        this.player.pos.z = newZ;
 
         // 走入花田檢查 (僅在 Zone 1 見習書齋密室通關時觸發)
         if ((!this.zoneManager || this.zoneManager.currentZoneId === 'zone1') && this.player.pos.z > 8.0 && !this.gameState.escaped) {
