@@ -60,6 +60,11 @@ class World3D {
     this.buildOutsideMeadow(this.activeZoneGroup);
     this.setupEvents();
     this.initCloudSync();
+
+    if (window.MinimapManager) {
+      this.minimap = new MinimapManager(this);
+    }
+
     this.animate();
   }
 
@@ -575,6 +580,60 @@ class World3D {
       fMesh.position.set(fx, 0.1, fz);
       this.meadowGroup.add(fMesh);
     }
+
+    // 1. 蜿蜒石板步道 (由石門一路通往遠方林道)
+    const stepStoneMat = new THREE.MeshStandardMaterial({ color: 0xd6d3d1, roughness: 0.85 });
+    for (let sz = 6.0; sz <= 13.5; sz += 0.85) {
+      const step = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.46, 0.06, 8), stepStoneMat);
+      step.position.set(Math.sin((sz - 6) * 0.7) * 0.35, 0.02, sz);
+      step.receiveShadow = true;
+      this.meadowGroup.add(step);
+    }
+
+    // 2. 邊境木質路標與通往市集傳送石門 (🌸 前往陽光微風市集)
+    const woodMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.7 });
+    const postMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 2.2, 8), woodMat);
+    postMesh.position.set(1.1, 1.1, 12.0);
+    this.meadowGroup.add(postMesh);
+
+    const signBoard = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.35, 0.08), woodMat);
+    signBoard.position.set(1.1, 1.9, 12.0);
+    signBoard.rotation.y = -0.2;
+    this.meadowGroup.add(signBoard);
+
+    // 兩側迎賓古石柱
+    const pillarMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.85 });
+    [-1.8, 1.8].forEach(px => {
+      const pil = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.35, 3.2, 8), pillarMat);
+      pil.position.set(px, 1.6, 13.0);
+      this.meadowGroup.add(pil);
+      const cap = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.2, 0.8), pillarMat);
+      cap.position.set(px, 3.3, 13.0);
+      this.meadowGroup.add(cap);
+    });
+
+    // 陽光林道微光光幕
+    const auraMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.45 });
+    const aura = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 3.0), auraMat);
+    aura.position.set(0, 1.5, 13.0);
+    this.meadowGroup.add(aura);
+
+    // 互動點與傳送門 Hitbox
+    const portalHitBox = new THREE.Mesh(new THREE.BoxGeometry(3.2, 3.5, 2.0), new THREE.MeshBasicMaterial({ visible: false }));
+    portalHitBox.position.set(0, 1.6, 12.5);
+    portalHitBox.userData = {
+      id: 'exit_portal_zone1',
+      name: '🌸 陽光花海古徑',
+      hint: '通往下一關【陽光微風市集】(點擊前往)',
+      onClick: () => {
+        if (this.zoneManager) {
+          this.showToast('🚀 踏上陽光花海古徑，前往陽光微風市集！');
+          this.switchZone('zone2');
+        }
+      }
+    };
+    this.meadowGroup.add(portalHitBox);
+    this.interactables.push(portalHitBox);
 
     // 花田上方陽光直射點光源
     this.meadowSun = new THREE.PointLight(0xfffae0, 2.0, 30);
@@ -1379,6 +1438,10 @@ class World3D {
 
     this.updatePlayer(delta);
     this.updateRaycast();
+
+    if (this.minimap) {
+      this.minimap.update();
+    }
 
     this.renderer.render(this.scene, this.camera);
   }

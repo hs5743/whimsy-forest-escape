@@ -161,6 +161,9 @@
         冒險成就：550 XP • 等級 6 一級大魔法使
       </div>
       <div class="victory-btn-group">
+        <button type="button" class="btn-voice" onclick="travelToZone('zone2'); document.getElementById('victoryModal').style.display='none';" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; font-weight: 800; padding: 12px 20px; border-radius: 14px;">
+          🚀 啟程前往下一關：陽光微風市集
+        </button>
         <button class="btn-replay" onclick="location.reload()">
           🔄 重新遊玩
         </button>
@@ -364,20 +367,40 @@
     <div class="world-map-dialog">
       <button class="modal-close-btn" type="button" onclick="toggleWorldMapModal()" aria-label="關閉">✕</button>
       <div class="world-map-header">
-        <h2 class="world-map-title">🗺️ 新港魔法學院：空間星圖 (Overworld Realm Map)</h2>
-        <p class="world-map-subtitle">突破單一狹隘密室！自由在五大生活與奇幻空間穿梭學習，解鎖全新單字與專屬成就</p>
+        <h2 class="world-map-title">🗺️ 新港魔法學院：冒險大陸世界地圖 (Overworld Realm Map)</h2>
+        <p class="world-map-subtitle">比照 RPG 開放世界！五大多元生活情境在大陸地理中彼此串聯，支援快速傳送與實體走動跨界</p>
       </div>
 
-      <div id="worldMapGrid" class="realm-grid">
-        <!-- 由 JavaScript 動態渲染五大空間卡片 -->
+      <!-- 大地圖切換標籤 (大陸串聯路網 vs 空間圖冊) -->
+      <div class="overworld-map-nav">
+        <button id="btnWorldRouteTab" type="button" class="overworld-map-tab-btn active" onclick="switchWorldMapTab('route')">
+          🗺️ 奇幻大陸串聯路網 (Overworld Route)
+        </button>
+        <button id="btnWorldCardsTab" type="button" class="overworld-map-tab-btn" onclick="switchWorldMapTab('cards')">
+          📜 空間詳細圖冊 (Realm Codex)
+        </button>
+      </div>
+
+      <!-- 視圖 1: 大陸串聯路網視圖 -->
+      <div id="worldMapRouteView" class="overworld-view-container">
+        <div id="worldMapRouteList" class="overworld-route-layout">
+          <!-- 由 JavaScript 動態渲染五大節點與串聯步道 -->
+        </div>
+      </div>
+
+      <!-- 視圖 2: 空間詳細卡片圖冊 (預設隱藏) -->
+      <div id="worldMapCardsView" style="display: none;">
+        <div id="worldMapGrid" class="realm-grid">
+          <!-- 由 JavaScript 動態渲染五大空間卡片 -->
+        </div>
       </div>
 
       <div class="world-map-footer">
         <div class="world-map-tip">
-          💡 <strong>冒險提示</strong>：探索各空間中的發光互動點並大聲朗讀單字，即可獲取經驗值 (XP) 提升等級，解鎖更廣袤的生活冒險空間！
+          💡 <strong>RPG 雙向串聯提示</strong>：除了在世界地圖點擊「🚀 施法傳送」外，各場景邊緣均設有真實路標與傳送門扉，可直接步行穿越或折返探索！
         </div>
         <button type="button" class="btn-voice" onclick="toggleWorldMapModal()" style="min-width: 140px; padding: 10px 20px;">
-          關閉星圖
+          關閉地圖
         </button>
       </div>
     </div>
@@ -388,14 +411,15 @@
 
   <!-- 核心庫與遊戲腳本 -->
   <script src="three.min.js"></script>
-  <script src="vocab-data.js?v=20260911_v2"></script>
-  <script src="vocab-passport-bank.js?v=20260911_v2"></script>
-  <script src="speech-manager.js?v=20260911_v2"></script>
-  <script src="audio-manager.js?v=20260911_v2"></script>
-  <script src="touch-controls.js?v=20260911_v2"></script>
-  <script src="cloud-sync-manager.js?v=20260911_v2"></script>
-  <script src="spatial-zone-manager.js?v=20260911_v2"></script>
-  <script src="world-3d.js?v=20260911_v2"></script>
+  <script src="vocab-data.js?v=20260911_v3"></script>
+  <script src="vocab-passport-bank.js?v=20260911_v3"></script>
+  <script src="speech-manager.js?v=20260911_v3"></script>
+  <script src="audio-manager.js?v=20260911_v3"></script>
+  <script src="touch-controls.js?v=20260911_v3"></script>
+  <script src="cloud-sync-manager.js?v=20260911_v3"></script>
+  <script src="spatial-zone-manager.js?v=20260911_v3"></script>
+  <script src="minimap-manager.js?v=20260911_v3"></script>
+  <script src="world-3d.js?v=20260911_v3"></script>
 
   <script>
     let curLeaderboardTab = 'school';
@@ -759,15 +783,134 @@
       document.getElementById('gasStatusNotice').style.color = '#059669';
     }
 
-    // 空間星圖大地圖互動邏輯
+    // 空間星圖與大陸串聯大地圖互動邏輯
+    let curWorldMapTab = 'route';
+
     function toggleWorldMapModal() {
       const modal = document.getElementById('worldMapModal');
       const isOpening = modal.style.display !== 'flex';
       modal.style.display = isOpening ? 'flex' : 'none';
       if (isOpening) {
+        if (curWorldMapTab === 'route') {
+          renderWorldMapRoute();
+        } else {
+          renderWorldMapCards();
+        }
+      }
+      if (window.audioManager) window.audioManager.playSfx('click');
+    }
+
+    function switchWorldMapTab(tab) {
+      curWorldMapTab = tab;
+      const btnRoute = document.getElementById('btnWorldRouteTab');
+      const btnCards = document.getElementById('btnWorldCardsTab');
+      const viewRoute = document.getElementById('worldMapRouteView');
+      const viewCards = document.getElementById('worldMapCardsView');
+
+      if (tab === 'route') {
+        if (btnRoute) btnRoute.className = 'overworld-map-tab-btn active';
+        if (btnCards) btnCards.className = 'overworld-map-tab-btn';
+        if (viewRoute) viewRoute.style.display = 'block';
+        if (viewCards) viewCards.style.display = 'none';
+        renderWorldMapRoute();
+      } else {
+        if (btnRoute) btnRoute.className = 'overworld-map-tab-btn';
+        if (btnCards) btnCards.className = 'overworld-map-tab-btn active';
+        if (viewRoute) viewRoute.style.display = 'none';
+        if (viewCards) viewCards.style.display = 'block';
         renderWorldMapCards();
       }
       if (window.audioManager) window.audioManager.playSfx('click');
+    }
+
+    // 渲染奇幻大陸串聯路網 (Overworld Route Layout)
+    function renderWorldMapRoute() {
+      const listEl = document.getElementById('worldMapRouteList');
+      if (!listEl || !window.world3D || !window.world3D.zoneManager) return;
+      const zm = window.world3D.zoneManager;
+      const curZone = zm.getCurrentZone();
+
+      // 取得使用者已通關詞彙清單
+      const p = (window.cloudSyncManager && window.cloudSyncManager.profile) ? window.cloudSyncManager.profile : { completedWords: [] };
+      const completedList = (p.completedWords || []).map(w => w.toUpperCase());
+
+      listEl.innerHTML = '';
+
+      const orderedZoneIds = ['zone1', 'zone2', 'zone3', 'zone4', 'zone5'];
+      const connectors = [
+        '🌾 陽光花海古徑 (走出書齋石門花田，邁入微風市集)',
+        '🌉 護城河古石橋 (降下市集要塞吊橋，前往精靈花園)',
+        '🌲 迷霧森林古道 (撥開花園古樹林蔭，通向運動園區)',
+        '🛤️ 凱旋星光鐵道 (穿過操場終點金拱門，抵達鐘樓車站)'
+      ];
+
+      orderedZoneIds.forEach((zid, idx) => {
+        const z = zm.zones[zid];
+        if (!z) return;
+
+        const isUnlocked = zm.isZoneUnlocked(z.id);
+        const isCurrent = (z.id === curZone.id);
+
+        // 統計該空間單字收集率
+        const totalWords = z.words.length;
+        const doneWords = z.words.filter(w => completedList.includes(w.toUpperCase())).length;
+
+        const row = document.createElement('div');
+        row.className = `overworld-node-row ${isCurrent ? 'current-node' : ''} ${isUnlocked ? 'unlocked-node' : 'locked-node'}`;
+
+        row.innerHTML = `
+          <div class="node-left-cluster">
+            <div class="node-icon-avatar">${z.icon}</div>
+            <div class="node-content-info">
+              <div class="node-title-main">
+                <span>${z.name}</span>
+                <span style="font-size: 13px; color: #8c7361; font-weight: 500;">(${z.englishName})</span>
+              </div>
+              <div class="node-sub-detail">
+                <span>主題：<strong style="color: #b45309;">${z.topic}</strong></span> • 
+                <span style="color: #059669; font-weight: 700;">單字收集：${doneWords} / ${totalWords}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="node-status-beacon">
+            ${isCurrent ? `
+              <span class="beacon-pulse"></span>
+              <span style="font-size: 13px; color: #2563eb; font-weight: 800;">📍 當前冒險中</span>
+            ` : isUnlocked ? `
+              <button type="button" class="realm-action-btn btn-teleport" onclick="travelToZone('${z.id}')">
+                🚀 施法傳送前往
+              </button>
+            ` : `
+              <span style="font-size: 12px; color: #9ca3af; font-weight: 700;">🔒 Lv.${z.reqLevel} 解鎖</span>
+            `}
+          </div>
+        `;
+
+        if (isUnlocked && !isCurrent) {
+          row.onclick = (e) => {
+            if (e.target.tagName !== 'BUTTON') {
+              travelToZone(z.id);
+            }
+          };
+        }
+
+        listEl.appendChild(row);
+
+        // 節點間繪製路徑串聯器
+        if (idx < connectors.length) {
+          const connector = document.createElement('div');
+          connector.className = 'node-trail-connector';
+          connector.innerHTML = `<span>${connectors[idx]}</span>`;
+          listEl.appendChild(connector);
+        }
+      });
+
+      // 終點：大魔導士殿堂終極傳送
+      const finalTrail = document.createElement('div');
+      finalTrail.className = 'node-trail-connector';
+      finalTrail.innerHTML = `<span>✨ 破空特快車鳴笛 ➔ 通往大魔導士終極榮譽殿堂 (Grand Victory)</span>`;
+      listEl.appendChild(finalTrail);
     }
 
     function renderWorldMapCards() {

@@ -92,8 +92,9 @@ class SpatialZoneManager {
         { type: 'box', minX: -14.0, maxX: 4.5, minZ: -14.0, maxZ: -8.8 },
         // 西側街屋建築實體
         { type: 'box', minX: -14.0, maxX: -9.5, minZ: -12.0, maxZ: 12.0 },
-        // 南側街屋建築實體
-        { type: 'box', minX: -14.0, maxX: 6.0, minZ: 9.3, maxZ: 14.0 },
+        // 南側街屋建築實體 (左翼與右翼，中間保留寬敞驛站出入口)
+        { type: 'box', minX: -14.0, maxX: -1.8, minZ: 9.3, maxZ: 14.0 },
+        { type: 'box', minX: 1.8, maxX: 8.0, minZ: 9.3, maxZ: 14.0 },
         // 東北城門左側城牆石塔
         { type: 'box', minX: 4.5, maxX: 5.6, minZ: -11.0, maxZ: -7.0 },
         // 東北城門右側城牆石塔與延伸牆
@@ -439,16 +440,25 @@ class SpatialZoneManager {
 
     this.buildBuntingFlags(group, [-4.5, 3.2, -1.0], [4.2, 3.2, 1.2]);
 
-    // 東北角城門吊橋 (OPEN)
+    // 東北角城門吊橋 (OPEN -> 前往 Zone 3 守護獸花園)
     this.buildDrawbridgePortal(group, 6.8, 0, -8.0, '🏰 前往精靈花園的城門吊橋 (OPEN)', 'OPEN', () => {
       this.world.showToast('🎉 恭喜！市集衛兵降下城門吊橋，解鎖前往精靈花園！');
       this.switchZone('zone3');
     }, -0.35);
 
+    // 南側驛站拱門 (返回 Zone 1 見習學徒書齋)
+    this.buildTownSouthEntrance(group, 0, 0, 10.5, '🏰 驛站古道 ➔ 返回【見習學徒書齋】', () => {
+      this.world.showToast('🧭 穿過驛站石板古徑，返回見習學徒書齋！');
+      this.switchZone('zone1');
+    });
+
+    // 市集生活感道具 (木桶、木箱、店鋪招牌、鑄鐵路燈)
+    this.buildMarketStreetProps(group);
+
     this.addFloatingParticles(group, 0xffedd5, 140, 36, 6);
   }
 
-  // [市集] 城鎮真實街屋建築群 (山牆斜屋頂嚴格限制在建築本體上方)
+  // [市集] 城鎮真實街屋建築群 (山牆斜屋頂嚴格限制在建築本體上方，南側保留驛站拱門通道)
   buildTownStreetBlocks(group) {
     const facadeMat = new THREE.MeshStandardMaterial({ map: this.tex.townFacade, roughness: 0.8 });
     const slateRoofMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.7 });
@@ -486,17 +496,33 @@ class SpatialZoneManager {
     westBlock.add(wRoof);
     group.add(westBlock);
 
-    // 3. 南側街屋
+    // 3. 南側街屋 (左翼與右翼，中間保留 3.6m 寬中央拱門通道)
     const southBlock = new THREE.Group();
-    southBlock.position.set(-3.5, 0, 11.5);
+    southBlock.position.set(0, 0, 11.5);
 
-    const sBody = new THREE.Mesh(new THREE.BoxGeometry(17, 6.8, 3.8), facadeMat);
-    sBody.position.y = 3.4;
-    southBlock.add(sBody);
+    // 左翼
+    const sBodyL = new THREE.Mesh(new THREE.BoxGeometry(11, 6.8, 3.8), facadeMat);
+    sBodyL.position.set(-7.5, 3.4, 0);
+    southBlock.add(sBodyL);
 
-    const sRoof = new THREE.Mesh(new THREE.BoxGeometry(17.2, 1.8, 4.2), slateRoofMat);
-    sRoof.position.y = 7.7;
-    southBlock.add(sRoof);
+    const sRoofL = new THREE.Mesh(new THREE.BoxGeometry(11.2, 1.8, 4.2), slateRoofMat);
+    sRoofL.position.set(-7.5, 7.7, 0);
+    southBlock.add(sRoofL);
+
+    // 右翼
+    const sBodyR = new THREE.Mesh(new THREE.BoxGeometry(6, 6.8, 3.8), facadeMat);
+    sBodyR.position.set(5.0, 3.4, 0);
+    southBlock.add(sBodyR);
+
+    const sRoofR = new THREE.Mesh(new THREE.BoxGeometry(6.2, 1.8, 4.2), slateRoofMat);
+    sRoofR.position.set(5.0, 7.7, 0);
+    southBlock.add(sRoofR);
+
+    // 連接中央拱門石樑
+    const sArchBeam = new THREE.Mesh(new THREE.BoxGeometry(4.2, 1.6, 4.0), stoneMat);
+    sArchBeam.position.set(0, 6.0, 0);
+    southBlock.add(sArchBeam);
+
     group.add(southBlock);
   }
 
@@ -560,11 +586,17 @@ class SpatialZoneManager {
       });
     });
 
-    // 西北側自然林道拱門 (OPEN)
+    // 西北側自然林道拱門 (OPEN -> 前往 Zone 4 操場)
     this.buildRoseArchPortal(group, -6.5, 0, -8.0, '🌸 通往冒險操場的精靈古徑 (OPEN)', 'OPEN', () => {
       this.world.showToast('🎉 森林古樹撥開枝枒，微風輕拂，解鎖前往活力操場！');
       this.switchZone('zone4');
     }, 0.35);
+
+    // 南側入園花廊 (返回 Zone 2 陽光微風市集)
+    this.buildGardenSouthEntrance(group, 0, 0, 11.5, '🍎 林間小徑 ➔ 返回【陽光微風市集】', () => {
+      this.world.showToast('🧭 沿著林間小徑漫步，返回陽光微風市集！');
+      this.switchZone('zone2');
+    });
 
     this.addFloatingParticles(group, 0x86efac, 160, 36, 5.5);
   }
@@ -583,6 +615,7 @@ class SpatialZoneManager {
       const tz = Math.sin(angle) * radius;
 
       if (tx < -4.5 && tz < -6.5) continue; // 留出西北出徑
+      if (Math.abs(tx) < 2.5 && tz > 9.5) continue; // 留出南方出徑 (往市集)
 
       const treeGroup = new THREE.Group();
       treeGroup.position.set(tx, 0, tz);
@@ -680,10 +713,16 @@ class SpatialZoneManager {
       });
     });
 
-    // 終點衝刺凱旋拱門 (OPEN) - 位於東直道衝線終點線
+    // 終點衝刺凱旋拱門 (OPEN -> 前往 Zone 5 星光車站)
     this.buildTrophyArchPortal(group, 8.5, 0, -6.0, '🏆 終點衝線冠軍金色拱門 (OPEN)', 'OPEN', () => {
       this.world.showToast('🎉 裁判長鳴哨！以驚人速度衝過終點線，解鎖星光車站！');
       this.switchZone('zone5');
+    });
+
+    // 西南側入場合成拱門 (返回 Zone 3 守護獸之森花園)
+    this.buildStadiumEntryArch(group, -7.5, 0, 11.0, '🐰 校園林蔭 ➔ 返回【守護獸之森花園】', () => {
+      this.world.showToast('🧭 漫步穿過校園林蔭，返回守護獸之森花園！');
+      this.switchZone('zone3');
     });
 
     this.addFloatingParticles(group, 0x67e8f9, 140, 36, 6);
@@ -970,10 +1009,16 @@ class SpatialZoneManager {
       });
     });
 
-    // 客車登車大門 (OPEN) - 迎賓紅毯通往車廂
+    // 客車登車大門 (OPEN) - 迎賓紅毯通往車廂 (通往大魔導士殿堂)
     this.buildTrainCarriageDoorPortal(group, 4.8, 0, 2.2, '🚂 登上通往大魔導士殿堂的列車門 (OPEN)', 'OPEN', () => {
       this.world.showToast('🎉 汽笛長鳴！恭喜完成全維度英語護照試煉！');
       if (this.world) this.world.triggerEscapeCelebration();
+    });
+
+    // 南側出站口閘門 (返回 Zone 4 活力冒險操場)
+    this.buildStationSouthExitGate(group, -1.0, 0, 12.0, '⚽ 車站出站閘口 ➔ 返回【活力冒險操場】', () => {
+      this.world.showToast('🧭 穿過古典出站閘口，返回活力冒險操場！');
+      this.switchZone('zone4');
     });
 
     this.addFloatingParticles(group, 0xfde047, 180, 36, 7);
@@ -1251,6 +1296,64 @@ class SpatialZoneManager {
       win.rotation.y = Math.PI / 2;
       group.add(win);
     });
+
+    // 1. 大型火車班次發車時刻表看板 (Timetable Blackboard)
+    const timeTex = this.createTimetableTexture();
+    const boardMat = timeTex
+      ? new THREE.MeshBasicMaterial({ map: timeTex })
+      : new THREE.MeshStandardMaterial({ color: 0x0f172a });
+    const timetableBoard = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 1.8), boardMat);
+    timetableBoard.position.set(-9.85, 3.8, 2.5);
+    timetableBoard.rotation.y = Math.PI / 2;
+    group.add(timetableBoard);
+
+    // 2. 月台售票窗口 (Ticket Window)
+    const woodMat = new THREE.MeshStandardMaterial({ map: this.tex.woodDesk, roughness: 0.65 });
+    const brassMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.85 });
+
+    const ticketCounter = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.9, 1.8), woodMat);
+    ticketCounter.position.set(-9.7, 0.45, -2.5);
+    group.add(ticketCounter);
+
+    for (let b = -0.7; b <= 0.7; b += 0.2) {
+      const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 1.2, 6), brassMat);
+      bar.position.set(-9.7, 1.5, -2.5 + b);
+      group.add(bar);
+    }
+
+    // 3. 月台行李推車與復古皮箱 (Luggage Trolley & Trunks)
+    const trolleyGroup = new THREE.Group();
+    trolleyGroup.position.set(-5.5, 0, -2.0);
+
+    const ironMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.85 });
+    const tBed = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.1, 0.9), woodMat);
+    tBed.position.y = 0.35;
+    trolleyGroup.add(tBed);
+
+    [-0.6, 0.6].forEach(wx => {
+      const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.06, 12), ironMat);
+      wheel.rotation.z = Math.PI / 2;
+      wheel.position.set(wx, 0.18, 0.45);
+      trolleyGroup.add(wheel);
+      const wheelR = wheel.clone();
+      wheelR.position.z = -0.45;
+      trolleyGroup.add(wheelR);
+    });
+
+    // 堆疊皮革行李箱
+    const trunkMat1 = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.6 });
+    const trunkMat2 = new THREE.MeshStandardMaterial({ color: 0x92400e, roughness: 0.6 });
+
+    const trunk1 = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.35, 0.5), trunkMat1);
+    trunk1.position.set(-0.2, 0.58, 0);
+    trolleyGroup.add(trunk1);
+
+    const trunk2 = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.3, 0.4), trunkMat2);
+    trunk2.position.set(-0.15, 0.9, 0);
+    trunk2.rotation.y = 0.15;
+    trolleyGroup.add(trunk2);
+
+    group.add(trolleyGroup);
   }
 
   // [市集] 擬真水果帳篷攤位
@@ -1674,9 +1777,49 @@ class SpatialZoneManager {
     canopy1.position.set(0, 4.0, 0);
     tree.add(canopy1);
 
-    const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 8), new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xf59e0b, emissiveIntensity: 0.8 }));
-    lamp.position.set(1.2, 3.0, 0.5);
-    tree.add(lamp);
+    // 枝頭懸掛 4 盞發光精靈水晶提燈 (Fairy Crystal Lanterns)
+    const lanternColors = [0x38bdf8, 0xfde047, 0xf472b6, 0x4ade80];
+    const lanternOffsets = [[1.4, 3.1, 0.6], [-1.2, 3.4, 0.8], [0.5, 3.0, -1.3], [-0.8, 2.9, -1.0]];
+    const lanternGroup = new THREE.Group();
+
+    lanternOffsets.forEach(([lx, ly, lz], idx) => {
+      const col = lanternColors[idx % lanternColors.length];
+      const singleLantern = new THREE.Group();
+      singleLantern.position.set(lx, ly, lz);
+
+      // 細吊鍊
+      const chain = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.6, 4), new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.8 }));
+      chain.position.y = 0.3;
+      singleLantern.add(chain);
+
+      // 水晶多面體燈身
+      const crystal = new THREE.Mesh(
+        new THREE.DodecahedronGeometry(0.2),
+        new THREE.MeshStandardMaterial({
+          color: col,
+          emissive: col,
+          emissiveIntensity: 0.9,
+          roughness: 0.15,
+          transparent: true,
+          opacity: 0.9
+        })
+      );
+      singleLantern.add(crystal);
+
+      // 柔和點光源
+      const pLight = new THREE.PointLight(col, 0.65, 5);
+      singleLantern.add(pLight);
+
+      lanternGroup.add(singleLantern);
+    });
+    tree.add(lanternGroup);
+
+    this.world.animators.push((time) => {
+      lanternGroup.children.forEach((l, i) => {
+        l.rotation.z = Math.sin(time * 2 + i * 1.5) * 0.12;
+        l.rotation.x = Math.cos(time * 2 + i * 1.5) * 0.08;
+      });
+    });
 
     const hitBox = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.2, 4.8, 8), new THREE.MeshBasicMaterial({ visible: false }));
     hitBox.position.y = 2.4;
@@ -2324,7 +2467,364 @@ class SpatialZoneManager {
       geo.attributes.position.needsUpdate = true;
     });
   }
+  // ==========================================
+  // RPG 雙向穿梭門扉與世界路標建構器 (Bi-directional Portals)
+  // ==========================================
+
+  // [市集] 南側驛站拱門 (返回 Zone 1 見習書齋)
+  buildTownSouthEntrance(group, x, y, z, label, onTravel) {
+    const arch = new THREE.Group();
+    arch.position.set(x, y, z);
+
+    const stoneMat = new THREE.MeshStandardMaterial({ map: this.tex.stoneWall, roughness: 0.85 });
+    const woodMat = new THREE.MeshStandardMaterial({ map: this.tex.woodDesk, roughness: 0.7 });
+
+    // 兩側拱門基石立柱
+    [-1.6, 1.6].forEach(px => {
+      const col = new THREE.Mesh(new THREE.BoxGeometry(0.7, 4.2, 0.7), stoneMat);
+      col.position.set(px, 2.1, 0);
+      arch.add(col);
+
+      // 溫暖路燈
+      const lamp = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.12, 0.16, 0.35, 6),
+        new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xf59e0b, emissiveIntensity: 0.8 })
+      );
+      lamp.position.set(px, 4.35, 0);
+      arch.add(lamp);
+
+      const light = new THREE.PointLight(0xfef08a, 0.8, 8);
+      light.position.set(px, 4.35, 0);
+      arch.add(light);
+    });
+
+    // 頂部石拱頂樑
+    const beam = new THREE.Mesh(new THREE.BoxGeometry(3.9, 0.6, 0.9), stoneMat);
+    beam.position.set(0, 4.4, 0);
+    arch.add(beam);
+
+    // 懸掛木雕路標牌
+    const sign = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.45, 0.08), woodMat);
+    sign.position.set(0, 3.8, 0);
+    arch.add(sign);
+
+    // 穿梭光暈微光
+    const glow = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.6, 3.8),
+      new THREE.MeshBasicMaterial({ color: 0xa855f7, transparent: true, opacity: 0.35, side: THREE.DoubleSide })
+    );
+    glow.position.set(0, 2.0, 0);
+    arch.add(glow);
+
+    // 互動點與傳送門 Hitbox
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.5, 4.2, 2.4), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 2.1;
+    hitBox.userData = {
+      id: 'return_portal_zone2',
+      label,
+      onClick: () => {
+        if (onTravel) onTravel();
+      }
+    };
+    arch.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      glow.material.opacity = 0.3 + Math.sin(time * 2.5) * 0.15;
+    });
+
+    group.add(arch);
+  }
+
+  // [花園] 南側入園花廊 (返回 Zone 2 微風市集)
+  buildGardenSouthEntrance(group, x, y, z, label, onTravel) {
+    const arbor = new THREE.Group();
+    arbor.position.set(x, y, z);
+
+    const marbleMat = new THREE.MeshStandardMaterial({ map: this.tex.marbleFountain, roughness: 0.4 });
+    const ivyMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.8 });
+
+    [-1.6, 1.6].forEach(px => {
+      const col = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.28, 3.8, 12), marbleMat);
+      col.position.set(px, 1.9, 0);
+      arbor.add(col);
+
+      // 常春藤葉團
+      const ivy = new THREE.Mesh(new THREE.DodecahedronGeometry(0.55), ivyMat);
+      ivy.position.set(px, 3.6, 0);
+      arbor.add(ivy);
+    });
+
+    const topArch = new THREE.Mesh(new THREE.TorusGeometry(1.6, 0.12, 8, 16, Math.PI), marbleMat);
+    topArch.position.set(0, 3.8, 0);
+    arbor.add(topArch);
+
+    // 路標木牌
+    const sign = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.4, 0.08), new THREE.MeshStandardMaterial({ map: this.tex.woodDesk }));
+    sign.position.set(0, 3.3, 0);
+    arbor.add(sign);
+
+    const glow = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.5, 3.5),
+      new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.35, side: THREE.DoubleSide })
+    );
+    glow.position.set(0, 1.8, 0);
+    arbor.add(glow);
+
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.5, 4.0, 2.2), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 2.0;
+    hitBox.userData = {
+      id: 'return_portal_zone3',
+      label,
+      onClick: () => {
+        if (onTravel) onTravel();
+      }
+    };
+    arbor.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      glow.material.opacity = 0.3 + Math.sin(time * 3) * 0.15;
+    });
+
+    group.add(arbor);
+  }
+
+  // [操場] 西南側校園林蔭門 (返回 Zone 3 守護獸花園)
+  buildStadiumEntryArch(group, x, y, z, label, onTravel) {
+    const arch = new THREE.Group();
+    arch.position.set(x, y, z);
+
+    const steelMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.5, metalness: 0.6 });
+    const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.3, metalness: 0.8 });
+
+    [-1.6, 1.6].forEach(px => {
+      const col = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 3.8, 10), steelMat);
+      col.position.set(px, 1.9, 0);
+      arch.add(col);
+
+      const cap = new THREE.Mesh(new THREE.SphereGeometry(0.24, 8, 8), goldMat);
+      cap.position.set(px, 3.9, 0);
+      arch.add(cap);
+    });
+
+    const crossBeam = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.3, 0.3), steelMat);
+    crossBeam.position.set(0, 3.8, 0);
+    arch.add(crossBeam);
+
+    const sign = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.45, 0.08), goldMat);
+    sign.position.set(0, 3.4, 0);
+    arch.add(sign);
+
+    const glow = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.6, 3.5),
+      new THREE.MeshBasicMaterial({ color: 0x22c55e, transparent: true, opacity: 0.35, side: THREE.DoubleSide })
+    );
+    glow.position.set(0, 1.8, 0);
+    arch.add(glow);
+
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.5, 4.0, 2.2), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 2.0;
+    hitBox.userData = {
+      id: 'return_portal_zone4',
+      label,
+      onClick: () => {
+        if (onTravel) onTravel();
+      }
+    };
+    arch.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      glow.material.opacity = 0.3 + Math.sin(time * 3) * 0.15;
+    });
+
+    group.add(arch);
+  }
+
+  // [車站] 南側出站口古典鐵藝閘門 (返回 Zone 4 操場)
+  buildStationSouthExitGate(group, x, y, z, label, onTravel) {
+    const gate = new THREE.Group();
+    gate.position.set(x, y, z);
+
+    const ironMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.9, roughness: 0.2 });
+    const brassMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.85, roughness: 0.25 });
+
+    [-1.6, 1.6].forEach(px => {
+      const col = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.2, 4.2, 8), ironMat);
+      col.position.set(px, 2.1, 0);
+      gate.add(col);
+
+      const finial = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.4, 6), brassMat);
+      finial.position.set(px, 4.4, 0);
+      gate.add(finial);
+
+      const lamp = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.14, 0.1, 0.35, 6),
+        new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xf59e0b, emissiveIntensity: 0.8 })
+      );
+      lamp.position.set(px, 3.8, 0.2);
+      gate.add(lamp);
+    });
+
+    const topArch = new THREE.Mesh(new THREE.TorusGeometry(1.6, 0.08, 6, 16, Math.PI), ironMat);
+    topArch.position.set(0, 4.0, 0);
+    gate.add(topArch);
+
+    const sign = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.4, 0.08), brassMat);
+    sign.position.set(0, 3.6, 0);
+    gate.add(sign);
+
+    const glow = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.6, 3.6),
+      new THREE.MeshBasicMaterial({ color: 0x60a5fa, transparent: true, opacity: 0.35, side: THREE.DoubleSide })
+    );
+    glow.position.set(0, 1.9, 0);
+    gate.add(glow);
+
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.5, 4.0, 2.2), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 2.0;
+    hitBox.userData = {
+      id: 'return_portal_zone5',
+      label,
+      onClick: () => {
+        if (onTravel) onTravel();
+      }
+    };
+    gate.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      glow.material.opacity = 0.3 + Math.sin(time * 3) * 0.15;
+    });
+
+    group.add(gate);
+  }
+
+  // [市集] 精緻生活道具群 (木箱、酒桶、麻布袋、招牌、路燈)
+  buildMarketStreetProps(group) {
+    const woodMat = new THREE.MeshStandardMaterial({ map: this.tex.woodDesk, roughness: 0.7 });
+    const crateMat = new THREE.MeshStandardMaterial({ color: 0x92400e, roughness: 0.8 });
+    const ironMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.85, roughness: 0.3 });
+    const sackMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.95 });
+
+    // 1. 堆疊蔬果木箱 (在蘋果攤與香蕉攤旁)
+    const crateCoords = [
+      [-5.8, 0, -1.8], [-5.8, 0.4, -1.8], [-6.2, 0, -1.2],
+      [5.4, 0, 0.4], [5.4, 0.4, 0.4], [5.8, 0, 1.0]
+    ];
+    crateCoords.forEach(([cx, cy, cz]) => {
+      const crate = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.4, 0.65), crateMat);
+      crate.position.set(cx, cy + 0.2, cz);
+      crate.castShadow = true;
+      group.add(crate);
+    });
+
+    // 2. 釀酒橡木桶 (在麵包車與轉角處)
+    const barrelCoords = [[-4.8, 0, -4.2], [-5.2, 0, -3.5], [4.5, 0, -2.2]];
+    barrelCoords.forEach(([bx, by, bz]) => {
+      const barrel = new THREE.Group();
+      barrel.position.set(bx, by, bz);
+
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.38, 0.9, 12), woodMat);
+      body.position.y = 0.45;
+      barrel.add(body);
+
+      [-0.25, 0.25].forEach(hy => {
+        const ring = new THREE.Mesh(new THREE.TorusGeometry(0.39, 0.02, 6, 16), ironMat);
+        ring.rotation.x = Math.PI / 2;
+        ring.position.y = 0.45 + hy;
+        barrel.add(ring);
+      });
+      group.add(barrel);
+    });
+
+    // 3. 黃麻麵粉布袋 (在麵包車旁)
+    const sackCoords = [[-2.2, 0, -5.8], [-1.8, 0, -5.4]];
+    sackCoords.forEach(([sx, sy, sz]) => {
+      const sack = new THREE.Mesh(new THREE.DodecahedronGeometry(0.35), sackMat);
+      sack.scale.set(1.1, 0.8, 0.9);
+      sack.position.set(sx, sy + 0.25, sz);
+      group.add(sack);
+    });
+
+    // 4. 兩座古典鑄鐵街燈 (廣場東西兩側)
+    [[-8.0, -4.0], [7.5, 4.0]].forEach(([lx, lz]) => {
+      const lamp = new THREE.Group();
+      lamp.position.set(lx, 0, lz);
+
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.14, 3.6, 8), ironMat);
+      post.position.y = 1.8;
+      lamp.add(post);
+
+      const glass = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.22, 0.15, 0.45, 6),
+        new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xf59e0b, emissiveIntensity: 0.9 })
+      );
+      glass.position.y = 3.7;
+      lamp.add(glass);
+
+      const pLight = new THREE.PointLight(0xffedd5, 1.2, 12);
+      pLight.position.y = 3.7;
+      lamp.add(pLight);
+
+      group.add(lamp);
+    });
+  }
+
+  // [車站] 動態火車時刻表畫布材質
+  createTimetableTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    // 深色復古黑板底
+    ctx.fillStyle = '#090d16';
+    ctx.fillRect(0, 0, 512, 256);
+    ctx.strokeStyle = '#d97706';
+    ctx.lineWidth = 6;
+    ctx.strokeRect(3, 3, 506, 250);
+
+    // 金色標題
+    ctx.fillStyle = '#facc15';
+    ctx.font = 'bold 22px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('★ STARLIGHT EXPRESS TIMETABLE ★', 256, 38);
+
+    ctx.strokeStyle = '#64748b';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(20, 52);
+    ctx.lineTo(492, 52);
+    ctx.stroke();
+
+    // 時刻表班次
+    const schedule = [
+      { no: 'EXP-01', time: '21:00', dest: 'MAGE CITADEL (終點)', status: 'BOARDING', color: '#10b981' },
+      { no: 'LOC-02', time: '22:30', dest: 'ATHLETIC STADIUM', status: 'ON TIME', color: '#38bdf8' },
+      { no: 'LOC-03', time: '06:15', dest: 'SUNLIT BAZAAR', status: 'ON TIME', color: '#38bdf8' },
+      { no: 'EXP-04', time: '08:00', dest: 'APPRENTICE TOWER', status: 'WAITING', color: '#f59e0b' }
+    ];
+
+    ctx.font = 'bold 15px monospace';
+    schedule.forEach((row, idx) => {
+      const y = 88 + idx * 38;
+      ctx.fillStyle = '#e2e8f0';
+      ctx.textAlign = 'left';
+      ctx.fillText(`${row.no}  ${row.time}  ${row.dest}`, 25, y);
+      ctx.fillStyle = row.color;
+      ctx.textAlign = 'right';
+      ctx.fillText(row.status, 485, y);
+    });
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.needsUpdate = true;
+    return tex;
+  }
 }
 
 // 建立全域空間實例
 window.SpatialZoneManager = SpatialZoneManager;
+
