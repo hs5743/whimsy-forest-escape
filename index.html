@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>童趣森林魔法書齋逃脫：蒼月之約 (Whimsy Forest 3D Escape)</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%20%22100%22><text y=%22.9em%22 font-size=%2290%22>🗝️</text></svg>">
+</head>
+<body>
+  <!-- 3D 渲染畫布 -->
+  <canvas id="renderCanvas"></canvas>
+
+  <!-- 頂部 HUD (等級、經驗值、操作引導) -->
+  <div id="hudBar">
+    <div class="hud-pill">
+      <span id="hudLevelLabel" class="hud-title">等級 1 • 童趣魔法使</span>
+      <div class="xp-bar-container">
+        <div id="hudXpFill" class="xp-bar-fill"></div>
+      </div>
+      <span id="hudXpLabel" class="xp-text">0 XP</span>
+    </div>
+
+    <div style="display: flex; gap: 8px;">
+      <button id="bgmToggleBtn" class="hud-btn" onclick="toggleMusic()">
+        <span id="bgmIcon">🎵</span> 音樂
+      </button>
+      <button id="guideBtn" class="hud-btn" onclick="toggleGuideModal()">
+        <span>📖</span> 指南
+      </button>
+    </div>
+  </div>
+
+  <!-- 中心準星與互動提示標籤 -->
+  <div id="crosshair"></div>
+  <div id="interactPrompt"></div>
+
+  <!-- 底部背包欄 -->
+  <div id="inventoryContainer">
+    <div id="inventoryList" style="display: flex; gap: 8px;"></div>
+  </div>
+
+  <!-- 平板/手機 觸控操控層 -->
+  <div id="touchControlsLayer">
+    <div id="touchLeftZone">
+      <div id="joystickBase">
+        <div id="joystickKnob"></div>
+      </div>
+    </div>
+    <div id="touchLookArea"></div>
+    <button id="touchActionBtn" type="button">
+      ✋
+      <span>互動</span>
+    </button>
+  </div>
+
+  <!-- 單字口說練習彈窗 (Speech Practice Modal) -->
+  <div id="speechModal">
+    <div class="parchment-card">
+      <div class="modal-header">
+        <img id="modalMascotImg" src="assets/textures/fox-guide.png" alt="Mascot" class="mascot-avatar">
+        <div class="mascot-info">
+          <h3 id="modalMascotName">小狐狸 Foxy</h3>
+          <p id="modalDialogue" class="mascot-dialogue"></p>
+          <p id="modalDialogueZh" style="font-size: 13px; color: #8c7361;"></p>
+        </div>
+      </div>
+
+      <div class="word-display-box">
+        <div id="modalWord" class="target-word">LIGHT</div>
+        <div id="modalPhonics" class="target-phonics">/laɪt/ • L-I-G-H-T</div>
+        <div id="modalZh" class="target-zh">光芒、點亮</div>
+      </div>
+
+      <div id="modalPrompt" class="instruction-box">
+        請看著銅燭台，大聲唸出單字！
+      </div>
+
+      <div class="action-buttons-row">
+        <button id="playVoiceBtn" class="btn-voice" type="button">
+          <span>🔊</span> 聽示範發音
+        </button>
+        <button id="micButton" class="btn-mic" type="button">
+          <span>🎙️ 按下開始口說挑戰 (Speak)</span>
+        </button>
+      </div>
+
+      <div id="speechStatus" class="speech-status">
+        點擊上方「開始口說挑戰」，靠近麥克風唸出單字！
+      </div>
+
+      <div class="fallback-pass-container">
+        <button id="teacherPassBtn" class="btn-teacher-pass" type="button">
+          ✨ 教室環境吵雜或無麥克風？點此老師驗證通過 (Teacher Pass)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 玩法說明指南彈窗 -->
+  <div id="guideModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 150; display: none; justify-content: center; align-items: center; padding: 20px;">
+    <div class="parchment-card" style="max-width: 520px;">
+      <h2 style="color: var(--warm-brown); font-size: 22px; text-align: center; border-bottom: 2px dashed #dfc79b; padding-bottom: 10px;">
+        📖 魔法使書齋逃脫指南
+      </h2>
+      <div style="font-size: 15px; color: #4a3728; line-height: 1.8;">
+        <p><strong>📱 平板操作：</strong></p>
+        <p>• <strong>移動走位</strong>：按住螢幕左半邊滑動（虛擬搖桿）。</p>
+        <p>• <strong>轉動視角</strong>：滑動螢幕右半邊環顧四周。</p>
+        <p>• <strong>調查解謎</strong>：靠近發光物件，點擊右下角「✋ 互動」按鈕或直接點擊畫面中央物件。</p>
+        <p style="margin-top: 8px;"><strong>💻 電腦操作：</strong></p>
+        <p>• <strong>鍵盤</strong>：<code>W</code> <code>A</code> <code>S</code> <code>D</code> 移動，<code>E</code> 鍵互動。</p>
+        <p>• <strong>滑鼠</strong>：按住拖曳轉動視角，點擊物件互動。</p>
+        <p style="margin-top: 8px;"><strong>🎙️ 口說過關：</strong></p>
+        <p>• 靠近燭台、古書、抽屜、調劑台、貓咪寶箱與石門，按下麥克風大聲唸出英語單字，解開所有魔法封印！</p>
+      </div>
+      <button class="btn-voice" onclick="toggleGuideModal()" style="margin-top: 10px; width: 100%;">
+        了解，開始探索書齋！
+      </button>
+    </div>
+  </div>
+
+  <!-- 破關勝利彈窗 (Grand Victory Screen) -->
+  <div id="victoryModal">
+    <div class="victory-card">
+      <div style="font-size: 56px;">🌸✨</div>
+      <h1 class="victory-title">恭喜突破石門封印！</h1>
+      <p class="victory-sub">
+        你與小狐狸 Foxy、小兔 Bunny、長老 Ollie 和貓咪 Mimic 一起解開了古代魔法！<br>
+        推開遠古石門，迎向溫暖陽光與盛開的整片蒼月草花田。
+      </p>
+      <div id="finalScoreText" class="victory-score">
+        冒險成就：550 XP • 等級 6 一級大魔法使
+      </div>
+      <div class="victory-btn-group">
+        <button class="btn-replay" onclick="location.reload()">
+          🔄 重新遊玩
+        </button>
+        <a href="https://hs5743.github.io/Whimsy_Forest_English/" target="_blank" class="btn-website">
+          🌲 探索更多童趣森林英語
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 提示氣泡 (Toast Notice) -->
+  <div id="toastNotice"></div>
+
+  <!-- 核心庫與遊戲腳本 -->
+  <script src="three.min.js"></script>
+  <script src="vocab-data.js"></script>
+  <script src="speech-manager.js"></script>
+  <script src="audio-manager.js"></script>
+  <script src="touch-controls.js"></script>
+  <script src="world-3d.js"></script>
+
+  <script>
+    function toggleMusic() {
+      if (window.audioManager) {
+        const isPlaying = window.audioManager.toggleBgm();
+        document.getElementById('bgmIcon').textContent = isPlaying ? '🔊' : '🔇';
+      }
+    }
+
+    function toggleGuideModal() {
+      const modal = document.getElementById('guideModal');
+      modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
+      if (window.audioManager) window.audioManager.playSfx('click');
+    }
+
+    // 第一次點擊畫面啟動背景音樂 (符合瀏覽器 Autoplay 政策)
+    window.addEventListener('click', function startAudioOnce() {
+      if (window.audioManager && !window.audioManager.isBgmPlaying) {
+        window.audioManager.startBgm();
+        document.getElementById('bgmIcon').textContent = '🔊';
+      }
+      window.removeEventListener('click', startAudioOnce);
+    }, { once: true });
+  </script>
+</body>
+</html>
