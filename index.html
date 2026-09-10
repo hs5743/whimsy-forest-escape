@@ -335,12 +335,12 @@
         ☁️ Google 試算表 (GAS) 雲端連線
       </h2>
       <p style="font-size: 13px; color: #4a3728; line-height: 1.6; margin-top: 8px;">
-        若學校已在 Google 試算表部署了 <code>gas/Code.gs</code> 網頁應用程式，請在此貼上 Web App 網址以啟用全校雲端連線！
+        已預設直接連結<strong>新港國小英語冒險護照官方試算表</strong>。學生打開網頁即可直接記錄歷程，完全無需手動輸入網址！
       </p>
 
       <div class="form-group" style="margin-top: 10px;">
         <label for="gasUrlInput">GAS Web App 網址 (URL)</label>
-        <input type="url" id="gasUrlInput" class="form-input" placeholder="https://script.google.com/macros/s/.../exec" style="font-size: 13px;">
+        <input type="url" id="gasUrlInput" class="form-input" value="https://script.google.com/macros/s/AKfycbxMzYX-1b-fxlC6QN41uEdywDl0O-rRkt6Hw9AxypGdJB7FC3Ns7rpdvXryJwLULR01/exec" placeholder="https://script.google.com/macros/s/.../exec" style="font-size: 13px;">
       </div>
 
       <div style="display: flex; gap: 8px; margin-top: 14px;">
@@ -350,8 +350,8 @@
         <button type="button" class="btn-voice" onclick="testGasPing()" style="flex: 1; font-size: 13px; padding: 10px;">
           ⚡ 測試連線
         </button>
-        <button type="button" class="btn-voice" onclick="clearGasUrl()" style="flex: 1; font-size: 13px; padding: 10px; background: #e2d3be; color: #5c3d2e;">
-          🔄 清空
+        <button type="button" class="btn-voice" onclick="resetDefaultGasUrl()" style="flex: 1; font-size: 13px; padding: 10px; background: #e2d3be; color: #5c3d2e;" title="重設回校本官方試算表">
+          🔄 恢復預設
         </button>
       </div>
 
@@ -750,12 +750,13 @@
       }
     }
 
-    function clearGasUrl() {
-      document.getElementById('gasUrlInput').value = '';
+    function resetDefaultGasUrl() {
       if (window.cloudSyncManager) {
-        window.cloudSyncManager.setGasUrl('');
+        const defUrl = window.cloudSyncManager.resetToDefaultGasUrl();
+        document.getElementById('gasUrlInput').value = defUrl;
       }
-      document.getElementById('gasStatusNotice').textContent = '⚪ 已切換為純單機離線模式。';
+      document.getElementById('gasStatusNotice').textContent = '✅ 已恢復為官方校本試算表預設連線！';
+      document.getElementById('gasStatusNotice').style.color = '#059669';
     }
 
     // 空間星圖大地圖互動邏輯

@@ -1,12 +1,22 @@
+// 預設校本官方 Google 試算表 (GAS) 網址（學童進入網頁直接自動連線，完全免手動輸入）
+const DEFAULT_OFFICIAL_GAS_URL = 'https://script.google.com/macros/s/AKfycbxMzYX-1b-fxlC6QN41uEdywDl0O-rRkt6Hw9AxypGdJB7FC3Ns7rpdvXryJwLULR01/exec';
+
 // 雲端資料同步與學生護照歷程管理器 (CloudSyncManager)
 class CloudSyncManager {
   constructor() {
     this.storageKey = 'whimsy_student_profile';
     this.queueKey = 'whimsy_pending_logs';
     this.gasUrlKey = 'whimsy_gas_url';
+    this.defaultGasUrl = DEFAULT_OFFICIAL_GAS_URL;
 
-    // 讀取本地端 GAS 網址（若有設定）
-    this.gasUrl = localStorage.getItem(this.gasUrlKey) || '';
+    // 優先讀取本地端 GAS 網址；若未設定或為空，直接預設採用校本官方網址
+    const localGas = localStorage.getItem(this.gasUrlKey);
+    this.gasUrl = (localGas && localGas.trim() !== '') ? localGas.trim() : this.defaultGasUrl;
+    try {
+      if (!localGas || localGas.trim() === '') {
+        localStorage.setItem(this.gasUrlKey, this.defaultGasUrl);
+      }
+    } catch (e) {}
 
     // 讀取當前登入學生檔案，若無則為訪客/遊客狀態
     this.profile = this.loadLocalProfile() || {
@@ -34,7 +44,9 @@ class CloudSyncManager {
 
     // 啟動離線重試佇列計時器 (每 25 秒檢查一次)
     setInterval(() => this.flushQueue(), 25000);
-    window.addEventListener('online', () => this.flushQueue());
+    if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+      window.addEventListener('online', () => this.flushQueue());
+    }
   }
 
   // 溫和冪次等級成長曲線計算：Level = floor((XP / 100) ^ (1 / 1.35)) + 1
@@ -78,13 +90,18 @@ class CloudSyncManager {
 
   // 設定或更新 GAS Web App 網址
   setGasUrl(url) {
-    this.gasUrl = (url || '').trim();
-    if (this.gasUrl) {
+    const cleanUrl = (url || '').trim();
+    this.gasUrl = cleanUrl || this.defaultGasUrl;
+    try {
       localStorage.setItem(this.gasUrlKey, this.gasUrl);
-    } else {
-      localStorage.removeItem(this.gasUrlKey);
-    }
+    } catch (e) {}
     this.updateCloudStatusIndicator();
+  }
+
+  // 恢復校本官方預設 GAS 網址
+  resetToDefaultGasUrl() {
+    this.setGasUrl(this.defaultGasUrl);
+    return this.defaultGasUrl;
   }
 
   // 學生登入 / 切換身分
