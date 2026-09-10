@@ -17,6 +17,9 @@
       <button id="studentProfileBtn" class="student-hud-btn" onclick="toggleStudentModal()" type="button" title="點此查看/切換學生護照身分">
         <span id="studentProfileBtnLabel">🎒 點此登入護照</span>
       </button>
+      <button id="magicPassportBtn" class="hud-btn passport-btn-highlight" onclick="togglePassportModal()" type="button" title="翻開數位魔法護照手帳">
+        <span>📘</span> 魔法護照
+      </button>
       <div class="hud-pill">
         <span id="hudLevelLabel" class="hud-title">等級 1 • 童趣魔法使</span>
         <div class="xp-bar-container">
@@ -81,7 +84,13 @@
       <div class="word-display-box">
         <div id="modalWord" class="target-word">LIGHT</div>
         <div id="modalPhonics" class="target-phonics">/laɪt/ • L-I-G-H-T</div>
+        <div class="chunk-phonics-hint">👆 點擊音節可聆聽拆解練習自然發音：</div>
+        <div id="modalChunksContainer" class="chunks-container"></div>
         <div id="modalZh" class="target-zh">光芒、點亮</div>
+        <div id="modalSentenceBox" class="context-sentence-box" style="display: none;">
+          <div id="modalSentenceEn" class="sentence-en"></div>
+          <div id="modalSentenceZh" class="sentence-zh"></div>
+        </div>
       </div>
 
       <div id="modalPrompt" class="instruction-box">
@@ -152,6 +161,87 @@
         <a href="https://hs5743.github.io/Whimsy_Forest_English/" target="_blank" class="btn-website">
           🌲 探索更多童趣森林英語
         </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 數位翻頁魔法護照手帳 (Digital Magic Passport Modal) -->
+  <div id="magicPassportModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 155; display: none; justify-content: center; align-items: center; padding: 12px;">
+    <div class="passport-book-container">
+      <button class="modal-close-btn" type="button" onclick="togglePassportModal()" aria-label="關閉">✕</button>
+
+      <!-- 護照頂部主題篩選列 -->
+      <div class="passport-header-bar">
+        <div class="passport-title-tag">
+          <span>📘 新港國小英語冒險護照 (English Passport)</span>
+          <span id="passportTotalCountBadge" class="passport-count-badge">已收集 0 / 706 章</span>
+        </div>
+        <div class="passport-topic-scroll" id="passportTopicTabs"></div>
+      </div>
+
+      <!-- 護照雙頁手帳核心主體 -->
+      <div class="passport-spread">
+        <!-- 左頁：學童個人學籍證與冒險成就卡 -->
+        <div class="passport-page passport-page-left">
+          <div class="student-id-card">
+            <div class="id-card-header">
+              <div class="school-seal">🏛️ 新港國小</div>
+              <div class="passport-doc-id" id="passCardId">NO. 50101</div>
+            </div>
+            <div class="id-card-body">
+              <div class="avatar-frame">
+                <img id="passCardAvatar" src="assets/textures/fox-guide.png" alt="Avatar">
+              </div>
+              <div class="id-card-details">
+                <div class="id-card-name" id="passCardName">見習魔法使</div>
+                <div class="id-card-class" id="passCardClass">五年一班 01號</div>
+                <div class="id-card-title-pill" id="passCardTitle">✨ 初級學徒 (Lv.1)</div>
+              </div>
+            </div>
+            <div class="passport-stats-grid">
+              <div class="stat-box">
+                <div class="stat-num" id="passCardXp">0</div>
+                <div class="stat-label">累積 XP</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-num" id="passCardStars">0</div>
+                <div class="stat-label">護照星數</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-num" id="passCardBadges">0</div>
+                <div class="stat-label">獲得徽章</div>
+              </div>
+            </div>
+            <div class="passport-motto">
+              “Words are the ancient keys to open all realms.”<br>
+              「話語是解開一切秘境的古老鑰匙。」
+            </div>
+            <div style="margin-top: auto; display: flex; gap: 8px; padding-top: 10px;">
+              <button class="hud-btn" onclick="toggleStudentModal(); togglePassportModal();" style="flex: 1; font-size: 12px; justify-content: center;">
+                🎒 切換學籍
+              </button>
+              <button class="hud-btn" onclick="toggleLeaderboardModal(); togglePassportModal();" style="flex: 1; font-size: 12px; justify-content: center;">
+                🏆 榮譽榜
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右頁：簽證印章展示頁 (3x3 網格與翻頁控制) -->
+        <div class="passport-page passport-page-right">
+          <div class="visa-page-header">
+            <span class="visa-page-title" id="visaCategoryTitle">🏰 書齋與學校 (School)</span>
+            <span class="visa-page-count" id="visaPageIndicator">第 1 / 1 頁</span>
+          </div>
+
+          <div class="stamps-grid" id="stampsGridContainer"></div>
+
+          <div class="visa-page-footer">
+            <button class="page-nav-btn" id="prevPageBtn" onclick="changePassportPage(-1)">◀ 上一頁</button>
+            <span id="visaPageInfo" style="font-size: 13px; color: #8c7361;">每頁 9 個單字印章</span>
+            <button class="page-nav-btn" id="nextPageBtn" onclick="changePassportPage(1)">下一頁 ▶</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -269,6 +359,7 @@
   <!-- 核心庫與遊戲腳本 -->
   <script src="three.min.js"></script>
   <script src="vocab-data.js"></script>
+  <script src="vocab-passport-bank.js"></script>
   <script src="speech-manager.js"></script>
   <script src="audio-manager.js"></script>
   <script src="touch-controls.js"></script>
@@ -277,6 +368,159 @@
 
   <script>
     let curLeaderboardTab = 'school';
+
+    // 數位翻頁魔法護照手帳邏輯
+    let curPassportTopic = 'School';
+    let curPassportPage = 0;
+    const WORDS_PER_PAGE = 9;
+
+    function togglePassportModal() {
+      const modal = document.getElementById('magicPassportModal');
+      const isOpening = modal.style.display !== 'flex';
+      modal.style.display = isOpening ? 'flex' : 'none';
+      if (isOpening) {
+        renderPassportProfile();
+        initPassportTopics();
+        renderPassportStamps();
+      }
+      if (window.audioManager) window.audioManager.playSfx('click');
+    }
+
+    function renderPassportProfile() {
+      const p = (window.cloudSyncManager && window.cloudSyncManager.profile) 
+        ? window.cloudSyncManager.profile 
+        : { studentId: '50101', name: '見習魔法使', classId: '501', seatNo: '01', xp: 0, level: 1, stars: 0, badgesCount: 0, completedWords: [] };
+
+      document.getElementById('passCardId').textContent = `NO. ${p.studentId || '50101'}`;
+      document.getElementById('passCardName').textContent = p.name || '見習魔法使';
+      document.getElementById('passCardClass').textContent = p.isGuest ? '訪客身份 (未綁定)' : `${p.classId} 班 ${p.seatNo} 號`;
+      
+      let title = '✨ 初級學徒 (Lv.1)';
+      if (p.level >= 10) title = '👑 新港大魔導士 (Lv.10+)';
+      else if (p.level >= 7) title = '🌟 守護使者 (Lv.7)';
+      else if (p.level >= 4) title = '🌿 元素操縱使 (Lv.4)';
+      document.getElementById('passCardTitle').textContent = title;
+
+      document.getElementById('passCardXp').textContent = p.xp || 0;
+      document.getElementById('passCardStars').textContent = p.stars || (p.completedWords ? p.completedWords.length : 0);
+      document.getElementById('passCardBadges').textContent = p.badgesCount || Math.floor((p.completedWords ? p.completedWords.length : 0) / 3);
+
+      const count = p.completedWords ? p.completedWords.length : 0;
+      document.getElementById('passportTotalCountBadge').textContent = `已收集 ${count} / 706 章`;
+    }
+
+    function initPassportTopics() {
+      const container = document.getElementById('passportTopicTabs');
+      if (!container || !window.PassportBankHelper) return;
+
+      const topTopics = ['School', 'Food', 'Animals', 'Time', 'Prepositions', 'Sports', 'Actions', 'House', 'Place', 'Adjectives', 'Weather', 'all'];
+
+      container.innerHTML = '';
+      topTopics.forEach(top => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'topic-chip' + (curPassportTopic === top ? ' active' : '');
+        chip.textContent = top === 'all' ? '🌐 全部 (706字)' : top;
+        chip.onclick = () => switchPassportTopic(top);
+        container.appendChild(chip);
+      });
+    }
+
+    function switchPassportTopic(topic) {
+      curPassportTopic = topic;
+      curPassportPage = 0;
+      initPassportTopics();
+      renderPassportStamps();
+      if (window.audioManager) window.audioManager.playSfx('click');
+    }
+
+    function renderPassportStamps() {
+      if (!window.PassportBankHelper) return;
+
+      const words = window.PassportBankHelper.getByTopic(curPassportTopic);
+      const totalWords = words.length;
+      const totalPages = Math.ceil(totalWords / WORDS_PER_PAGE) || 1;
+
+      if (curPassportPage >= totalPages) curPassportPage = totalPages - 1;
+      if (curPassportPage < 0) curPassportPage = 0;
+
+      document.getElementById('visaCategoryTitle').textContent = `🏰 主題：${curPassportTopic === 'all' ? '全單字庫' : curPassportTopic} (${totalWords} 字)`;
+      document.getElementById('visaPageIndicator').textContent = `第 ${curPassportPage + 1} / ${totalPages} 頁`;
+
+      document.getElementById('prevPageBtn').disabled = (curPassportPage <= 0);
+      document.getElementById('nextPageBtn').disabled = (curPassportPage >= totalPages - 1);
+
+      const startIndex = curPassportPage * WORDS_PER_PAGE;
+      const pageWords = words.slice(startIndex, startIndex + WORDS_PER_PAGE);
+
+      const container = document.getElementById('stampsGridContainer');
+      container.innerHTML = '';
+
+      const p = (window.cloudSyncManager && window.cloudSyncManager.profile) ? window.cloudSyncManager.profile : { completedWords: [] };
+      const completedList = (p.completedWords || []).map(w => w.toUpperCase());
+
+      pageWords.forEach(w => {
+        const isUnlocked = completedList.includes(w.word.toUpperCase());
+        const slot = document.createElement('div');
+        slot.className = 'stamp-slot ' + (isUnlocked ? 'unlocked' : 'locked');
+        
+        if (isUnlocked) {
+          slot.title = `點擊聆聽示範發音與例句：${w.word}`;
+          slot.innerHTML = `
+            <div class="stamp-seal-circle">💮</div>
+            <div class="stamp-word">${w.word}</div>
+            <div class="stamp-zh">${w.zh || ''}</div>
+            <div style="font-size: 10px; color: #b91c1c; font-weight: 700; margin-top: 2px;">${w.phonetic || ''}</div>
+          `;
+          slot.onclick = () => {
+            playWordSpeech(w.word);
+            if (w.sentence) {
+              if (window.world3D) window.world3D.showToast(`💬 "${w.sentence}" (${w.sentenceZh || ''})`);
+            }
+          };
+        } else {
+          slot.title = `尚未解鎖！在冒險中唸出此單字可蓋章：${w.word}`;
+          slot.innerHTML = `
+            <div style="font-size: 20px; color: #a89f91; margin-bottom: 2px;">🔒</div>
+            <div class="stamp-word" style="color: #8c7361;">${w.word}</div>
+            <div class="stamp-zh">${w.zh || ''}</div>
+            <div style="font-size: 10px; color: #a89f91;">${w.topic}</div>
+          `;
+          slot.onclick = () => {
+            playWordSpeech(w.word);
+            if (window.world3D) window.world3D.showToast(`🔒【${w.word}】${w.zh} 尚未解鎖，快去探索空間解開它！`);
+          };
+        }
+
+        container.appendChild(slot);
+      });
+
+      // 補足 9 格以維持整齊網格
+      for (let i = pageWords.length; i < WORDS_PER_PAGE; i++) {
+        const dummy = document.createElement('div');
+        dummy.className = 'stamp-slot locked';
+        dummy.style.opacity = '0.25';
+        dummy.innerHTML = `<div style="font-size: 20px; color: #ccc;">✦</div>`;
+        container.appendChild(dummy);
+      }
+    }
+
+    function changePassportPage(delta) {
+      curPassportPage += delta;
+      renderPassportStamps();
+      if (window.audioManager) window.audioManager.playSfx('click');
+    }
+
+    function playWordSpeech(word) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(word);
+        u.lang = 'en-US';
+        u.rate = 0.85;
+        window.speechSynthesis.speak(u);
+      }
+      if (window.audioManager) window.audioManager.playSfx('click');
+    }
 
     function toggleMusic() {
       if (window.audioManager) {

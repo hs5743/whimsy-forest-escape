@@ -997,6 +997,55 @@ class World3D {
     document.getElementById('modalDialogueZh').textContent = data.dialogueZh;
     document.getElementById('modalPrompt').textContent = data.prompt;
 
+    // 查詢 706 校本英語護照庫，取得音節拆解 Chunks 與情境例句
+    let passportWord = null;
+    if (window.PassportBankHelper) {
+      passportWord = window.PassportBankHelper.findByWord(wordKey);
+    }
+
+    // 渲染音節按鈕 (Chunks Syllables)
+    const chunksContainer = document.getElementById('modalChunksContainer');
+    if (chunksContainer) {
+      chunksContainer.innerHTML = '';
+      const chunks = (passportWord && passportWord.chunks && passportWord.chunks.length > 0)
+        ? passportWord.chunks
+        : [data.word];
+
+      chunks.forEach(chunk => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'chunk-btn';
+        btn.textContent = chunk;
+        btn.title = `點擊聆聽 [ ${chunk} ] 發音`;
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(chunk);
+            u.lang = 'en-US';
+            u.rate = 0.85;
+            window.speechSynthesis.speak(u);
+          }
+          if (window.audioManager) window.audioManager.playSfx('click');
+        };
+        chunksContainer.appendChild(btn);
+      });
+    }
+
+    // 渲染情境雙語例句
+    const sentenceBox = document.getElementById('modalSentenceBox');
+    const sentenceEn = document.getElementById('modalSentenceEn');
+    const sentenceZh = document.getElementById('modalSentenceZh');
+    if (sentenceBox && sentenceEn && sentenceZh) {
+      if (passportWord && passportWord.sentence) {
+        sentenceEn.textContent = `💬 "${passportWord.sentence}"`;
+        sentenceZh.textContent = passportWord.sentenceZh || '';
+        sentenceBox.style.display = 'block';
+      } else {
+        sentenceBox.style.display = 'none';
+      }
+    }
+
     modal.style.display = 'flex';
 
     // 自動播放一次外師發音
@@ -1020,6 +1069,7 @@ class World3D {
             if (window.cloudSyncManager) {
               window.cloudSyncManager.recordWordPass(wordKey, data.xp || 50, false);
             }
+            this.showToast(`📘 英語護照已蓋上簽證印章：【${wordKey}】！`);
             if (onComplete) onComplete();
           }
         });
@@ -1034,6 +1084,7 @@ class World3D {
         if (window.cloudSyncManager) {
           window.cloudSyncManager.recordWordPass(wordKey, data.xp || 50, true);
         }
+        this.showToast(`✨ 教師驗證通過：已認證【${wordKey}】！`);
         setTimeout(() => {
           modal.style.display = 'none';
           if (onComplete) onComplete();
