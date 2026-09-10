@@ -687,10 +687,16 @@ class World3D {
 
         const nextPos = this.player.pos.clone().add(moveStep);
 
-        // 房間碰撞邊界 (若門已開，允許往南走出花田)
-        const minX = -5.4, maxX = 5.4;
-        const minZ = -5.4;
-        const maxZ = this.gameState.doorOpened ? 20.0 : 5.2;
+        // 空間碰撞邊界 (若門已開，允許往南走出花田；若在 Zone 2~5 廣闊空間，自動擴展邊界)
+        let minX = -5.4, maxX = 5.4;
+        let minZ = -5.4, maxZ = this.gameState.doorOpened ? 20.0 : 5.2;
+
+        if (this.zoneManager && this.zoneManager.currentZoneId !== 'zone1') {
+          minX = -12.8;
+          maxX = 12.8;
+          minZ = -12.8;
+          maxZ = 12.8;
+        }
 
         if (nextPos.x > minX && nextPos.x < maxX) {
           this.player.pos.x = nextPos.x;
@@ -699,8 +705,8 @@ class World3D {
           this.player.pos.z = nextPos.z;
         }
 
-        // 走入花田檢查 (通關 SUN)
-        if (this.player.pos.z > 8.0 && !this.gameState.escaped) {
+        // 走入花田檢查 (僅在 Zone 1 見習書齋密室通關時觸發)
+        if ((!this.zoneManager || this.zoneManager.currentZoneId === 'zone1') && this.player.pos.z > 8.0 && !this.gameState.escaped) {
           this.triggerEscapeCelebration();
         }
       }
