@@ -109,22 +109,28 @@ class World3D {
   // 打造溫馨木造與石砌魔法書齋
   buildAtelierRoom() {
     const roomGroup = new THREE.Group();
+    const textureLoader = new THREE.TextureLoader();
 
-    // 1. 溫潤木地板
+    // 1. 溫潤古木地板 (AI 精緻木紋皮膚)
+    const floorTex = textureLoader.load('assets/textures/tex-wood-floor.jpg');
+    floorTex.wrapS = THREE.RepeatWrapping;
+    floorTex.wrapT = THREE.RepeatWrapping;
+    floorTex.repeat.set(4, 4);
     const floorGeo = new THREE.PlaneGeometry(12, 12);
     const floorMat = new THREE.MeshStandardMaterial({
-      color: 0xa27b5c,
-      roughness: 0.6,
-      metalness: 0.1
+      map: floorTex,
+      roughness: 0.55,
+      metalness: 0.05
     });
     const floor = new THREE.Mesh(floorGeo, floorMat);
     floor.rotation.x = -Math.PI / 2;
     floor.receiveShadow = true;
     roomGroup.add(floor);
 
-    // 2. 天花板與橫樑
+    // 2. 天花板與深木橫樑 (木紋皮膚)
+    const beamTex = textureLoader.load('assets/textures/tex-wood-desk.jpg');
     const ceilingGeo = new THREE.PlaneGeometry(12, 12);
-    const ceilingMat = new THREE.MeshStandardMaterial({ color: 0x5a4233, roughness: 0.8 });
+    const ceilingMat = new THREE.MeshStandardMaterial({ color: 0x3d291d, roughness: 0.85 });
     const ceiling = new THREE.Mesh(ceilingGeo, ceilingMat);
     ceiling.position.y = 4.2;
     ceiling.rotation.x = Math.PI / 2;
@@ -133,14 +139,22 @@ class World3D {
     // 木質橫樑
     for (let z = -4; z <= 4; z += 2.5) {
       const beamGeo = new THREE.BoxGeometry(12, 0.25, 0.35);
-      const beamMat = new THREE.MeshStandardMaterial({ color: 0x422d20, roughness: 0.7 });
+      const beamMat = new THREE.MeshStandardMaterial({ map: beamTex, roughness: 0.6 });
       const beam = new THREE.Mesh(beamGeo, beamMat);
       beam.position.set(0, 4.05, z);
       roomGroup.add(beam);
     }
 
-    // 3. 牆壁材質 (米黃石砌質感)
-    const wallMat = new THREE.MeshStandardMaterial({ color: 0xddd3c4, roughness: 0.85 });
+    // 3. 牆壁材質 (AI 精緻古石磚牆皮膚)
+    const wallTex = textureLoader.load('assets/textures/tex-stone-wall.jpg');
+    wallTex.wrapS = THREE.RepeatWrapping;
+    wallTex.wrapT = THREE.RepeatWrapping;
+    wallTex.repeat.set(3, 2);
+    const wallMat = new THREE.MeshStandardMaterial({
+      map: wallTex,
+      roughness: 0.85,
+      metalness: 0.05
+    });
 
     // 北牆 (有大拱窗)
     const northWallLeft = new THREE.Mesh(new THREE.BoxGeometry(4, 4.2, 0.4), wallMat);
@@ -156,13 +170,10 @@ class World3D {
     roomGroup.add(northWallTop);
 
     // 大拱窗窗框
-    // 大拱窗窗框
-    const frameMat = new THREE.MeshStandardMaterial({ color: 0x6e4e37, roughness: 0.5 });
+    const frameMat = new THREE.MeshStandardMaterial({ map: beamTex, roughness: 0.5 });
     const windowFrame = new THREE.Mesh(new THREE.BoxGeometry(3.9, 2.9, 0.2), frameMat);
     windowFrame.position.set(0, 1.5, -6);
     roomGroup.add(windowFrame);
-
-    const textureLoader = new THREE.TextureLoader();
 
     // 窗外風景立體背板 (芙莉蓮風格陽光花田與遠景)
     const bgGeo = new THREE.PlaneGeometry(16, 9);
@@ -230,7 +241,9 @@ class World3D {
 
   buildBookshelf(parent, x, y, z, rotY) {
     const shelfGroup = new THREE.Group();
-    const woodMat = new THREE.MeshStandardMaterial({ color: 0x5a3e2a, roughness: 0.6 });
+    const textureLoader = new THREE.TextureLoader();
+    const woodTex = textureLoader.load('assets/textures/tex-wood-desk.jpg');
+    const woodMat = new THREE.MeshStandardMaterial({ map: woodTex, roughness: 0.6 });
 
     // 書架主體
     const frame = new THREE.Mesh(new THREE.BoxGeometry(3.2, 3.6, 0.6), woodMat);
@@ -258,14 +271,22 @@ class World3D {
 
   // 建造各項解謎互動道具
   buildProps() {
+    const textureLoader = new THREE.TextureLoader();
+    const deskWoodTex = textureLoader.load('assets/textures/tex-wood-desk.jpg');
+    const grimoireTex = textureLoader.load('assets/textures/tex-grimoire-book.jpg');
+    const slateTex = textureLoader.load('assets/textures/tex-alchemy-slate.jpg');
+
     // ==========================================
     // 1. 銅燭台 (Candle -> LIGHT)
     // ==========================================
     const candleGroup = new THREE.Group();
-    const standMat = new THREE.MeshStandardMaterial({ color: 0xb8860b, metalness: 0.6, roughness: 0.3 });
+    const standMat = new THREE.MeshStandardMaterial({ color: 0xb8860b, metalness: 0.7, roughness: 0.25 });
 
-    // 小圓茶几
-    const tableMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.55, 0.85, 16), new THREE.MeshStandardMaterial({ color: 0x6e4e37 }));
+    // 小圓茶几 (木紋皮膚)
+    const tableMesh = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.5, 0.55, 0.85, 16),
+      new THREE.MeshStandardMaterial({ map: deskWoodTex, roughness: 0.5, metalness: 0.1 })
+    );
     tableMesh.position.set(-3.2, 0.42, -3.5);
     this.scene.add(tableMesh);
 
@@ -299,22 +320,29 @@ class World3D {
     // 2. 書桌與漂浮古書 (Desk & Floating Book -> BOOK & KEY)
     // ==========================================
     const deskGroup = new THREE.Group();
-    const deskTop = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.1, 1.2), new THREE.MeshStandardMaterial({ color: 0x7c5335 }));
+    // 書桌面板 (AI 精緻深木雕花邊框皮膚)
+    const deskTop = new THREE.Mesh(
+      new THREE.BoxGeometry(2.4, 0.1, 1.2),
+      new THREE.MeshStandardMaterial({ map: deskWoodTex, roughness: 0.45, metalness: 0.1 })
+    );
     deskTop.position.set(0, 0.95, -3.8);
     deskTop.castShadow = true;
     deskGroup.add(deskTop);
 
     // 桌腳
     const legGeo = new THREE.BoxGeometry(0.12, 0.95, 0.12);
-    const legMat = new THREE.MeshStandardMaterial({ color: 0x543620 });
+    const legMat = new THREE.MeshStandardMaterial({ map: deskWoodTex, roughness: 0.6 });
     [[-1.1, -3.3], [1.1, -3.3], [-1.1, -4.3], [1.1, -4.3]].forEach(([lx, lz]) => {
       const leg = new THREE.Mesh(legGeo, legMat);
       leg.position.set(lx, 0.475, lz);
       deskGroup.add(leg);
     });
 
-    // 抽屜組
-    this.drawerMesh = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.25, 0.9), new THREE.MeshStandardMaterial({ color: 0x5c3b24 }));
+    // 抽屜組 (木紋皮膚)
+    this.drawerMesh = new THREE.Mesh(
+      new THREE.BoxGeometry(0.8, 0.25, 0.9),
+      new THREE.MeshStandardMaterial({ map: deskWoodTex, roughness: 0.45, metalness: 0.1 })
+    );
     this.drawerMesh.position.set(0.6, 0.8, -3.8);
     const knob = new THREE.Mesh(new THREE.SphereGeometry(0.04, 8, 8), standMat);
     knob.position.set(0, 0, 0.47);
@@ -325,9 +353,13 @@ class World3D {
     this.drawerMesh.userData = { id: 'drawer', name: '上鎖的書桌抽屜', hint: '需要黃銅鑰匙 (KEY)' };
     this.interactables.push(this.drawerMesh);
 
-    // 漂浮魔導書
+    // 漂浮魔導書 (AI 燙金星月皮革法典皮膚)
     this.bookGroup = new THREE.Group();
-    const coverMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.4 });
+    const coverMat = new THREE.MeshStandardMaterial({
+      map: grimoireTex,
+      roughness: 0.35,
+      metalness: 0.2
+    });
     const bookMesh = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.08, 0.35), coverMat);
     const pages = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.06, 0.32), new THREE.MeshStandardMaterial({ color: 0xfdf6e2 }));
     pages.position.set(0.01, 0, 0);
@@ -357,7 +389,11 @@ class World3D {
     // 3. 元素煉金台 (Alchemy Table -> RED, BLUE, STAR)
     // ==========================================
     const alchemyGroup = new THREE.Group();
-    const tableA = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.85, 1.0), new THREE.MeshStandardMaterial({ color: 0x4a3525 }));
+    // 煉金石台面 (AI 黑色玄武岩黃金鍊金陣法石板皮膚)
+    const tableA = new THREE.Mesh(
+      new THREE.BoxGeometry(1.6, 0.85, 1.0),
+      new THREE.MeshStandardMaterial({ map: slateTex, roughness: 0.5, metalness: 0.2 })
+    );
     tableA.position.set(-4.5, 0.425, 0);
     alchemyGroup.add(tableA);
 
@@ -384,12 +420,19 @@ class World3D {
     // 4. 貓咪寶箱怪 (Cat Mimic -> CAT, FISH)
     // ==========================================
     this.mimicGroup = new THREE.Group();
-    const chestBody = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.45, 0.5), new THREE.MeshStandardMaterial({ color: 0x8b5a2b, roughness: 0.5 }));
+    // 寶箱本體 (深木雕紋皮膚)
+    const chestBody = new THREE.Mesh(
+      new THREE.BoxGeometry(0.7, 0.45, 0.5),
+      new THREE.MeshStandardMaterial({ map: deskWoodTex, roughness: 0.5, metalness: 0.15 })
+    );
     chestBody.position.y = 0.225;
     this.mimicGroup.add(chestBody);
 
     // 寶箱蓋
-    this.mimicLid = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.26, 0.7, 16, 1, false, 0, Math.PI), new THREE.MeshStandardMaterial({ color: 0x6e3b15 }));
+    this.mimicLid = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.26, 0.26, 0.7, 16, 1, false, 0, Math.PI),
+      new THREE.MeshStandardMaterial({ map: deskWoodTex, roughness: 0.5, metalness: 0.15 })
+    );
     this.mimicLid.rotation.z = Math.PI / 2;
     this.mimicLid.position.set(0, 0.45, 0);
     this.mimicGroup.add(this.mimicLid);
@@ -428,8 +471,6 @@ class World3D {
     this.mimicGroup.userData = { id: 'mimic', name: '貓咪寶箱怪 Mimic', hint: '愛吃魚的貪睡小怪 (CAT, FISH)' };
     this.scene.add(this.mimicGroup);
     this.interactables.push(this.mimicGroup);
-
-    const textureLoader = new THREE.TextureLoader();
 
     // 寶箱怪旁邊東側牆壁上的可愛貓咪掛畫
     const mimicPicTex = textureLoader.load('assets/textures/cute-cat-mimic.jpg');
