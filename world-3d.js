@@ -156,19 +156,48 @@ class World3D {
     roomGroup.add(northWallTop);
 
     // 大拱窗窗框
+    // 大拱窗窗框
     const frameMat = new THREE.MeshStandardMaterial({ color: 0x6e4e37, roughness: 0.5 });
     const windowFrame = new THREE.Mesh(new THREE.BoxGeometry(3.9, 2.9, 0.2), frameMat);
     windowFrame.position.set(0, 1.5, -6);
     roomGroup.add(windowFrame);
 
-    // 窗外風景立體背板 (童趣森林遠景)
-    const bgGeo = new THREE.PlaneGeometry(16, 9);
     const textureLoader = new THREE.TextureLoader();
-    const bgTex = textureLoader.load('assets/textures/bg-home-forest.png');
+
+    // 窗外風景立體背板 (芙莉蓮風格陽光花田與遠景)
+    const bgGeo = new THREE.PlaneGeometry(16, 9);
+    const bgTex = textureLoader.load('assets/textures/atelier-window-view.jpg');
     const bgMat = new THREE.MeshBasicMaterial({ map: bgTex });
     const bgMesh = new THREE.Mesh(bgGeo, bgMat);
-    bgMesh.position.set(0, 3, -12);
+    bgMesh.position.set(0, 2.5, -11.5);
     roomGroup.add(bgMesh);
+
+    // 4. 地面中央華麗魔導圓形地毯 (Magic Circle Rug)
+    const rugTex = textureLoader.load('assets/textures/magic-circle-rug.jpg');
+    const rugGeo = new THREE.CircleGeometry(2.3, 32);
+    const rugMat = new THREE.MeshStandardMaterial({
+      map: rugTex,
+      roughness: 0.8,
+      metalness: 0.05
+    });
+    const rugMesh = new THREE.Mesh(rugGeo, rugMat);
+    rugMesh.rotation.x = -Math.PI / 2;
+    rugMesh.position.set(0, 0.02, -0.6);
+    rugMesh.receiveShadow = true;
+    roomGroup.add(rugMesh);
+
+    // 5. 西側石壁懸掛古老魔導「蒼月草植物圖鑑」畫框 (Botanical Herb Painting)
+    const paintingTex = textureLoader.load('assets/textures/botanical-flower-painting.jpg');
+    const paintingGeo = new THREE.PlaneGeometry(2.6, 1.95);
+    const paintingMat = new THREE.MeshStandardMaterial({
+      map: paintingTex,
+      roughness: 0.45,
+      metalness: 0.1
+    });
+    const paintingMesh = new THREE.Mesh(paintingGeo, paintingMat);
+    paintingMesh.position.set(-5.75, 2.2, 1.6);
+    paintingMesh.rotation.y = Math.PI / 2;
+    roomGroup.add(paintingMesh);
 
     // 東西牆壁
     const eastWall = new THREE.Mesh(new THREE.BoxGeometry(0.4, 4.2, 12), wallMat);
@@ -400,6 +429,18 @@ class World3D {
     this.scene.add(this.mimicGroup);
     this.interactables.push(this.mimicGroup);
 
+    const textureLoader = new THREE.TextureLoader();
+
+    // 寶箱怪旁邊東側牆壁上的可愛貓咪掛畫
+    const mimicPicTex = textureLoader.load('assets/textures/cute-cat-mimic.jpg');
+    const mimicPic = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.1, 1.1),
+      new THREE.MeshStandardMaterial({ map: mimicPicTex, roughness: 0.5 })
+    );
+    mimicPic.position.set(5.78, 1.9, 2.5);
+    mimicPic.rotation.y = -Math.PI / 2;
+    this.scene.add(mimicPic);
+
     // ==========================================
     // 5. 遠古石門 (Ancient Stone Door -> DOOR, OPEN)
     // ==========================================
@@ -411,11 +452,28 @@ class World3D {
     archTop.position.set(0, 3.1, 5.8);
     this.doorGroup.add(archTop);
 
-    // 雙開石門扇 (Left & Right)
-    const doorLeafMat = new THREE.MeshStandardMaterial({ color: 0x5a554d, roughness: 0.8 });
-    this.doorLeft = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.9, 0.2), doorLeafMat);
+    // 左右門扇專用古老星芒與蒼月花符文雕刻材質
+    const doorTexLeft = textureLoader.load('assets/textures/ancient-stone-door.jpg');
+    doorTexLeft.repeat.set(0.5, 1);
+    doorTexLeft.offset.set(0, 0);
+    const doorLeafMatLeft = new THREE.MeshStandardMaterial({
+      map: doorTexLeft,
+      roughness: 0.75,
+      metalness: 0.15
+    });
+
+    const doorTexRight = textureLoader.load('assets/textures/ancient-stone-door.jpg');
+    doorTexRight.repeat.set(0.5, 1);
+    doorTexRight.offset.set(0.5, 0);
+    const doorLeafMatRight = new THREE.MeshStandardMaterial({
+      map: doorTexRight,
+      roughness: 0.75,
+      metalness: 0.15
+    });
+
+    this.doorLeft = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.9, 0.2), doorLeafMatLeft);
     this.doorLeft.position.set(-0.6, 1.45, 5.8);
-    this.doorRight = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.9, 0.2), doorLeafMat);
+    this.doorRight = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.9, 0.2), doorLeafMatRight);
     this.doorRight.position.set(0.6, 1.45, 5.8);
 
     // 門上凹槽 (星芒槽與花朵槽)
