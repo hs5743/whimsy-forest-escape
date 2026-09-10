@@ -1308,16 +1308,16 @@ class World3D {
     const studentLabel = document.getElementById('studentProfileBtnLabel');
 
     if (xpLabel) xpLabel.textContent = `${profile.xp} XP`;
-    if (levelLabel) levelLabel.textContent = `等級 ${profile.level} • 童趣魔法使`;
+    if (levelLabel) levelLabel.textContent = `Lv.${profile.level} 魔法使`;
     if (xpFill) {
       const pct = Math.min(100, (profile.xp % 100));
       xpFill.style.width = `${pct}%`;
     }
     if (studentLabel) {
       if (profile.isGuest) {
-        studentLabel.textContent = `🎒 訪客 (點此登入護照)`;
+        studentLabel.textContent = `見習使 (點此登入)`;
       } else {
-        studentLabel.textContent = `🎒 ${profile.classId}班 ${profile.seatNo}號 ${profile.name}`;
+        studentLabel.textContent = `${profile.classId}班 ${profile.seatNo}號 ${profile.name}`;
       }
     }
   }
@@ -1370,7 +1370,7 @@ class World3D {
       const levelLabel = document.getElementById('hudLevelLabel');
 
       if (xpLabel) xpLabel.textContent = `${this.gameState.xp} XP`;
-      if (levelLabel) levelLabel.textContent = `等級 ${this.gameState.level} • 童趣魔法使`;
+      if (levelLabel) levelLabel.textContent = `Lv.${this.gameState.level} 魔法使`;
       if (xpFill) {
         let nextLevelXp = 100 * Math.pow(this.gameState.level, 1.35);
         let curLevelBaseXp = this.gameState.level > 1 ? 100 * Math.pow(this.gameState.level - 1, 1.35) : 0;
