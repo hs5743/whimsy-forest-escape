@@ -62,6 +62,13 @@ npx http-server -p 8080
 
 開啟瀏覽器前往 `http://localhost:8080` 即可遊玩。
 
+## 🛠️ 開發者參考與架構規格 (For Developers & AI Agents)
+
+本專案將所有技術細節、模組解耦、手勢校準與發布管線沉澱為完整技術文件，方便其他開發者或 AI Agent 複用與擴充：
+
+- 📘 **[技術架構與完整開發者手冊 (DEVELOPER_GUIDE.md)](DEVELOPER_GUIDE.md)**：包含模組劃分、Web Speech API 模糊容錯、雙模觸控手勢防誤觸演算法、AI 文生圖材質皮膚管線與 GitHub Pages 發布詳解。
+- 🤖 **[Agent Skill 規範文件 (SKILL.md)](SKILL.md)**：專為 Google Antigravity / Gemini 編寫的標準 Skill 模式，可一鍵讓 AI 助理掌握本套 3D 教育遊戲開發能力。
+
 ---
 
 ## 📜 授權與版權 (License)
