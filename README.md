@@ -24,7 +24,12 @@
    - 採用 Three.js 低多邊形手繪風 3D 建模，免安裝任何外掛，秒速開啟。
    - 柔和陽光光暈、空中漂浮金粉微粒、高聳書架、漂浮魔導書、星象調劑台、貪睡貓耳寶箱怪（Mimic）與開向陽光花田的遠古石門。
 
-4. **🎵 治癒系純程序八音盒背景音樂（Web Audio API）**
+4. **🎒 學生英語護照與 Google 試算表雲端同步 (Google Apps Script)**
+   - 內建學童身分登入機制（年級 ➔ 班級 ➔ 座號 ➔ 姓名），無密碼負擔。
+   - 口說過關即時回傳至後端 Google 試算表，支援 `LockService` 併發寫入保護與離線暫存重傳。
+   - 提供「🌐 全校榮譽榜」與「🏫 本班排行榜」，並支援教師在試算表直接產出護照認證統計名冊。
+
+5. **🎵 治癒系純程序八音盒背景音樂（Web Audio API）**
    - 零外部大型音訊檔負擔，由瀏覽器即時合成溫馨舒緩的八音盒與和弦音效，營造放鬆專注的學習氛圍。
 
 ---
@@ -67,6 +72,7 @@ npx http-server -p 8080
 本專案將所有技術細節、模組解耦、手勢校準與發布管線沉澱為完整技術文件，方便其他開發者或 AI Agent 複用與擴充：
 
 - 📘 **[技術架構與完整開發者手冊 (DEVELOPER_GUIDE.md)](DEVELOPER_GUIDE.md)**：包含模組劃分、Web Speech API 模糊容錯、雙模觸控手勢防誤觸演算法、AI 文生圖材質皮膚管線與 GitHub Pages 發布詳解。
+- ☁️ **[Google Apps Script 後端腳本 (gas/Code.gs)](gas/Code.gs)**：提供全校免維護成本之 Google 試算表雲端 API，含試算表初始化、LockService 併發保護與即時排行榜。
 - 🤖 **[Agent Skill 規範文件 (SKILL.md)](SKILL.md)**：專為 Google Antigravity / Gemini 編寫的標準 Skill 模式，可一鍵讓 AI 助理掌握本套 3D 教育遊戲開發能力。
 
 ---

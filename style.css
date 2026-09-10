@@ -685,3 +685,189 @@ body, html {
     right: 8px;
   }
 }
+
+/* ================================================= */
+/* 學生身分、排行榜與雲端同步樣式 (Phase 1) */
+/* ================================================= */
+.cloud-status-pill {
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.cloud-status-pill.mode-online {
+  background: rgba(236, 253, 245, 0.95);
+  border: 2px solid #10b981;
+  color: #065f46;
+}
+
+.cloud-status-pill.mode-pending {
+  background: rgba(254, 252, 232, 0.95);
+  border: 2px solid #f59e0b;
+  color: #92400e;
+}
+
+.cloud-status-pill.mode-local {
+  background: rgba(243, 244, 246, 0.95);
+  border: 2px solid #9ca3af;
+  color: #4b5563;
+}
+
+.student-hud-btn {
+  background: linear-gradient(135deg, #fffbf2 0%, #fef3c7 100%);
+  border: 2px solid #eab308;
+  border-radius: 24px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #78350f;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: 0 4px 12px rgba(234, 179, 8, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.student-hud-btn:active {
+  transform: scale(0.95);
+}
+
+/* 表單元件 */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #5c3d2e;
+}
+
+.form-input, .form-select {
+  padding: 10px 12px;
+  border: 2px solid #dfc79b;
+  border-radius: 12px;
+  background: #fff;
+  font-size: 15px;
+  font-family: inherit;
+  color: #2d241e;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus, .form-select:focus {
+  border-color: #eab308;
+}
+
+/* 標籤切換頁 (Tabs) */
+.tab-row {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+  border-bottom: 2px solid #e2d3be;
+  padding-bottom: 8px;
+}
+
+.tab-btn {
+  padding: 8px 16px;
+  border-radius: 16px;
+  border: none;
+  background: #f3ece1;
+  color: #78350f;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab-btn.active {
+  background: #eab308;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(234, 179, 8, 0.4);
+}
+
+/* 排行榜表格 */
+.leaderboard-list {
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid #dfc79b;
+  border-radius: 14px;
+  background: #fff;
+  margin-top: 8px;
+}
+
+.leaderboard-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid #f3ece1;
+  font-size: 14px;
+}
+
+.leaderboard-item:last-child {
+  border-bottom: none;
+}
+
+.leaderboard-item.my-rank {
+  background: #fef9c3;
+  font-weight: 800;
+  border-left: 4px solid #eab308;
+}
+
+.rank-badge {
+  width: 28px;
+  font-weight: 900;
+  font-size: 16px;
+  text-align: center;
+}
+
+.rank-name-box {
+  flex: 1;
+  margin-left: 10px;
+  text-align: left;
+}
+
+.rank-name {
+  font-weight: 800;
+  color: #2d241e;
+}
+
+.rank-class {
+  font-size: 12px;
+  color: #8c7361;
+}
+
+.rank-score-box {
+  text-align: right;
+}
+
+.rank-xp {
+  font-weight: 900;
+  color: #059669;
+}
+
+.rank-stars {
+  font-size: 12px;
+  color: #d97706;
+}

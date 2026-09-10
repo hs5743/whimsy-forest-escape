@@ -11,21 +11,32 @@
   <!-- 3D 渲染畫布 -->
   <canvas id="renderCanvas"></canvas>
 
-  <!-- 頂部 HUD (等級、經驗值、操作引導) -->
+  <!-- 頂部 HUD (學生護照、等級、經驗值、排行榜、雲端狀態、操作引導) -->
   <div id="hudBar">
-    <div class="hud-pill">
-      <span id="hudLevelLabel" class="hud-title">等級 1 • 童趣魔法使</span>
-      <div class="xp-bar-container">
-        <div id="hudXpFill" class="xp-bar-fill"></div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <button id="studentProfileBtn" class="student-hud-btn" onclick="toggleStudentModal()" type="button" title="點此查看/切換學生護照身分">
+        <span id="studentProfileBtnLabel">🎒 點此登入護照</span>
+      </button>
+      <div class="hud-pill">
+        <span id="hudLevelLabel" class="hud-title">等級 1 • 童趣魔法使</span>
+        <div class="xp-bar-container">
+          <div id="hudXpFill" class="xp-bar-fill"></div>
+        </div>
+        <span id="hudXpLabel" class="xp-text">0 XP</span>
       </div>
-      <span id="hudXpLabel" class="xp-text">0 XP</span>
     </div>
 
-    <div style="display: flex; gap: 8px;">
-      <button id="bgmToggleBtn" class="hud-btn" onclick="toggleMusic()">
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <button id="leaderboardBtn" class="hud-btn" onclick="toggleLeaderboardModal()" type="button">
+        <span>🏆</span> 榮譽榜
+      </button>
+      <div id="cloudStatusPill" class="cloud-status-pill mode-local" onclick="toggleCloudConfigModal()" title="雲端同步狀態 (點此設定)">
+        <span>⚪</span> 單機模式
+      </div>
+      <button id="bgmToggleBtn" class="hud-btn" onclick="toggleMusic()" type="button">
         <span id="bgmIcon">🎵</span> 音樂
       </button>
-      <button id="guideBtn" class="hud-btn" onclick="toggleGuideModal()">
+      <button id="guideBtn" class="hud-btn" onclick="toggleGuideModal()" type="button">
         <span>📖</span> 指南
       </button>
     </div>
@@ -145,6 +156,113 @@
     </div>
   </div>
 
+  <!-- 學生護照登入與切換彈窗 (Student Login Modal) -->
+  <div id="studentLoginModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 160; display: none; justify-content: center; align-items: center; padding: 16px;">
+    <div class="parchment-card" style="max-width: 480px; text-align: center;">
+      <button class="modal-close-btn" type="button" onclick="toggleStudentModal()" aria-label="關閉">✕</button>
+      <h2 style="color: var(--warm-brown); font-size: 20px; border-bottom: 2px dashed #dfc79b; padding-bottom: 8px;">
+        🎒 魔法使身分登記（英語護照）
+      </h2>
+      <p style="font-size: 13px; color: #8c7361; margin-top: 4px;">
+        登入您的班級座號，通關成績與收集的單字將即時同步至學校 Google 試算表！
+      </p>
+
+      <form id="studentLoginForm" onsubmit="submitStudentLogin(event)" style="margin-top: 10px;">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="loginGrade">年級 (Grade)</label>
+            <select id="loginGrade" class="form-select" onchange="updateClassOptions()">
+              <option value="3">三年級 (G3)</option>
+              <option value="4">四年級 (G4)</option>
+              <option value="5" selected>五年級 (G5)</option>
+              <option value="6">六年級 (G6)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="loginClass">班級 (Class)</label>
+            <select id="loginClass" class="form-select"></select>
+          </div>
+        </div>
+
+        <div class="form-grid" style="margin-top: 8px;">
+          <div class="form-group">
+            <label for="loginSeat">座號 (Seat No.)</label>
+            <select id="loginSeat" class="form-select"></select>
+          </div>
+          <div class="form-group">
+            <label for="loginName">冒險者姓名 (Name)</label>
+            <input type="text" id="loginName" class="form-input" placeholder="例如：王小明" required>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 18px;">
+          <button type="submit" class="btn-mic" style="flex: 2; font-size: 15px; padding: 12px;">
+            ✨ 綁定護照並開始冒險
+          </button>
+          <button type="button" class="btn-voice" onclick="loginAsGuest()" style="flex: 1; font-size: 13px; padding: 12px; background: #e2d3be; color: #5c3d2e;">
+            🧭 訪客體驗
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 排行榜彈窗 (Leaderboard Modal) -->
+  <div id="leaderboardModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 160; display: none; justify-content: center; align-items: center; padding: 16px;">
+    <div class="parchment-card" style="max-width: 540px; width: 95%;">
+      <button class="modal-close-btn" type="button" onclick="toggleLeaderboardModal()" aria-label="關閉">✕</button>
+      <h2 style="color: var(--warm-brown); font-size: 22px; text-align: center; border-bottom: 2px dashed #dfc79b; padding-bottom: 8px;">
+        🏆 新港魔法學院：冒險榮譽榜
+      </h2>
+
+      <div class="tab-row">
+        <button id="tabSchoolRank" class="tab-btn active" onclick="switchLeaderboardTab('school')">🌐 全校排名前 50</button>
+        <button id="tabClassRank" class="tab-btn" onclick="switchLeaderboardTab('class')">🏫 本班排行榜</button>
+      </div>
+
+      <div id="leaderboardList" class="leaderboard-list">
+        <div style="text-align: center; padding: 30px; color: #8c7361;">正在載入榮譽榜資料...</div>
+      </div>
+
+      <div style="margin-top: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #8c7361;">
+        <span id="myRankSummary">我的身分：載入中...</span>
+        <button class="hud-btn" onclick="refreshLeaderboardData()" style="padding: 4px 10px; font-size: 12px;">🔄 重新整理</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 雲端連線設定彈窗 (Cloud Config Modal) -->
+  <div id="cloudConfigModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 160; display: none; justify-content: center; align-items: center; padding: 16px;">
+    <div class="parchment-card" style="max-width: 500px; text-align: left;">
+      <button class="modal-close-btn" type="button" onclick="toggleCloudConfigModal()" aria-label="關閉">✕</button>
+      <h2 style="color: var(--warm-brown); font-size: 20px; text-align: center; border-bottom: 2px dashed #dfc79b; padding-bottom: 8px;">
+        ☁️ Google 試算表 (GAS) 雲端連線
+      </h2>
+      <p style="font-size: 13px; color: #4a3728; line-height: 1.6; margin-top: 8px;">
+        若學校已在 Google 試算表部署了 <code>gas/Code.gs</code> 網頁應用程式，請在此貼上 Web App 網址以啟用全校雲端連線！
+      </p>
+
+      <div class="form-group" style="margin-top: 10px;">
+        <label for="gasUrlInput">GAS Web App 網址 (URL)</label>
+        <input type="url" id="gasUrlInput" class="form-input" placeholder="https://script.google.com/macros/s/.../exec" style="font-size: 13px;">
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-top: 14px;">
+        <button type="button" class="btn-mic" onclick="saveGasUrl()" style="flex: 2; font-size: 14px; padding: 10px;">
+          💾 儲存並連線
+        </button>
+        <button type="button" class="btn-voice" onclick="testGasPing()" style="flex: 1; font-size: 13px; padding: 10px;">
+          ⚡ 測試連線
+        </button>
+        <button type="button" class="btn-voice" onclick="clearGasUrl()" style="flex: 1; font-size: 13px; padding: 10px; background: #e2d3be; color: #5c3d2e;">
+          🔄 清空
+        </button>
+      </div>
+
+      <div id="gasStatusNotice" style="margin-top: 10px; font-size: 13px; color: #059669; font-weight: 700; text-align: center;"></div>
+    </div>
+  </div>
+
   <!-- 提示氣泡 (Toast Notice) -->
   <div id="toastNotice"></div>
 
@@ -154,9 +272,12 @@
   <script src="speech-manager.js"></script>
   <script src="audio-manager.js"></script>
   <script src="touch-controls.js"></script>
+  <script src="cloud-sync-manager.js"></script>
   <script src="world-3d.js"></script>
 
   <script>
+    let curLeaderboardTab = 'school';
+
     function toggleMusic() {
       if (window.audioManager) {
         const isPlaying = window.audioManager.toggleBgm();
@@ -168,6 +289,198 @@
       const modal = document.getElementById('guideModal');
       modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
       if (window.audioManager) window.audioManager.playSfx('click');
+    }
+
+    function toggleStudentModal() {
+      const modal = document.getElementById('studentLoginModal');
+      const isOpening = modal.style.display !== 'flex';
+      modal.style.display = isOpening ? 'flex' : 'none';
+      if (isOpening) {
+        initLoginFormOptions();
+      }
+      if (window.audioManager) window.audioManager.playSfx('click');
+    }
+
+    function toggleLeaderboardModal() {
+      const modal = document.getElementById('leaderboardModal');
+      const isOpening = modal.style.display !== 'flex';
+      modal.style.display = isOpening ? 'flex' : 'none';
+      if (isOpening) {
+        refreshLeaderboardData();
+      }
+      if (window.audioManager) window.audioManager.playSfx('click');
+    }
+
+    function toggleCloudConfigModal() {
+      const modal = document.getElementById('cloudConfigModal');
+      const isOpening = modal.style.display !== 'flex';
+      modal.style.display = isOpening ? 'flex' : 'none';
+      if (isOpening && window.cloudSyncManager) {
+        document.getElementById('gasUrlInput').value = window.cloudSyncManager.gasUrl || '';
+        document.getElementById('gasStatusNotice').textContent = '';
+      }
+      if (window.audioManager) window.audioManager.playSfx('click');
+    }
+
+    // 初始化學生登入下拉選項
+    function initLoginFormOptions() {
+      updateClassOptions();
+      const seatSelect = document.getElementById('loginSeat');
+      if (seatSelect && seatSelect.options.length === 0) {
+        for (let i = 1; i <= 40; i++) {
+          const opt = document.createElement('option');
+          const val = String(i).padStart(2, '0');
+          opt.value = val;
+          opt.textContent = `${val} 號`;
+          seatSelect.appendChild(opt);
+        }
+      }
+
+      if (window.cloudSyncManager && !window.cloudSyncManager.profile.isGuest) {
+        const p = window.cloudSyncManager.profile;
+        document.getElementById('loginGrade').value = p.grade || '5';
+        updateClassOptions();
+        document.getElementById('loginClass').value = p.classId || '501';
+        document.getElementById('loginSeat').value = p.seatNo || '01';
+        document.getElementById('loginName').value = p.name || '';
+      }
+    }
+
+    function updateClassOptions() {
+      const grade = document.getElementById('loginGrade').value;
+      const classSelect = document.getElementById('loginClass');
+      classSelect.innerHTML = '';
+      for (let i = 1; i <= 8; i++) {
+        const opt = document.createElement('option');
+        const classCode = `${grade}0${i}`;
+        opt.value = classCode;
+        opt.textContent = `${grade} 年 ${i} 班 (${classCode})`;
+        classSelect.appendChild(opt);
+      }
+    }
+
+    async function submitStudentLogin(e) {
+      e.preventDefault();
+      const grade = document.getElementById('loginGrade').value;
+      const classId = document.getElementById('loginClass').value;
+      const seatNo = document.getElementById('loginSeat').value;
+      const name = document.getElementById('loginName').value.trim();
+
+      if (window.cloudSyncManager) {
+        await window.cloudSyncManager.login(grade, classId, seatNo, name);
+        if (window.world3D) {
+          window.world3D.showToast(`✨ 歡迎魔法使 ${name}！已成功綁定英語護照。`);
+        }
+      }
+      document.getElementById('studentLoginModal').style.display = 'none';
+      if (window.audioManager) window.audioManager.playSfx('magicSuccess');
+    }
+
+    function loginAsGuest() {
+      if (window.cloudSyncManager) {
+        window.cloudSyncManager.loginGuest();
+        if (window.world3D) {
+          window.world3D.showToast('🧭 已切換為訪客模式 (本機記錄)');
+        }
+      }
+      document.getElementById('studentLoginModal').style.display = 'none';
+    }
+
+    function switchLeaderboardTab(tab) {
+      curLeaderboardTab = tab;
+      document.getElementById('tabSchoolRank').className = (tab === 'school') ? 'tab-btn active' : 'tab-btn';
+      document.getElementById('tabClassRank').className = (tab === 'class') ? 'tab-btn active' : 'tab-btn';
+      refreshLeaderboardData();
+    }
+
+    async function refreshLeaderboardData() {
+      const listEl = document.getElementById('leaderboardList');
+      listEl.innerHTML = '<div style="text-align: center; padding: 25px; color: #8c7361;">⏳ 正在連線雲端查詢最新排名...</div>';
+
+      const myProfile = window.cloudSyncManager ? window.cloudSyncManager.profile : null;
+      const classFilter = (curLeaderboardTab === 'class' && myProfile) ? myProfile.classId : '';
+      
+      const ranks = window.cloudSyncManager ? await window.cloudSyncManager.getLeaderboard(classFilter) : [];
+
+      if (!ranks || ranks.length === 0) {
+        listEl.innerHTML = '<div style="text-align: center; padding: 25px; color: #8c7361;">目前尚無挑戰紀錄，快開始冒險奪下第一名吧！</div>';
+        return;
+      }
+
+      listEl.innerHTML = '';
+      ranks.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'leaderboard-item' + (item.isMe ? ' my-rank' : '');
+        
+        let medal = `#${item.rank}`;
+        if (item.rank === 1) medal = '🥇';
+        else if (item.rank === 2) medal = '🥈';
+        else if (item.rank === 3) medal = '🥉';
+
+        row.innerHTML = `
+          <div class="rank-badge">${medal}</div>
+          <div class="rank-name-box">
+            <div class="rank-name">${item.name}</div>
+            <div class="rank-class">${item.classId} 班 • Lv.${item.level || 1} 魔法使</div>
+          </div>
+          <div class="rank-score-box">
+            <div class="rank-xp">${item.xp} XP</div>
+            <div class="rank-stars">⭐ ${item.stars || 0} 顆星 • 🎖️ ${item.badgesCount || 0}</div>
+          </div>
+        `;
+        listEl.appendChild(row);
+      });
+
+      const summary = document.getElementById('myRankSummary');
+      if (summary && myProfile) {
+        summary.textContent = `當前身分：${myProfile.classId}班 ${myProfile.seatNo}號 ${myProfile.name} (${myProfile.xp} XP)`;
+      }
+    }
+
+    function saveGasUrl() {
+      const url = document.getElementById('gasUrlInput').value.trim();
+      if (window.cloudSyncManager) {
+        window.cloudSyncManager.setGasUrl(url);
+        document.getElementById('gasStatusNotice').textContent = '✅ 已儲存網址！已切換為雲端同步模式。';
+        setTimeout(() => {
+          document.getElementById('cloudConfigModal').style.display = 'none';
+        }, 1200);
+      }
+    }
+
+    async function testGasPing() {
+      const notice = document.getElementById('gasStatusNotice');
+      const url = document.getElementById('gasUrlInput').value.trim();
+      if (!url) {
+        notice.style.color = '#dc2626';
+        notice.textContent = '❌ 請先輸入 GAS 網址！';
+        return;
+      }
+      notice.style.color = '#d97706';
+      notice.textContent = '⏳ 正在測試連線中...';
+
+      try {
+        const res = await fetch(`${url}?action=ping`);
+        const json = await res.json();
+        if (json.status === 'success') {
+          notice.style.color = '#059669';
+          notice.textContent = '🎉 連線成功！Google 試算表後端正常運作。';
+        } else {
+          notice.style.color = '#dc2626';
+          notice.textContent = '⚠️ 回應異常：' + (json.message || '未知錯誤');
+        }
+      } catch (err) {
+        notice.style.color = '#dc2626';
+        notice.textContent = '❌ 連線失敗，請檢查部署權限是否設為「所有人 (Anyone)」。';
+      }
+    }
+
+    function clearGasUrl() {
+      document.getElementById('gasUrlInput').value = '';
+      if (window.cloudSyncManager) {
+        window.cloudSyncManager.setGasUrl('');
+      }
+      document.getElementById('gasStatusNotice').textContent = '⚪ 已切換為純單機離線模式。';
     }
 
     // 第一次點擊畫面啟動背景音樂 (符合瀏覽器 Autoplay 政策)

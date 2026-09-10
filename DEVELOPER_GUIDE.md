@@ -31,8 +31,11 @@ whimsy-forest-escape/
 ├── audio-manager.js          # Web Audio API 純程序化音效與八音盒 BGM 合成器
 ├── speech-manager.js         # Web Speech API 語音辨識、關鍵字容錯與語音合成
 ├── touch-controls.js         # 虛擬搖桿（走位）、滑動環視（視角）與鍵盤滑鼠雙模適配器
+├── cloud-sync-manager.js     # 雲端同步、學生護照登入、排行榜與離線重傳佇列
 ├── vocab-data.js             # 國小英語單字資料庫、自然發音、例句、匹配關鍵字與吉祥物配置
 ├── world-3d.js               # Three.js 3D 渲染場景、道具建造、射線偵測與解謎邏輯
+├── gas/
+│   └── Code.gs               # Google Apps Script 雲端後端，含試算表初始化與併發鎖定
 ├── style.css                 # 響應式奇幻羊皮紙 UI、觸控按鈕、大字體單字卡與動畫樣式
 ├── index.html                # 主網頁進入點、HUD 結構與各類互動彈窗
 ├── DEVELOPER_GUIDE.md        # 本技術架構指南
@@ -48,6 +51,8 @@ whimsy-forest-escape/
 | `speech-manager.js` | `SpeechManager`：口說辨識 | `startListening()`, `evaluatePronunciation()`, `playWordVoice()`, `forcePass()` |
 | `touch-controls.js` | `TouchControls`：雙模輸入 | `update()`, `getMoveVector()`, `getLookDelta()`, `consumeInteract()` |
 | `audio-manager.js` | `AudioManager`：合成音訊 | `startBgm()`, `stopBgm()`, `toggleBgm()`, `playSfx(type)`, `playMusicBoxNote()` |
+| `cloud-sync-manager.js` | `CloudSyncManager`：雲端同步 | `login()`, `recordWordPass()`, `getLeaderboard()`, `flushQueue()`, `updateCloudStatusIndicator()` |
+| `gas/Code.gs` | `Google Apps Script`：雲端 API | `doGet()` (排行榜/個人存檔), `doPost()` (登入/過關日誌), `LockService` (防止併發衝突) |
 | `vocab-data.js` | `VOCAB_DATA`：教學資料庫 | 定義 `word`, `phonics`, `zh`, `category`, `mascot`, `matchKeywords`, `audioFile`, `xp` |
 
 ---
@@ -229,8 +234,29 @@ gh run list --repo <your-username>/whimsy-forest-escape
 
 ---
 
-## 8. 未來擴充與複用建議 (Extensibility & Future Work)
+## 8. Google 試算表雲端整合與未來擴充建議 (GAS Cloud & Future Work)
 
-1. **更換教材單字庫**：直接編輯 `vocab-data.js`，修改單字、例句、匹配詞與配對音檔，即可直接改造成不同學年（如中年級 300 字、高年級 1200 字）之題庫。
-2. **多關卡擴充**：本架構的房間幾何生成於 `buildAtelierRoom()`，可擴充為雙層閣樓、地下鍊金密室或戶外森林迷宮，只需新增 `roomGroup` 並依序觸發傳送點。
-3. **學習歷程回傳 (LMS Integration)**：在 `triggerEscapeCelebration()` 通關時，可透過 `fetch()` 將學生的通關時間、答題嘗試次數與 XP 成績傳送回學校後台（如 Google Sheets、Canvas 或自建學習系統）。
+### 8.1 Google Apps Script (GAS) 零成本雲端架構實踐
+為解決傳統自建伺服器月費負擔與國小教師管理門檻，本專案實作了以 Google 試算表為核心的微後端：
+1. **併發安全保護（LockService）**：
+   全班 30 台平板同時提交口說成果時，GAS 原生試算表容易出現衝突覆寫。我們在 `gas/Code.gs` 中引入：
+   ```javascript
+   const lock = LockService.getScriptLock();
+   const hasLock = lock.tryLock(15000); // 15 秒鎖定佇列
+   try {
+     // 安全寫入日誌與更新學生積分...
+   } finally {
+     lock.releaseLock();
+   }
+   ```
+2. **斷網離線佇列重傳（Offline Retry Queue）**：
+   在校園 Wi-Fi 訊號微弱時，前端 `CloudSyncManager` 會自動將過關紀錄暫存於 `localStorage`，每 25 秒或在偵測到 `window.online` 事件時批次重試，確保學生成績 100% 不掉單。
+3. **免密碼學童身分設計**：
+   國小學童記憶密碼成本極高。前台採用「年級 ➔ 班級 ➔ 座號 ➔ 姓名」直覺選單，快速建立 `studentId`（例如 `50108`），無密碼負擔即可綁定雲端存檔。
+
+### 8.2 未來空間與題庫擴充方向
+1. **多情境空間擴充（Spatial Bounded Zones）**：
+   密室逃脫不僅限於室內。可使用通用空間邊界協議，擴充為「陽光市集（Food/Numbers）」、「微風花園（Animals/Nature）」、「冒險操場（Sports/Actions）」與「鐘樓車站（Time/Transport）」。
+2. **動態題庫對齊**：
+   直接對齊校本 706 單字資料庫（`vocabulary.json`）與 8,000+ 句型庫，透過關卡設定檔動態注入題目，無須更動 3D 核心引擎。
+

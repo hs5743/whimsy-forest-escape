@@ -52,6 +52,7 @@ class World3D {
     this.buildProps();
     this.buildOutsideMeadow();
     this.setupEvents();
+    this.initCloudSync();
     this.animate();
   }
 
@@ -1016,6 +1017,9 @@ class World3D {
         window.speechManager.startListening(wordKey, (success) => {
           if (success) {
             modal.style.display = 'none';
+            if (window.cloudSyncManager) {
+              window.cloudSyncManager.recordWordPass(wordKey, data.xp || 50, false);
+            }
             if (onComplete) onComplete();
           }
         });
@@ -1027,6 +1031,9 @@ class World3D {
     passBtn.onclick = () => {
       if (window.speechManager) {
         window.speechManager.forcePass();
+        if (window.cloudSyncManager) {
+          window.cloudSyncManager.recordWordPass(wordKey, data.xp || 50, true);
+        }
         setTimeout(() => {
           modal.style.display = 'none';
           if (onComplete) onComplete();
@@ -1043,6 +1050,46 @@ class World3D {
     }
     if (window.audioManager) {
       window.audioManager.playSfx('click');
+    }
+  }
+
+  // 初始化雲端身分與排行榜同步監聽
+  initCloudSync() {
+    if (window.cloudSyncManager) {
+      if (window.cloudSyncManager.profile) {
+        this.gameState.xp = window.cloudSyncManager.profile.xp;
+        this.gameState.level = window.cloudSyncManager.profile.level;
+        this.updateHUDFromProfile(window.cloudSyncManager.profile);
+      }
+
+      window.cloudSyncManager.onProfileUpdated((profile) => {
+        this.gameState.xp = profile.xp;
+        this.gameState.level = profile.level;
+        this.updateHUDFromProfile(profile);
+      });
+      window.cloudSyncManager.updateCloudStatusIndicator();
+    }
+  }
+
+  updateHUDFromProfile(profile) {
+    if (!profile) return;
+    const xpLabel = document.getElementById('hudXpLabel');
+    const xpFill = document.getElementById('hudXpFill');
+    const levelLabel = document.getElementById('hudLevelLabel');
+    const studentLabel = document.getElementById('studentProfileBtnLabel');
+
+    if (xpLabel) xpLabel.textContent = `${profile.xp} XP`;
+    if (levelLabel) levelLabel.textContent = `等級 ${profile.level} • 童趣魔法使`;
+    if (xpFill) {
+      const pct = Math.min(100, (profile.xp % 100));
+      xpFill.style.width = `${pct}%`;
+    }
+    if (studentLabel) {
+      if (profile.isGuest) {
+        studentLabel.textContent = `🎒 訪客 (點此登入護照)`;
+      } else {
+        studentLabel.textContent = `🎒 ${profile.classId}班 ${profile.seatNo}號 ${profile.name}`;
+      }
     }
   }
 
@@ -1080,15 +1127,21 @@ class World3D {
     this.gameState.xp += amount;
     this.gameState.level = Math.floor(this.gameState.xp / 100) + 1;
 
-    const xpLabel = document.getElementById('hudXpLabel');
-    const xpFill = document.getElementById('hudXpFill');
-    const levelLabel = document.getElementById('hudLevelLabel');
+    if (window.cloudSyncManager && window.cloudSyncManager.profile) {
+      window.cloudSyncManager.profile.xp = this.gameState.xp;
+      window.cloudSyncManager.profile.level = this.gameState.level;
+      window.cloudSyncManager.notifyListeners();
+    } else {
+      const xpLabel = document.getElementById('hudXpLabel');
+      const xpFill = document.getElementById('hudXpFill');
+      const levelLabel = document.getElementById('hudLevelLabel');
 
-    if (xpLabel) xpLabel.textContent = `${this.gameState.xp} XP`;
-    if (levelLabel) levelLabel.textContent = `等級 ${this.gameState.level} • 童趣魔法使`;
-    if (xpFill) {
-      const pct = Math.min(100, (this.gameState.xp % 100));
-      xpFill.style.width = `${pct}%`;
+      if (xpLabel) xpLabel.textContent = `${this.gameState.xp} XP`;
+      if (levelLabel) levelLabel.textContent = `等級 ${this.gameState.level} • 童趣魔法使`;
+      if (xpFill) {
+        const pct = Math.min(100, (this.gameState.xp % 100));
+        xpFill.style.width = `${pct}%`;
+      }
     }
   }
 
