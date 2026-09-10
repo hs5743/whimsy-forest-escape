@@ -57,6 +57,7 @@
   <!-- 單字口說練習彈窗 (Speech Practice Modal) -->
   <div id="speechModal">
     <div class="parchment-card">
+      <button id="closeSpeechBtn" class="modal-close-btn" type="button" onclick="if(window.world3D) window.world3D.closeSpeechCard()" aria-label="關閉">✕</button>
       <div class="modal-header">
         <img id="modalMascotImg" src="assets/textures/fox-guide.png" alt="Mascot" class="mascot-avatar">
         <div class="mascot-info">
@@ -100,6 +101,7 @@
   <!-- 玩法說明指南彈窗 -->
   <div id="guideModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 150; display: none; justify-content: center; align-items: center; padding: 20px;">
     <div class="parchment-card" style="max-width: 520px;">
+      <button class="modal-close-btn" type="button" onclick="toggleGuideModal()" aria-label="關閉">✕</button>
       <h2 style="color: var(--warm-brown); font-size: 22px; text-align: center; border-bottom: 2px dashed #dfc79b; padding-bottom: 10px;">
         📖 魔法使書齋逃脫指南
       </h2>

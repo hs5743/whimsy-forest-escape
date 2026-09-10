@@ -34,9 +34,11 @@ class World3D {
       alchemyMixed: false,
       hasStarStone: false,
       hasFish: false,
+      catPracticed: false,
       mimicFed: false,
       hasFlowerStone: false,
       doorSocketsFilled: false,
+      doorStonePlaced: false,
       doorOpened: false,
       escaped: false,
       inventory: [],
@@ -473,18 +475,75 @@ class World3D {
       this.renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // 點擊 3D 畫面觸發互動
+    let pointerDownPos = { x: 0, y: 0 };
+    let pointerDownTime = 0;
+
+    window.addEventListener('pointerdown', (e) => {
+      pointerDownPos = { x: e.clientX, y: e.clientY };
+      pointerDownTime = Date.now();
+    });
+
+    // 點擊 3D 畫面觸發互動 (只在短促點擊 Tap/Click 且不是滑動轉視角時觸發)
     window.addEventListener('pointerup', (e) => {
-      // 避免點擊UI時觸發
-      if (e.target.closest('#uiLayer') || e.target.closest('#speechModal') || e.target.closest('.touch-button')) return;
+      // 避免點擊 UI 或觸控按鈕時誤觸
+      if (e.target.closest('#speechModal') ||
+          e.target.closest('#guideModal') ||
+          e.target.closest('#victoryModal') ||
+          e.target.closest('#hudBar') ||
+          e.target.closest('#touchControlsLayer') ||
+          e.target.closest('#inventoryContainer') ||
+          e.target.closest('#toastNotice')) {
+        return;
+      }
+
+      const dist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
+      const elapsed = Date.now() - pointerDownTime;
+
+      // 若滑動距離大於 12px 或按壓超過 300ms，判定為轉動視角/滑動螢幕，絕不觸發互動
+      if (dist > 12 || elapsed > 300) return;
+
       if (this.hoveredObject) {
         this.triggerInteraction(this.hoveredObject);
       }
     });
+
+    // ESC 鍵關閉彈窗
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Escape') {
+        this.closeSpeechCard();
+        const guideModal = document.getElementById('guideModal');
+        if (guideModal && guideModal.style.display === 'flex') {
+          guideModal.style.display = 'none';
+        }
+      }
+    });
+
+    // 吐司通知點擊直接關閉
+    const toast = document.getElementById('toastNotice');
+    if (toast) {
+      toast.addEventListener('click', () => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translate(-50%, 20px)';
+      });
+    }
   }
 
   // 推進第一人稱移動與碰撞邊界
   updatePlayer(delta) {
+    // 彈窗開啟時暫停視角旋轉與走動，防止誤觸
+    const modal = document.getElementById('speechModal');
+    const guideModal = document.getElementById('guideModal');
+    const victoryModal = document.getElementById('victoryModal');
+    if ((modal && modal.style.display === 'flex') ||
+        (guideModal && guideModal.style.display === 'flex') ||
+        (victoryModal && victoryModal.style.display === 'flex')) {
+      if (window.touchControls) {
+        window.touchControls.consumeInteract();
+        window.touchControls.getLookDelta();
+      }
+      return;
+    }
+
     if (window.touchControls) {
       window.touchControls.update();
 
@@ -533,8 +592,12 @@ class World3D {
       this.camera.position.copy(this.player.pos);
 
       // 檢查互動鍵 (E 或 手機互動鈕)
-      if (window.touchControls.consumeInteract() && this.hoveredObject) {
-        this.triggerInteraction(this.hoveredObject);
+      if (window.touchControls.consumeInteract()) {
+        if (this.hoveredObject) {
+          this.triggerInteraction(this.hoveredObject);
+        } else {
+          this.showToast('請靠近並對準魔法物件再按下互動鍵！');
+        }
       }
     }
   }
@@ -572,6 +635,11 @@ class World3D {
   // 觸發解謎口說練習互動
   triggerInteraction(target) {
     if (!target || !target.userData) return;
+
+    // 若彈窗已在畫面上，不重複觸發
+    const modal = document.getElementById('speechModal');
+    if (modal && modal.style.display === 'flex') return;
+
     const id = target.userData.id;
     if (window.audioManager) window.audioManager.playSfx('interact');
 
@@ -601,7 +669,6 @@ class World3D {
             this.keyMesh.visible = true;
             this.addXP(50);
             this.showToast('📖 魔導書翻開了！裡面夾著一把黃銅鑰匙 (KEY)！');
-            // 接著練習 KEY
             setTimeout(() => {
               this.openSpeechCard('KEY', () => {
                 this.gameState.hasKey = true;
@@ -610,7 +677,15 @@ class World3D {
                 this.addXP(50);
                 this.showToast('🔑 獲得道具：黃銅鑰匙！可用來打開書桌抽屜。');
               });
-            }, 600);
+            }, 500);
+          });
+        } else if (!this.gameState.hasKey && !this.gameState.inventory.some(i => i.id === 'KEY')) {
+          this.openSpeechCard('KEY', () => {
+            this.gameState.hasKey = true;
+            this.keyMesh.visible = false;
+            this.addInventory('KEY', '🔑 黃銅鑰匙', '#ecc94b');
+            this.addXP(50);
+            this.showToast('🔑 獲得道具：黃銅鑰匙！可用來打開書桌抽屜。');
           });
         } else {
           this.showToast('魔導書記載著古老的真名魔法。');
@@ -618,13 +693,13 @@ class World3D {
         break;
 
       case 'drawer':
-        if (!this.gameState.hasKey) {
+        const hasKeyInBag = this.gameState.hasKey || this.gameState.inventory.some(i => i.id === 'KEY');
+        if (!hasKeyInBag) {
           this.showToast('抽屜緊緊鎖著，需要黃銅鑰匙 (KEY) 才能開啟！');
           return;
         }
         if (!this.gameState.drawerOpened) {
           this.gameState.drawerOpened = true;
-          // 抽屜滑出動畫
           this.animators.push({
             update: (dt) => {
               if (this.drawerMesh.position.z < -3.3) {
@@ -643,105 +718,167 @@ class World3D {
               this.showToast('獲得火紅魔藥！去調劑台與水之魔藥融合吧。');
             });
           }, 400);
+        } else if (!this.gameState.hasRedPotion && !this.gameState.inventory.some(i => i.id === 'RED')) {
+          this.openSpeechCard('RED', () => {
+            this.gameState.hasRedPotion = true;
+            this.addInventory('RED', '🧪 火紅魔藥', '#fc8181');
+            this.addXP(50);
+            this.showToast('獲得火紅魔藥！去調劑台與水之魔藥融合吧。');
+          });
         } else {
           this.showToast('抽屜裡已經空了。');
         }
         break;
 
       case 'alchemy':
-        if (!this.gameState.hasRedPotion) {
+        const hasRedInBag = this.gameState.hasRedPotion || this.gameState.inventory.some(i => i.id === 'RED');
+        if (!hasRedInBag) {
           this.showToast('調劑台上需要火紅魔藥 (RED) 作為反應基底。');
           return;
         }
         if (!this.gameState.alchemyMixed) {
-          this.openSpeechCard('BLUE', () => {
-            this.gameState.hasBluePotion = true;
-            if (window.audioManager) window.audioManager.playSfx('potionMix');
-            this.flaskLiquid.material.color.setHex(0x9955ff); // 變紫魔力混合
+          const hasBlue = this.gameState.hasBluePotion || this.gameState.inventory.some(i => i.id === 'BLUE');
+          if (!hasBlue) {
+            this.openSpeechCard('BLUE', () => {
+              this.gameState.hasBluePotion = true;
+              this.addInventory('BLUE', '💧 蒼藍之水', '#63b3ed');
+              if (window.audioManager) window.audioManager.playSfx('potionMix');
+              this.flaskLiquid.material.color.setHex(0x9955ff); // 變紫魔力混合
 
-            setTimeout(() => {
-              this.openSpeechCard('STAR', () => {
-                this.gameState.alchemyMixed = true;
-                this.gameState.hasStarStone = true;
-                this.starStone.visible = true;
-                this.addInventory('STAR', '⭐ 星芒之石', '#f6e05e');
-                this.addInventory('FISH', '🐟 魔法小魚乾', '#4fd1c5');
-                this.addXP(70);
-                this.showToast('⭐ 成功調配出星芒之石，並在底座發現了小魚乾 (FISH)！');
-              });
-            }, 600);
-          });
+              setTimeout(() => {
+                this.openSpeechCard('STAR', () => {
+                  this.gameState.alchemyMixed = true;
+                  this.gameState.hasStarStone = true;
+                  this.gameState.hasFish = true; // 關鍵修復：確保 hasFish 為 true
+                  this.starStone.visible = true;
+                  this.addInventory('STAR', '⭐ 星芒之石', '#f6e05e');
+                  this.addInventory('FISH', '🐟 魔法小魚乾', '#4fd1c5');
+                  this.addXP(70);
+                  this.showToast('⭐ 成功調配出星芒之石，並在底座發現了小魚乾 (FISH)！');
+                });
+              }, 500);
+            });
+          } else {
+            this.openSpeechCard('STAR', () => {
+              this.gameState.alchemyMixed = true;
+              this.gameState.hasStarStone = true;
+              this.gameState.hasFish = true; // 關鍵修復：確保 hasFish 為 true
+              this.starStone.visible = true;
+              this.addInventory('STAR', '⭐ 星芒之石', '#f6e05e');
+              this.addInventory('FISH', '🐟 魔法小魚乾', '#4fd1c5');
+              this.addXP(70);
+              this.showToast('⭐ 成功調配出星芒之石，並在底座發現了小魚乾 (FISH)！');
+            });
+          }
         } else {
           this.showToast('煉金調劑台散發著淡紫色的星芒魔力。');
         }
         break;
 
       case 'mimic':
+        const hasFishInBag = this.gameState.hasFish || this.gameState.inventory.some(i => i.id === 'FISH');
+
         if (!this.gameState.mimicFed) {
-          this.openSpeechCard('CAT', () => {
-            this.showToast('😺 貓咪寶箱怪伸了個懶腰，肚子咕嚕嚕叫，牠想吃美食 (FISH)！');
-            if (this.gameState.hasFish) {
-              setTimeout(() => {
-                this.openSpeechCard('FISH', () => {
-                  this.gameState.mimicFed = true;
-                  this.gameState.hasFlowerStone = true;
-                  this.flowerStone.visible = true;
-                  // 寶箱大開動畫
-                  this.mimicLid.rotation.x = -Math.PI / 3;
-                  this.addInventory('FLOWER', '🌸 蒼月花石刻', '#63b3ed');
-                  this.addXP(80);
-                  this.showToast('🌸 貓咪寶箱怪吃得飽飽的，開心地吐出了蒼月花石刻！');
-                });
-              }, 600);
+          if (!this.gameState.catPracticed) {
+            // 第一次互動：先練習認識貓咪寶箱怪 (CAT)
+            this.openSpeechCard('CAT', () => {
+              this.gameState.catPracticed = true;
+              if (hasFishInBag) {
+                this.showToast('😺 寶箱怪肚子咕嚕嚕叫，聞到你身上的小魚乾了！');
+                setTimeout(() => {
+                  this.openSpeechCard('FISH', () => {
+                    this.feedMimicSuccess();
+                  });
+                }, 500);
+              } else {
+                this.showToast('😺 寶箱怪肚子咕嚕嚕叫，牠想吃香噴噴的小魚乾 (FISH)！快去煉金台調配魔藥！');
+              }
+            });
+          } else {
+            // 已經練習過 CAT：若有魚乾直接餵食，若沒有則提示
+            if (hasFishInBag) {
+              this.openSpeechCard('FISH', () => {
+                this.feedMimicSuccess();
+              });
             } else {
-              this.showToast('你身上沒有小魚乾，先去煉金台看看吧！');
+              this.showToast('😺 寶箱怪正眼巴巴地等著小魚乾，快去煉金台調配魔藥獲取小魚乾吧！');
             }
-          });
+          }
         } else {
-          this.showToast('貓咪寶箱怪正在心滿意足地打呼嚕：Purr, purr...');
+          this.showToast('😺 貓咪寶箱怪吃得飽飽的，正在心滿意足地打呼嚕：Purr, purr...');
         }
         break;
 
       case 'door':
-        if (!this.gameState.hasStarStone || !this.gameState.hasFlowerStone) {
-          this.showToast('石門的大鎖凹槽需要「星芒之石 (STAR)」與「蒼月花石刻 (FLOWER)」！');
+        const hasStarInBag = this.gameState.hasStarStone || this.gameState.inventory.some(i => i.id === 'STAR');
+        const hasFlowerInBag = this.gameState.hasFlowerStone || this.gameState.inventory.some(i => i.id === 'FLOWER');
+
+        if (!hasStarInBag || !hasFlowerInBag) {
+          if (!hasStarInBag && !hasFlowerInBag) {
+            this.showToast('石門的大鎖需要「星芒之石 (STAR)」與「蒼月花石刻 (FLOWER)」！');
+          } else if (!hasStarInBag) {
+            this.showToast('石門左側凹槽缺少「星芒之石 (STAR)」！去煉金台調配吧！');
+          } else {
+            this.showToast('石門右側凹槽缺少「蒼月花石刻 (FLOWER)」！去餵飽貓咪寶箱怪吧！');
+          }
           return;
         }
-        if (!this.gameState.doorOpened) {
-          this.openSpeechCard('DOOR', () => {
-            this.socketStar.material.color.setHex(0xffe600);
-            this.socketFlower.material.color.setHex(0x4da6ff);
-            this.showToast('🗝️ 兩顆魔法石完美契入！請詠唱最後的開門咒語 (OPEN)！');
 
-            setTimeout(() => {
-              this.openSpeechCard('OPEN', () => {
-                this.gameState.doorOpened = true;
-                if (window.audioManager) window.audioManager.playSfx('doorOpen');
-                // 石門開啟滑動動畫
-                this.animators.push({
-                  update: (dt) => {
-                    let stillMoving = false;
-                    if (this.doorLeft.position.x > -1.7) {
-                      this.doorLeft.position.x -= 0.8 * dt;
-                      stillMoving = true;
-                    }
-                    if (this.doorRight.position.x < 1.7) {
-                      this.doorRight.position.x += 0.8 * dt;
-                      stillMoving = true;
-                    }
-                    return stillMoving;
-                  }
+        if (!this.gameState.doorOpened) {
+          if (!this.gameState.doorStonePlaced) {
+            this.openSpeechCard('DOOR', () => {
+              this.gameState.doorStonePlaced = true;
+              this.socketStar.material.color.setHex(0xffe600);
+              this.socketFlower.material.color.setHex(0x4da6ff);
+              this.showToast('🗝️ 兩顆魔法石完美契入！請詠唱最後的開門咒語 (OPEN)！');
+
+              setTimeout(() => {
+                this.openSpeechCard('OPEN', () => {
+                  this.openStoneDoorSuccess();
                 });
-                this.addXP(100);
-                this.showToast('🚪 遠古石門敞開了！微風與花香飄進來，快走到花田迎接朝陽！');
-              });
-            }, 600);
-          });
+              }, 500);
+            });
+          } else {
+            this.openSpeechCard('OPEN', () => {
+              this.openStoneDoorSuccess();
+            });
+          }
         } else {
-          this.showToast('石門已敞開，走進花田吧！');
+          this.showToast('石門已敞開，走進花田迎接陽光吧！');
         }
         break;
     }
+  }
+
+  feedMimicSuccess() {
+    this.gameState.mimicFed = true;
+    this.gameState.hasFlowerStone = true;
+    this.flowerStone.visible = true;
+    this.mimicLid.rotation.x = -Math.PI / 3;
+    this.addInventory('FLOWER', '🌸 蒼月花石刻', '#63b3ed');
+    this.addXP(80);
+    this.showToast('🌸 貓咪寶箱怪吃飽飽，開心地吐出了蒼月花石刻 (FLOWER)！');
+  }
+
+  openStoneDoorSuccess() {
+    this.gameState.doorOpened = true;
+    if (window.audioManager) window.audioManager.playSfx('doorOpen');
+    this.animators.push({
+      update: (dt) => {
+        let stillMoving = false;
+        if (this.doorLeft.position.x > -1.7) {
+          this.doorLeft.position.x -= 0.8 * dt;
+          stillMoving = true;
+        }
+        if (this.doorRight.position.x < 1.7) {
+          this.doorRight.position.x += 0.8 * dt;
+          stillMoving = true;
+        }
+        return stillMoving;
+      }
+    });
+    this.addXP(100);
+    this.showToast('🚪 遠古石門敞開了！微風與花香飄進來，快走到花田迎接朝陽！');
   }
 
   // 開啟單字練習對話視窗
@@ -797,6 +934,17 @@ class World3D {
         }, 300);
       }
     };
+  }
+
+  closeSpeechCard() {
+    const modal = document.getElementById('speechModal');
+    if (modal) modal.style.display = 'none';
+    if (window.speechManager) {
+      window.speechManager.stopListening();
+    }
+    if (window.audioManager) {
+      window.audioManager.playSfx('click');
+    }
   }
 
   // 走入花田迎接朝陽 (SUN 通關慶典)
@@ -856,7 +1004,7 @@ class World3D {
     this.toastTimer = setTimeout(() => {
       toast.style.opacity = '0';
       toast.style.transform = 'translate(-50%, 20px)';
-    }, 3200);
+    }, 2200);
   }
 
   animate() {
