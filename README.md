@@ -10,26 +10,37 @@
 
 ## 🌟 核心特色 (Key Features)
 
-1. **🎙️ 學生口說實戰辨識（Speech Recognition to Unlock）**
+1. **🎙️ 學生口說實戰辨識與 Chunks 音節拆解（Speech Recognition & Interactive Drill-down）**
    - 整合 Web Speech API（`webkitSpeechRecognition`），學生必須大聲唸出英語單字才能啟動魔法陣與解鎖機關。
-   - 內建 13 組外師純正發音音檔，隨時可點擊「🔊 聽示範發音」練習自然發音（Phonics）。
+   - 口說彈窗內嵌「音節拆解按鈕（Chunks Buttons）」，學童可點擊單獨音節聆聽自然發音，輕鬆征服多音節單字。
+   - 內建 13 組外師真人發音與 Web Speech 語音合成雙軌備援，隨時可點擊「🔊 聽示範發音」。
    - 貼心設計「✨ 老師驗證通過（Teacher Pass）」按鈕，面對教室嘈雜環境或個別無麥克風設備時皆能順暢體驗。
 
-2. **📱 跨平台與平板觸控最佳化（Tablet & Mobile Friendly）**
+2. **🗺️ 五大多元生活情境空間與空間星圖（Spatial Bounded Zones & Overworld Map）**
+   - 突破傳統狹隘單一密室限制！以「邊界圍欄 + 互動點 + 出口閘門」建構五大多元學習空間：
+     - **🏰 Zone 1: 見習學徒書齋** (School & Prepositions)
+     - **🍎 Zone 2: 陽光微風市集** (Food, Numbers & Adjectives)
+     - **🐰 Zone 3: 守護獸之森花園** (Animals, Nature & Actions)
+     - **⚽ Zone 4: 活力冒險操場** (Sports, Actions & Body)
+     - **🚂 Zone 5: 星光鐘樓車站** (Time, Places & Transport)
+   - 隨時開啟「🗺️ 空間星圖」，以等級解鎖並自由傳送跨空間學習！
+
+3. **📘 校本 706 單字英語護照與數位手帳（School Passport & Digital Flip-Book）**
+   - 完整整合新港國小 706 個英語單字題庫、國際音標 IPA、音節拆解 Chunks 與情境雙例句。
+   - 遊戲內建雙頁復古羊皮紙「數位魔法冒險護照」，包含個人學籍證、12 主題分類篩選與動態蓋上的 3x3 魔法簽證印章。
+
+4. **📱 跨平台與平板觸控最佳化（Tablet & Mobile Friendly）**
    - 支援 iPad、Chromebook、Android 平板與電腦瀏覽器。
    - **平板/手機觸控**：左下角動態虛擬搖桿（走位）、右半螢幕滑動（旋轉環顧視角）、右下角「✋ 互動」大圓鈕。
    - **桌機操作**：標準 `W` `A` `S` `D` 移動，滑鼠按住拖曳環視，`E` 鍵互動。
 
-3. **✨ 3D 溫馨奇幻書齋（Three.js WebGL）**
-   - 採用 Three.js 低多邊形手繪風 3D 建模，免安裝任何外掛，秒速開啟。
-   - 柔和陽光光暈、空中漂浮金粉微粒、高聳書架、漂浮魔導書、星象調劑台、貪睡貓耳寶箱怪（Mimic）與開向陽光花田的遠古石門。
-
-4. **🎒 學生英語護照與 Google 試算表雲端同步 (Google Apps Script)**
+5. **🎒 學生英語護照、RPG 平滑升級與 Google 試算表雲端同步 (Google Apps Script)**
    - 內建學童身分登入機制（年級 ➔ 班級 ➔ 座號 ➔ 姓名），無密碼負擔。
+   - 套用溫和冪次等級曲線（$\text{RequiredXP} = \lfloor 100 \times \text{Level}^{1.35} \rfloor$），每通過單字獲得經驗值晉升階級。
    - 口說過關即時回傳至後端 Google 試算表，支援 `LockService` 併發寫入保護與離線暫存重傳。
-   - 提供「🌐 全校榮譽榜」與「🏫 本班排行榜」，並支援教師在試算表直接產出護照認證統計名冊。
+   - 提供「🌐 全校榮譽榜」與「🏫 本班排行榜」，並支援教師在後端一鍵產出全校各班護照認證通過率報表 (`action=generateReport`)。
 
-5. **🎵 治癒系純程序八音盒背景音樂（Web Audio API）**
+6. **🎵 治癒系純程序八音盒背景音樂（Web Audio API）**
    - 零外部大型音訊檔負擔，由瀏覽器即時合成溫馨舒緩的八音盒與和弦音效，營造放鬆專注的學習氛圍。
 
 ---

@@ -13,13 +13,19 @@
 
   <!-- 頂部 HUD (學生護照、等級、經驗值、排行榜、雲端狀態、操作引導) -->
   <div id="hudBar">
-    <div style="display: flex; gap: 8px; align-items: center;">
+    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
       <button id="studentProfileBtn" class="student-hud-btn" onclick="toggleStudentModal()" type="button" title="點此查看/切換學生護照身分">
         <span id="studentProfileBtnLabel">🎒 點此登入護照</span>
       </button>
       <button id="magicPassportBtn" class="hud-btn passport-btn-highlight" onclick="togglePassportModal()" type="button" title="翻開數位魔法護照手帳">
         <span>📘</span> 魔法護照
       </button>
+      <button id="worldMapBtn" class="hud-btn map-btn-highlight" onclick="toggleWorldMapModal()" type="button" title="開啟五大情境空間星圖">
+        <span>🗺️</span> 空間星圖
+      </button>
+      <div id="hudCurrentZoneTag" class="zone-badge" onclick="toggleWorldMapModal()" title="目前所在空間 (點此開啟星圖)">
+        <span id="hudCurrentZoneLabel">🏰 見習學徒書齋</span>
+      </div>
       <div class="hud-pill">
         <span id="hudLevelLabel" class="hud-title">等級 1 • 童趣魔法使</span>
         <div class="xp-bar-container">
@@ -353,6 +359,30 @@
     </div>
   </div>
 
+  <!-- 空間星圖大地圖 (Overworld Realm Map Modal) -->
+  <div id="worldMapModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 158; display: none; justify-content: center; align-items: center; padding: 12px;">
+    <div class="world-map-dialog">
+      <button class="modal-close-btn" type="button" onclick="toggleWorldMapModal()" aria-label="關閉">✕</button>
+      <div class="world-map-header">
+        <h2 class="world-map-title">🗺️ 新港魔法學院：空間星圖 (Overworld Realm Map)</h2>
+        <p class="world-map-subtitle">突破單一狹隘密室！自由在五大生活與奇幻空間穿梭學習，解鎖全新單字與專屬成就</p>
+      </div>
+
+      <div id="worldMapGrid" class="realm-grid">
+        <!-- 由 JavaScript 動態渲染五大空間卡片 -->
+      </div>
+
+      <div class="world-map-footer">
+        <div class="world-map-tip">
+          💡 <strong>冒險提示</strong>：探索各空間中的發光互動點並大聲朗讀單字，即可獲取經驗值 (XP) 提升等級，解鎖更廣袤的生活冒險空間！
+        </div>
+        <button type="button" class="btn-voice" onclick="toggleWorldMapModal()" style="min-width: 140px; padding: 10px 20px;">
+          關閉星圖
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- 提示氣泡 (Toast Notice) -->
   <div id="toastNotice"></div>
 
@@ -364,6 +394,7 @@
   <script src="audio-manager.js"></script>
   <script src="touch-controls.js"></script>
   <script src="cloud-sync-manager.js"></script>
+  <script src="spatial-zone-manager.js"></script>
   <script src="world-3d.js"></script>
 
   <script>
@@ -725,6 +756,71 @@
         window.cloudSyncManager.setGasUrl('');
       }
       document.getElementById('gasStatusNotice').textContent = '⚪ 已切換為純單機離線模式。';
+    }
+
+    // 空間星圖大地圖互動邏輯
+    function toggleWorldMapModal() {
+      const modal = document.getElementById('worldMapModal');
+      const isOpening = modal.style.display !== 'flex';
+      modal.style.display = isOpening ? 'flex' : 'none';
+      if (isOpening) {
+        renderWorldMapCards();
+      }
+      if (window.audioManager) window.audioManager.playSfx('click');
+    }
+
+    function renderWorldMapCards() {
+      const grid = document.getElementById('worldMapGrid');
+      if (!grid || !window.world3D || !window.world3D.zoneManager) return;
+      const zm = window.world3D.zoneManager;
+      const curZone = zm.getCurrentZone();
+      grid.innerHTML = '';
+
+      Object.values(zm.zones).forEach(z => {
+        const isUnlocked = zm.isZoneUnlocked(z.id);
+        const isCurrent = (z.id === curZone.id);
+
+        const card = document.createElement('div');
+        card.className = `realm-card ${isCurrent ? 'current' : ''} ${isUnlocked ? 'unlocked' : 'locked'}`;
+
+        const wordsChips = z.words.slice(0, 5).map(w => `<span class="realm-word-chip">${w}</span>`).join('');
+
+        card.innerHTML = `
+          <div class="realm-card-top">
+            <div class="realm-icon-box">${z.icon}</div>
+            <div class="realm-meta">
+              <div class="realm-name">${z.name}</div>
+              <div class="realm-sub">${z.englishName} • <span class="realm-topic-tag">${z.topic}</span></div>
+            </div>
+            <div class="realm-badge ${isUnlocked ? 'badge-open' : 'badge-lock'}">
+              ${isUnlocked ? '已解鎖' : `Lv.${z.reqLevel} 解鎖`}
+            </div>
+          </div>
+          <div class="realm-desc-text">${z.desc}</div>
+          <div class="realm-words-row">
+            <span style="font-size: 11px; color: #8c7361; font-weight: 700;">空間詞彙：</span>
+            ${wordsChips}
+          </div>
+          <div class="realm-btn-wrap">
+            ${isCurrent ? `
+              <button type="button" class="realm-action-btn btn-here" disabled>📍 目前冒險中</button>
+            ` : isUnlocked ? `
+              <button type="button" class="realm-action-btn btn-teleport" onclick="travelToZone('${z.id}')">🚀 施法傳送前往</button>
+            ` : `
+              <button type="button" class="realm-action-btn btn-locked" disabled>🔒 等級未達 Lv.${z.reqLevel}</button>
+            `}
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function travelToZone(zoneId) {
+      if (!window.world3D) return;
+      const success = window.world3D.switchZone(zoneId);
+      if (success) {
+        document.getElementById('worldMapModal').style.display = 'none';
+      }
     }
 
     // 第一次點擊畫面啟動背景音樂 (符合瀏覽器 Autoplay 政策)

@@ -20,15 +20,31 @@ class CloudSyncManager {
       stars: 0,
       completedWords: [],
       badgesCount: 0,
+      wordMastery: {},
       isGuest: true
     };
 
+    if (!this.profile.wordMastery) {
+      this.profile.wordMastery = {};
+    }
+
+    this.currentStreak = 0;
     this.listeners = [];
     this.isSyncing = false;
 
     // 啟動離線重試佇列計時器 (每 25 秒檢查一次)
     setInterval(() => this.flushQueue(), 25000);
     window.addEventListener('online', () => this.flushQueue());
+  }
+
+  // 溫和冪次等級成長曲線計算：Level = floor((XP / 100) ^ (1 / 1.35)) + 1
+  calculateLevel(xp) {
+    if (!xp || xp < 100) return 1;
+    return Math.floor(Math.pow(xp / 100, 1 / 1.35)) + 1;
+  }
+
+  getXpForLevel(lvl) {
+    return Math.floor(100 * Math.pow(lvl, 1.35));
   }
 
   // 註冊狀態變更監聽器 (用於更新 HUD)
@@ -153,13 +169,40 @@ class CloudSyncManager {
     return this.profile;
   }
 
-  // 記錄單字過關並寫入雲端與本地
-  async recordWordPass(wordKey, xpGained = 50, isTeacherPass = false, zone = 'Zone 1: 見習學徒書齋') {
+  // 記錄單字過關並寫入雲端與本地 (含連擊倍率與五星精熟度)
+  async recordWordPass(wordKey, baseXP = 50, isTeacherPass = false, zone = 'Zone 1: 見習學徒書齋') {
     const word = String(wordKey || '').toUpperCase();
     
-    // 1. 更新本地資料
-    this.profile.xp += xpGained;
-    this.profile.level = Math.floor(this.profile.xp / 100) + 1;
+    // 1. 計算連續答對連擊加成 (Streak Multiplier)
+    let streakMultiplier = 1.0;
+    if (isTeacherPass) {
+      this.currentStreak = 0;
+    } else {
+      this.currentStreak++;
+      if (this.currentStreak >= 5) {
+        streakMultiplier = 1.5; // 5 連擊 1.5x 加成
+      } else if (this.currentStreak >= 3) {
+        streakMultiplier = 1.2; // 3 連擊 1.2x 加成
+      }
+    }
+
+    const actualXP = Math.round(baseXP * streakMultiplier);
+
+    // 2. 更新本地經驗值與溫和冪次等級
+    this.profile.xp += actualXP;
+    this.profile.level = this.calculateLevel(this.profile.xp);
+
+    // 3. 更新五星精熟度 (5-Star Mastery)
+    if (!this.profile.wordMastery) this.profile.wordMastery = {};
+    const curMastery = this.profile.wordMastery[word] || { stars: 0, times: 0 };
+    curMastery.times++;
+    if (!isTeacherPass && curMastery.stars < 5) {
+      curMastery.stars = Math.min(5, curMastery.stars + 1);
+    } else if (curMastery.stars === 0) {
+      curMastery.stars = 1;
+    }
+    curMastery.lastPassedAt = Date.now();
+    this.profile.wordMastery[word] = curMastery;
 
     let isFirstTime = false;
     if (!this.profile.completedWords.includes(word)) {
@@ -171,7 +214,7 @@ class CloudSyncManager {
 
     this.notifyListeners();
 
-    // 2. 構建通關資料包
+    // 4. 構建通關資料包
     const payload = {
       action: 'recordPass',
       studentId: this.profile.studentId,
@@ -180,19 +223,25 @@ class CloudSyncManager {
       seatNo: this.profile.seatNo,
       name: this.profile.name,
       word: word,
-      xp: xpGained,
+      xp: actualXP,
       isTeacherPass: isTeacherPass,
+      streak: this.currentStreak,
+      streakMultiplier: streakMultiplier,
       zone: zone,
       ua: navigator.userAgent.substring(0, 80)
     };
 
-    // 3. 若有 GAS 網址則嘗試傳送，失敗則加入離線重試佇列
+    // 5. 若有 GAS 網址則嘗試傳送，失敗則加入離線重試佇列
     if (this.gasUrl) {
       this.sendOrQueue(payload);
     }
 
     return {
       isFirstTime,
+      actualXP,
+      streak: this.currentStreak,
+      streakMultiplier,
+      mastery: curMastery,
       profile: this.profile
     };
   }

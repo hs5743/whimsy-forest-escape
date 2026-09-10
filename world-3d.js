@@ -47,13 +47,26 @@ class World3D {
     };
 
     this.clock = new THREE.Clock();
+    this.activeZoneGroup = new THREE.Group();
     this.initScene();
-    this.buildAtelierRoom();
-    this.buildProps();
-    this.buildOutsideMeadow();
+    this.scene.add(this.activeZoneGroup);
+
+    if (window.SpatialZoneManager) {
+      this.zoneManager = new SpatialZoneManager(this);
+    }
+
+    this.buildAtelierRoom(this.activeZoneGroup);
+    this.buildProps(this.activeZoneGroup);
+    this.buildOutsideMeadow(this.activeZoneGroup);
     this.setupEvents();
     this.initCloudSync();
     this.animate();
+  }
+
+  switchZone(zoneId) {
+    if (this.zoneManager) {
+      return this.zoneManager.switchZone(zoneId);
+    }
   }
 
   initScene() {
@@ -108,7 +121,8 @@ class World3D {
   }
 
   // 打造溫馨木造與石砌魔法書齋
-  buildAtelierRoom() {
+  buildAtelierRoom(parentGroup) {
+    const container = parentGroup || this.activeZoneGroup || this.scene;
     const roomGroup = new THREE.Group();
     const textureLoader = new THREE.TextureLoader();
 
@@ -237,7 +251,7 @@ class World3D {
     this.buildBookshelf(roomGroup, -5.6, 0, -2, Math.PI / 2);
     this.buildBookshelf(roomGroup, 5.6, 0, -2, -Math.PI / 2);
 
-    this.scene.add(roomGroup);
+    container.add(roomGroup);
   }
 
   buildBookshelf(parent, x, y, z, rotY) {
@@ -271,7 +285,8 @@ class World3D {
   }
 
   // 建造各項解謎互動道具
-  buildProps() {
+  buildProps(parentGroup) {
+    const container = parentGroup || this.activeZoneGroup || this.scene;
     const textureLoader = new THREE.TextureLoader();
     const deskWoodTex = textureLoader.load('assets/textures/tex-wood-desk.jpg');
     const grimoireTex = textureLoader.load('assets/textures/tex-grimoire-book.jpg');
@@ -289,7 +304,7 @@ class World3D {
       new THREE.MeshStandardMaterial({ map: deskWoodTex, roughness: 0.5, metalness: 0.1 })
     );
     tableMesh.position.set(-3.2, 0.42, -3.5);
-    this.scene.add(tableMesh);
+    container.add(tableMesh);
 
     // 燭台底座
     const base = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, 0.06, 12), standMat);
@@ -314,7 +329,7 @@ class World3D {
 
     candleGroup.position.set(-3.2, 0.85, -3.5);
     candleGroup.userData = { id: 'candle', name: '古銅燭台', hint: '點亮房間的微光 (LIGHT)' };
-    this.scene.add(candleGroup);
+    container.add(candleGroup);
     this.interactables.push(candleGroup);
 
     // ==========================================
@@ -369,7 +384,7 @@ class World3D {
     this.bookGroup.position.set(-0.5, 1.25, -3.8);
     this.bookGroup.rotation.y = 0.2;
     this.bookGroup.userData = { id: 'book', name: '漂浮魔導書', hint: '記載遠古智慧 (BOOK)' };
-    this.scene.add(this.bookGroup);
+    container.add(this.bookGroup);
     this.interactables.push(this.bookGroup);
 
     // 浮空鑰匙 (預設隱形)
@@ -382,9 +397,9 @@ class World3D {
     this.keyMesh.add(keyShaft);
     this.keyMesh.position.set(-0.5, 1.15, -3.8);
     this.keyMesh.visible = false;
-    this.scene.add(this.keyMesh);
+    container.add(this.keyMesh);
 
-    this.scene.add(deskGroup);
+    container.add(deskGroup);
 
     // ==========================================
     // 3. 元素煉金台 (Alchemy Table -> RED, BLUE, STAR)
@@ -411,10 +426,10 @@ class World3D {
     );
     this.starStone.position.set(-4.5, 1.25, 0);
     this.starStone.visible = false;
-    this.scene.add(this.starStone);
+    container.add(this.starStone);
 
     alchemyGroup.userData = { id: 'alchemy', name: '元素煉金台', hint: '調配魔藥 (RED, BLUE)' };
-    this.scene.add(alchemyGroup);
+    container.add(alchemyGroup);
     this.interactables.push(alchemyGroup);
 
     // ==========================================
@@ -465,12 +480,12 @@ class World3D {
     );
     this.flowerStone.position.set(4.5, 0.9, 2.5);
     this.flowerStone.visible = false;
-    this.scene.add(this.flowerStone);
+    container.add(this.flowerStone);
 
     this.mimicGroup.position.set(4.5, 0, 2.5);
     this.mimicGroup.rotation.y = -Math.PI / 4;
     this.mimicGroup.userData = { id: 'mimic', name: '貓咪寶箱怪 Mimic', hint: '愛吃魚的貪睡小怪 (CAT, FISH)' };
-    this.scene.add(this.mimicGroup);
+    container.add(this.mimicGroup);
     this.interactables.push(this.mimicGroup);
 
     // 寶箱怪旁邊東側牆壁上的可愛貓咪掛畫
@@ -481,7 +496,7 @@ class World3D {
     );
     mimicPic.position.set(5.78, 1.9, 2.5);
     mimicPic.rotation.y = -Math.PI / 2;
-    this.scene.add(mimicPic);
+    container.add(mimicPic);
 
     // ==========================================
     // 5. 遠古石門 (Ancient Stone Door -> DOOR, OPEN)
@@ -530,12 +545,13 @@ class World3D {
 
     this.doorGroup.add(this.doorLeft, this.doorRight, this.socketStar, this.socketFlower);
     this.doorGroup.userData = { id: 'door', name: '遠古石門', hint: '需要星芒石與蒼月花石 (DOOR, OPEN)' };
-    this.scene.add(this.doorGroup);
+    container.add(this.doorGroup);
     this.interactables.push(this.doorGroup);
   }
 
   // 建造門外的陽光蒼月花田 (芙莉蓮的寧靜花田風景)
-  buildOutsideMeadow() {
+  buildOutsideMeadow(parentGroup) {
+    const container = parentGroup || this.activeZoneGroup || this.scene;
     this.meadowGroup = new THREE.Group();
 
     // 廣袤綠意草地
@@ -565,7 +581,7 @@ class World3D {
     this.meadowSun.position.set(0, 5, 12);
     this.meadowGroup.add(this.meadowSun);
 
-    this.scene.add(this.meadowGroup);
+    container.add(this.meadowGroup);
   }
 
   setupEvents() {
@@ -720,7 +736,9 @@ class World3D {
         this.hoveredObject = root;
         if (tooltip) {
           tooltip.style.display = 'block';
-          tooltip.textContent = `[ 點擊 / 互動 ] ${root.userData.name} • ${root.userData.hint}`;
+          const title = root.userData.name || root.userData.label || '謎之物件';
+          const hint = root.userData.hint ? ` • ${root.userData.hint}` : '';
+          tooltip.textContent = `[ 點擊 / 互動 ] ${title}${hint}`;
         }
         if (crosshair) crosshair.classList.add('focused');
         return;
@@ -740,8 +758,15 @@ class World3D {
     const modal = document.getElementById('speechModal');
     if (modal && modal.style.display === 'flex') return;
 
-    const id = target.userData.id;
     if (window.audioManager) window.audioManager.playSfx('interact');
+
+    // 支援通用空間物件自訂點擊回呼 (Zone 2~5 POIs & Portals)
+    if (typeof target.userData.onClick === 'function') {
+      target.userData.onClick();
+      return;
+    }
+
+    const id = target.userData.id;
 
     switch (id) {
       case 'candle':
@@ -984,8 +1009,52 @@ class World3D {
   // 開啟單字練習對話視窗
   openSpeechCard(wordKey, onComplete) {
     const modal = document.getElementById('speechModal');
-    const data = VOCAB_DATA[wordKey];
-    if (!modal || !data) return;
+    let data = VOCAB_DATA[wordKey];
+
+    // 查詢 706 校本英語護照庫，取得音節拆解 Chunks 與情境例句
+    let passportWord = null;
+    if (window.PassportBankHelper) {
+      passportWord = window.PassportBankHelper.findByWord(wordKey);
+    }
+
+    // 若非固定核心詞，從 706 護照庫動態合成單字卡資料
+    if (!data && passportWord) {
+      data = {
+        word: passportWord.word,
+        phonics: `${passportWord.phonetic || ''} • ${passportWord.word.split('').join('-')}`,
+        zh: passportWord.zh || passportWord.chinese || '',
+        category: passportWord.topic || '新港英語冒險',
+        mascot: 'foxy',
+        mascotName: '精靈導師 Foxy',
+        mascotImg: 'assets/textures/fox-guide.png',
+        dialogue: passportWord.sentence ? `“${passportWord.sentence}”` : `“Let's practice saying '${passportWord.word}' together!”`,
+        dialogueZh: passportWord.sentenceZh ? `「${passportWord.sentenceZh}」` : `「讓我們一起練習 ${passportWord.zh || passportWord.chinese || ''} 的英語發音吧！」`,
+        prompt: `請看著互動目標，大聲唸出：${passportWord.word}！`,
+        puzzleHint: `練習空間魔法詞彙：${passportWord.zh || passportWord.chinese || ''}`,
+        matchKeywords: [passportWord.word.toLowerCase()],
+        xp: 60,
+        color: '#38bdf8'
+      };
+    } else if (!data) {
+      data = {
+        word: wordKey,
+        phonics: `• ${wordKey.split('').join('-')}`,
+        zh: '',
+        category: '英語冒險',
+        mascot: 'foxy',
+        mascotName: '精靈導師 Foxy',
+        mascotImg: 'assets/textures/fox-guide.png',
+        dialogue: `“Let's practice the magic word: ${wordKey}!”`,
+        dialogueZh: `「讓我們一起練習魔法單字：${wordKey}！」`,
+        prompt: `請大聲唸出：${wordKey}！`,
+        puzzleHint: `練習單字：${wordKey}`,
+        matchKeywords: [wordKey.toLowerCase()],
+        xp: 50,
+        color: '#38bdf8'
+      };
+    }
+
+    if (!modal) return;
 
     // 填入吉祥物與單字資料
     document.getElementById('modalMascotImg').src = data.mascotImg;
@@ -996,12 +1065,6 @@ class World3D {
     document.getElementById('modalDialogue').textContent = data.dialogue;
     document.getElementById('modalDialogueZh').textContent = data.dialogueZh;
     document.getElementById('modalPrompt').textContent = data.prompt;
-
-    // 查詢 706 校本英語護照庫，取得音節拆解 Chunks 與情境例句
-    let passportWord = null;
-    if (window.PassportBankHelper) {
-      passportWord = window.PassportBankHelper.findByWord(wordKey);
-    }
 
     // 渲染音節按鈕 (Chunks Syllables)
     const chunksContainer = document.getElementById('modalChunksContainer');
@@ -1176,7 +1239,11 @@ class World3D {
 
   addXP(amount) {
     this.gameState.xp += amount;
-    this.gameState.level = Math.floor(this.gameState.xp / 100) + 1;
+    if (window.cloudSyncManager && typeof window.cloudSyncManager.calculateLevel === 'function') {
+      this.gameState.level = window.cloudSyncManager.calculateLevel(this.gameState.xp);
+    } else {
+      this.gameState.level = Math.floor(this.gameState.xp / 100) + 1;
+    }
 
     if (window.cloudSyncManager && window.cloudSyncManager.profile) {
       window.cloudSyncManager.profile.xp = this.gameState.xp;
@@ -1190,7 +1257,10 @@ class World3D {
       if (xpLabel) xpLabel.textContent = `${this.gameState.xp} XP`;
       if (levelLabel) levelLabel.textContent = `等級 ${this.gameState.level} • 童趣魔法使`;
       if (xpFill) {
-        const pct = Math.min(100, (this.gameState.xp % 100));
+        let nextLevelXp = 100 * Math.pow(this.gameState.level, 1.35);
+        let curLevelBaseXp = this.gameState.level > 1 ? 100 * Math.pow(this.gameState.level - 1, 1.35) : 0;
+        let range = Math.max(1, nextLevelXp - curLevelBaseXp);
+        let pct = Math.min(100, Math.max(0, ((this.gameState.xp - curLevelBaseXp) / range) * 100));
         xpFill.style.width = `${pct}%`;
       }
     }
@@ -1216,10 +1286,15 @@ class World3D {
     const delta = this.clock.getDelta();
     const elapsedTime = this.clock.getElapsedTime();
 
-    // 更新動畫
+    // 更新動畫 (支援持續函數 anim(time, dt) 與單次物件 anim.update(dt))
     for (let i = this.animators.length - 1; i >= 0; i--) {
-      if (!this.animators[i].update(delta)) {
-        this.animators.splice(i, 1);
+      const anim = this.animators[i];
+      if (typeof anim === 'function') {
+        anim(elapsedTime, delta);
+      } else if (anim && typeof anim.update === 'function') {
+        if (!anim.update(delta)) {
+          this.animators.splice(i, 1);
+        }
       }
     }
 

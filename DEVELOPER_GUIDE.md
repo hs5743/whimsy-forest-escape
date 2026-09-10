@@ -32,12 +32,14 @@ whimsy-forest-escape/
 ├── speech-manager.js         # Web Speech API 語音辨識、關鍵字容錯與語音合成
 ├── touch-controls.js         # 虛擬搖桿（走位）、滑動環視（視角）與鍵盤滑鼠雙模適配器
 ├── cloud-sync-manager.js     # 雲端同步、學生護照登入、排行榜與離線重傳佇列
-├── vocab-data.js             # 國小英語單字資料庫、自然發音、例句、匹配關鍵字與吉祥物配置
-├── world-3d.js               # Three.js 3D 渲染場景、道具建造、射線偵測與解謎邏輯
+├── vocab-passport-bank.js    # 校本 706 英語單字題庫、IPA 音標、音節拆解 Chunks 與雙例句
+├── spatial-zone-manager.js   # 五大多元生活情境空間管理器 (書齋、市集、花園、操場、車站)
+├── vocab-data.js             # 核心關卡單字資料庫、自然發音、例句、匹配關鍵字與吉祥物配置
+├── world-3d.js               # Three.js 3D 渲染場景、道具建造、射線偵測與動態空間切換
 ├── gas/
-│   └── Code.gs               # Google Apps Script 雲端後端，含試算表初始化與併發鎖定
+│   └── Code.gs               # Google Apps Script 雲端後端，含試算表初始化、併發鎖定與教師統計報表
 ├── style.css                 # 響應式奇幻羊皮紙 UI、觸控按鈕、大字體單字卡與動畫樣式
-├── index.html                # 主網頁進入點、HUD 結構與各類互動彈窗
+├── index.html                # 主網頁進入點、HUD 結構、空間星圖與各類互動彈窗
 ├── DEVELOPER_GUIDE.md        # 本技術架構指南
 ├── SKILL.md                  # 可被 AI Agent 讀取的標準 Skill 規格書
 └── README.md                 # 專案公開說明文件
@@ -47,12 +49,14 @@ whimsy-forest-escape/
 
 | 模組檔案 | 核心類別 / 職責 | 關鍵方法與屬性 |
 | :--- | :--- | :--- |
-| `world-3d.js` | `World3D`：3D 核心 | `initScene()`, `buildAtelierRoom()`, `buildProps()`, `updateRaycast()`, `triggerInteraction()` |
-| `speech-manager.js` | `SpeechManager`：口說辨識 | `startListening()`, `evaluatePronunciation()`, `playWordVoice()`, `forcePass()` |
+| `spatial-zone-manager.js` | `SpatialZoneManager`：空間情境管理器 | `getCurrentZone()`, `isZoneUnlocked(id)`, `switchZone(id)`, `buildZone1~5()` |
+| `vocab-passport-bank.js` | `PassportBankHelper`：校本題庫大管家 | `getAll()`, `getByTopic()`, `getByGrade()`, `findByWord()`，收錄 706 詞與 Chunks |
+| `world-3d.js` | `World3D`：3D 核心與空間渲染 | `switchZone()`, `initScene()`, `buildProps()`, `updateRaycast()`, `triggerInteraction()` |
+| `speech-manager.js` | `SpeechManager`：口說辨識與 Chunks | `startListening()`, `evaluatePronunciation()`, `playWordVoice()`, `forcePass()` |
 | `touch-controls.js` | `TouchControls`：雙模輸入 | `update()`, `getMoveVector()`, `getLookDelta()`, `consumeInteract()` |
 | `audio-manager.js` | `AudioManager`：合成音訊 | `startBgm()`, `stopBgm()`, `toggleBgm()`, `playSfx(type)`, `playMusicBoxNote()` |
-| `cloud-sync-manager.js` | `CloudSyncManager`：雲端同步 | `login()`, `recordWordPass()`, `getLeaderboard()`, `flushQueue()`, `updateCloudStatusIndicator()` |
-| `gas/Code.gs` | `Google Apps Script`：雲端 API | `doGet()` (排行榜/個人存檔), `doPost()` (登入/過關日誌), `LockService` (防止併發衝突) |
+| `cloud-sync-manager.js` | `CloudSyncManager`：雲端與數值系統 | `calculateLevel()`, `recordWordPass()`, `getLeaderboard()`, `updateWordMastery()` |
+| `gas/Code.gs` | `Google Apps Script`：雲端 API | `doGet()` (排行榜/個人存檔/教師報表), `doPost()` (登入/過關日誌), `LockService` |
 | `vocab-data.js` | `VOCAB_DATA`：教學資料庫 | 定義 `word`, `phonics`, `zh`, `category`, `mascot`, `matchKeywords`, `audioFile`, `xp` |
 
 ---
@@ -254,9 +258,25 @@ gh run list --repo <your-username>/whimsy-forest-escape
 3. **免密碼學童身分設計**：
    國小學童記憶密碼成本極高。前台採用「年級 ➔ 班級 ➔ 座號 ➔ 姓名」直覺選單，快速建立 `studentId`（例如 `50108`），無密碼負擔即可綁定雲端存檔。
 
-### 8.2 未來空間與題庫擴充方向
-1. **多情境空間擴充（Spatial Bounded Zones）**：
-   密室逃脫不僅限於室內。可使用通用空間邊界協議，擴充為「陽光市集（Food/Numbers）」、「微風花園（Animals/Nature）」、「冒險操場（Sports/Actions）」與「鐘樓車站（Time/Transport）」。
-2. **動態題庫對齊**：
-   直接對齊校本 706 單字資料庫（`vocabulary.json`）與 8,000+ 句型庫，透過關卡設定檔動態注入題目，無須更動 3D 核心引擎。
+### 8.2 多情境生活空間架構（Spatial Bounded Zones & Overworld Map）
+本專案已完全實現通用邊界協議，打破傳統單一室內密室限制：
+1. **空間三大要素**：
+   - **邊界圍欄（Perimeter）**：以木柵欄、花籬或跑道限制玩家行動範圍，保持緊湊的遊戲節奏。
+   - **環境互動點（POIs）**：擺設空間專屬物件（如市集蘋果攤、花園噴泉、操場足球、車站時鐘）。
+   - **傳送通道閘門（Exit Portal）**：發光結界拱門，完成關鍵口說即觸發前往次一空間。
+2. **五大多元生活情境空間**：
+   - **🏰 Zone 1: 見習學徒書齋** (`Apprentice Study`)：School & Prepositions，12 個核心道具。
+   - **🍎 Zone 2: 陽光微風市集** (`Bazaar Marketplace`)：Food, Numbers & Adjectives，蔬果帳篷與推車。
+   - **🐰 Zone 3: 守護獸之森花園** (`Beast Sanctuary Garden`)：Animals, Nature & Actions，石造噴泉、草地兔子與飛鳥。
+   - **⚽ Zone 4: 活力冒險操場** (`Athletic Sports Field`)：Sports, Actions & Body，草地足球門與加速跑道。
+   - **🚂 Zone 5: 星光鐘樓車站** (`Clocktower Station`)：Time, Places & Transport，月台巨型時鐘、售票亭與列車。
+3. **空間星圖（Overworld Map）與無縫群組切換**：
+   - 點擊 HUD「🗺️ 空間星圖」彈出全域節點地圖，呈現各空間解鎖條件（Lv.1 ~ Lv.5）與主題單字。
+   - `SpatialZoneManager.switchZone(id)` 透過 `world.activeZoneGroup` 實體徹底銷毀與重建 3D 物件，確保零記憶體洩漏與平滑生成。
+
+### 8.3 教師後台一鍵統計與認證報表 (Teacher Report API)
+在 Google Apps Script 中，教師可發起 `?action=generateReport&classId=501`：
+- 自動彙整班級總人數、平均累積經驗值 (XP)、平均通過單字量。
+- 計算護照通過認證率（通過單字數 $\ge 10$ 之學童比例）。
+- 標註班級最高分領頭羊（Top Student），便於期末頒獎表揚。
 

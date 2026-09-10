@@ -97,6 +97,25 @@ class SpeechManager {
   startListening(wordKey, callback) {
     this.currentWordKey = wordKey.toUpperCase();
     this.targetData = VOCAB_DATA[this.currentWordKey];
+
+    if (!this.targetData && window.PassportBankHelper) {
+      const pw = window.PassportBankHelper.findByWord(this.currentWordKey);
+      if (pw) {
+        this.targetData = {
+          word: pw.word,
+          zh: pw.zh || pw.chinese || '',
+          matchKeywords: [pw.word.toLowerCase()]
+        };
+      }
+    }
+    if (!this.targetData) {
+      this.targetData = {
+        word: this.currentWordKey,
+        zh: '',
+        matchKeywords: [this.currentWordKey.toLowerCase()]
+      };
+    }
+
     this.onResultCallback = callback;
 
     if (!this.recognition) {

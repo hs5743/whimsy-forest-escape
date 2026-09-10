@@ -168,6 +168,80 @@ function doGet(e) {
       return makeJsonResponse({ status: "not_found", message: "Student record not found" });
     }
 
+    // 4. 教師後台一鍵統計報表 (generateReport)
+    if (action === "generateReport") {
+      const classFilter = params.classId || "";
+      const studentSheet = ss.getSheetByName(SHEET_STUDENTS);
+      if (!studentSheet) {
+        return makeJsonResponse({ status: "error", message: "Students sheet not found" });
+      }
+
+      const rows = studentSheet.getDataRange().getValues();
+      if (rows.length <= 1) {
+        return makeJsonResponse({ status: "success", report: { totalStudents: 0, classStats: {} } });
+      }
+
+      const classStats = {};
+      let totalSchoolXP = 0;
+      let totalSchoolWordsPassed = 0;
+
+      for (let i = 1; i < rows.length; i++) {
+        const r = rows[i];
+        const cid = String(r[2] || "未指定");
+        const xp = Number(r[5] || 0);
+        const level = Number(r[6] || 1);
+        const words = r[8] ? String(r[8]).split(",").filter(Boolean) : [];
+        const wordsCount = words.length;
+
+        if (!classStats[cid]) {
+          classStats[cid] = {
+            classId: cid,
+            grade: String(r[1] || ""),
+            studentCount: 0,
+            totalXP: 0,
+            avgXP: 0,
+            avgLevel: 0,
+            totalWordsPassed: 0,
+            avgWordsPassed: 0,
+            certifiedCount: 0, // 達 10 個單字以上獲得認證之學生
+            topStudent: null
+          };
+        }
+
+        const cs = classStats[cid];
+        cs.studentCount++;
+        cs.totalXP += xp;
+        cs.totalWordsPassed += wordsCount;
+        if (wordsCount >= 10) cs.certifiedCount++;
+
+        if (!cs.topStudent || xp > cs.topStudent.xp) {
+          cs.topStudent = { name: String(r[4] || ""), seatNo: String(r[3] || ""), xp: xp, level: level };
+        }
+
+        totalSchoolXP += xp;
+        totalSchoolWordsPassed += wordsCount;
+      }
+
+      // 計算平均值與通過率
+      Object.keys(classStats).forEach(cid => {
+        const cs = classStats[cid];
+        cs.avgXP = Math.round(cs.totalXP / cs.studentCount);
+        cs.avgWordsPassed = (cs.totalWordsPassed / cs.studentCount).toFixed(1);
+        cs.certificationRate = `${Math.round((cs.certifiedCount / cs.studentCount) * 100)}%`;
+      });
+
+      return makeJsonResponse({
+        status: "success",
+        generatedAt: Utilities.formatDate(new Date(), "GMT+8", "yyyy/MM/dd HH:mm:ss"),
+        report: {
+          totalRegisteredStudents: rows.length - 1,
+          totalSchoolXP: totalSchoolXP,
+          totalSchoolWordsPassed: totalSchoolWordsPassed,
+          classStats: classFilter ? { [classFilter]: classStats[classFilter] || null } : classStats
+        }
+      });
+    }
+
     return makeJsonResponse({ status: "error", message: "Unknown action: " + action });
 
   } catch (err) {
