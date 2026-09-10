@@ -124,14 +124,16 @@ class SpatialZoneManager {
         { type: 'circle', x: 7.0, z: -9.0, radius: 1.5 }
       ],
       'zone4': [
-        // 西側階梯看台大建築
-        { type: 'box', minX: -14.5, maxX: -11.0, minZ: -9.0, maxZ: 9.0 },
-        // 北側電子記分牌柱與底盤
-        { type: 'box', minX: -4.2, maxX: 4.2, minZ: -14.5, maxZ: -12.5 },
+        // 西側宏偉主看台大建築群 (階梯朝東、後方安全牆朝西)
+        { type: 'box', minX: -16.5, maxX: -10.8, minZ: -14.5, maxZ: 14.5 },
+        // 北側大型數位記分大屏幕與鋼架
+        { type: 'box', minX: -4.8, maxX: 4.8, minZ: -15.8, maxZ: -13.5 },
         // 足球門立柱與球網實體
-        { type: 'box', minX: -3.4, maxX: 1.0, minZ: -5.5, maxZ: -3.5 },
-        // 體育跳高墊與跳箱
-        { type: 'box', minX: 2.2, maxX: 5.4, minZ: -0.2, maxZ: 2.6 }
+        { type: 'box', minX: -2.5, maxX: 2.5, minZ: -10.2, maxZ: -8.0 },
+        // 躍動跳高墊、跳箱與沙坑
+        { type: 'box', minX: 1.8, maxX: 4.8, minZ: 2.0, maxZ: 5.2 },
+        // 東側球員教練替補席
+        { type: 'box', minX: 4.6, maxX: 6.0, minZ: -2.2, maxZ: 2.2 }
       ],
       'zone5': [
         // 蒸汽特快車 - 黑色鍋爐、排障器與車頭連接部 (絕對無法穿透火車車頭！)
@@ -614,110 +616,114 @@ class SpatialZoneManager {
 
   // ==========================================
   // Zone 4: 活力冒險操場 (Athletic Sports Field)
-  // 核心修復：幾何精準奧林匹克跑道 (徹底消除貼圖混亂！)
+  // 全面旗艦級升級：奧林匹克標準紅土跑道、正規綠茵足球場、東向全景大看台與挑高遮雨棚
   // ==========================================
   buildZone4_Athletic(group) {
     this.initTextures();
 
-    const sunLight = new THREE.DirectionalLight(0xffffff, 1.45);
-    sunLight.position.set(14, 25, 12);
+    // 陽光與環境光
+    const sunLight = new THREE.DirectionalLight(0xfffbeb, 1.35);
+    sunLight.position.set(16, 28, 14);
     sunLight.castShadow = true;
     group.add(sunLight);
 
-    const hemiLight = new THREE.HemisphereLight(0xe0f2fe, 0x15803d, 0.75);
+    const hemiLight = new THREE.HemisphereLight(0xe0f2fe, 0x15803d, 0.7);
     group.add(hemiLight);
 
-    // 外圍校園草坪 (72m x 72m)
+    // 外圍校園草坪 (76m x 76m)
     const outerGrass = new THREE.Mesh(
-      new THREE.PlaneGeometry(72, 72),
-      new THREE.MeshStandardMaterial({ map: this.tex.gardenGrass, roughness: 0.88 })
+      new THREE.PlaneGeometry(76, 76),
+      new THREE.MeshStandardMaterial({ map: this.tex.gardenGrass, roughness: 0.9 })
     );
     outerGrass.rotation.x = -Math.PI / 2;
     outerGrass.receiveShadow = true;
     group.add(outerGrass);
 
-    // 幾何標準田徑跑道 (兩條直道 + 兩端半圓彎道，清晰白色 4 分道)
+    // 幾何標準田徑跑道 (奧林匹克 4 分道，向外延展無交叉，附帶清晰跑道數字 1~4)
     this.buildOlympicRunningTrack(group);
 
-    // 中央足球綠茵草坪
-    const innerTurf = new THREE.Mesh(
-      new THREE.PlaneGeometry(12, 20),
-      new THREE.MeshStandardMaterial({ color: 0x22c55e, roughness: 0.8 })
-    );
+    // 中央雙色條紋足球綠茵草坪 (11m x 22m)
+    const turfMat = new THREE.MeshStandardMaterial({
+      map: this.createSoccerTurfTexture(),
+      roughness: 0.75
+    });
+    const innerTurf = new THREE.Mesh(new THREE.PlaneGeometry(11.2, 22.4), turfMat);
     innerTurf.rotation.x = -Math.PI / 2;
     innerTurf.position.y = 0.03;
     innerTurf.receiveShadow = true;
     group.add(innerTurf);
 
+    // 國際標準足球場劃線 (白線、中圈、禁區與角旗)
     this.buildSoccerFieldLines(group);
 
-    // 看台與設施
+    // 西側面向操場之宏偉主看台、挑高遮陽雨棚、北側大型 LED 記分板、4 座夜間投光燈塔、替補席與林蔭
     this.buildStadiumSurroundings(group);
 
-    // 足球與球門 (BALL / SOCCER)
-    this.buildSoccerGoalAndBall(group, 0, 0, -4.0, '⚽ 草地上的足球 (SOCCER / BALL)', 'BALL', () => {
+    // 足球與標準球門 (BALL / SOCCER) - 位於北側禁區
+    this.buildSoccerGoalAndBall(group, 0, 0, -8.5, '⚽ 綠茵場上的足球 (SOCCER / BALL)', 'BALL', () => {
       this.world.openSpeechCard('BALL', () => {
         this.world.addXP(60);
       });
     });
 
-    // 直道起跑點與助跑塊 (RUN) - 位於西直道
-    this.buildStartingBlocks(group, -8.5, 0, 4.0, '🏃 起跑線加速奔跑 (RUN)', 'RUN', () => {
+    // 直道起跑點、助跑塊與接力棒 (RUN) - 位於西直道第 1 分道
+    this.buildStartingBlocks(group, -7.3, 0, 4.0, '🏃 起跑線加速奔跑 (RUN)', 'RUN', () => {
       this.world.openSpeechCard('RUN', () => {
         this.world.addXP(60);
       });
     });
 
-    // 跳躍運動區 (JUMP) - 位於內場草坪
-    this.buildJumpEquipment(group, 3.5, 0, 2.0, '🦘 體育跳箱與跳躍 (JUMP)', 'JUMP', () => {
+    // 跳躍運動區 (JUMP) - 位於內場跳高墊、跳箱與沙坑
+    this.buildJumpEquipment(group, 2.8, 0, 3.2, '🦘 體育跳箱與跳躍 (JUMP)', 'JUMP', () => {
       this.world.openSpeechCard('JUMP', () => {
         this.world.addXP(60);
       });
     });
 
-    // 終點凱旋拱門 (OPEN) - 位於東直道衝刺終點線
+    // 終點衝刺凱旋拱門 (OPEN) - 位於東直道衝線終點線
     this.buildTrophyArchPortal(group, 8.5, 0, -6.0, '🏆 終點衝線冠軍金色拱門 (OPEN)', 'OPEN', () => {
-      this.world.showToast('🎉 裁判長鳴哨！以驚人速度衝過終點線，前往星光車站！');
+      this.world.showToast('🎉 裁判長鳴哨！以驚人速度衝過終點線，解鎖星光車站！');
       this.switchZone('zone5');
     });
+
+    this.addFloatingParticles(group, 0x67e8f9, 140, 36, 6);
   }
 
-  // [操場] 構建幾何精準奧林匹克跑道 (兩條直道 + 兩端半圓彎道，無任何貼圖扭曲)
+  // [操場] 構建標準幾何奧林匹克跑道 (兩條直道 + 兩端半圓彎道外凸，零貼圖扭曲與交叉)
   buildOlympicRunningTrack(group) {
-    const rubberMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.85 });
+    const rubberMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.85 });
     const whiteLineMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
 
-    // 西側直道 (寬 4.8m，長 24m)
+    // 西側直道 (寬 4.8m，涵蓋 X: -10.9 ~ -6.1，長 24m)
     const straightW = new THREE.Mesh(new THREE.PlaneGeometry(4.8, 24), rubberMat);
     straightW.rotation.x = -Math.PI / 2;
     straightW.position.set(-8.5, 0.02, 0);
     straightW.receiveShadow = true;
     group.add(straightW);
 
-    // 東側直道 (寬 4.8m，長 24m)
+    // 東側直道 (寬 4.8m，涵蓋 X: 6.1 ~ 10.9，長 24m)
     const straightE = new THREE.Mesh(new THREE.PlaneGeometry(4.8, 24), rubberMat);
     straightE.rotation.x = -Math.PI / 2;
     straightE.position.set(8.5, 0.02, 0);
     straightE.receiveShadow = true;
     group.add(straightE);
 
-    // 北端半圓彎道
-    const curveN = new THREE.Mesh(new THREE.RingGeometry(6.1, 10.9, 32, 1, 0, Math.PI), rubberMat);
+    // 北端半圓彎道 (中心在 Z = -12，幾何外凸向北 Z <= -12，絕不往內侵入球場)
+    const curveN = new THREE.Mesh(new THREE.RingGeometry(6.1, 10.9, 48, 1, 0, Math.PI), rubberMat);
     curveN.rotation.x = -Math.PI / 2;
-    curveN.rotation.z = Math.PI;
     curveN.position.set(0, 0.02, -12);
     curveN.receiveShadow = true;
     group.add(curveN);
 
-    // 南端半圓彎道
-    const curveS = new THREE.Mesh(new THREE.RingGeometry(6.1, 10.9, 32, 1, 0, Math.PI), rubberMat);
+    // 南端半圓彎道 (中心在 Z = +12，幾何外凸向南 Z >= 12，絕不往內侵入球場)
+    const curveS = new THREE.Mesh(new THREE.RingGeometry(6.1, 10.9, 48, 1, Math.PI, Math.PI), rubberMat);
     curveS.rotation.x = -Math.PI / 2;
     curveS.position.set(0, 0.02, 12);
     curveS.receiveShadow = true;
     group.add(curveS);
 
-    // 直道分道白線 (4 分道)
-    [-1.8, -0.6, 0.6, 1.8].forEach(offset => {
+    // 直道分道白線 (4 分道，5 條分道標線，每道寬 1.2m)
+    [-2.4, -1.2, 0, 1.2, 2.4].forEach(offset => {
       const lineW = new THREE.Mesh(new THREE.PlaneGeometry(0.08, 24), whiteLineMat);
       lineW.rotation.x = -Math.PI / 2;
       lineW.position.set(-8.5 + offset, 0.025, 0);
@@ -729,30 +735,187 @@ class SpatialZoneManager {
       group.add(lineE);
     });
 
-    // 彎道同心分道白線
+    // 彎道同心分道白線 (外凸弧線完美接合直道)
     [6.1, 7.3, 8.5, 9.7, 10.9].forEach(r => {
-      const lN = new THREE.Mesh(new THREE.RingGeometry(r - 0.04, r + 0.04, 32, 1, 0, Math.PI), whiteLineMat);
+      const lN = new THREE.Mesh(new THREE.RingGeometry(r - 0.035, r + 0.035, 48, 1, 0, Math.PI), whiteLineMat);
       lN.rotation.x = -Math.PI / 2;
-      lN.rotation.z = Math.PI;
-      lN.position.set(0, 0.025, -12);
+      lN.position.set(0, 0.026, -12);
       group.add(lN);
 
-      const lS = new THREE.Mesh(new THREE.RingGeometry(r - 0.04, r + 0.04, 32, 1, 0, Math.PI), whiteLineMat);
+      const lS = new THREE.Mesh(new THREE.RingGeometry(r - 0.035, r + 0.035, 48, 1, Math.PI, Math.PI), whiteLineMat);
       lS.rotation.x = -Math.PI / 2;
-      lS.position.set(0, 0.025, 12);
+      lS.position.set(0, 0.026, 12);
       group.add(lS);
+    });
+
+    // 跑道起跑數字標記 (1, 2, 3, 4) - 位於西直道南端起跑區
+    ['1', '2', '3', '4'].forEach((numStr, idx) => {
+      // 內道至外道 X 分布: -7.3, -8.5, -9.7, -10.3
+      const laneX = -6.7 - idx * 1.2;
+      const numTex = this.createTrackLaneNumberTexture(numStr);
+      if (numTex) {
+        const numMesh = new THREE.Mesh(
+          new THREE.PlaneGeometry(0.8, 1.3),
+          new THREE.MeshBasicMaterial({ map: numTex, transparent: true, opacity: 0.92 })
+        );
+        numMesh.rotation.x = -Math.PI / 2;
+        numMesh.position.set(laneX, 0.028, 5.5);
+        group.add(numMesh);
+      }
     });
 
     // 起跑白斑線與終點衝線標記
     const startStripe = new THREE.Mesh(new THREE.PlaneGeometry(4.8, 0.25), whiteLineMat);
     startStripe.rotation.x = -Math.PI / 2;
-    startStripe.position.set(-8.5, 0.028, 6.0);
+    startStripe.position.set(-8.5, 0.028, 6.2);
     group.add(startStripe);
 
-    const finishStripe = new THREE.Mesh(new THREE.PlaneGeometry(4.8, 0.25), whiteLineMat);
+    const finishStripe = new THREE.Mesh(new THREE.PlaneGeometry(4.8, 0.35), whiteLineMat);
     finishStripe.rotation.x = -Math.PI / 2;
     finishStripe.position.set(8.5, 0.028, -6.0);
     group.add(finishStripe);
+
+    // 在直道第 3、4 分道設置奧林匹克跨欄 (Hurdles) 增添運動氛圍
+    this.buildOlympicHurdle(group, -9.7, 0, 0);
+    this.buildOlympicHurdle(group, -8.5, 0, -3.5);
+  }
+
+  // [操場] 專業奧林匹克田徑跨欄
+  buildOlympicHurdle(group, x, y, z) {
+    const hurdle = new THREE.Group();
+    hurdle.position.set(x, y, z);
+
+    const steelMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85, roughness: 0.2 });
+    const barMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.4 });
+    const stripeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+    // 兩側 L 型立柱底座
+    [-0.5, 0.5].forEach(hx => {
+      const foot = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.05, 0.6), steelMat);
+      foot.position.set(hx, 0.025, 0);
+      hurdle.add(foot);
+
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.85, 8), steelMat);
+      post.position.set(hx, 0.45, 0.15);
+      hurdle.add(post);
+    });
+
+    // 橫向木製/泡棉跨欄頂板
+    const topBar = new THREE.Mesh(new THREE.BoxGeometry(1.12, 0.12, 0.04), barMat);
+    topBar.position.set(0, 0.88, 0.15);
+    hurdle.add(topBar);
+
+    // 頂板黑白斑馬標紋
+    [-0.35, 0, 0.35].forEach(sx => {
+      const s = new THREE.Mesh(new THREE.PlaneGeometry(0.12, 0.12), stripeMat);
+      s.position.set(sx, 0.88, 0.172);
+      hurdle.add(s);
+    });
+
+    group.add(hurdle);
+  }
+
+  // [操場] 生成跑道數字貼圖 CanvasTexture
+  createTrackLaneNumberTexture(numStr) {
+    if (typeof document === 'undefined' || !document.createElement) return null;
+    const canvas = document.createElement('canvas');
+    if (!canvas || !canvas.getContext) return null;
+    canvas.width = 256;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    ctx.clearRect(0, 0, 256, 512);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '900 320px "Arial Black", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(numStr, 128, 256);
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.needsUpdate = true;
+    return tex;
+  }
+
+  // [操場] 生成條紋草坪貼圖 CanvasTexture
+  createSoccerTurfTexture() {
+    if (typeof document === 'undefined' || !document.createElement) return null;
+    const canvas = document.createElement('canvas');
+    if (!canvas || !canvas.getContext) return null;
+    canvas.width = 512;
+    canvas.height = 1024;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    const stripeHeight = 64;
+    for (let y = 0; y < 1024; y += stripeHeight) {
+      ctx.fillStyle = (y / stripeHeight) % 2 === 0 ? '#15803d' : '#16a34a';
+      ctx.fillRect(0, y, 512, stripeHeight);
+    }
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(1, 1);
+    tex.needsUpdate = true;
+    return tex;
+  }
+
+  // [操場] 生成大型數位記分大屏幕 LED 貼圖
+  createScoreboardTexture() {
+    if (typeof document === 'undefined' || !document.createElement) return null;
+    const canvas = document.createElement('canvas');
+    if (!canvas || !canvas.getContext) return null;
+    canvas.width = 1024;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    ctx.fillStyle = '#0a0f1d';
+    ctx.fillRect(0, 0, 1024, 512);
+
+    ctx.strokeStyle = '#facc15';
+    ctx.lineWidth = 12;
+    ctx.strokeRect(12, 12, 1000, 488);
+
+    ctx.fillStyle = '#1e3a8a';
+    ctx.fillRect(20, 20, 984, 80);
+    ctx.fillStyle = '#fef08a';
+    ctx.font = 'bold 38px "Noto Sans TC", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('🏆 XINGANG SPORTS FESTIVAL • 活力校園運動會 🏃', 512, 75);
+
+    ctx.fillStyle = '#111827';
+    ctx.fillRect(40, 120, 430, 260);
+    ctx.fillRect(554, 120, 430, 260);
+
+    ctx.fillStyle = '#60a5fa';
+    ctx.font = 'bold 36px sans-serif';
+    ctx.fillText('HOME • 勇者隊', 255, 175);
+    ctx.fillStyle = '#22c55e';
+    ctx.font = 'bold 110px "Courier New", monospace';
+    ctx.fillText('03', 255, 310);
+
+    ctx.fillStyle = '#f59e0b';
+    ctx.font = 'bold 44px sans-serif';
+    ctx.fillText('VS', 512, 260);
+
+    ctx.fillStyle = '#f87171';
+    ctx.font = 'bold 36px sans-serif';
+    ctx.fillText('GUEST • 精靈隊', 769, 175);
+    ctx.fillStyle = '#ef4444';
+    ctx.font = 'bold 110px "Courier New", monospace';
+    ctx.fillText('02', 769, 310);
+
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(40, 400, 944, 80);
+    ctx.fillStyle = '#38bdf8';
+    ctx.font = 'bold 36px "Courier New", monospace';
+    ctx.fillText('⏱️ TIME: 88:26   |   STAGE: ZONE 4 ATHLETIC   |   LEVEL: 4', 512, 452);
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.needsUpdate = true;
+    return tex;
   }
 
   // ==========================================
@@ -829,38 +992,228 @@ class SpatialZoneManager {
     }
   }
 
-  // [操場] 圍繞看台與設施
+  // [操場] 圍繞看台與設施：西側面向球場宏偉主看台、挑高遮陽雨棚、北側高科技 LED 屏幕、4 座巨型燈塔與校園林蔭
   buildStadiumSurroundings(group) {
-    const steelMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.8, roughness: 0.3 });
-    const woodMat = new THREE.MeshStandardMaterial({ map: this.tex.woodDesk, roughness: 0.7 });
-    const boardMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5 });
+    const concreteMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.75 });
+    const blueSeatMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.35 });
+    const amberSeatMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.35 });
+    const steelMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8, roughness: 0.25 });
+    const canopyMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3, side: THREE.DoubleSide });
+    const chromeMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9, roughness: 0.15 });
 
-    // 西側大看台
+    // ==========================================
+    // 1. 西側宏偉主看台 (全方位修正：階梯朝東面向球場，向西逐層攀升！)
+    // ==========================================
     const grandstand = new THREE.Group();
-    grandstand.position.set(-13.5, 0, 0);
-    for (let r = 0; r < 4; r++) {
-      const step = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.45 * (r + 1), 16), steelMat);
-      step.position.set(r * 1.0, (0.45 * (r + 1)) / 2, 0);
-      grandstand.add(step);
+    // 看台面寬 28m (Z: -14 ~ 14)
+    // 5 層台階，向西 (負 X 方向) 漸次升高：
+    // Row 0 (前排最近跑道 X = -11.4): 高 0.45m
+    // Row 1 (X = -12.4): 高 0.85m
+    // Row 2 (X = -13.4): 高 1.25m
+    // Row 3 (X = -14.4): 高 1.65m
+    // Row 4 (後排 X = -15.4): 高 2.05m
+    for (let r = 0; r < 5; r++) {
+      const stepX = -11.4 - r * 1.0;
+      const stepH = 0.45 + r * 0.40;
 
-      const seat = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.1, 15.6), woodMat);
-      seat.position.set(r * 1.0, 0.45 * (r + 1) + 0.05, 0);
-      grandstand.add(seat);
+      // 混凝土看台階梯基座
+      const stepMesh = new THREE.Mesh(new THREE.BoxGeometry(1.0, stepH, 28), concreteMat);
+      stepMesh.position.set(stepX, stepH / 2, 0);
+      stepMesh.receiveShadow = true;
+      grandstand.add(stepMesh);
+
+      // 看台座位：藍黃相間的專業塑膠桶型座椅 (面向東邊操場！)
+      const seatMat = (r % 2 === 0) ? blueSeatMat : amberSeatMat;
+      for (let z = -13.0; z <= 13.0; z += 1.0) {
+        if (Math.abs(z) < 1.0) continue; // 留出中央走道 (Aisle)
+        const seatBase = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.08, 0.65), seatMat);
+        seatBase.position.set(stepX, stepH + 0.04, z);
+        grandstand.add(seatBase);
+
+        // 靠背 (面向東方 +X，靠背位於西方 -X)
+        const seatBack = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.35, 0.65), seatMat);
+        seatBack.position.set(stepX - 0.22, stepH + 0.22, z);
+        grandstand.add(seatBack);
+      }
     }
+
+    // 中央安全走道與黃黑警示條紋
+    const aisleMesh = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.02, 1.8), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }));
+    aisleMesh.position.set(-13.4, 0.03, 0);
+    grandstand.add(aisleMesh);
+
+    // 走道不鏽鋼安全扶手
+    [-0.8, 0.8].forEach(az => {
+      for (let rx = -11.4; rx >= -15.4; rx -= 1.0) {
+        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.85, 8), chromeMat);
+        const curH = 0.45 + Math.abs(rx - (-11.4)) * 0.40;
+        post.position.set(rx, curH + 0.425, az);
+        grandstand.add(post);
+      }
+      const rail = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.05, 0.05), chromeMat);
+      rail.position.set(-13.4, 1.7, az);
+      rail.rotation.z = 0.38;
+      grandstand.add(rail);
+    });
+
+    // 看台後方護牆 (X = -16.0)
+    const backWall = new THREE.Mesh(new THREE.BoxGeometry(0.5, 3.2, 28), concreteMat);
+    backWall.position.set(-16.0, 1.6, 0);
+    grandstand.add(backWall);
+
+    // 看台南北端側山牆
+    [-14.0, 14.0].forEach(ez => {
+      const endWall = new THREE.Mesh(new THREE.BoxGeometry(5.2, 2.6, 0.4), concreteMat);
+      endWall.position.set(-13.4, 1.3, ez);
+      grandstand.add(endWall);
+    });
+
+    // 挑高弧形懸臂鋼構雨棚 (Cantilever Stadium Canopy，挑高 5.8m 遮雨棚覆蓋座位)
+    [-10, -3.5, 3.5, 10].forEach(cz => {
+      // 垂直支撐鋼柱
+      const pCol = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.25, 6.0, 12), steelMat);
+      pCol.position.set(-16.0, 3.0, cz);
+      grandstand.add(pCol);
+
+      // 前伸斜桁架 (Cantilever Truss)
+      const truss = new THREE.Mesh(new THREE.BoxGeometry(6.0, 0.2, 0.2), steelMat);
+      truss.position.set(-13.0, 5.8, cz);
+      truss.rotation.z = -0.08;
+      grandstand.add(truss);
+    });
+
+    // 白色流線型雨棚頂板
+    const canopyRoof = new THREE.Mesh(new THREE.PlaneGeometry(6.2, 29), canopyMat);
+    canopyRoof.position.set(-13.0, 5.9, 0);
+    canopyRoof.rotation.x = -Math.PI / 2;
+    canopyRoof.rotation.y = 0.08;
+    grandstand.add(canopyRoof);
+
     group.add(grandstand);
 
-    // 北面記分牌
-    const scoreboard = new THREE.Group();
-    scoreboard.position.set(0, 0, -14.0);
-    [-3.0, 3.0].forEach(px => {
-      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 6.0, 8), steelMat);
-      pole.position.set(px, 3.0, 0);
-      scoreboard.add(pole);
+    // ==========================================
+    // 2. 北側高科技 LED 數位電子記分大屏幕
+    // ==========================================
+    const scoreboardGroup = new THREE.Group();
+    scoreboardGroup.position.set(0, 0, -14.8);
+
+    // 兩座雙重金屬桁架支撐柱
+    [-3.5, 3.5].forEach(px => {
+      const p1 = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.24, 7.2, 8), steelMat);
+      p1.position.set(px - 0.2, 3.6, 0);
+      scoreboardGroup.add(p1);
+      const p2 = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.24, 7.2, 8), steelMat);
+      p2.position.set(px + 0.2, 3.6, 0);
+      scoreboardGroup.add(p2);
     });
-    const board = new THREE.Mesh(new THREE.BoxGeometry(7.2, 3.2, 0.4), boardMat);
-    board.position.set(0, 5.0, 0);
-    scoreboard.add(board);
-    group.add(scoreboard);
+
+    // 屏幕本體外殼
+    const screenCase = new THREE.Mesh(new THREE.BoxGeometry(8.4, 4.4, 0.6), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5 }));
+    screenCase.position.set(0, 5.0, 0);
+    scoreboardGroup.add(screenCase);
+
+    // LED 高亮顯示面
+    const boardTex = this.createScoreboardTexture();
+    const screenFaceMat = boardTex
+      ? new THREE.MeshBasicMaterial({ map: boardTex })
+      : new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.4 });
+    const screenFace = new THREE.Mesh(new THREE.PlaneGeometry(8.0, 4.0), screenFaceMat);
+    screenFace.position.set(0, 5.0, 0.32);
+    scoreboardGroup.add(screenFace);
+
+    group.add(scoreboardGroup);
+
+    // ==========================================
+    // 3. 四座巨型體育場投光燈塔 (四角高聳 Floodlight Towers)
+    // ==========================================
+    [[-15.0, -15.0], [15.0, -15.0], [-15.0, 15.0], [15.0, 15.0]].forEach(([lx, lz]) => {
+      const mastGroup = new THREE.Group();
+      mastGroup.position.set(lx, 0, lz);
+
+      // 高聳鋼構主柱 (13.5m 高)
+      const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.5, 13.5, 8), steelMat);
+      mast.position.y = 6.75;
+      mastGroup.add(mast);
+
+      // 頂部燈架平台
+      const headFrame = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.4, 0.4), steelMat);
+      headFrame.position.set(0, 13.5, 0);
+      headFrame.lookAt(0, 0, 0);
+      mastGroup.add(headFrame);
+
+      // 6 盞高亮投光燈矩陣
+      const lampMat = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        emissive: 0xfef08a,
+        emissiveIntensity: 1.2
+      });
+      [-0.8, 0, 0.8].forEach(lampX => {
+        [-0.4, 0.4].forEach(lampY => {
+          const lampMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.25, 0.3, 8), lampMat);
+          lampMesh.position.set(lampX, 13.5 + lampY, 0.2);
+          lampMesh.rotation.x = Math.PI / 4;
+          mastGroup.add(lampMesh);
+        });
+      });
+
+      // 照向球場的照明光源
+      const light = new THREE.PointLight(0xfffaed, 0.65, 26);
+      light.position.set(0, 12, 0);
+      mastGroup.add(light);
+
+      group.add(mastGroup);
+    });
+
+    // ==========================================
+    // 4. 東側球員教練遮棚替補席 (Team Dugout)
+    // ==========================================
+    const dugout = new THREE.Group();
+    dugout.position.set(5.2, 0, 0);
+
+    const shelterFrame = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.4, 1.4, 3.8, 16, 1, true, 0, Math.PI),
+      new THREE.MeshStandardMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.4, roughness: 0.1, side: THREE.DoubleSide })
+    );
+    shelterFrame.position.set(0, 1.2, 0);
+    shelterFrame.rotation.z = Math.PI / 2;
+    shelterFrame.rotation.y = Math.PI / 2;
+    dugout.add(shelterFrame);
+
+    // 替補席長椅與座椅
+    const benchMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a });
+    for (let bz = -1.4; bz <= 1.4; bz += 0.7) {
+      const bSeat = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.45, 0.5), benchMat);
+      bSeat.position.set(0, 0.225, bz);
+      dugout.add(bSeat);
+    }
+    group.add(dugout);
+
+    // ==========================================
+    // 5. 校園體育園區景觀樹木與紅磚圍欄 (告別空蕩虛空)
+    // ==========================================
+    const brickMat = new THREE.MeshStandardMaterial({ map: this.tex.stationBrick, roughness: 0.8 });
+    const pineMat = new THREE.MeshStandardMaterial({ color: 0x14532d, roughness: 0.8 });
+    const trunkMat = new THREE.MeshStandardMaterial({ map: this.tex.woodDesk, roughness: 0.8 });
+
+    // 南北外圍景觀矮牆與校園綠樹
+    [-17, 17].forEach(wz => {
+      const pWall = new THREE.Mesh(new THREE.BoxGeometry(36, 1.4, 0.8), brickMat);
+      pWall.position.set(0, 0.7, wz);
+      group.add(pWall);
+
+      // 種植校園柏樹
+      for (let tx = -14; tx <= 14; tx += 4.5) {
+        const tree = new THREE.Group();
+        tree.position.set(tx, 0, wz + (wz > 0 ? 1.5 : -1.5));
+        const tTrunk = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.25, 2.0, 6), trunkMat);
+        tTrunk.position.y = 1.0;
+        tree.add(tTrunk);
+        const tCrown = new THREE.Mesh(new THREE.ConeGeometry(1.2, 3.8, 7), pineMat);
+        tCrown.position.y = 3.2;
+        tree.add(tCrown);
+        group.add(tree);
+      }
+    });
   }
 
   // [車站] 雨棚鋼架
@@ -1390,63 +1743,134 @@ class SpatialZoneManager {
     group.add(portal);
   }
 
-  // [操場] 足球劃線
+  // [操場] 國際標準足球場標線 (白線邊界、中場線、中圈、禁區、點球點與四角角旗)
   buildSoccerFieldLines(group) {
     const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    const border = new THREE.Mesh(new THREE.RingGeometry(5.8, 5.9, 4), lineMat);
-    border.rotation.x = -Math.PI / 2;
-    border.rotation.z = Math.PI / 4;
-    border.position.y = 0.035;
-    group.add(border);
 
-    const centerCircle = new THREE.Mesh(new THREE.RingGeometry(2.0, 2.08, 24), lineMat);
+    // 1. 球場外圍邊界白線 (11.2m x 22.4m)
+    [-5.6, 5.6].forEach(bx => {
+      const touchline = new THREE.Mesh(new THREE.PlaneGeometry(0.08, 22.4), lineMat);
+      touchline.rotation.x = -Math.PI / 2;
+      touchline.position.set(bx, 0.035, 0);
+      group.add(touchline);
+    });
+    [-11.2, 11.2].forEach(bz => {
+      const goalline = new THREE.Mesh(new THREE.PlaneGeometry(11.2, 0.08), lineMat);
+      goalline.rotation.x = -Math.PI / 2;
+      goalline.position.set(0, 0.035, bz);
+      group.add(goalline);
+    });
+
+    // 2. 中場線與中圈 (Center Circle & Halfway Line)
+    const halfway = new THREE.Mesh(new THREE.PlaneGeometry(11.2, 0.08), lineMat);
+    halfway.rotation.x = -Math.PI / 2;
+    halfway.position.set(0, 0.035, 0);
+    group.add(halfway);
+
+    const centerCircle = new THREE.Mesh(new THREE.RingGeometry(2.36, 2.44, 32), lineMat);
     centerCircle.rotation.x = -Math.PI / 2;
-    centerCircle.position.y = 0.035;
+    centerCircle.position.set(0, 0.036, 0);
     group.add(centerCircle);
+
+    const kickoffSpot = new THREE.Mesh(new THREE.CircleGeometry(0.12, 16), lineMat);
+    kickoffSpot.rotation.x = -Math.PI / 2;
+    kickoffSpot.position.set(0, 0.037, 0);
+    group.add(kickoffSpot);
+
+    // 3. 南北兩側大禁區 (Penalty Areas)
+    [-11.2, 11.2].forEach(pz => {
+      const sign = pz < 0 ? 1 : -1;
+      // 禁區橫線
+      const pCross = new THREE.Mesh(new THREE.PlaneGeometry(6.0, 0.08), lineMat);
+      pCross.rotation.x = -Math.PI / 2;
+      pCross.position.set(0, 0.035, pz + sign * 3.6);
+      group.add(pCross);
+
+      // 禁區兩側縱線
+      [-3.0, 3.0].forEach(px => {
+        const pSide = new THREE.Mesh(new THREE.PlaneGeometry(0.08, 3.6), lineMat);
+        pSide.rotation.x = -Math.PI / 2;
+        pSide.position.set(px, 0.035, pz + sign * 1.8);
+        group.add(pSide);
+      });
+
+      // 點球點 (Penalty Spot)
+      const pSpot = new THREE.Mesh(new THREE.CircleGeometry(0.1, 16), lineMat);
+      pSpot.rotation.x = -Math.PI / 2;
+      pSpot.position.set(0, 0.037, pz + sign * 2.4);
+      group.add(pSpot);
+    });
+
+    // 4. 四座角旗 (Corner Flags)
+    [[-5.6, -11.2], [5.6, -11.2], [-5.6, 11.2], [5.6, 11.2]].forEach(([fx, fz]) => {
+      const flagPole = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 1.5, 6), new THREE.MeshStandardMaterial({ color: 0xffffff }));
+      flagPole.position.set(fx, 0.75, fz);
+      group.add(flagPole);
+
+      const flagCloth = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.35, 0.25),
+        new THREE.MeshStandardMaterial({ color: 0xef4444, side: THREE.DoubleSide })
+      );
+      flagCloth.position.set(fx + 0.175, 1.35, fz);
+      group.add(flagCloth);
+    });
   }
 
-  // [操場] 足球門與足球 (BALL)
+  // [操場] 專業鋼管足球門與 3D 擬真足球 (BALL / SOCCER)
   buildSoccerGoalAndBall(group, x, y, z, label, id, onClick) {
     const goalGroup = new THREE.Group();
     goalGroup.position.set(x, y, z);
 
-    const postMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
-    const netMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, wireframe: true, transparent: true, opacity: 0.4 });
+    const postMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.25, metalness: 0.1 });
+    const netMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, wireframe: true, transparent: true, opacity: 0.45 });
 
-    const postL = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.4, 12), postMat);
-    postL.position.set(-2.0, 1.2, 0);
-    goalGroup.add(postL);
+    // 前側兩根立柱 (門寬 4.4m，門高 2.4m)
+    [-2.2, 2.2].forEach(gx => {
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 2.4, 16), postMat);
+      post.position.set(gx, 1.2, 0);
+      post.castShadow = true;
+      goalGroup.add(post);
 
-    const postR = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.4, 12), postMat);
-    postR.position.set(2.0, 1.2, 0);
-    goalGroup.add(postR);
+      // 後側斜向支撐鋼架
+      const stay = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.8, 8), postMat);
+      stay.position.set(gx, 1.2, -0.85);
+      stay.rotation.x = -0.65;
+      goalGroup.add(stay);
+    });
 
-    const crossbar = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 4.16, 12), postMat);
+    // 橫向頂桿 (Crossbar)
+    const crossbar = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 4.54, 16), postMat);
     crossbar.position.set(0, 2.4, 0);
     crossbar.rotation.z = Math.PI / 2;
     goalGroup.add(crossbar);
 
-    const netBox = new THREE.Mesh(new THREE.BoxGeometry(4.0, 2.4, 1.4), netMat);
-    netBox.position.set(0, 1.2, -0.7);
-    goalGroup.add(netBox);
+    // 後方球網 (3D 三角斜度球網)
+    const netMesh = new THREE.Mesh(new THREE.BoxGeometry(4.4, 2.35, 1.7), netMat);
+    netMesh.position.set(0, 1.18, -0.85);
+    goalGroup.add(netMesh);
 
-    // 足球
+    // 經典黑白五角星 3D 足球 (放置於球門前罰球區)
     const ballGroup = new THREE.Group();
-    ballGroup.position.set(0, 0.24, 1.2);
-    const ballBase = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 16), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35 }));
+    ballGroup.position.set(0, 0.24, 2.0); // 距球門前方 2m
+    const ballBase = new THREE.Mesh(
+      new THREE.SphereGeometry(0.24, 20, 20),
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35 })
+    );
     ballGroup.add(ballBase);
 
-    const ballMatBlack = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.35 });
-    for (let p = 0; p < 6; p++) {
-      const patch = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.02, 5), ballMatBlack);
-      patch.position.set(Math.sin(p * 1.05) * 0.22, Math.cos(p * 1.05) * 0.22, (p % 2 === 0 ? 0.08 : -0.08));
+    const patchMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.35 });
+    // 五角黑色色塊
+    for (let p = 0; p < 8; p++) {
+      const ang = p * (Math.PI / 4);
+      const patch = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.02, 5), patchMat);
+      patch.position.set(Math.sin(ang) * 0.21, Math.cos(ang) * (p % 2 === 0 ? 0.18 : -0.18), 0.12);
       patch.lookAt(ballGroup.position);
       ballGroup.add(patch);
     }
     goalGroup.add(ballGroup);
 
-    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(4.4, 2.8, 3.0), new THREE.MeshBasicMaterial({ visible: false }));
-    hitBox.position.y = 1.3;
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(4.8, 2.8, 3.6), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.set(0, 1.3, 0.8);
     hitBox.userData = { id, label, onClick };
     goalGroup.add(hitBox);
     this.world.interactables.push(hitBox);
@@ -1454,28 +1878,36 @@ class SpatialZoneManager {
     group.add(goalGroup);
   }
 
-  // [操場] 跑道起跑線與接力棒 (RUN)
+  // [操場] 跑道起跑線、助跑塊與接力棒 (RUN)
   buildStartingBlocks(group, x, y, z, label, id, onClick) {
     const runGroup = new THREE.Group();
     runGroup.position.set(x, y, z);
 
-    const steelMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8, roughness: 0.3 });
-    const batonMat = new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.7, roughness: 0.2 });
+    const aluMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85, roughness: 0.2 });
+    const padMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6 });
+    const batonMat = new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.7, roughness: 0.25 });
 
-    [-0.3, 0.3].forEach(bx => {
-      const block = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.15, 0.3), steelMat);
-      block.position.set(bx, 0.08, 0.35);
-      block.rotation.x = -0.4;
-      runGroup.add(block);
+    // 鋁合金中心導軌
+    const rail = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.04, 0.9), aluMat);
+    rail.position.set(0, 0.03, 0);
+    runGroup.add(rail);
+
+    // 左右腳助跑踏板
+    [[-0.22, 0.15], [0.22, -0.15]].forEach(([bx, bz]) => {
+      const pedal = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.14, 0.26), padMat);
+      pedal.position.set(bx, 0.08, bz);
+      pedal.rotation.x = -0.42;
+      runGroup.add(pedal);
     });
 
-    const baton = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.55, 12), batonMat);
-    baton.position.set(0, 0.18, -0.4);
+    // 鮮紅金屬運動接力棒
+    const baton = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.032, 0.52, 12), batonMat);
+    baton.position.set(0, 0.22, -0.45);
     baton.rotation.z = Math.PI / 2;
     runGroup.add(baton);
 
-    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(2.0, 1.2, 2.0), new THREE.MeshBasicMaterial({ visible: false }));
-    hitBox.position.y = 0.5;
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.4, 2.2), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 0.6;
     hitBox.userData = { id, label, onClick };
     runGroup.add(hitBox);
     this.world.interactables.push(hitBox);
@@ -1483,27 +1915,76 @@ class SpatialZoneManager {
     group.add(runGroup);
   }
 
-  // [操場] 跳箱跳高設備 (JUMP)
+  // [操場] 躍動跳高設備、跳箱與長跳沙坑 (JUMP)
   buildJumpEquipment(group, x, y, z, label, id, onClick) {
     const jumpGroup = new THREE.Group();
     jumpGroup.position.set(x, y, z);
 
-    const matMesh = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.5, 1.8), new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.6 }));
-    matMesh.position.set(0, 0.25, 0);
-    jumpGroup.add(matMesh);
+    // 1. 加厚皇家藍跳高防護海綿軟墊 (2.8m x 2.0m x 0.55m)
+    const matCoverMat = new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.55 });
+    const crashMat = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.55, 2.0), matCoverMat);
+    crashMat.position.set(0, 0.275, 0);
+    jumpGroup.add(crashMat);
 
-    const crossbar = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 2.4, 8), new THREE.MeshStandardMaterial({ color: 0xef4444 }));
-    crossbar.position.set(0, 1.35, -1.0);
-    crossbar.rotation.z = Math.PI / 2;
-    jumpGroup.add(crossbar);
+    // 軟墊白色十字降落標靶
+    const targetMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const target1 = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.15), targetMat);
+    target1.rotation.x = -Math.PI / 2;
+    target1.position.set(0, 0.555, 0);
+    jumpGroup.add(target1);
+    const target2 = new THREE.Mesh(new THREE.PlaneGeometry(0.15, 1.2), targetMat);
+    target2.rotation.x = -Math.PI / 2;
+    target2.position.set(0, 0.555, 0);
+    jumpGroup.add(target2);
 
+    // 2. 兩座黃色帶刻度跳高立柱 (Upright Stands)
+    const standMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.7, roughness: 0.3 });
+    [-1.5, 1.5].forEach(sx => {
+      const base = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.08, 0.4), standMat);
+      base.position.set(sx, 0.04, -1.05);
+      jumpGroup.add(base);
+
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 2.0, 8), standMat);
+      pole.position.set(sx, 1.0, -1.05);
+      jumpGroup.add(pole);
+    });
+
+    // 橫跨兩柱的鮮紅跳高橫桿 (Crossbar)
+    const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 3.05, 8), new THREE.MeshStandardMaterial({ color: 0xef4444 }));
+    bar.position.set(0, 1.45, -1.05);
+    bar.rotation.z = Math.PI / 2;
+    jumpGroup.add(bar);
+
+    // 3. 經典四層實木體育跳箱 (Vaulting Box)
     const woodMat = new THREE.MeshStandardMaterial({ map: this.tex.woodDesk, roughness: 0.7 });
-    const vaultBox = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.65, 1.2), woodMat);
-    vaultBox.position.set(-1.8, 0.325, 0.2);
-    jumpGroup.add(vaultBox);
+    const leatherMat = new THREE.MeshStandardMaterial({ color: 0x92400e, roughness: 0.8 });
+    const vGroup = new THREE.Group();
+    vGroup.position.set(-2.0, 0, 0.3);
 
-    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.6, 2.2, 3.0), new THREE.MeshBasicMaterial({ visible: false }));
-    hitBox.position.y = 1.0;
+    for (let t = 0; t < 4; t++) {
+      const layer = new THREE.Mesh(new THREE.BoxGeometry(0.9 - t * 0.06, 0.16, 1.3 - t * 0.08), woodMat);
+      layer.position.y = 0.08 + t * 0.16;
+      vGroup.add(layer);
+    }
+    const vTop = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.12, 1.02), leatherMat);
+    vTop.position.y = 0.70;
+    vGroup.add(vTop);
+    jumpGroup.add(vGroup);
+
+    // 4. 跳遠沙坑 (Long Jump Sand Pit)
+    const sandMat = new THREE.MeshStandardMaterial({ color: 0xfde047, roughness: 0.95 });
+    const sandBorderMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.8 });
+    const pit = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 4.0), sandMat);
+    pit.rotation.x = -Math.PI / 2;
+    pit.position.set(2.4, 0.028, 0.5);
+    jumpGroup.add(pit);
+
+    const pitFrame = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.06, 4.2), sandBorderMat);
+    pitFrame.position.set(2.4, 0.03, 0.5);
+    jumpGroup.add(pitFrame);
+
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(4.8, 2.4, 3.6), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 1.1;
     hitBox.userData = { id, label, onClick };
     jumpGroup.add(hitBox);
     this.world.interactables.push(hitBox);
