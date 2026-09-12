@@ -1249,6 +1249,9 @@ class World3D {
             }
             this.showToast(`📘 英語護照已蓋上簽證印章：【${wordKey}】！`);
             if (onComplete) onComplete();
+            if (this.zoneManager && this.zoneManager.checkZoneCompletionStatus) {
+              this.zoneManager.checkZoneCompletionStatus();
+            }
           }
         });
       }
@@ -1266,6 +1269,9 @@ class World3D {
         setTimeout(() => {
           modal.style.display = 'none';
           if (onComplete) onComplete();
+          if (this.zoneManager && this.zoneManager.checkZoneCompletionStatus) {
+            this.zoneManager.checkZoneCompletionStatus();
+          }
         }, 300);
       }
     };
@@ -1279,6 +1285,15 @@ class World3D {
     }
     if (window.audioManager) {
       window.audioManager.playSfx('click');
+    }
+  }
+
+  // 開啟關卡主英語問句三重試煉
+  openGuardianTrial(zoneId) {
+    if (typeof window.startGuardianTrial === 'function') {
+      window.startGuardianTrial(zoneId);
+    } else {
+      this.showToast('⚓ 關卡主英語問句試煉系統已就緒！');
     }
   }
 

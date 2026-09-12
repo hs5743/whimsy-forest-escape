@@ -70,6 +70,18 @@ class SpatialZoneManager {
         words: ['TIME', 'CLOCK', 'TRAIN', 'MORNING', 'OPEN'],
         spawnPos: [-1.0, 1.6, 3.0],
         spawnYaw: 0
+      },
+      'zone6': {
+        id: 'zone6',
+        name: '蔚藍秘境海港',
+        englishName: 'Azure Fantasy Harbor',
+        icon: '⚓',
+        topic: 'Ocean, Transport & Weather',
+        reqLevel: 6,
+        desc: '碧海晴空下的航海貿易大港，三桅帆船破浪而立，旋轉燈塔在海岸邊指引方向！',
+        words: ['SHIP', 'BOAT', 'WIND', 'FISH', 'WATER', 'OPEN'],
+        spawnPos: [0, 1.6, 6.0],
+        spawnYaw: 0
       }
     };
 
@@ -149,6 +161,23 @@ class SpatialZoneManager {
         { type: 'box', minX: -5.0, maxX: -0.6, minZ: -10.8, maxZ: -6.2 },
         // 候車長椅與燈柱
         { type: 'box', minX: -5.5, maxX: -3.5, minZ: 0.6, maxZ: 2.0 }
+      ],
+      'zone6': [
+        // 1. 海岸燈塔石造巨塔圓形碰撞 (半徑 2.6m)
+        { type: 'circle', x: 8.5, z: -8.0, radius: 2.6 },
+        // 2. 停泊遠洋三桅帆船船體實體 (阻止玩家掉入深海或穿入船體內部)
+        { type: 'box', minX: -13.5, maxX: -4.5, minZ: -12.0, maxZ: 10.0 },
+        // 3. 碼頭木箱與鮮魚木桶貨物堆
+        { type: 'box', minX: 3.7, maxX: 6.3, minZ: 1.4, maxZ: 3.0 },
+        // 4. 東側海面防護木欄
+        { type: 'box', minX: 13.5, maxX: 16.0, minZ: -14.0, maxZ: 14.0 },
+        // 5. 西側外海安全邊界
+        { type: 'box', minX: -16.0, maxX: -13.5, minZ: -14.0, maxZ: 14.0 },
+        // 6. 北側深海邊界
+        { type: 'box', minX: -14.0, maxX: 14.0, minZ: -16.0, maxZ: -13.5 },
+        // 7. 南側鐵道聯絡門石牆左右翼
+        { type: 'box', minX: -14.0, maxX: -2.5, minZ: 12.0, maxZ: 14.0 },
+        { type: 'box', minX: 2.5, maxX: 14.0, minZ: 12.0, maxZ: 14.0 }
       ]
     };
   }
@@ -194,7 +223,10 @@ class SpatialZoneManager {
       stoneWall: loader.load('assets/textures/tex-stone-wall.jpg'),
       woodDesk: loader.load('assets/textures/tex-wood-desk.jpg'),
       woodFloor: loader.load('assets/textures/tex-wood-floor.jpg'),
-      alchemySlate: loader.load('assets/textures/tex-alchemy-slate.jpg')
+      alchemySlate: loader.load('assets/textures/tex-alchemy-slate.jpg'),
+      dockWood: loader.load('assets/textures/harbor_dock_wood.jpg'),
+      lighthouseBrick: loader.load('assets/textures/lighthouse_brick.jpg'),
+      galleonHull: loader.load('assets/textures/galleon_hull.jpg')
     };
 
     this.tex.marketCobble.wrapS = THREE.RepeatWrapping;
@@ -226,6 +258,22 @@ class SpatialZoneManager {
 
     this.tex.woodDesk.wrapS = THREE.RepeatWrapping;
     this.tex.woodDesk.wrapT = THREE.RepeatWrapping;
+
+    if (this.tex.dockWood) {
+      this.tex.dockWood.wrapS = THREE.RepeatWrapping;
+      this.tex.dockWood.wrapT = THREE.RepeatWrapping;
+      this.tex.dockWood.repeat.set(8, 8);
+    }
+    if (this.tex.lighthouseBrick) {
+      this.tex.lighthouseBrick.wrapS = THREE.RepeatWrapping;
+      this.tex.lighthouseBrick.wrapT = THREE.RepeatWrapping;
+      this.tex.lighthouseBrick.repeat.set(3, 8);
+    }
+    if (this.tex.galleonHull) {
+      this.tex.galleonHull.wrapS = THREE.RepeatWrapping;
+      this.tex.galleonHull.wrapT = THREE.RepeatWrapping;
+      this.tex.galleonHull.repeat.set(4, 2);
+    }
 
     this.texturesLoaded = true;
   }
@@ -284,6 +332,8 @@ class SpatialZoneManager {
       this.buildZone4_Athletic(group);
     } else if (zoneId === 'zone5') {
       this.buildZone5_Station(group);
+    } else if (zoneId === 'zone6') {
+      this.buildZone6_Harbor(group);
     }
 
     this.world.scene.add(group);
@@ -333,6 +383,11 @@ class SpatialZoneManager {
       skyColorTop = 0x60a5fa;
       fogColor = 0xe0f2fe;
       fogDensity = 0.01;
+    } else if (zoneId === 'zone6') {
+      // 蔚藍秘境海港：陽光海岸海天一色與遠洋微風
+      skyColorTop = 0x0284c7;
+      fogColor = 0xbae6fd;
+      fogDensity = 0.009;
     } else {
       // 陽光微風市集：地中海溫暖日光藍天
       skyColorTop = 0x38bdf8;
@@ -1013,6 +1068,12 @@ class SpatialZoneManager {
     this.buildTrainCarriageDoorPortal(group, 4.8, 0, 2.2, '🚂 登上通往大魔導士殿堂的列車門 (OPEN)', 'OPEN', () => {
       this.world.showToast('🎉 汽笛長鳴！恭喜完成全維度英語護照試煉！');
       if (this.world) this.world.triggerEscapeCelebration();
+    });
+
+    // 北側鐵道專線閘門 (前往 Zone 6 蔚藍秘境海港)
+    this.buildStationNorthHarborGate(group, 0.0, 0, -12.5, '⚓ 海港貨運專線 ➔ 前往【蔚藍秘境海港】 (Zone 6)', () => {
+      this.world.showToast('⚓ 穿越海港鐵道專線，啟程前往【蔚藍秘境海港】！');
+      this.switchZone('zone6');
     });
 
     // 南側出站口閘門 (返回 Zone 4 活力冒險操場)
@@ -2822,6 +2883,1062 @@ class SpatialZoneManager {
     const tex = new THREE.CanvasTexture(canvas);
     tex.needsUpdate = true;
     return tex;
+  }
+
+  // ==========================================
+  // Zone 5 ➔ Zone 6 鐵道聯絡專線閘門
+  // ==========================================
+  buildStationNorthHarborGate(group, x, y, z, label, onTravel) {
+    const arch = new THREE.Group();
+    arch.position.set(x, y, z);
+
+    const steelMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.85, roughness: 0.25 });
+    const brassMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.9, roughness: 0.2 });
+
+    [-1.8, 1.8].forEach(px => {
+      const col = new THREE.Mesh(new THREE.BoxGeometry(0.5, 4.2, 0.5), steelMat);
+      col.position.set(px, 2.1, 0);
+      arch.add(col);
+
+      const cap = new THREE.Mesh(new THREE.SphereGeometry(0.25, 8, 8), brassMat);
+      cap.position.set(px, 4.3, 0);
+      arch.add(cap);
+    });
+
+    const crossBeam = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.35, 0.35), steelMat);
+    crossBeam.position.set(0, 4.0, 0);
+    arch.add(crossBeam);
+
+    const glow = new THREE.Mesh(
+      new THREE.PlaneGeometry(3.2, 3.8),
+      new THREE.MeshBasicMaterial({ color: 0x0284c7, transparent: true, opacity: 0.45, side: THREE.DoubleSide })
+    );
+    glow.position.set(0, 2.0, 0);
+    arch.add(glow);
+
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(4.0, 4.2, 2.5), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 2.1;
+    hitBox.userData = {
+      id: 'travel_portal_zone6',
+      label,
+      onClick: () => {
+        if (onTravel) onTravel();
+      }
+    };
+    arch.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      glow.material.opacity = 0.35 + Math.sin(time * 3.5) * 0.18;
+    });
+
+    group.add(arch);
+  }
+
+  // =========================================================================
+  // Zone 6: 蔚藍秘境海港 (Azure Fantasy Harbor)
+  // =========================================================================
+  buildZone6_Harbor(group) {
+    this.initTextures();
+
+    // 1. 陽光海洋明亮光照
+    const sunLight = new THREE.DirectionalLight(0xfffaed, 1.15);
+    sunLight.position.set(16, 28, 12);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width = 1024;
+    sunLight.shadow.mapSize.height = 1024;
+    group.add(sunLight);
+
+    const hemiLight = new THREE.HemisphereLight(0x38bdf8, 0x0f766e, 0.75);
+    group.add(hemiLight);
+
+    // 2. 動態蔚藍海洋水面 (160m x 160m, 附波浪漣漪)
+    this.buildHarborDynamicOcean(group);
+
+    // 3. 碼頭厚木石造棧道 (Wharf Pier Platform, 24m x 26m)
+    this.buildHarborWharfPlatform(group);
+
+    // 4. 停靠遠洋三桅帆船 (Galleon Ship, x: -8.6, z: -2.0) - SHIP POI
+    this.buildHarborGalleonShip(group, -8.6, -0.65, -2.0);
+
+    // 5. 海岸導航燈塔 (Coastal Lighthouse, x: 8.5, z: -8.0) - WIND POI
+    this.buildHarborLighthouse(group, 8.5, 0, -8.0);
+
+    // 6. 碼頭木造巡邏小艇 (BOAT POI)
+    this.buildHarborRowboat(group, 3.8, -0.5, -3.5);
+
+    // 7. 碼頭鮮魚貨物堆疊區 (FISH POI)
+    this.buildHarborCargoArea(group, 5.0, 0, 2.2);
+
+    // 8. 碼頭海平線觀景台 (WATER POI)
+    this.buildHarborWaterOverlook(group, 0.0, 0, -10.5);
+
+    // 9. 航向新世界海關拱門 (OPEN POI)
+    this.buildHarborGrandArchPortal(group, 0.0, 0, -13.0, '🚪 航向新世界海關拱門 (OPEN)', 'OPEN', () => {
+      this.world.openSpeechCard('OPEN', () => {
+        this.world.addXP(80);
+        this.checkZoneCompletionStatus();
+      });
+    });
+
+    // 10. 南側鐵道聯絡門 (返回 Zone 5 星光鐘樓車站)
+    this.buildHarborSouthRailwayGate(group, 0.0, 0, 12.0, '🚂 港口鐵道月台 ➔ 返回【星光鐘樓車站】', () => {
+      this.world.showToast('🚂 穿越鐵道閘門，返回星光鐘樓車站！');
+      this.switchZone('zone5');
+    });
+
+    // 11. 👑 關卡主 NPC：皇家海港總督・瑪琳娜船長 (Captain Marina)
+    this.buildHarborGuardianNPC(group, 1.5, 0, -5.0);
+
+    // 12. 海港環境微風光點粒子與海鷗
+    this.addFloatingParticles(group, 0x38bdf8, 160, 32, 6);
+    this.buildHarborSeagulls(group);
+  }
+
+  // 1. 動態海洋水面
+  buildHarborDynamicOcean(group) {
+    const oceanGeo = new THREE.PlaneGeometry(160, 160, 24, 24);
+    const oceanMat = new THREE.MeshStandardMaterial({
+      color: 0x0284c7,
+      roughness: 0.15,
+      metalness: 0.4,
+      transparent: true,
+      opacity: 0.88
+    });
+    const ocean = new THREE.Mesh(oceanGeo, oceanMat);
+    ocean.rotation.x = -Math.PI / 2;
+    ocean.position.y = -0.65;
+    ocean.receiveShadow = true;
+    group.add(ocean);
+
+    // 浮動海浪漣漪網格
+    const rippleGeo = new THREE.RingGeometry(2.0, 2.5, 16);
+    const rippleMat = new THREE.MeshBasicMaterial({
+      color: 0xe0f2fe,
+      transparent: true,
+      opacity: 0.45,
+      side: THREE.DoubleSide
+    });
+    const ripples = [];
+    const ripplePositions = [[-8, -1.0], [5, -4.0], [0, -11.0], [9, -7.0]];
+    ripplePositions.forEach(pos => {
+      const rip = new THREE.Mesh(rippleGeo, rippleMat.clone());
+      rip.rotation.x = -Math.PI / 2;
+      rip.position.set(pos[0], -0.62, pos[1]);
+      group.add(rip);
+      ripples.push(rip);
+    });
+
+    this.world.animators.push((time) => {
+      ocean.position.y = -0.65 + Math.sin(time * 1.8) * 0.08;
+      ripples.forEach((rip, idx) => {
+        const s = 1.0 + Math.sin(time * 2.2 + idx * 1.5) * 0.4;
+        rip.scale.set(s, s, s);
+        rip.material.opacity = 0.25 + Math.sin(time * 2.2 + idx * 1.5) * 0.2;
+      });
+    });
+  }
+
+  // 2. 碼頭厚木石造棧道 (Wharf Pier Platform)
+  buildHarborWharfPlatform(group) {
+    const wharfMat = new THREE.MeshStandardMaterial({
+      map: this.tex.dockWood,
+      roughness: 0.8,
+      metalness: 0.1
+    });
+    const woodPilingMat = new THREE.MeshStandardMaterial({
+      color: 0x451a03,
+      roughness: 0.9
+    });
+    const ironBollardMat = new THREE.MeshStandardMaterial({
+      color: 0x1e293b,
+      metalness: 0.9,
+      roughness: 0.25
+    });
+
+    // 碼頭中央木棧平台 (22m 寬 x 26m 長)
+    const pier = new THREE.Mesh(new THREE.PlaneGeometry(22, 26), wharfMat);
+    pier.rotation.x = -Math.PI / 2;
+    pier.position.set(1.0, 0, 0);
+    pier.receiveShadow = true;
+    group.add(pier);
+
+    // 碼頭底座厚度厚板 (側面防穿幫)
+    const apronMat = new THREE.MeshStandardMaterial({ color: 0x27272a, roughness: 0.9 });
+    const apronNorth = new THREE.Mesh(new THREE.BoxGeometry(22, 0.7, 0.4), apronMat);
+    apronNorth.position.set(1.0, -0.35, -13.0);
+    group.add(apronNorth);
+
+    const apronWest = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.7, 26), apronMat);
+    apronWest.position.set(-10.0, -0.35, 0);
+    group.add(apronWest);
+
+    const apronEast = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.7, 26), apronMat);
+    apronEast.position.set(12.0, -0.35, 0);
+    group.add(apronEast);
+
+    // 碼頭邊緣繫纜木樁 (Pilings)
+    for (let z = -12; z <= 12; z += 3) {
+      // 西側樁
+      const pWest = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.25, 2.2, 8), woodPilingMat);
+      pWest.position.set(-10.0, 0.3, z);
+      pWest.castShadow = true;
+      group.add(pWest);
+
+      // 東側樁
+      const pEast = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.25, 2.2, 8), woodPilingMat);
+      pEast.position.set(12.0, 0.3, z);
+      pEast.castShadow = true;
+      group.add(pEast);
+    }
+
+    // 碼頭鑄鐵繫纜樁 (Mooring Bollards)
+    const bollardCoords = [[-9.8, -8], [-9.8, -2], [-9.8, 4], [11.8, -6], [11.8, 2]];
+    bollardCoords.forEach(c => {
+      const bollard = new THREE.Group();
+      bollard.position.set(c[0], 0, c[1]);
+
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.3, 0.45, 8), ironBollardMat);
+      base.position.y = 0.22;
+      bollard.add(base);
+
+      const top = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.25, 0.25, 8), ironBollardMat);
+      top.position.y = 0.55;
+      bollard.add(top);
+
+      const crossBar = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.1, 0.1), ironBollardMat);
+      crossBar.position.y = 0.45;
+      bollard.add(crossBar);
+
+      group.add(bollard);
+    });
+
+    // 碼頭救生圈裝飾
+    const lifesaverMat = new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.4 });
+    const whiteBandMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 });
+    [-9.8, 11.8].forEach((bx, idx) => {
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.4, 0.12, 8, 16), lifesaverMat);
+      ring.position.set(bx, 0.7, idx === 0 ? 1.0 : -2.0);
+      ring.rotation.y = Math.PI / 2;
+      group.add(ring);
+    });
+  }
+
+  // 3. 停靠遠洋三桅大帆船 (Galleon Ship, SHIP POI)
+  buildHarborGalleonShip(group, x, y, z) {
+    const ship = new THREE.Group();
+    ship.position.set(x, y, z);
+
+    const hullMat = new THREE.MeshStandardMaterial({
+      map: this.tex.galleonHull,
+      roughness: 0.75,
+      metalness: 0.15
+    });
+    const darkWoodMat = new THREE.MeshStandardMaterial({ color: 0x3e2723, roughness: 0.85 });
+    const sailMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.9, side: THREE.DoubleSide });
+    const brassMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.85, roughness: 0.2 });
+    const goldTrimMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.7, roughness: 0.3 });
+
+    // 船身下層主船體 (Main Lower Hull)
+    const hullLower = new THREE.Mesh(new THREE.BoxGeometry(5.4, 3.2, 17.0), hullMat);
+    hullLower.position.y = 1.6;
+    hullLower.castShadow = true;
+    ship.add(hullLower);
+
+    // 船頭尖削尖角 (Bow)
+    const bow = new THREE.Mesh(new THREE.ConeGeometry(2.7, 4.5, 4), hullMat);
+    bow.rotation.x = -Math.PI / 2;
+    bow.rotation.y = Math.PI / 4;
+    bow.position.set(0, 1.8, -10.0);
+    bow.castShadow = true;
+    ship.add(bow);
+
+    // 前伸斜桅 (Bowsprit Spar)
+    const bowsprit = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.2, 6.0, 8), darkWoodMat);
+    bowsprit.rotation.x = -Math.PI / 3.2;
+    bowsprit.position.set(0, 3.2, -13.5);
+    ship.add(bowsprit);
+
+    // 船尾高聳船長室 (Sterncastle & Captain Cabin)
+    const sternCastle = new THREE.Mesh(new THREE.BoxGeometry(5.2, 3.4, 5.2), hullMat);
+    sternCastle.position.set(0, 3.5, 6.2);
+    sternCastle.castShadow = true;
+    ship.add(sternCastle);
+
+    // 船長室彩繪玻璃窗
+    const windowMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, emissive: 0x0284c7, emissiveIntensity: 0.4 });
+    const cabinWin = new THREE.Mesh(new THREE.BoxGeometry(3.6, 1.2, 0.2), windowMat);
+    cabinWin.position.set(0, 3.6, 8.85);
+    ship.add(cabinWin);
+
+    // 船舷兩側金色雕飾條
+    const trimLeft = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.25, 17.2), goldTrimMat);
+    trimLeft.position.set(-2.75, 3.0, 0);
+    ship.add(trimLeft);
+
+    const trimRight = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.25, 17.2), goldTrimMat);
+    trimRight.position.set(2.75, 3.0, 0);
+    ship.add(trimRight);
+
+    // 船尾黃銅舵輪 (Ship's Wheel)
+    const wheelStand = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.9, 0.3), darkWoodMat);
+    wheelStand.position.set(0, 5.5, 4.5);
+    ship.add(wheelStand);
+
+    const wheel = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.08, 6, 12), brassMat);
+    wheel.position.set(0, 6.0, 4.4);
+    ship.add(wheel);
+
+    // 船尾皇家海軍旗幟
+    const flagPole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 3.5, 8), darkWoodMat);
+    flagPole.position.set(0, 6.8, 8.4);
+    ship.add(flagPole);
+
+    const navyFlag = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.0), new THREE.MeshStandardMaterial({ color: 0x1d4ed8, side: THREE.DoubleSide }));
+    navyFlag.position.set(0.8, 7.5, 8.4);
+    ship.add(navyFlag);
+
+    // 三座巍峨高聳桅杆 (Three Masts)
+    const mastData = [
+      { z: -5.0, height: 13.0, radius: 0.24, yardWidth: 4.8, yardHeight: 8.5 }, // 前桅 (Foremast)
+      { z: 0.0, height: 16.5, radius: 0.28, yardWidth: 5.6, yardHeight: 10.5 }, // 主桅 (Mainmast)
+      { z: 4.5, height: 11.5, radius: 0.22, yardWidth: 4.2, yardHeight: 7.5 }   // 後桅 (Mizzenmast)
+    ];
+
+    mastData.forEach(m => {
+      // 桅杆柱
+      const mastPole = new THREE.Mesh(new THREE.CylinderGeometry(m.radius * 0.7, m.radius, m.height, 8), darkWoodMat);
+      mastPole.position.set(0, m.height / 2 + 2.5, m.z);
+      mastPole.castShadow = true;
+      ship.add(mastPole);
+
+      // 橫桁 (Yard)
+      const yard = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, m.yardWidth, 8), darkWoodMat);
+      yard.rotation.z = Math.PI / 2;
+      yard.position.set(0, m.yardHeight, m.z);
+      ship.add(yard);
+
+      // 鼓脹白帆 (Sail)
+      const sail = new THREE.Mesh(new THREE.PlaneGeometry(m.yardWidth * 0.9, 4.0, 6, 4), sailMat);
+      sail.position.set(0, m.yardHeight - 2.0, m.z - 0.2);
+      ship.add(sail);
+
+      // 瞭望台 (Crow's Nest)
+      const crowNest = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.55, 0.8, 8), darkWoodMat);
+      crowNest.position.set(0, m.yardHeight + 1.2, m.z);
+      ship.add(crowNest);
+    });
+
+    // 碼頭通往帆船跳板木橋 (Gangway Plank, x: -4.0 到 x: -6.5)
+    const gangway = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.18, 1.8), darkWoodMat);
+    gangway.position.set(3.4, 2.1, 0.5);
+    gangway.rotation.z = 0.22;
+    gangway.castShadow = true;
+    ship.add(gangway);
+
+    // 帆船巨大鐵錨 (Anchor)
+    const anchorRing = new THREE.Mesh(new THREE.TorusGeometry(0.4, 0.08, 6, 12), brassMat);
+    anchorRing.position.set(2.8, 1.5, -8.5);
+    ship.add(anchorRing);
+
+    // 互動點 POI: SHIP
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(4.0, 4.5, 4.0), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.set(3.0, 2.5, 0.5);
+    hitBox.userData = {
+      id: 'poi_SHIP',
+      label: '🚢 皇家遠洋三桅帆船 (SHIP)',
+      onClick: () => {
+        this.world.openSpeechCard('SHIP', () => {
+          this.world.addXP(80);
+          this.checkZoneCompletionStatus();
+        });
+      }
+    };
+    ship.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    // 船身隨海浪輕微擺動動畫
+    this.world.animators.push((time) => {
+      ship.rotation.z = Math.sin(time * 1.5) * 0.03;
+      ship.rotation.x = Math.cos(time * 1.2) * 0.02;
+    });
+
+    group.add(ship);
+  }
+
+  // 4. 海岸導航燈塔 (Coastal Lighthouse, WIND POI)
+  buildHarborLighthouse(group, x, y, z) {
+    const lighthouse = new THREE.Group();
+    lighthouse.position.set(x, y, z);
+
+    const stoneMat = new THREE.MeshStandardMaterial({ map: this.tex.stoneWall, roughness: 0.85 });
+    const brickMat = new THREE.MeshStandardMaterial({ map: this.tex.lighthouseBrick, roughness: 0.75 });
+    const ironMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.85, roughness: 0.3 });
+    const redTrimMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.6 });
+    const brassMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.9, roughness: 0.2 });
+
+    // 1. 巨大基座花崗岩台階 (Octagonal Foundation)
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.5, 1.6, 8), stoneMat);
+    base.position.y = 0.8;
+    base.castShadow = true;
+    base.receiveShadow = true;
+    lighthouse.add(base);
+
+    // 2. 圓錐紅白色環石砌塔身 (Tapered Shaft, 高 13m)
+    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 2.6, 13.0, 16), brickMat);
+    shaft.position.y = 8.1;
+    shaft.castShadow = true;
+    lighthouse.add(shaft);
+
+    // 3. 頂部環形觀景走廊 (Gallery Deck)
+    const gallery = new THREE.Mesh(new THREE.CylinderGeometry(2.3, 2.0, 0.6, 16), redTrimMat);
+    gallery.position.y = 14.8;
+    lighthouse.add(gallery);
+
+    // 走廊黑色鑄鐵護欄 (Railings)
+    for (let i = 0; i < 12; i++) {
+      const rad = (i / 12) * Math.PI * 2;
+      const rx = Math.cos(rad) * 2.1;
+      const rz = Math.sin(rad) * 2.1;
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.9, 6), ironMat);
+      post.position.set(rx, 15.4, rz);
+      lighthouse.add(post);
+    }
+
+    // 4. 玻璃燈室 (Lantern Room)
+    const glassMat = new THREE.MeshStandardMaterial({
+      color: 0xfef08a,
+      roughness: 0.1,
+      metalness: 0.9,
+      transparent: true,
+      opacity: 0.65
+    });
+    const lanternRoom = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.6, 2.0, 12), glassMat);
+    lanternRoom.position.y = 16.0;
+    lighthouse.add(lanternRoom);
+
+    // 5. 燈塔圓頂與避雷針 (Dome Roof & Finial)
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(1.65, 12, 8, 0, Math.PI * 2, 0, Math.PI * 0.5), redTrimMat);
+    dome.position.y = 17.0;
+    lighthouse.add(dome);
+
+    const finial = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.08, 1.6, 8), brassMat);
+    finial.position.y = 18.8;
+    lighthouse.add(finial);
+
+    // 6. 航海風向標與風向旗 (WIND POI 核心道具)
+    const vaneGroup = new THREE.Group();
+    vaneGroup.position.set(0, 19.4, 0);
+
+    const vaneArrow = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.9, 4), brassMat);
+    vaneArrow.rotation.z = -Math.PI / 2;
+    vaneArrow.position.x = 0.45;
+    vaneGroup.add(vaneArrow);
+
+    const vaneTail = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.4, 0.5), brassMat);
+    vaneTail.position.x = -0.45;
+    vaneGroup.add(vaneTail);
+
+    const windFlag = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.6), new THREE.MeshStandardMaterial({ color: 0xef4444, side: THREE.DoubleSide }));
+    windFlag.position.set(-0.9, 0, 0);
+    vaneGroup.add(windFlag);
+
+    lighthouse.add(vaneGroup);
+
+    // 7. 燈塔旋轉光束 (Rotating Light Beam)
+    const beamGroup = new THREE.Group();
+    beamGroup.position.set(0, 16.0, 0);
+
+    const beamMat = new THREE.MeshBasicMaterial({
+      color: 0xfef08a,
+      transparent: true,
+      opacity: 0.38,
+      side: THREE.DoubleSide
+    });
+    const beam = new THREE.Mesh(new THREE.ConeGeometry(3.5, 32.0, 16, 1, true), beamMat);
+    beam.rotation.x = Math.PI / 2;
+    beam.position.z = -16.0;
+    beamGroup.add(beam);
+
+    const lanternLight = new THREE.PointLight(0xfef08a, 2.5, 35);
+    beamGroup.add(lanternLight);
+
+    lighthouse.add(beamGroup);
+
+    // 互動點 POI: WIND
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.2, 4.0, 3.2), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.set(0, 2.2, 2.5);
+    hitBox.userData = {
+      id: 'poi_WIND',
+      label: '🌬️ 燈塔航海風向標 (WIND)',
+      onClick: () => {
+        this.world.openSpeechCard('WIND', () => {
+          this.world.addXP(80);
+          this.checkZoneCompletionStatus();
+        });
+      }
+    };
+    lighthouse.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    // 動畫：光束與風向標旋轉
+    this.world.animators.push((time) => {
+      beamGroup.rotation.y = time * 0.9;
+      vaneGroup.rotation.y = Math.sin(time * 0.6) * 0.6 + 0.3;
+    });
+
+    group.add(lighthouse);
+  }
+
+  // 5. 碼頭巡邏小艇 (BOAT POI)
+  buildHarborRowboat(group, x, y, z) {
+    const boat = new THREE.Group();
+    boat.position.set(x, y, z);
+
+    const woodMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.8 });
+    const seatMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.85 });
+    const oarMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.7 });
+
+    // 小艇木造船身
+    const hull = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.8, 3.8), woodMat);
+    hull.position.y = 0.4;
+    boat.add(hull);
+
+    // 尖船頭
+    const prow = new THREE.Mesh(new THREE.ConeGeometry(0.9, 1.2, 4), woodMat);
+    prow.rotation.x = -Math.PI / 2;
+    prow.rotation.y = Math.PI / 4;
+    prow.position.set(0, 0.4, -2.4);
+    boat.add(prow);
+
+    // 木長椅 (Thwarts)
+    [-0.6, 0.6].forEach(bz => {
+      const bench = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.1, 0.4), seatMat);
+      bench.position.set(0, 0.7, bz);
+      boat.add(bench);
+    });
+
+    // 划槳一對 (Oars)
+    const oar1 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.06, 2.2, 8), oarMat);
+    oar1.rotation.z = 0.5;
+    oar1.rotation.y = 0.2;
+    oar1.position.set(-0.8, 0.9, 0);
+    boat.add(oar1);
+
+    const oar2 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.06, 2.2, 8), oarMat);
+    oar2.rotation.z = -0.5;
+    oar2.rotation.y = -0.2;
+    oar2.position.set(0.8, 0.9, 0);
+    boat.add(oar2);
+
+    // 繫纜麻繩 (Mooring Rope)
+    const ropeMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.95 });
+    const rope = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.6, 6), ropeMat);
+    rope.position.set(0.6, 0.7, -1.8);
+    rope.rotation.z = -0.6;
+    boat.add(rope);
+
+    // 互動點 POI: BOAT
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(2.6, 2.6, 4.2), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.set(0, 0.8, 0);
+    hitBox.userData = {
+      id: 'poi_BOAT',
+      label: '🛶 碼頭木造巡邏小艇 (BOAT)',
+      onClick: () => {
+        this.world.openSpeechCard('BOAT', () => {
+          this.world.addXP(80);
+          this.checkZoneCompletionStatus();
+        });
+      }
+    };
+    boat.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    // 隨波浪輕晃
+    this.world.animators.push((time) => {
+      boat.position.y = y + Math.sin(time * 2.0) * 0.05;
+      boat.rotation.z = Math.sin(time * 1.8) * 0.04;
+    });
+
+    group.add(boat);
+  }
+
+  // 6. 碼頭鮮魚貨物堆疊區 (FISH POI)
+  buildHarborCargoArea(group, x, y, z) {
+    const cargo = new THREE.Group();
+    cargo.position.set(x, y, z);
+
+    const woodBoxMat = new THREE.MeshStandardMaterial({ map: this.tex.woodDesk, roughness: 0.8 });
+    const barrelMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.85 });
+    const ironBandMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8, roughness: 0.3 });
+    const fishSilverMat = new THREE.MeshStandardMaterial({ color: 0x93c5fd, metalness: 0.7, roughness: 0.3 });
+
+    // 堆疊木箱 (Cargo Crates)
+    const crateCoords = [
+      [-0.6, 0.45, 0, 0.9],
+      [0.5, 0.45, -0.4, 0.9],
+      [-0.1, 1.25, -0.2, 0.8]
+    ];
+    crateCoords.forEach(c => {
+      const box = new THREE.Mesh(new THREE.BoxGeometry(c[3], c[3], c[3]), woodBoxMat);
+      box.position.set(c[0], c[1], c[2]);
+      box.castShadow = true;
+      cargo.add(box);
+    });
+
+    // 鮮魚木桶 (Fish Barrels)
+    const barrelCoords = [[-1.2, 0.5, 0.6], [0.8, 0.5, 0.6]];
+    barrelCoords.forEach(b => {
+      const tub = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.38, 0.95, 10), barrelMat);
+      tub.position.set(b[0], b[1], b[2]);
+      tub.castShadow = true;
+      cargo.add(tub);
+
+      // 鐵箍
+      const band = new THREE.Mesh(new THREE.CylinderGeometry(0.43, 0.43, 0.08, 10), ironBandMat);
+      band.position.set(b[0], b[1], b[2]);
+      cargo.add(band);
+
+      // 桶頂銀光閃閃鮮魚
+      for (let f = 0; f < 3; f++) {
+        const fish = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.45, 6), fishSilverMat);
+        fish.rotation.x = Math.PI / 2 + f * 0.3;
+        fish.position.set(b[0] + (f - 1) * 0.15, b[1] + 0.5, b[2]);
+        cargo.add(fish);
+      }
+    });
+
+    // 互動點 POI: FISH
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.0, 2.5, 3.0), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.set(0, 1.2, 0);
+    hitBox.userData = {
+      id: 'poi_FISH',
+      label: '🐟 鮮美漁獲貨箱 (FISH)',
+      onClick: () => {
+        this.world.openSpeechCard('FISH', () => {
+          this.world.addXP(80);
+          this.checkZoneCompletionStatus();
+        });
+      }
+    };
+    cargo.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    group.add(cargo);
+  }
+
+  // 7. 碼頭海平線觀景台 (WATER POI)
+  buildHarborWaterOverlook(group, x, y, z) {
+    const overlook = new THREE.Group();
+    overlook.position.set(x, y, z);
+
+    const stoneMat = new THREE.MeshStandardMaterial({ map: this.tex.stoneWall, roughness: 0.85 });
+    const brassMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.85, roughness: 0.2 });
+
+    // 半圓石造欄杆觀景平台
+    const balustrade = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 1.8, 1.0, 12, 1, true, 0, Math.PI), stoneMat);
+    balustrade.position.y = 0.5;
+    balustrade.rotation.y = Math.PI / 2;
+    overlook.add(balustrade);
+
+    // 黃銅觀景單筒望遠鏡 (Scenic Telescope)
+    const tripod = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.25, 1.3, 3), brassMat);
+    tripod.position.set(0, 0.65, 0);
+    overlook.add(tripod);
+
+    const scope = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.14, 0.9, 8), brassMat);
+    scope.rotation.x = -Math.PI / 3;
+    scope.position.set(0, 1.35, -0.1);
+    overlook.add(scope);
+
+    // 水波微光標記 (Water Glyph)
+    const glyphMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.65, side: THREE.DoubleSide });
+    const glyph = new THREE.Mesh(new THREE.RingGeometry(0.6, 0.85, 16), glyphMat);
+    glyph.rotation.x = -Math.PI / 2;
+    glyph.position.set(0, 0.04, 0);
+    overlook.add(glyph);
+
+    // 互動點 POI: WATER
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.0, 3.0, 3.0), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.set(0, 1.5, 0);
+    hitBox.userData = {
+      id: 'poi_WATER',
+      label: '🌊 澄澈碧藍港灣 (WATER)',
+      onClick: () => {
+        this.world.openSpeechCard('WATER', () => {
+          this.world.addXP(80);
+          this.checkZoneCompletionStatus();
+        });
+      }
+    };
+    overlook.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      glyph.rotation.z = time * 0.8;
+      glyphMat.opacity = 0.4 + Math.sin(time * 2.5) * 0.25;
+    });
+
+    group.add(overlook);
+  }
+
+  // 8. 航向新世界海關凱旋拱門 (OPEN POI)
+  buildHarborGrandArchPortal(group, x, y, z, label, id, onClick) {
+    const arch = new THREE.Group();
+    arch.position.set(x, y, z);
+
+    const stoneMat = new THREE.MeshStandardMaterial({ map: this.tex.stoneWall, roughness: 0.8 });
+    const brassMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.85, roughness: 0.2 });
+
+    // 兩側巨大海港石柱立柱
+    [-2.2, 2.2].forEach(px => {
+      const col = new THREE.Mesh(new THREE.BoxGeometry(0.9, 5.0, 0.9), stoneMat);
+      col.position.set(px, 2.5, 0);
+      col.castShadow = true;
+      arch.add(col);
+
+      const anchorInsignia = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.08, 6, 12), brassMat);
+      anchorInsignia.position.set(px, 3.8, 0.48);
+      arch.add(anchorInsignia);
+    });
+
+    // 頂部大理石橫梁拱架
+    const beam = new THREE.Mesh(new THREE.BoxGeometry(5.4, 0.8, 1.0), stoneMat);
+    beam.position.set(0, 4.8, 0);
+    beam.castShadow = true;
+    arch.add(beam);
+
+    // 拱門正中央黃金徽章牌匾 (OPEN)
+    const plaque = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.5, 0.15), brassMat);
+    plaque.position.set(0, 4.8, 0.52);
+    arch.add(plaque);
+
+    // 湛藍旋渦時空傳送光門 (Azure Portal Vortex)
+    const portalMat = new THREE.MeshBasicMaterial({
+      color: 0x0284c7,
+      transparent: true,
+      opacity: 0.55,
+      side: THREE.DoubleSide
+    });
+    const portal = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 4.3), portalMat);
+    portal.position.set(0, 2.2, 0);
+    arch.add(portal);
+
+    // 傳送門互動 Hitbox
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(4.2, 4.8, 2.4), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 2.4;
+    hitBox.userData = { id, label, onClick };
+    arch.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      portalMat.opacity = 0.45 + Math.sin(time * 3.2) * 0.2;
+    });
+
+    group.add(arch);
+  }
+
+  // 9. 南側海港鐵道聯絡門 (返回 Zone 5)
+  buildHarborSouthRailwayGate(group, x, y, z, label, onTravel) {
+    const gate = new THREE.Group();
+    gate.position.set(x, y, z);
+
+    const steelMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.85, roughness: 0.25 });
+    const brassMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.85, roughness: 0.2 });
+
+    [-1.8, 1.8].forEach(px => {
+      const col = new THREE.Mesh(new THREE.BoxGeometry(0.5, 4.0, 0.5), steelMat);
+      col.position.set(px, 2.0, 0);
+      gate.add(col);
+
+      const cap = new THREE.Mesh(new THREE.SphereGeometry(0.24, 8, 8), brassMat);
+      cap.position.set(px, 4.2, 0);
+      gate.add(cap);
+    });
+
+    const crossBeam = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.3, 0.3), steelMat);
+    crossBeam.position.set(0, 3.9, 0);
+    gate.add(crossBeam);
+
+    const glow = new THREE.Mesh(
+      new THREE.PlaneGeometry(3.2, 3.6),
+      new THREE.MeshBasicMaterial({ color: 0x818cf8, transparent: true, opacity: 0.4, side: THREE.DoubleSide })
+    );
+    glow.position.set(0, 1.9, 0);
+    gate.add(glow);
+
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.8, 4.0, 2.4), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 2.0;
+    hitBox.userData = {
+      id: 'return_portal_zone5_from_harbor',
+      label,
+      onClick: () => {
+        if (onTravel) onTravel();
+      }
+    };
+    gate.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      glow.material.opacity = 0.3 + Math.sin(time * 3) * 0.15;
+    });
+
+    group.add(gate);
+  }
+
+  // 10. 👑 關卡主 NPC：皇家海港總督・瑪琳娜船長 (Captain Marina)
+  buildHarborGuardianNPC(group, x, y, z) {
+    const npc = new THREE.Group();
+    npc.position.set(x, y, z);
+
+    const navyMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.6 });
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 });
+    const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.85, roughness: 0.2 });
+    const skinMat = new THREE.MeshStandardMaterial({ color: 0xfed7aa, roughness: 0.8 });
+    const hatMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5 });
+    const hairMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.7 });
+
+    // 羅盤雕花底座 (Compass Rose Pedestal)
+    const pedestal = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.3, 0.2, 16), goldMat);
+    pedestal.position.y = 0.1;
+    pedestal.receiveShadow = true;
+    npc.add(pedestal);
+
+    // 守護者腳下光環 (Aura Ring)
+    const auraMat = new THREE.MeshBasicMaterial({ color: 0xfacc15, transparent: true, opacity: 0.6, side: THREE.DoubleSide });
+    const aura = new THREE.Mesh(new THREE.RingGeometry(1.25, 1.5, 24), auraMat);
+    aura.rotation.x = -Math.PI / 2;
+    aura.position.y = 0.12;
+    npc.add(aura);
+
+    // 雙腿長靴
+    [-0.22, 0.22].forEach(lx => {
+      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.14, 1.1, 8), hatMat);
+      leg.position.set(lx, 0.75, 0);
+      leg.castShadow = true;
+      npc.add(leg);
+    });
+
+    // 海軍大衣身體軀幹 (Navy Frock Coat)
+    const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.32, 1.1, 8), navyMat);
+    torso.position.y = 1.8;
+    torso.castShadow = true;
+    npc.add(torso);
+
+    // 大衣金色雙排扣與飾邊
+    const trim = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.8, 0.08), goldMat);
+    trim.position.set(0, 1.8, 0.35);
+    npc.add(trim);
+
+    // 金色肩章 (Epaulets)
+    [-0.42, 0.42].forEach(ex => {
+      const epaulet = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.08, 0.28), goldMat);
+      epaulet.position.set(ex, 2.3, 0);
+      npc.add(epaulet);
+    });
+
+    // 白色領結襯衫 (Jabot Cravat)
+    const cravat = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.24, 0.05), whiteMat);
+    cravat.position.set(0, 2.22, 0.34);
+    npc.add(cravat);
+
+    // 頭部與金色捲髮 (Head & Hair)
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.26, 12, 10), skinMat);
+    head.position.y = 2.58;
+    head.castShadow = true;
+    npc.add(head);
+
+    const hair = new THREE.Mesh(new THREE.SphereGeometry(0.29, 8, 8), hairMat);
+    hair.position.set(0, 2.62, -0.05);
+    npc.add(hair);
+
+    // 船長三角雙角帽 (Captain's Bicorne Hat)
+    const hat = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.28, 0.42), hatMat);
+    hat.position.set(0, 2.86, 0);
+    hat.rotation.y = Math.PI / 10;
+    npc.add(hat);
+
+    const hatCockade = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), goldMat);
+    hatCockade.position.set(0.25, 2.92, 0.2);
+    npc.add(hatCockade);
+
+    // 右手拿著黃銅單筒望遠鏡 (Spyglass)
+    const spyglass = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.07, 0.75, 8), goldMat);
+    spyglass.rotation.x = -Math.PI / 3;
+    spyglass.rotation.z = -0.3;
+    spyglass.position.set(0.48, 1.9, 0.25);
+    npc.add(spyglass);
+
+    // 頭頂懸浮動態稱號牌 (Billboard)
+    const billboard = this.createGuardianBillboard('zone6', '瑪琳娜船長');
+    billboard.position.set(0, 3.4, 0);
+    npc.add(billboard);
+
+    // 互動 HitBox: 點擊或 E 鍵挑戰關卡主
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(2.6, 3.6, 2.6), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 1.8;
+    hitBox.userData = {
+      id: 'guardian_zone6',
+      label: '👑 [E] 挑戰關卡主・瑪琳娜船長 (Captain Marina)',
+      onClick: () => {
+        this.handleGuardianInteraction('zone6');
+      }
+    };
+    npc.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    // 關卡主周身光環呼吸動畫
+    this.world.animators.push((time) => {
+      aura.rotation.z = time * 0.5;
+      const s = 1.0 + Math.sin(time * 2.5) * 0.08;
+      aura.scale.set(s, s, s);
+      billboard.position.y = 3.4 + Math.sin(time * 2.0) * 0.06;
+    });
+
+    group.add(npc);
+  }
+
+  // 關卡主動態畫布稱號牌 (Canvas Billboard)
+  createGuardianBillboard(zoneId, name) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return new THREE.Group();
+
+    const p = (window.cloudSyncManager && window.cloudSyncManager.profile)
+      ? window.cloudSyncManager.profile
+      : { completedWords: [] };
+    const completedList = (p.completedWords || []).map(w => w.toUpperCase());
+    const zone = this.zones[zoneId] || { words: [] };
+    const isReady = zone.words.every(w => completedList.includes(w.toUpperCase()));
+
+    // 背景氣泡圓角
+    ctx.fillStyle = isReady ? 'rgba(15, 23, 42, 0.88)' : 'rgba(30, 41, 59, 0.75)';
+    ctx.strokeStyle = isReady ? '#facc15' : '#64748b';
+    ctx.lineWidth = 5;
+
+    ctx.beginPath();
+    ctx.roundRect(10, 10, 492, 108, 20);
+    ctx.fill();
+    ctx.stroke();
+
+    // 文字
+    ctx.textAlign = 'center';
+    if (isReady) {
+      ctx.fillStyle = '#fde047';
+      ctx.font = 'bold 30px sans-serif';
+      ctx.fillText('👑 [E] 挑戰關卡主試煉！', 256, 55);
+      ctx.fillStyle = '#67e8f9';
+      ctx.font = 'bold 22px sans-serif';
+      ctx.fillText(`⚓ ${name} (Captain Marina)`, 256, 95);
+    } else {
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = 'bold 26px sans-serif';
+      ctx.fillText(`⚓ 關卡主・${name}`, 256, 52);
+      ctx.fillStyle = '#cbd5e1';
+      ctx.font = '20px sans-serif';
+      ctx.fillText('🔒 請先探索收集本關單字', 256, 90);
+    }
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.needsUpdate = true;
+
+    const spriteMat = new THREE.SpriteMaterial({ map: tex, transparent: true });
+    const sprite = new THREE.Sprite(spriteMat);
+    sprite.scale.set(3.2, 0.8, 1);
+    return sprite;
+  }
+
+  // 關卡主互動決策 (Guardian Interaction Handler)
+  handleGuardianInteraction(zoneId) {
+    const zone = this.zones[zoneId];
+    if (!zone) return;
+
+    const p = (window.cloudSyncManager && window.cloudSyncManager.profile)
+      ? window.cloudSyncManager.profile
+      : { completedWords: [] };
+    const completedList = (p.completedWords || []).map(w => w.toUpperCase());
+
+    // 檢查該關卡單字是否已全部收集
+    const remaining = zone.words.filter(w => !completedList.includes(w.toUpperCase()));
+
+    // 若還有未完成單字，給予引導提示
+    if (remaining.length > 0 && !window.DEV_OVERRIDE_GUARDIAN) {
+      if (window.audioManager) window.audioManager.playSfx('click');
+      this.world.showToast(`⚓ 瑪琳娜船長：「冒險者，請先探索海港收集完剩餘單字（${remaining.join(', ')}），再來接受我的英語問句試煉！」`);
+      return;
+    }
+
+    // 達成全部單字探索，啟動英語問句三重試煉！
+    if (typeof window.openGuardianTrial === 'function') {
+      window.openGuardianTrial(zoneId);
+    } else if (this.world && typeof this.world.openGuardianTrial === 'function') {
+      this.world.openGuardianTrial(zoneId);
+    } else {
+      this.world.showToast('⚓ 關卡主試煉已就緒！');
+    }
+  }
+
+  // 檢查關卡探索完成狀態
+  checkZoneCompletionStatus() {
+    const curZone = this.zones[this.currentZoneId];
+    if (!curZone) return;
+
+    const p = (window.cloudSyncManager && window.cloudSyncManager.profile)
+      ? window.cloudSyncManager.profile
+      : { completedWords: [] };
+    const completedList = (p.completedWords || []).map(w => w.toUpperCase());
+
+    const remaining = curZone.words.filter(w => !completedList.includes(w.toUpperCase()));
+    if (remaining.length === 0) {
+      if (window.audioManager) window.audioManager.playSfx('magicSuccess');
+      this.world.showToast(`🎉【${curZone.name}】所有單字已全數集齊！關卡主頭頂已綻放金色皇冠，快去接受英語問句挑戰！`);
+    }
+  }
+
+  // 11. 海港天際海鷗動態 (Harbor Seagulls)
+  buildHarborSeagulls(group) {
+    const gullGroup = new THREE.Group();
+    const gullMat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+
+    const gulls = [];
+    for (let i = 0; i < 4; i++) {
+      const g = new THREE.Group();
+      // 兩片海鷗翅膀
+      const wingLeft = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.25), gullMat);
+      wingLeft.position.x = -0.3;
+      wingLeft.rotation.z = 0.25;
+      g.add(wingLeft);
+
+      const wingRight = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.25), gullMat);
+      wingRight.position.x = 0.3;
+      wingRight.rotation.z = -0.25;
+      g.add(wingRight);
+
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 0.5, 6), gullMat);
+      body.rotation.x = Math.PI / 2;
+      g.add(body);
+
+      g.position.set(
+        Math.cos((i / 4) * Math.PI * 2) * 14,
+        12 + i * 1.2,
+        Math.sin((i / 4) * Math.PI * 2) * 14
+      );
+      gullGroup.add(g);
+      gulls.push({ mesh: g, angle: (i / 4) * Math.PI * 2, radius: 14 + i * 2, speed: 0.4 + i * 0.1 });
+    }
+
+    this.world.animators.push((time) => {
+      gulls.forEach(g => {
+        g.angle += g.speed * 0.02;
+        g.mesh.position.x = Math.cos(g.angle) * g.radius;
+        g.mesh.position.z = Math.sin(g.angle) * g.radius;
+        g.mesh.rotation.y = -g.angle;
+      });
+    });
+
+    group.add(gullGroup);
   }
 }
 

@@ -112,7 +112,18 @@ class MinimapManager {
         { x: -2.8, z: -8.5, label: '天文時鐘塔', icon: '🕰️', color: '#38bdf8' },
         { x: -4.5, z: 1.0, label: '路燈長椅', icon: '🌅', color: '#eab308' },
         { x: 4.8, z: 2.2, label: '特快車登車門', icon: '✨', color: '#10b981', isPortal: true },
+        { x: 0.0, z: -12.5, label: '海港貨運閘門/往海港', icon: '⚓', color: '#0284c7', isPortal: true },
         { x: -1.0, z: 12.0, label: '南側出站口/往操場', icon: '🚪', color: '#a855f7', isPortal: true }
+      ],
+      'zone6': [
+        { x: -5.5, z: -2.0, label: '遠洋三桅帆船', icon: '🚢', color: '#0284c7' },
+        { x: 3.8, z: -3.5, label: '巡邏小艇', icon: '🛶', color: '#f59e0b' },
+        { x: 8.5, z: -5.5, label: '燈塔風向標', icon: '🌬️', color: '#38bdf8' },
+        { x: 5.0, z: 2.2, label: '鮮美漁獲貨堆', icon: '🐟', color: '#06b6d4' },
+        { x: 0.0, z: -10.5, label: '港灣觀景台', icon: '🌊', color: '#3b82f6' },
+        { x: 0.0, z: -13.0, label: '海關凱旋門/往新世界', icon: '🚪', color: '#10b981', isPortal: true },
+        { x: 1.5, z: -5.0, label: '關卡主・瑪琳娜船長', icon: '👑', color: '#facc15', isGuardian: true },
+        { x: 0.0, z: 12.0, label: '南側鐵道閘門/往車站', icon: '🚂', color: '#a855f7', isPortal: true }
       ]
     };
 
@@ -248,6 +259,38 @@ class MinimapManager {
       // 天文時鐘塔
       ctx.fillStyle = '#b45309';
       ctx.fillRect(-5.0 * s, -10.8 * s, 4.2 * s, 4.2 * s);
+
+    } else if (curZone === 'zone6') {
+      // 蔚藍海港：蔚藍海水底色 + 木棧道平台 + 大帆船 + 燈塔圓形
+      ctx.fillStyle = '#0284c7';
+      ctx.fillRect(-16 * s, -18 * s, 32 * s, 36 * s);
+
+      // 木造碼頭主平台 (22m x 26m)
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(-10 * s, -13 * s, 22 * s, 26 * s);
+      ctx.strokeStyle = '#b45309';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(-10 * s, -13 * s, 22 * s, 26 * s);
+
+      // 西側大帆船輪廓 (長條與尖頭)
+      ctx.fillStyle = '#3e2723';
+      ctx.fillRect(-11.5 * s, -8 * s, 5.4 * s, 16 * s);
+      ctx.beginPath();
+      ctx.moveTo(-11.5 * s, -8 * s);
+      ctx.lineTo(-8.8 * s, -12 * s);
+      ctx.lineTo(-6.1 * s, -8 * s);
+      ctx.closePath();
+      ctx.fill();
+
+      // 東北側海岸燈塔 (八角/圓形石塔)
+      ctx.fillStyle = '#b91c1c';
+      ctx.beginPath();
+      ctx.arc(8.5 * s, -8.0 * s, 2.8 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath();
+      ctx.arc(8.5 * s, -8.0 * s, 1.2 * s, 0, Math.PI * 2);
+      ctx.fill();
     }
 
     ctx.restore();
@@ -328,8 +371,17 @@ class MinimapManager {
       const dist = Math.hypot(poi.x - px, poi.z - pz);
       const isNearby = dist < 3.5;
 
-      // 外圍微光脈衝 (若為傳送門或玩家靠近)
-      if (poi.isPortal || isNearby) {
+      // 外圍微光脈衝 (若為關卡主、傳送門或玩家靠近)
+      if (poi.isGuardian) {
+        ctx.beginPath();
+        const pulseR = 11 + Math.sin(timeSec * 5) * 4;
+        ctx.arc(ix, iz, pulseR, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(250, 204, 21, 0.4)';
+        ctx.fill();
+        ctx.strokeStyle = '#facc15';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      } else if (poi.isPortal || isNearby) {
         ctx.beginPath();
         const pulseR = 9 + Math.sin(timeSec * 4) * 3;
         ctx.arc(ix, iz, pulseR, 0, Math.PI * 2);

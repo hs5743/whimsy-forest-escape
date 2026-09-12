@@ -203,5 +203,205 @@ const VOCAB_DATA = {
     matchKeywords: ["sun", "son", "sunny"],
     xp: 50,
     color: "#f6ad55"
+  },
+  "SHIP": {
+    word: "SHIP",
+    phonics: "/ʃɪp/ • S-H-I-P",
+    zh: "大帆船、輪船",
+    category: "蔚藍秘境海港",
+    mascot: "marina",
+    mascotName: "瑪琳娜船長 Marina",
+    mascotImg: "assets/textures/tex-town-facade.jpg",
+    dialogue: "“The majestic galleon ship is ready to set sail across the ocean!”",
+    dialogueZh: "「威風凜凜的三桅大帆船已備妥風帆，準備啟航橫越大洋！」",
+    prompt: "請看著碼頭旁停泊的宏偉帆船，唸出：SHIP！",
+    puzzleHint: "碼頭停泊著巨大的三桅遠洋帆船，登上甲板感受航海的壯麗！",
+    audioFile: "assets/sounds/vocab/SHIP.wav",
+    matchKeywords: ["ship", "ships", "sheep"],
+    xp: 60,
+    color: "#0284c7"
+  },
+  "BOAT": {
+    word: "BOAT",
+    phonics: "/boʊt/ • B-O-A-T",
+    zh: "小艇、小木船",
+    category: "蔚藍秘境海港",
+    mascot: "marina",
+    mascotName: "瑪琳娜船長 Marina",
+    mascotImg: "assets/textures/tex-town-facade.jpg",
+    dialogue: "“The wooden boat rocks gently beside the harbor pier.”",
+    dialogueZh: "「繫在碼頭邊的木造小艇隨著海浪輕輕搖曳晃動。」",
+    prompt: "請看著碼頭繫纜樁旁的小船，唸出：BOAT！",
+    puzzleHint: "港口木棧道邊繫著一艘輕巧的小木艇，是近海探險的良伴！",
+    audioFile: "assets/sounds/vocab/BOAT.wav",
+    matchKeywords: ["boat", "boats", "bolt"],
+    xp: 50,
+    color: "#f59e0b"
+  },
+  "WIND": {
+    word: "WIND",
+    phonics: "/wɪnd/ • W-I-N-D",
+    zh: "微風、航海之風",
+    category: "蔚藍秘境海港",
+    mascot: "marina",
+    mascotName: "瑪琳娜船長 Marina",
+    mascotImg: "assets/textures/tex-town-facade.jpg",
+    dialogue: "“A brisk ocean wind fills the sails and turns the lighthouse vane!”",
+    dialogueZh: "「強勁清爽的海風吹鼓了風帆，也轉動了燈塔上的航海風向標！」",
+    prompt: "請感受吹拂海面的清爽微風，唸出：WIND！",
+    puzzleHint: "燈塔頂端的風向標與風向旗正隨風旋轉，為水手測量風向！",
+    audioFile: "assets/sounds/vocab/WIND.wav",
+    matchKeywords: ["wind", "winds", "win", "wing"],
+    xp: 50,
+    color: "#38bdf8"
+  },
+  "WATER": {
+    word: "WATER",
+    phonics: "/ˈwɔː.tər/ • W-A-T-E-R",
+    zh: "海水、碧波清泉",
+    category: "蔚藍秘境海港",
+    mascot: "marina",
+    mascotName: "瑪琳娜船長 Marina",
+    mascotImg: "assets/textures/tex-town-facade.jpg",
+    dialogue: "“The crystal clear blue water sparkles under the warm morning sunlight.”",
+    dialogueZh: "「澄澈湛藍的港灣海水在晨曦朝陽下閃爍著點點波光。」",
+    prompt: "請俯瞰碼頭邊清澈碧藍的海水，唸出：WATER！",
+    puzzleHint: "碼頭觀景台邊的海水碧藍透亮，波光粼粼！",
+    audioFile: "assets/sounds/vocab/WATER.wav",
+    matchKeywords: ["water", "waters", "waiter"],
+    xp: 50,
+    color: "#06b6d4"
+  }
+};
+
+// 關卡主英語問句試煉題庫 (Guardian Question Trials Database)
+// 每位關卡主具備：
+// 1. NPC 開場對話
+// 2. 兩道英語問句填充選擇題 (Multiple Choice)
+// 3. 一道高階英語問句朗讀挑戰 (Sentence Speech Trial, 正確率 >= 80%)
+const GUARDIAN_TRIALS = {
+  'zone6': {
+    zoneId: 'zone6',
+    zoneName: '蔚藍秘境海港',
+    bossId: 'captain_marina',
+    bossName: '瑪琳娜船長 (Captain Marina)',
+    bossRole: '⚓ 皇家海港總督・傳奇領航者',
+    bossAvatar: 'assets/textures/tex-town-facade.jpg',
+    bossEmoji: '⚓',
+    introDialogue: "Ahoy! 勇敢的冒險者！你已經掌握了海港的所有基礎字彙。但是，想要拿到航向未知海域的通行證並獲得本關卡【海港守護之星】，你必須通過我的「英語問句三重試煉」！拔錨啟航，接受挑戰吧！",
+    rewardXP: 200,
+    starName: "海港守護之星 ⚓",
+    victoryDialogue: "Bravo! 你的英語問句掌握得無懈可擊，發音精準有力！以皇家海港總督之名，我將這顆【海港守護之星】授予你，浩瀚的星海航道已為你敞開！",
+    questions: [
+      {
+        stage: 1,
+        type: 'choice',
+        title: '問句試煉 1/3：疑問詞選擇題 (Question Words)',
+        scenario: '航海探索情境：你在碼頭想打聽遠洋帆船的航行方向',
+        prompt: '請問句中的空格應填入哪一個疑問詞？',
+        sentence: "“_____ is the big ship sailing to?”",
+        sentenceZh: "「這艘大帆船要航向哪裡？」",
+        audioText: "Where is the big ship sailing to?",
+        options: [
+          { key: 'A', text: 'Where', correct: true, hint: '答對了！詢問「地點/目的地」使用 Where。' },
+          { key: 'B', text: 'When', correct: false, hint: 'When 是詢問「時間」，這裡詢問的是航向哪裡喔！' },
+          { key: 'C', text: 'Who', correct: false, hint: 'Who 是詢問「人物」，不能用來問航行目的地喔！' },
+          { key: 'D', text: 'What', correct: false, hint: '詢問航向某個目的地，以「Where ... sailing to?」最道地！' }
+        ],
+        explanation: '【Where】用於詢問地點、場所與目的地。「Where is the big ship sailing to?」意思為「這艘大帆船要航向何處？」。'
+      },
+      {
+        stage: 2,
+        type: 'choice',
+        title: '問句試煉 2/3：情境助動詞選擇題 (Auxiliary Verbs)',
+        scenario: '航海導航情境：船長指著遠方海平面的燈塔光芒詢問隊員',
+        prompt: '請問句中的空格應填入哪一個助動詞？',
+        sentence: "“_____ you see the lighthouse beam across the sea?”",
+        sentenceZh: "「你能看見橫越海面的燈塔光束嗎？」",
+        audioText: "Can you see the lighthouse beam across the sea?",
+        options: [
+          { key: 'A', text: 'Can', correct: true, hint: '太厲害了！Can you see... 用於詢問「你能看見...嗎？」。' },
+          { key: 'B', text: 'Is', correct: false, hint: '主詞是 you 且搭配動詞原形 see，不能使用 Is 喔！' },
+          { key: 'C', text: 'Does', correct: false, hint: '主詞是 you，一般動詞現在式疑問要用 Do 而非 Does。' },
+          { key: 'D', text: 'Are', correct: false, hint: 'Are you 後方需接 V-ing 或形容詞，接原形動詞 see 需使用 Can。' }
+        ],
+        explanation: '【Can】表示能力或感官觀察，「Can you see...?」為生活與航海中最常用的詢問句：「你能看見...嗎？」。'
+      },
+      {
+        stage: 3,
+        type: 'speech',
+        title: '終極試煉 3/3：英語問句口說朗讀 (Required Accuracy ≥ 80%)',
+        scenario: '海港尋路任務：請用清晰標準的英語問句，向海港水手詢問燈塔的方位！',
+        prompt: '請點擊下方麥克風，完整清晰地朗讀出這句英語問句：',
+        targetSentence: "Where is the harbor lighthouse?",
+        targetSentenceZh: "「請問海港燈塔在哪裡？」",
+        phoneticGuide: "/wɛər ɪz ðə ˈhɑːrbər ˈlaɪtˌhaʊs/",
+        targetKeywords: ["where", "is", "the", "harbor", "lighthouse"],
+        requiredAccuracy: 80,
+        audioText: "Where is the harbor lighthouse?"
+      }
+    ]
+  },
+  'zone1': {
+    zoneId: 'zone1',
+    zoneName: '見習學徒書齋',
+    bossId: 'elder_ollie',
+    bossName: '貓頭鷹長老 Ollie (Elder Ollie)',
+    bossRole: '🦉 智慧殿堂守護者・貓頭鷹長老',
+    bossAvatar: 'assets/textures/owl-guide.png',
+    bossEmoji: '🦉',
+    introDialogue: "咕咕！年輕的魔法學徒，你在書齋中的學習非常出色。不過，真正的大學者必須能夠靈活使用英語問句發問！來吧，通過我的問句三重考驗，奪取【書齋守護之星】！",
+    rewardXP: 150,
+    starName: "書齋守護之星 📜",
+    victoryDialogue: "智慧的光芒在你眼中閃耀！你的英語問句精準無誤，這是屬於你的【書齋守護之星】！",
+    questions: [
+      {
+        stage: 1,
+        type: 'choice',
+        title: '問句試煉 1/3：疑問詞選擇題 (Question Words)',
+        scenario: '書齋探秘情境：你想知道桌上這本古老魔導書的名稱或內容',
+        prompt: '請問句中的空格應填入哪一個疑問詞？',
+        sentence: "“_____ is this magic book about?”",
+        sentenceZh: "「這本魔法書是關於什麼的？」",
+        audioText: "What is this magic book about?",
+        options: [
+          { key: 'A', text: 'What', correct: true, hint: '正確！詢問「事物內容」使用 What。' },
+          { key: 'B', text: 'Where', correct: false, hint: 'Where 是詢問「地點」，詢問內容要用 What。' },
+          { key: 'C', text: 'Who', correct: false, hint: 'Who 是詢問「人物」喔！' },
+          { key: 'D', text: 'When', correct: false, hint: 'When 是詢問「時間」喔！' }
+        ],
+        explanation: '【What】用於詢問事物內容，「What is this magic book about?」意為「這本魔法書是關於什麼的？」。'
+      },
+      {
+        stage: 2,
+        type: 'choice',
+        title: '問句試煉 2/3：位置問句選擇題 (Where & Prepositions)',
+        scenario: '尋找關鍵道具：你在書齋中尋找打開抽屜的黃金鑰匙',
+        prompt: '請問句中的空格應填入哪一個疑問詞？',
+        sentence: "“_____ is the golden key on the desk?”",
+        sentenceZh: "「書桌上的那把黃金鑰匙在哪裡？」",
+        audioText: "Where is the golden key on the desk?",
+        options: [
+          { key: 'A', text: 'Where', correct: true, hint: '太棒了！詢問「在哪裡」要用 Where！' },
+          { key: 'B', text: 'How', correct: false, hint: 'How 是詢問「如何/方式」喔。' },
+          { key: 'C', text: 'Why', correct: false, hint: 'Why 是詢問「原因」喔。' },
+          { key: 'D', text: 'Which', correct: false, hint: '這裡已明確指特定金鑰匙，詢問位置用 Where 最合適。' }
+        ],
+        explanation: '【Where】用於詢問位置或場所，「Where is the golden key on the desk?」意為「書桌上的黃金鑰匙在哪裡？」。'
+      },
+      {
+        stage: 3,
+        type: 'speech',
+        title: '終極試煉 3/3：英語問句口說朗讀 (Required Accuracy ≥ 80%)',
+        scenario: '書齋問答挑戰：請清晰標準朗讀出詢問光芒與燭台的問句！',
+        prompt: '請點擊下方麥克風，完整清晰地朗讀出這句英語問句：',
+        targetSentence: "Can you see the golden light?",
+        targetSentenceZh: "「你能看見那道金色光芒嗎？」",
+        phoneticGuide: "/kæn juː siː ðə ˈɡoʊldən laɪt/",
+        targetKeywords: ["can", "you", "see", "the", "golden", "light"],
+        requiredAccuracy: 80,
+        audioText: "Can you see the golden light?"
+      }
+    ]
   }
 };

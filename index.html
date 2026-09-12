@@ -654,6 +654,175 @@
           關閉地圖
         </button>
       </div>
+  <!-- 關卡主英語問句三重試煉彈窗 (Guardian Question Trial Modal) -->
+  <div id="guardianTrialModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 160; display: none; justify-content: center; align-items: center; padding: 12px;">
+    <div class="guardian-dialog-container">
+      <button class="modal-close-btn" type="button" onclick="closeGuardianTrialModal()" aria-label="關閉">✕</button>
+
+      <!-- 頂部：關卡主標頭與試煉進度 -->
+      <div class="guardian-header">
+        <div class="guardian-identity-badge">
+          <div id="guardianAvatarWrap" class="guardian-avatar-wrap">
+            <span id="guardianAvatarEmoji">⚓</span>
+          </div>
+          <div class="guardian-titles">
+            <div id="guardianRoleText" class="guardian-role-tag">⚓ 皇家海港總督・傳奇領航者</div>
+            <h2 id="guardianNameText" class="guardian-name-title">瑪琳娜船長 (Captain Marina)</h2>
+          </div>
+        </div>
+
+        <!-- 試煉三階段進度條 -->
+        <div class="guardian-stage-stepper">
+          <div id="stepDot1" class="step-dot active"><span class="step-num">1</span> <span class="step-label">問句填充 1</span></div>
+          <div class="step-arrow">➔</div>
+          <div id="stepDot2" class="step-dot"><span class="step-num">2</span> <span class="step-label">問句填充 2</span></div>
+          <div class="step-arrow">➔</div>
+          <div id="stepDot3" class="step-dot"><span class="step-num">3</span> <span class="step-label">問句朗讀 (≥80%)</span></div>
+        </div>
+      </div>
+
+      <!-- 主內容區域：分階段動態切換 -->
+      <div class="guardian-body">
+        <!-- 階段 0: 關卡主開場對白 -->
+        <div id="guardianStageIntro" class="guardian-stage-panel" style="display: block;">
+          <div class="guardian-speech-bubble">
+            <div class="bubble-speaker">📢 關卡主對話：</div>
+            <p id="guardianIntroText">Ahoy! 勇敢的冒險者！你已經掌握了海港的所有基礎字彙。但是，想要拿到航向未知海域的通行證並獲得本關卡【海港守護之星】，你必須通過我的「英語問句三重試煉」！拔錨啟航，接受挑戰吧！</p>
+          </div>
+          <div class="guardian-intro-rules">
+            <div class="rule-card">
+              <span class="rule-icon">📝</span>
+              <div>
+                <strong>第一 & 二題：問句結構選擇題</strong>
+                <p>正確選出英語問句核心疑問詞 (Where, What...) 與助動詞 (Can, Do...)！</p>
+              </div>
+            </div>
+            <div class="rule-card">
+              <span class="rule-icon">🎙️</span>
+              <div>
+                <strong>第三題：高階英語問句朗讀</strong>
+                <p>標準朗讀完整航海情境問句，正確率須達 <strong>80% 以上</strong>！</p>
+              </div>
+            </div>
+          </div>
+          <div class="guardian-action-row">
+            <button type="button" class="btn-guardian-primary" onclick="proceedToFirstTrialQuestion()">
+              ⚔️ 拔錨啟航！接受問句試煉 (Start Trial)
+            </button>
+          </div>
+        </div>
+
+        <!-- 階段 1 & 2: 填充選擇題面板 -->
+        <div id="guardianStageMC" class="guardian-stage-panel" style="display: none;">
+          <div class="trial-meta-info">
+            <span id="trialQuestionStageTag" class="trial-tag">第 1 / 3 關</span>
+            <span id="trialQuestionScenario" class="trial-scenario">情境：你在碼頭想打聽遠洋帆船的航行方向</span>
+          </div>
+
+          <div class="trial-sentence-card">
+            <div class="trial-sentence-header">
+              <span class="trial-sentence-label">請選出空格中最恰當的英語字詞：</span>
+              <button type="button" id="btnListenSentenceVoice" class="btn-listen-mini" onclick="playCurrentQuestionVoice()" title="聆聽整句發音">
+                🔊 聽整句發音
+              </button>
+            </div>
+            <div id="trialSentenceEn" class="trial-sentence-en">“<span class="blank-highlight">_____</span> is the big ship sailing to?”</div>
+            <div id="trialSentenceZh" class="trial-sentence-zh">「這艘大帆船要航向哪裡？」</div>
+          </div>
+
+          <!-- 4 個選擇題選項按鈕 -->
+          <div id="guardianOptionsGrid" class="guardian-options-grid">
+            <!-- 由 JS 動態渲染 A, B, C, D 選項 -->
+          </div>
+
+          <!-- 答題回饋與解析區 -->
+          <div id="guardianMCFeedbackBox" class="guardian-feedback-box" style="display: none;">
+            <div id="guardianMCFeedbackText" class="feedback-msg"></div>
+            <div id="guardianMCExplanationText" class="explanation-msg"></div>
+          </div>
+
+          <div id="guardianMCActionRow" class="guardian-action-row" style="display: none;">
+            <button type="button" id="btnNextMCTrial" class="btn-guardian-primary" onclick="proceedToNextStage()">
+              下一關試煉 ➔
+            </button>
+          </div>
+        </div>
+
+        <!-- 階段 3: 問句口說朗讀挑戰 (要求準確度 >= 80%) -->
+        <div id="guardianStageSpeech" class="guardian-stage-panel" style="display: none;">
+          <div class="trial-meta-info">
+            <span class="trial-tag speech-tag">終極考驗 3 / 3</span>
+            <span id="speechTrialScenario" class="trial-scenario">海港尋路任務：請用清晰標準的英語問句，向海港水手詢問燈塔的方位！</span>
+          </div>
+
+          <div class="trial-sentence-card speech-challenge-card">
+            <div class="trial-sentence-header">
+              <span class="trial-sentence-label">🎯 目標朗讀問句（需達到 <strong>80% 準確度</strong>）：</span>
+              <button type="button" class="btn-listen-mini" onclick="playCurrentSpeechTargetVoice()" title="聆聽外師示範">
+                🔊 聽示範發音
+              </button>
+            </div>
+            <div id="speechTargetSentenceEn" class="trial-sentence-en highlight-sentence">Where is the harbor lighthouse?</div>
+            <div id="speechTargetPhonetic" class="trial-phonetics">/wɛər ɪz ðə ˈhɑːrbər ˈlaɪtˌhaʊs/</div>
+            <div id="speechTargetSentenceZh" class="trial-sentence-zh">「請問海港燈塔在哪裡？」</div>
+          </div>
+
+          <!-- 即時準確度計量儀表板 -->
+          <div class="accuracy-dashboard">
+            <div class="accuracy-header">
+              <span>🎯 口說辨識準確度：</span>
+              <span id="guardianAccuracyPercent" class="accuracy-val">0%</span>
+              <span class="accuracy-target">(及格門檻: 80%)</span>
+            </div>
+            <div class="accuracy-bar-track">
+              <div id="guardianAccuracyBar" class="accuracy-bar-fill" style="width: 0%;"></div>
+              <div class="accuracy-threshold-marker" style="left: 80%;" title="80% 通關線"></div>
+            </div>
+            <div id="guardianSentenceFeedback" class="sentence-tokens-breakdown">
+              <!-- 單字比對高亮標籤 -->
+            </div>
+          </div>
+
+          <!-- 語音狀態文字 -->
+          <div id="guardianSpeechStatus" class="guardian-speech-status status-idle">
+            🎙️ 請點擊下方按鈕，自信大聲朗讀出整句問句！
+          </div>
+
+          <!-- 語音操作按鈕行 -->
+          <div class="speech-controls-row">
+            <button type="button" id="btnGuardianMic" class="btn-guardian-mic" onclick="startGuardianSpeechReading()">
+              <span>🎙️ 按下開始朗讀挑戰 (Speak)</span>
+            </button>
+            <button type="button" id="btnGuardianTeacherPass" class="btn-teacher-pass-trial" onclick="forcePassGuardianSpeech()" title="教室噪音過大時由老師認證">
+              ✨ 老師驗證通過 (80%+)
+            </button>
+          </div>
+
+          <div id="guardianSpeechSuccessRow" class="guardian-action-row" style="display: none;">
+            <button type="button" class="btn-guardian-victory" onclick="proceedToVictoryCelebration()">
+              🌟 準確度達標！晉見關卡主領取通關守護之星 ➔
+            </button>
+          </div>
+        </div>
+
+        <!-- 階段 4: 大勝利真正通關結算 -->
+        <div id="guardianStageVictory" class="guardian-stage-panel" style="display: none;">
+          <div class="guardian-victory-card">
+            <div class="victory-star-icon">⚓</div>
+            <div class="victory-headline">🎉 真正通關！守護之星榮耀降臨！</div>
+            <div id="guardianVictoryStarName" class="star-pill">【海港守護之星 ⚓】</div>
+            <p id="guardianVictorySpeechText" class="victory-dialogue">
+              “Bravo! 你的英語問句掌握得無懈可擊，發音精準有力！以皇家海港總督之名，我將這顆【海港守護之星】授予你，浩瀚的星海航道已為你敞開！”
+            </p>
+            <div class="victory-reward-badge">+200 XP 探索經驗值已存入英語護照</div>
+          </div>
+          <div class="guardian-action-row">
+            <button type="button" class="btn-guardian-primary" onclick="closeGuardianTrialModal()">
+              🚀 榮耀啟航！繼續探索下一個空間
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -662,15 +831,15 @@
 
   <!-- 核心庫與遊戲腳本 -->
   <script src="three.min.js"></script>
-  <script src="vocab-data.js?v=20260911_v5"></script>
-  <script src="vocab-passport-bank.js?v=20260911_v5"></script>
-  <script src="speech-manager.js?v=20260911_v5"></script>
-  <script src="audio-manager.js?v=20260911_v5"></script>
-  <script src="touch-controls.js?v=20260911_v5"></script>
-  <script src="cloud-sync-manager.js?v=20260911_v5"></script>
-  <script src="spatial-zone-manager.js?v=20260911_v5"></script>
-  <script src="minimap-manager.js?v=20260911_v5"></script>
-  <script src="world-3d.js?v=20260911_v5"></script>
+  <script src="vocab-data.js?v=20260912_v1"></script>
+  <script src="vocab-passport-bank.js?v=20260912_v1"></script>
+  <script src="speech-manager.js?v=20260912_v1"></script>
+  <script src="audio-manager.js?v=20260912_v1"></script>
+  <script src="touch-controls.js?v=20260912_v1"></script>
+  <script src="cloud-sync-manager.js?v=20260912_v1"></script>
+  <script src="spatial-zone-manager.js?v=20260912_v1"></script>
+  <script src="minimap-manager.js?v=20260912_v1"></script>
+  <script src="world-3d.js?v=20260912_v1"></script>
 
   <script>
     let curLeaderboardTab = 'school';
@@ -1141,12 +1310,13 @@
 
       listEl.innerHTML = '';
 
-      const orderedZoneIds = ['zone1', 'zone2', 'zone3', 'zone4', 'zone5'];
+      const orderedZoneIds = ['zone1', 'zone2', 'zone3', 'zone4', 'zone5', 'zone6'];
       const connectors = [
         '🌾 陽光花海古徑 (走出書齋石門花田，邁入微風市集)',
         '🌉 護城河古石橋 (降下市集要塞吊橋，前往精靈花園)',
         '🌲 迷霧森林古道 (撥開花園古樹林蔭，通向運動園區)',
-        '🛤️ 凱旋星光鐵道 (穿過操場終點金拱門，抵達鐘樓車站)'
+        '🛤️ 凱旋星光鐵道 (穿過操場終點金拱門，抵達鐘樓車站)',
+        '⚓ 蔚藍航海專線鐵路 (從車站北月台出發，抵達蔚藍秘境海港)'
       ];
 
       orderedZoneIds.forEach((zid, idx) => {
@@ -1214,7 +1384,7 @@
       // 終點：大魔導士殿堂終極傳送
       const finalTrail = document.createElement('div');
       finalTrail.className = 'node-trail-connector';
-      finalTrail.innerHTML = `<span>✨ 破空特快車鳴笛 ➔ 通往大魔導士終極榮譽殿堂 (Grand Victory)</span>`;
+      finalTrail.innerHTML = `<span>🌊 蔚藍海圖拔錨啟航 ➔ 通往大魔導士終極榮譽殿堂 (Grand Victory)</span>`;
       listEl.appendChild(finalTrail);
     }
 
@@ -1270,6 +1440,249 @@
       if (success) {
         document.getElementById('worldMapModal').style.display = 'none';
       }
+    }
+
+    // ==========================================
+    // 關卡主英語問句三重試煉管理器 (Guardian Trial Controller)
+    // ==========================================
+    let currentGuardianZoneId = 'zone6';
+    let currentGuardianTrial = null;
+    let currentTrialStep = 0; // 0: intro, 1: Q1, 2: Q2, 3: Speech, 4: Victory
+    let isCurrentTrialAnswered = false;
+
+    function openGuardianTrial(zoneId) {
+      startGuardianTrial(zoneId || 'zone6');
+    }
+    window.openGuardianTrial = openGuardianTrial;
+
+    function startGuardianTrial(zoneId) {
+      const trialData = (typeof GUARDIAN_TRIALS !== 'undefined') ? GUARDIAN_TRIALS[zoneId] : null;
+      if (!trialData) {
+        if (window.world3D) window.world3D.showToast('⚓ 正在準備此空間關卡主試煉！');
+        return;
+      }
+      currentGuardianZoneId = zoneId;
+      currentGuardianTrial = trialData;
+      currentTrialStep = 0;
+      isCurrentTrialAnswered = false;
+
+      // 填入關卡主身分
+      const emojiEl = document.getElementById('guardianAvatarEmoji');
+      const roleEl = document.getElementById('guardianRoleText');
+      const nameEl = document.getElementById('guardianNameText');
+      const introEl = document.getElementById('guardianIntroText');
+
+      if (emojiEl) emojiEl.textContent = trialData.bossEmoji || '⚓';
+      if (roleEl) roleEl.textContent = trialData.bossRole || '關卡主';
+      if (nameEl) nameEl.textContent = trialData.bossName || '關卡主';
+      if (introEl) introEl.textContent = trialData.introDialogue || '';
+
+      updateTrialStepper(0);
+      showGuardianPanel('intro');
+
+      const modal = document.getElementById('guardianTrialModal');
+      if (modal) modal.style.display = 'flex';
+      if (window.audioManager) window.audioManager.playSfx('click');
+    }
+    window.startGuardianTrial = startGuardianTrial;
+
+    function closeGuardianTrialModal() {
+      const modal = document.getElementById('guardianTrialModal');
+      if (modal) modal.style.display = 'none';
+      if (window.speechManager) window.speechManager.stopListening();
+    }
+    window.closeGuardianTrialModal = closeGuardianTrialModal;
+
+    function proceedToFirstTrialQuestion() {
+      currentTrialStep = 1;
+      updateTrialStepper(1);
+      renderMCTrialQuestion(0);
+    }
+    window.proceedToFirstTrialQuestion = proceedToFirstTrialQuestion;
+
+    function renderMCTrialQuestion(qIndex) {
+      if (!currentGuardianTrial || !currentGuardianTrial.questions) return;
+      const q = currentGuardianTrial.questions[qIndex];
+      if (!q) return;
+
+      showGuardianPanel('mc');
+      isCurrentTrialAnswered = false;
+
+      document.getElementById('trialQuestionStageTag').textContent = `第 ${q.stage} / 3 關：問句結構選擇`;
+      document.getElementById('trialQuestionScenario').textContent = q.scenario || '';
+      document.getElementById('trialSentenceEn').innerHTML = q.sentence.replace('_____', '<span class="blank-highlight">_____</span>');
+      document.getElementById('trialSentenceZh').textContent = q.sentenceZh || '';
+
+      const feedbackBox = document.getElementById('guardianMCFeedbackBox');
+      const actionRow = document.getElementById('guardianMCActionRow');
+      if (feedbackBox) feedbackBox.style.display = 'none';
+      if (actionRow) actionRow.style.display = 'none';
+
+      // 渲染選項
+      const grid = document.getElementById('guardianOptionsGrid');
+      if (grid) {
+        grid.innerHTML = '';
+        q.options.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'guardian-mc-option';
+          btn.innerHTML = `<span class="opt-key">${opt.key}</span> <span class="opt-text">${opt.text}</span>`;
+          btn.onclick = () => handleMCOptionClick(btn, opt, q);
+          grid.appendChild(btn);
+        });
+      }
+    }
+
+    function handleMCOptionClick(btn, opt, q) {
+      if (isCurrentTrialAnswered) return;
+
+      const feedbackBox = document.getElementById('guardianMCFeedbackBox');
+      const feedbackText = document.getElementById('guardianMCFeedbackText');
+      const expText = document.getElementById('guardianMCExplanationText');
+      const actionRow = document.getElementById('guardianMCActionRow');
+
+      if (feedbackBox) feedbackBox.style.display = 'block';
+
+      if (opt.correct) {
+        isCurrentTrialAnswered = true;
+        btn.classList.add('correct');
+        if (feedbackBox) feedbackBox.className = 'guardian-feedback-box correct';
+        if (feedbackText) feedbackText.innerHTML = `✅ <strong>太棒了，完全正確！</strong> ${opt.hint}`;
+        if (expText) expText.innerHTML = `💡 <strong>文法重點</strong>：${q.explanation}`;
+        if (actionRow) actionRow.style.display = 'flex';
+        if (window.audioManager) window.audioManager.playSfx('magicSuccess');
+      } else {
+        btn.classList.add('wrong');
+        if (feedbackBox) feedbackBox.className = 'guardian-feedback-box wrong';
+        if (feedbackText) feedbackText.innerHTML = `❌ <strong>差一點點！</strong> ${opt.hint}`;
+        if (expText) expText.innerHTML = '再想一想，點選其他選項試試看！';
+        if (window.audioManager) window.audioManager.playSfx('click');
+      }
+    }
+
+    function proceedToNextStage() {
+      if (currentTrialStep === 1) {
+        currentTrialStep = 2;
+        updateTrialStepper(2);
+        renderMCTrialQuestion(1);
+      } else if (currentTrialStep === 2) {
+        currentTrialStep = 3;
+        updateTrialStepper(3);
+        renderSpeechTrialQuestion();
+      }
+    }
+    window.proceedToNextStage = proceedToNextStage;
+
+    function renderSpeechTrialQuestion() {
+      if (!currentGuardianTrial || !currentGuardianTrial.questions) return;
+      const q = currentGuardianTrial.questions[2];
+      if (!q) return;
+
+      showGuardianPanel('speech');
+
+      document.getElementById('speechTrialScenario').textContent = q.scenario || '';
+      document.getElementById('speechTargetSentenceEn').textContent = q.targetSentence;
+      document.getElementById('speechTargetPhonetic').textContent = q.phoneticGuide || '';
+      document.getElementById('speechTargetSentenceZh').textContent = q.targetSentenceZh || '';
+
+      const meter = document.getElementById('guardianAccuracyBar');
+      const percentText = document.getElementById('guardianAccuracyPercent');
+      const feedbackBox = document.getElementById('guardianSentenceFeedback');
+      const successRow = document.getElementById('guardianSpeechSuccessRow');
+
+      if (meter) { meter.style.width = '0%'; meter.style.backgroundColor = '#f59e0b'; }
+      if (percentText) { percentText.textContent = '0%'; percentText.style.color = '#b45309'; }
+      if (feedbackBox) feedbackBox.innerHTML = '';
+      if (successRow) successRow.style.display = 'none';
+
+      if (window.speechManager) {
+        window.speechManager.updateSentenceUI('idle', '🎙️ 請點擊下方按鈕，清晰大聲朗讀出整句問句！');
+      }
+    }
+
+    function startGuardianSpeechReading() {
+      if (!currentGuardianTrial || !currentGuardianTrial.questions) return;
+      const q = currentGuardianTrial.questions[2];
+      if (!q || !window.speechManager) return;
+
+      window.speechManager.startSentenceListening(
+        q.targetSentence,
+        q.targetKeywords,
+        q.requiredAccuracy || 80,
+        (result) => {
+          if (result.passed) {
+            const successRow = document.getElementById('guardianSpeechSuccessRow');
+            if (successRow) successRow.style.display = 'flex';
+          }
+        }
+      );
+    }
+    window.startGuardianSpeechReading = startGuardianSpeechReading;
+
+    function forcePassGuardianSpeech() {
+      if (!window.speechManager) return;
+      window.speechManager.forceSentencePass();
+      const successRow = document.getElementById('guardianSpeechSuccessRow');
+      if (successRow) successRow.style.display = 'flex';
+    }
+    window.forcePassGuardianSpeech = forcePassGuardianSpeech;
+
+    function playCurrentQuestionVoice() {
+      if (!currentGuardianTrial || !currentGuardianTrial.questions) return;
+      if (currentTrialStep === 1 || currentTrialStep === 2) {
+        const q = currentGuardianTrial.questions[currentTrialStep - 1];
+        if (q && q.audioText && window.speechManager) {
+          window.speechManager.playSentenceVoice(q.audioText);
+        }
+      }
+    }
+    window.playCurrentQuestionVoice = playCurrentQuestionVoice;
+
+    function playCurrentSpeechTargetVoice() {
+      if (!currentGuardianTrial || !currentGuardianTrial.questions) return;
+      const q = currentGuardianTrial.questions[2];
+      if (q && q.audioText && window.speechManager) {
+        window.speechManager.playSentenceVoice(q.audioText);
+      }
+    }
+    window.playCurrentSpeechTargetVoice = playCurrentSpeechTargetVoice;
+
+    function proceedToVictoryCelebration() {
+      showGuardianPanel('victory');
+      updateTrialStepper(4);
+
+      document.getElementById('guardianVictoryStarName').textContent = currentGuardianTrial.starName || '守護之星 🌟';
+      document.getElementById('guardianVictorySpeechText').textContent = currentGuardianTrial.victoryDialogue || '';
+
+      const xp = currentGuardianTrial.rewardXP || 200;
+      if (window.world3D) {
+        window.world3D.addXP(xp);
+      }
+      if (window.cloudSyncManager) {
+        window.cloudSyncManager.recordWordPass('GUARDIAN_' + currentGuardianZoneId.toUpperCase(), xp, false);
+      }
+      if (window.audioManager) window.audioManager.playSfx('magicSuccess');
+    }
+    window.proceedToVictoryCelebration = proceedToVictoryCelebration;
+
+    function showGuardianPanel(panelName) {
+      const pIntro = document.getElementById('guardianStageIntro');
+      const pMC = document.getElementById('guardianStageMC');
+      const pSpeech = document.getElementById('guardianStageSpeech');
+      const pVic = document.getElementById('guardianStageVictory');
+      if (pIntro) pIntro.style.display = (panelName === 'intro') ? 'block' : 'none';
+      if (pMC) pMC.style.display = (panelName === 'mc') ? 'block' : 'none';
+      if (pSpeech) pSpeech.style.display = (panelName === 'speech') ? 'block' : 'none';
+      if (pVic) pVic.style.display = (panelName === 'victory') ? 'block' : 'none';
+    }
+
+    function updateTrialStepper(step) {
+      const d1 = document.getElementById('stepDot1');
+      const d2 = document.getElementById('stepDot2');
+      const d3 = document.getElementById('stepDot3');
+      if (d1) d1.className = `step-dot ${step >= 1 ? 'active' : ''}`;
+      if (d2) d2.className = `step-dot ${step >= 2 ? 'active' : ''}`;
+      if (d3) d3.className = `step-dot ${step >= 3 ? 'active' : ''}`;
     }
 
     // 第一次點擊畫面啟動背景音樂 (符合瀏覽器 Autoplay 政策)
