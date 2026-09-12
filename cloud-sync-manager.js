@@ -1,5 +1,8 @@
 // 預設校本官方 Google 試算表 (GAS) 網址（學童進入網頁直接自動連線，完全免手動輸入）
 const DEFAULT_OFFICIAL_GAS_URL = 'https://script.google.com/macros/s/AKfycbxMzYX-1b-fxlC6QN41uEdywDl0O-rRkt6Hw9AxypGdJB7FC3Ns7rpdvXryJwLULR01/exec';
+// 校本前端安全防護 Token 與教師管理密鑰
+const APP_CLIENT_SECURITY_TOKEN = 'whimsy_forest_escape_2026';
+const TEACHER_PASS_KEY = 'teacherpass';
 
 // 雲端資料同步與學生護照歷程管理器 (CloudSyncManager)
 class CloudSyncManager {
@@ -8,6 +11,8 @@ class CloudSyncManager {
     this.queueKey = 'whimsy_pending_logs';
     this.gasUrlKey = 'whimsy_gas_url';
     this.defaultGasUrl = DEFAULT_OFFICIAL_GAS_URL;
+    this.clientToken = APP_CLIENT_SECURITY_TOKEN;
+    this.teacherPassKey = TEACHER_PASS_KEY;
 
     // 優先讀取本地端 GAS 網址；若未設定或為空，直接預設採用校本官方網址
     const localGas = localStorage.getItem(this.gasUrlKey);
@@ -104,6 +109,43 @@ class CloudSyncManager {
     return this.defaultGasUrl;
   }
 
+  // 驗證教師管理密鑰 (比對 teacherpass)
+  verifyTeacherPassword(pwd) {
+    return (pwd || '').trim() === this.teacherPassKey;
+  }
+
+  // 安全測試 GAS 連線 (帶上 Security Token)
+  async testPing(customUrl = null) {
+    const targetUrl = (customUrl || this.gasUrl || '').trim();
+    if (!targetUrl) return { success: false, message: '未設定 GAS 網址' };
+    try {
+      const res = await fetch(`${targetUrl}?action=ping&token=${encodeURIComponent(this.clientToken)}`);
+      const json = await res.json();
+      if (json.status === 'success') {
+        return { success: true, message: json.message || '連線正常' };
+      }
+      return { success: false, message: json.message || '後端回應異常' };
+    } catch (e) {
+      return { success: false, message: e.message || '連線失敗，請確認網路或試算表設定' };
+    }
+  }
+
+  // 學生姓名個資遮罩輔助函式（符合國中小個資保護指引）
+  static maskStudentName(name) {
+    const str = String(name || '').trim();
+    if (!str || str.startsWith('見習')) return str;
+    if (str.length === 2) {
+      return str[0] + '○';
+    } else if (str.length === 3) {
+      return str[0] + '○' + str[2];
+    } else if (str.length === 4) {
+      return str[0] + '○○' + str[3];
+    } else if (str.length > 4) {
+      return str.slice(0, 1) + '***' + str.slice(-1);
+    }
+    return str;
+  }
+
   // 學生登入 / 切換身分
   async login(grade, classId, seatNo, name) {
     const paddedSeat = String(seatNo || '01').padStart(2, '0');
@@ -133,6 +175,7 @@ class CloudSyncManager {
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({
             action: 'loginOrRegister',
+            token: this.clientToken,
             grade: this.profile.grade,
             classId: this.profile.classId,
             seatNo: this.profile.seatNo,
@@ -234,6 +277,7 @@ class CloudSyncManager {
     // 4. 構建通關資料包
     const payload = {
       action: 'recordPass',
+      token: this.clientToken,
       studentId: this.profile.studentId,
       grade: this.profile.grade,
       classId: this.profile.classId,
@@ -337,7 +381,7 @@ class CloudSyncManager {
     // 若有串接 GAS，向雲端撈取
     if (this.gasUrl && navigator.onLine) {
       try {
-        const url = `${this.gasUrl}?action=getLeaderboard&classId=${encodeURIComponent(classFilter)}`;
+        const url = `${this.gasUrl}?action=getLeaderboard&classId=${encodeURIComponent(classFilter)}&token=${encodeURIComponent(this.clientToken)}`;
         const res = await fetch(url);
         const data = await res.json();
         if (data.status === 'success' && Array.isArray(data.leaderboard)) {

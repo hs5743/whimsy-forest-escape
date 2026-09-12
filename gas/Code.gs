@@ -19,6 +19,27 @@ const SHEET_STUDENTS = "Students";
 const SHEET_LOGS = "Passport_Logs";
 const SHEET_CONFIG = "Config";
 
+// 校本前端安全防護 Token (需與前端 CloudSyncManager 一致)
+const APP_SECURITY_TOKEN = "whimsy_forest_escape_2026";
+
+/**
+ * 學生姓名個資遮罩去識別化（符合教育部校園個資保護指引）
+ */
+function maskStudentName(name) {
+  const str = String(name || "").trim();
+  if (!str || str.startsWith("見習")) return str;
+  if (str.length === 2) {
+    return str[0] + "○";
+  } else if (str.length === 3) {
+    return str[0] + "○" + str[2];
+  } else if (str.length === 4) {
+    return str[0] + "○○" + str[3];
+  } else if (str.length > 4) {
+    return str.slice(0, 1) + "***" + str.slice(-1);
+  }
+  return str;
+}
+
 /**
  * 試算表自動初始化函數 (初次使用時執行一次即可)
  */
@@ -83,9 +104,15 @@ function doGet(e) {
     const action = params.action || "ping";
     const ss = SpreadsheetApp.getActiveSpreadsheet();
 
-    // 1. 健康檢查 Ping
+    // 1. 健康檢查 Ping (允許無 Token 偵測伺服器存活)
     if (action === "ping") {
       return makeJsonResponse({ status: "success", message: "Whimsy Forest GAS API is active!", timestamp: new Date() });
+    }
+
+    // 安全性 Token 驗證 (除 ping 外，其餘操作皆需檢驗校本密鑰)
+    const token = params.token || "";
+    if (token !== APP_SECURITY_TOKEN) {
+      return makeJsonResponse({ status: "error", message: "Unauthorized access: Invalid security token" });
     }
 
     // 2. 取得排行榜 (依年級、班級或全校)
@@ -109,7 +136,7 @@ function doGet(e) {
           grade: String(r[1] || ""),
           classId: String(r[2] || ""),
           seatNo: String(r[3] || ""),
-          name: String(r[4] || "無名魔法使"),
+          name: maskStudentName(r[4] || "無名魔法使"), // 個資去識別化保護
           xp: Number(r[5] || 0),
           level: Number(r[6] || 1),
           stars: Number(r[7] || 0),
@@ -270,7 +297,13 @@ function doPost(e) {
     }
 
     const action = payload.action;
+    const token = payload.token || "";
     const ss = SpreadsheetApp.getActiveSpreadsheet();
+
+    // 安全性 Token 驗證：POST 請求必須附帶校本安全密鑰
+    if (token !== APP_SECURITY_TOKEN) {
+      return makeJsonResponse({ status: "error", message: "Unauthorized access: Invalid security token" });
+    }
 
     // 1. 學生登入或建立帳號
     if (action === "loginOrRegister") {
@@ -343,10 +376,18 @@ function doPost(e) {
     if (action === "recordPass") {
       const studentId = String(payload.studentId || "");
       const word = String(payload.word || "").toUpperCase();
-      const xpGained = Number(payload.xp || 50);
+      let xpGained = Number(payload.xp || 50);
       const isTeacherPass = Boolean(payload.isTeacherPass);
       const zone = String(payload.zone || "Zone 1: 見習學徒書齋");
       const ua = String(payload.ua || "");
+
+      // 安全防刷防護：單次經驗值防護與字串長度校驗
+      if (isNaN(xpGained) || xpGained < 0 || xpGained > 300) {
+        xpGained = 50;
+      }
+      if (!word || word.length > 35) {
+        return makeJsonResponse({ status: "error", message: "Invalid word payload" });
+      }
 
       if (!studentId || !word) {
         return makeJsonResponse({ status: "error", message: "Missing studentId or word" });
