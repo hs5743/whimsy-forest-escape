@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>童趣森林魔法書齋逃脫：蒼月之約 (Whimsy Forest 3D Escape)</title>
-  <link rel="stylesheet" href="style.css?v=20260911_v5">
+  <link rel="stylesheet" href="style.css?v=20260912_v2">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%20%22100%22><text y=%22.9em%22 font-size=%2290%22>🗝️</text></svg>">
   <style>
     /* ========================================================= */
@@ -683,13 +683,21 @@
 
       <!-- 主內容區域：分階段動態切換 -->
       <div class="guardian-body">
-        <!-- 階段 0: 關卡主開場對白 -->
+        <!-- 階段 0: 關卡主開場對白與單字引導 -->
         <div id="guardianStageIntro" class="guardian-stage-panel" style="display: block;">
           <div class="guardian-speech-bubble">
-            <div class="bubble-speaker">📢 關卡主對話：</div>
+            <div class="bubble-speaker"><span id="guardianIntroSpeakerTag">📢 瑪琳娜船長對話：</span></div>
             <p id="guardianIntroText">Ahoy! 勇敢的冒險者！你已經掌握了海港的所有基礎字彙。但是，想要拿到航向未知海域的通行證並獲得本關卡【海港守護之星】，你必須通過我的「英語問句三重試煉」！拔錨啟航，接受挑戰吧！</p>
           </div>
-          <div class="guardian-intro-rules">
+
+          <!-- 單字收集狀態與提示區 (未全收集時顯示) -->
+          <div id="guardianWordChecklistArea" style="display: none; background: rgba(30, 41, 59, 0.75); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 14px; padding: 14px; margin-bottom: 14px;">
+            <div style="font-size: 13px; font-weight: 700; color: #38bdf8; margin-bottom: 8px;">⚓ 本關航海單字探索進度：</div>
+            <div id="guardianWordChipsGrid" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;"></div>
+            <div id="guardianWordStatusHint" style="font-size: 12px; color: #94a3b8;"></div>
+          </div>
+
+          <div class="guardian-intro-rules" id="guardianIntroRules">
             <div class="rule-card">
               <span class="rule-icon">📝</span>
               <div>
@@ -705,8 +713,8 @@
               </div>
             </div>
           </div>
-          <div class="guardian-action-row">
-            <button type="button" class="btn-guardian-primary" onclick="proceedToFirstTrialQuestion()">
+          <div class="guardian-action-row" id="guardianIntroActionRow">
+            <button type="button" class="btn-guardian-primary" onclick="event.stopPropagation(); proceedToFirstTrialQuestion();">
               ⚔️ 拔錨啟航！接受問句試煉 (Start Trial)
             </button>
           </div>
@@ -719,13 +727,20 @@
             <span id="trialQuestionScenario" class="trial-scenario">情境：你在碼頭想打聽遠洋帆船的航行方向</span>
           </div>
 
-          <div class="trial-sentence-card">
-            <div class="trial-sentence-header">
-              <span class="trial-sentence-label">請選出空格中最恰當的英語字詞：</span>
-              <button type="button" id="btnListenSentenceVoice" class="btn-listen-mini" onclick="playCurrentQuestionVoice()" title="聆聽整句發音">
-                🔊 聽整句發音
+          <!-- 關卡主對話泡泡 (與船長面對面對話發問) -->
+          <div class="guardian-speech-bubble" style="margin-bottom: 12px;">
+            <div class="bubble-speaker" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <span id="mcCaptainSpeakerTag">📢 瑪琳娜船長發問：</span>
+              <button type="button" id="btnListenSentenceVoice" class="btn-listen-mini" onclick="event.stopPropagation(); playCurrentQuestionVoice();" title="聆聽船長示範整句">
+                🔊 聽船長示範整句
               </button>
             </div>
+            <p id="mcCaptainPromptText" style="margin: 6px 0 0 0; color: #f8fafc; font-size: 14px; line-height: 1.5;">
+              “Ahoy! 看看碼頭邊這艘遠洋三桅帆船。如果你想向水手打聽它的航行方向，英語該怎麼問呢？請告訴我空格該填什麼字詞：”
+            </p>
+          </div>
+
+          <div class="trial-sentence-card">
             <div id="trialSentenceEn" class="trial-sentence-en">“<span class="blank-highlight">_____</span> is the big ship sailing to?”</div>
             <div id="trialSentenceZh" class="trial-sentence-zh">「這艘大帆船要航向哪裡？」</div>
           </div>
@@ -735,14 +750,14 @@
             <!-- 由 JS 動態渲染 A, B, C, D 選項 -->
           </div>
 
-          <!-- 答題回饋與解析區 -->
+          <!-- 答題回饋與解析區 (船長即時回應) -->
           <div id="guardianMCFeedbackBox" class="guardian-feedback-box" style="display: none;">
             <div id="guardianMCFeedbackText" class="feedback-msg"></div>
             <div id="guardianMCExplanationText" class="explanation-msg"></div>
           </div>
 
           <div id="guardianMCActionRow" class="guardian-action-row" style="display: none;">
-            <button type="button" id="btnNextMCTrial" class="btn-guardian-primary" onclick="proceedToNextStage()">
+            <button type="button" id="btnNextMCTrial" class="btn-guardian-primary" onclick="event.stopPropagation(); proceedToNextStage();">
               下一關試煉 ➔
             </button>
           </div>
@@ -755,12 +770,22 @@
             <span id="speechTrialScenario" class="trial-scenario">海港尋路任務：請用清晰標準的英語問句，向海港水手詢問燈塔的方位！</span>
           </div>
 
+          <!-- 關卡主對話泡泡 (船長親自對話邀請口說挑戰) -->
+          <div class="guardian-speech-bubble" style="margin-bottom: 12px;">
+            <div class="bubble-speaker" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <span id="speechCaptainSpeakerTag">📢 瑪琳娜船長指令：</span>
+              <button type="button" class="btn-listen-mini" onclick="event.stopPropagation(); playCurrentSpeechTargetVoice();" title="聆聽外師示範">
+                🔊 聽船長示範發音
+              </button>
+            </div>
+            <p id="speechCaptainPromptText" style="margin: 6px 0 0 0; color: #f8fafc; font-size: 14px; line-height: 1.5;">
+              “最後一關！請看著海港燈塔，向我清晰朗讀這句問句：『Where is the harbor lighthouse?』正確率達到 80% 以上，就能正式通關！”
+            </p>
+          </div>
+
           <div class="trial-sentence-card speech-challenge-card">
             <div class="trial-sentence-header">
               <span class="trial-sentence-label">🎯 目標朗讀問句（需達到 <strong>80% 準確度</strong>）：</span>
-              <button type="button" class="btn-listen-mini" onclick="playCurrentSpeechTargetVoice()" title="聆聽外師示範">
-                🔊 聽示範發音
-              </button>
             </div>
             <div id="speechTargetSentenceEn" class="trial-sentence-en highlight-sentence">Where is the harbor lighthouse?</div>
             <div id="speechTargetPhonetic" class="trial-phonetics">/wɛər ɪz ðə ˈhɑːrbər ˈlaɪtˌhaʊs/</div>
@@ -790,16 +815,16 @@
 
           <!-- 語音操作按鈕行 -->
           <div class="speech-controls-row">
-            <button type="button" id="btnGuardianMic" class="btn-guardian-mic" onclick="startGuardianSpeechReading()">
+            <button type="button" id="btnGuardianMic" class="btn-guardian-mic" onclick="event.stopPropagation(); startGuardianSpeechReading();">
               <span>🎙️ 按下開始朗讀挑戰 (Speak)</span>
             </button>
-            <button type="button" id="btnGuardianTeacherPass" class="btn-teacher-pass-trial" onclick="forcePassGuardianSpeech()" title="教室噪音過大時由老師認證">
+            <button type="button" id="btnGuardianTeacherPass" class="btn-teacher-pass-trial" onclick="event.stopPropagation(); forcePassGuardianSpeech();" title="教室噪音過大時由老師認證">
               ✨ 老師驗證通過 (80%+)
             </button>
           </div>
 
           <div id="guardianSpeechSuccessRow" class="guardian-action-row" style="display: none;">
-            <button type="button" class="btn-guardian-victory" onclick="proceedToVictoryCelebration()">
+            <button type="button" class="btn-guardian-victory" onclick="event.stopPropagation(); proceedToVictoryCelebration();">
               🌟 準確度達標！晉見關卡主領取通關守護之星 ➔
             </button>
           </div>
@@ -817,7 +842,7 @@
             <div class="victory-reward-badge">+200 XP 探索經驗值已存入英語護照</div>
           </div>
           <div class="guardian-action-row">
-            <button type="button" class="btn-guardian-primary" onclick="closeGuardianTrialModal()">
+            <button type="button" class="btn-guardian-primary" onclick="event.stopPropagation(); closeGuardianTrialModal();">
               🚀 榮耀啟航！繼續探索下一個空間
             </button>
           </div>
@@ -831,15 +856,15 @@
 
   <!-- 核心庫與遊戲腳本 -->
   <script src="three.min.js"></script>
-  <script src="vocab-data.js?v=20260912_v1"></script>
-  <script src="vocab-passport-bank.js?v=20260912_v1"></script>
-  <script src="speech-manager.js?v=20260912_v1"></script>
-  <script src="audio-manager.js?v=20260912_v1"></script>
-  <script src="touch-controls.js?v=20260912_v1"></script>
-  <script src="cloud-sync-manager.js?v=20260912_v1"></script>
-  <script src="spatial-zone-manager.js?v=20260912_v1"></script>
-  <script src="minimap-manager.js?v=20260912_v1"></script>
-  <script src="world-3d.js?v=20260912_v1"></script>
+  <script src="vocab-data.js?v=20260912_v2"></script>
+  <script src="vocab-passport-bank.js?v=20260912_v2"></script>
+  <script src="speech-manager.js?v=20260912_v2"></script>
+  <script src="audio-manager.js?v=20260912_v2"></script>
+  <script src="touch-controls.js?v=20260912_v2"></script>
+  <script src="cloud-sync-manager.js?v=20260912_v2"></script>
+  <script src="spatial-zone-manager.js?v=20260912_v2"></script>
+  <script src="minimap-manager.js?v=20260912_v2"></script>
+  <script src="world-3d.js?v=20260912_v2"></script>
 
   <script>
     let curLeaderboardTab = 'school';
@@ -1466,16 +1491,82 @@
       currentTrialStep = 0;
       isCurrentTrialAnswered = false;
 
+      // 關閉其他可能干擾的底層彈窗
+      const mapModal = document.getElementById('worldMapModal');
+      if (mapModal) mapModal.style.display = 'none';
+      const passModal = document.getElementById('passportModal');
+      if (passModal) passModal.style.display = 'none';
+      const guideModal = document.getElementById('guideModal');
+      if (guideModal) guideModal.style.display = 'none';
+
+      // 檢查此關卡單字收集進度
+      const zm = (window.world3D && window.world3D.zoneManager) ? window.world3D.zoneManager : null;
+      const zoneInfo = zm ? zm.zones[zoneId] : null;
+      const p = (window.cloudSyncManager && window.cloudSyncManager.profile)
+        ? window.cloudSyncManager.profile
+        : { completedWords: [] };
+      const completedList = (p.completedWords || []).map(w => w.toUpperCase());
+
+      const zoneWords = (zoneInfo && zoneInfo.words) ? zoneInfo.words : [];
+      const remainingWords = zoneWords.filter(w => !completedList.includes(w.toUpperCase()));
+      const isAllWordsCollected = zoneWords.length > 0 && remainingWords.length === 0;
+
       // 填入關卡主身分
       const emojiEl = document.getElementById('guardianAvatarEmoji');
       const roleEl = document.getElementById('guardianRoleText');
       const nameEl = document.getElementById('guardianNameText');
+      const introSpeakerEl = document.getElementById('guardianIntroSpeakerTag');
       const introEl = document.getElementById('guardianIntroText');
+      const checklistArea = document.getElementById('guardianWordChecklistArea');
+      const chipsGrid = document.getElementById('guardianWordChipsGrid');
+      const statusHint = document.getElementById('guardianWordStatusHint');
+      const actionRow = document.getElementById('guardianIntroActionRow');
 
+      const bossName = trialData.bossName || '瑪琳娜船長';
       if (emojiEl) emojiEl.textContent = trialData.bossEmoji || '⚓';
       if (roleEl) roleEl.textContent = trialData.bossRole || '關卡主';
-      if (nameEl) nameEl.textContent = trialData.bossName || '關卡主';
-      if (introEl) introEl.textContent = trialData.introDialogue || '';
+      if (nameEl) nameEl.textContent = bossName;
+      if (introSpeakerEl) introSpeakerEl.textContent = `📢 ${bossName} 對話：`;
+
+      if (isAllWordsCollected || zoneWords.length === 0) {
+        if (checklistArea) checklistArea.style.display = 'none';
+        if (introEl) introEl.textContent = trialData.introDialogue || `Ahoy! 勇敢的冒險者！你已經掌握了本空間的所有核心單字。想要獲得本關【${trialData.starName || '守護之星'}】，你必須通過我的「英語問句三重試煉」！拔錨啟航，接受挑戰吧！`;
+        if (actionRow) {
+          actionRow.innerHTML = `
+            <button type="button" class="btn-guardian-primary" onclick="event.stopPropagation(); proceedToFirstTrialQuestion();">
+              ⚔️ 拔錨啟航！接受問句試煉 (Start Trial)
+            </button>
+          `;
+        }
+      } else {
+        if (checklistArea) checklistArea.style.display = 'block';
+        if (introEl) introEl.textContent = `Ahoy! 勇敢的冒險者！我是這座蔚藍秘境海港的領航者——${bossName} ⚓。很高興在碼頭遇見你！想要拿到航向新海域的航海圖並獲得【${trialData.starName || '守護之星'}】，需要通過我的英語問句三重試煉。你可以先在海港中探索收集單字，或是現在就直接向我發起問句挑戰！`;
+        if (chipsGrid) {
+          chipsGrid.innerHTML = zoneWords.map(w => {
+            const isDone = completedList.includes(w.toUpperCase());
+            return `
+              <div style="padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; background: ${isDone ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.15)'}; color: ${isDone ? '#34d399' : '#fca5a5'}; border: 1px solid ${isDone ? '#059669' : '#b91c1c'}; display: flex; align-items: center; gap: 6px;">
+                <span>${isDone ? '✅' : '🔍'}</span>
+                <span>${w}</span>
+                <span style="font-size: 11px; opacity: 0.8;">${isDone ? '已收集' : '待探索'}</span>
+              </div>
+            `;
+          }).join('');
+        }
+        if (statusHint) {
+          statusHint.textContent = `💡 目前進度：${zoneWords.length - remainingWords.length} / ${zoneWords.length}。尚未探索的單字：${remainingWords.join(', ')}`;
+        }
+        if (actionRow) {
+          actionRow.innerHTML = `
+            <button type="button" class="btn-listen-mini" onclick="event.stopPropagation(); closeGuardianTrialModal();" style="background: rgba(51, 65, 85, 0.8); color: #cbd5e1; border: 1px solid #64748b; padding: 10px 18px; border-radius: 12px; font-weight: 700;">
+              🔍 我先去海港探索收集單字
+            </button>
+            <button type="button" class="btn-guardian-primary" onclick="event.stopPropagation(); proceedToFirstTrialQuestion();" style="flex: 1;">
+              ⚔️ 我準備好了，直接開始問句挑戰！
+            </button>
+          `;
+        }
+      }
 
       updateTrialStepper(0);
       showGuardianPanel('intro');
@@ -1508,6 +1599,19 @@
       showGuardianPanel('mc');
       isCurrentTrialAnswered = false;
 
+      const bossName = currentGuardianTrial.bossName || '瑪琳娜船長';
+      const speakerTag = document.getElementById('mcCaptainSpeakerTag');
+      if (speakerTag) speakerTag.textContent = `📢 ${bossName} 發問：`;
+
+      const promptText = document.getElementById('mcCaptainPromptText');
+      if (promptText) {
+        if (q.scenario) {
+          promptText.textContent = `“Ahoy! 【${q.scenario}】請問句中的空格應該填入哪個英語字詞呢？”`;
+        } else {
+          promptText.textContent = `“請選出空格中最恰當的英語字詞：”`;
+        }
+      }
+
       document.getElementById('trialQuestionStageTag').textContent = `第 ${q.stage} / 3 關：問句結構選擇`;
       document.getElementById('trialQuestionScenario').textContent = q.scenario || '';
       document.getElementById('trialSentenceEn').innerHTML = q.sentence.replace('_____', '<span class="blank-highlight">_____</span>');
@@ -1527,7 +1631,10 @@
           btn.type = 'button';
           btn.className = 'guardian-mc-option';
           btn.innerHTML = `<span class="opt-key">${opt.key}</span> <span class="opt-text">${opt.text}</span>`;
-          btn.onclick = () => handleMCOptionClick(btn, opt, q);
+          btn.onclick = (e) => {
+            e.stopPropagation();
+            handleMCOptionClick(btn, opt, q);
+          };
           grid.appendChild(btn);
         });
       }
@@ -1536,6 +1643,7 @@
     function handleMCOptionClick(btn, opt, q) {
       if (isCurrentTrialAnswered) return;
 
+      const bossName = currentGuardianTrial ? (currentGuardianTrial.bossName || '瑪琳娜船長') : '關卡主';
       const feedbackBox = document.getElementById('guardianMCFeedbackBox');
       const feedbackText = document.getElementById('guardianMCFeedbackText');
       const expText = document.getElementById('guardianMCExplanationText');
@@ -1547,14 +1655,14 @@
         isCurrentTrialAnswered = true;
         btn.classList.add('correct');
         if (feedbackBox) feedbackBox.className = 'guardian-feedback-box correct';
-        if (feedbackText) feedbackText.innerHTML = `✅ <strong>太棒了，完全正確！</strong> ${opt.hint}`;
+        if (feedbackText) feedbackText.innerHTML = `⚓ <strong>${bossName}：</strong>「太棒了，完全正確！${opt.hint}」`;
         if (expText) expText.innerHTML = `💡 <strong>文法重點</strong>：${q.explanation}`;
         if (actionRow) actionRow.style.display = 'flex';
         if (window.audioManager) window.audioManager.playSfx('magicSuccess');
       } else {
         btn.classList.add('wrong');
         if (feedbackBox) feedbackBox.className = 'guardian-feedback-box wrong';
-        if (feedbackText) feedbackText.innerHTML = `❌ <strong>差一點點！</strong> ${opt.hint}`;
+        if (feedbackText) feedbackText.innerHTML = `⚓ <strong>${bossName}：</strong>「差一點點！${opt.hint}」`;
         if (expText) expText.innerHTML = '再想一想，點選其他選項試試看！';
         if (window.audioManager) window.audioManager.playSfx('click');
       }
@@ -1580,6 +1688,15 @@
 
       showGuardianPanel('speech');
 
+      const bossName = currentGuardianTrial.bossName || '瑪琳娜船長';
+      const speakerTag = document.getElementById('speechCaptainSpeakerTag');
+      if (speakerTag) speakerTag.textContent = `📢 ${bossName} 指令：`;
+
+      const promptText = document.getElementById('speechCaptainPromptText');
+      if (promptText) {
+        promptText.textContent = `“最後一關！請看著海港燈塔，向我清晰朗讀這句問句：『${q.targetSentence}』正確率達到 80% 以上，就能正式通關！”`;
+      }
+
       document.getElementById('speechTrialScenario').textContent = q.scenario || '';
       document.getElementById('speechTargetSentenceEn').textContent = q.targetSentence;
       document.getElementById('speechTargetPhonetic').textContent = q.phoneticGuide || '';
@@ -1596,7 +1713,7 @@
       if (successRow) successRow.style.display = 'none';
 
       if (window.speechManager) {
-        window.speechManager.updateSentenceUI('idle', '🎙️ 請點擊下方按鈕，清晰大聲朗讀出整句問句！');
+        window.speechManager.updateSentenceUI('idle', '🎙️ 請點擊下方按鈕，清晰大聲向船長朗讀出整句問句！');
       }
     }
 

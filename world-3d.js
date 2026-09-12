@@ -660,16 +660,27 @@ class World3D {
 
     // 點擊 3D 畫面觸發互動 (只在短促點擊 Tap/Click 且不是滑動轉視角時觸發)
     window.addEventListener('pointerup', (e) => {
-      // 避免點擊 UI 或觸控按鈕時誤觸
+      // 避免點擊任何 UI、彈窗或觸控按鈕時誤觸 3D 空間互動
       if (e.target.closest('#speechModal') ||
+          e.target.closest('#guardianTrialModal') ||
+          e.target.closest('#worldMapModal') ||
+          e.target.closest('#passportModal') ||
+          e.target.closest('#studentModal') ||
+          e.target.closest('#leaderboardModal') ||
+          e.target.closest('#cloudConfigModal') ||
           e.target.closest('#guideModal') ||
           e.target.closest('#victoryModal') ||
+          e.target.closest('#systemDrawer') ||
+          e.target.closest('.system-drawer-backdrop') ||
           e.target.closest('#hudBar') ||
           e.target.closest('#touchControlsLayer') ||
           e.target.closest('#inventoryContainer') ||
           e.target.closest('#toastNotice')) {
         return;
       }
+
+      // 若畫面上已有任何彈窗開啟，絕不觸發背景 3D 物件互動
+      if (this.isAnyModalOpen()) return;
 
       const dist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
       const elapsed = Date.now() - pointerDownTime;
@@ -689,6 +700,13 @@ class World3D {
         const guideModal = document.getElementById('guideModal');
         if (guideModal && guideModal.style.display === 'flex') {
           guideModal.style.display = 'none';
+        }
+        if (typeof window.closeGuardianTrialModal === 'function') {
+          window.closeGuardianTrialModal();
+        }
+        const mapModal = document.getElementById('worldMapModal');
+        if (mapModal && mapModal.style.display === 'flex') {
+          mapModal.style.display = 'none';
         }
       }
     });
@@ -747,15 +765,34 @@ class World3D {
     return false;
   }
 
+  // 檢查畫面上是否有任何全螢幕或對話彈窗開啟中
+  isAnyModalOpen() {
+    const modalIds = [
+      'speechModal',
+      'guardianTrialModal',
+      'worldMapModal',
+      'passportModal',
+      'studentModal',
+      'leaderboardModal',
+      'cloudConfigModal',
+      'guideModal',
+      'victoryModal'
+    ];
+    for (let i = 0; i < modalIds.length; i++) {
+      const el = document.getElementById(modalIds[i]);
+      if (el && el.style.display && el.style.display !== 'none') {
+        return true;
+      }
+    }
+    const drawer = document.getElementById('systemDrawer');
+    if (drawer && drawer.classList.contains('open')) return true;
+    return false;
+  }
+
   // 推進第一人稱移動與實體障礙物碰撞 (支援平滑滑牆 Smooth Wall-Sliding，徹底防止穿牆穿火車)
   updatePlayer(delta) {
     // 彈窗開啟時暫停視角旋轉與走動，防止誤觸
-    const modal = document.getElementById('speechModal');
-    const guideModal = document.getElementById('guideModal');
-    const victoryModal = document.getElementById('victoryModal');
-    if ((modal && modal.style.display === 'flex') ||
-        (guideModal && guideModal.style.display === 'flex') ||
-        (victoryModal && victoryModal.style.display === 'flex')) {
+    if (this.isAnyModalOpen()) {
       if (window.touchControls) {
         window.touchControls.consumeInteract();
         window.touchControls.getLookDelta();
@@ -869,9 +906,8 @@ class World3D {
   triggerInteraction(target) {
     if (!target || !target.userData) return;
 
-    // 若彈窗已在畫面上，不重複觸發
-    const modal = document.getElementById('speechModal');
-    if (modal && modal.style.display === 'flex') return;
+    // 若畫面上已有任何彈窗或對話介面，絕不觸發背景 3D 物件互動
+    if (this.isAnyModalOpen()) return;
 
     if (window.audioManager) window.audioManager.playSfx('interact');
 

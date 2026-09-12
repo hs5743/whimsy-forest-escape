@@ -3779,7 +3779,7 @@ class SpatialZoneManager {
     hitBox.position.y = 1.8;
     hitBox.userData = {
       id: 'guardian_zone6',
-      label: '👑 [E] 挑戰關卡主・瑪琳娜船長 (Captain Marina)',
+      label: '💬 [E] 與關卡主・瑪琳娜船長對話 (Captain Marina)',
       onClick: () => {
         this.handleGuardianInteraction('zone6');
       }
@@ -3833,12 +3833,12 @@ class SpatialZoneManager {
       ctx.font = 'bold 22px sans-serif';
       ctx.fillText(`⚓ ${name} (Captain Marina)`, 256, 95);
     } else {
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = 'bold 26px sans-serif';
+      ctx.fillStyle = '#facc15';
+      ctx.font = 'bold 28px sans-serif';
       ctx.fillText(`⚓ 關卡主・${name}`, 256, 52);
-      ctx.fillStyle = '#cbd5e1';
-      ctx.font = '20px sans-serif';
-      ctx.fillText('🔒 請先探索收集本關單字', 256, 90);
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 22px sans-serif';
+      ctx.fillText('💬 [E] 與船長對話 / 接受試煉', 256, 92);
     }
 
     const tex = new THREE.CanvasTexture(canvas);
@@ -3855,28 +3855,13 @@ class SpatialZoneManager {
     const zone = this.zones[zoneId];
     if (!zone) return;
 
-    const p = (window.cloudSyncManager && window.cloudSyncManager.profile)
-      ? window.cloudSyncManager.profile
-      : { completedWords: [] };
-    const completedList = (p.completedWords || []).map(w => w.toUpperCase());
-
-    // 檢查該關卡單字是否已全部收集
-    const remaining = zone.words.filter(w => !completedList.includes(w.toUpperCase()));
-
-    // 若還有未完成單字，給予引導提示
-    if (remaining.length > 0 && !window.DEV_OVERRIDE_GUARDIAN) {
-      if (window.audioManager) window.audioManager.playSfx('click');
-      this.world.showToast(`⚓ 瑪琳娜船長：「冒險者，請先探索海港收集完剩餘單字（${remaining.join(', ')}），再來接受我的英語問句試煉！」`);
-      return;
-    }
-
-    // 達成全部單字探索，啟動英語問句三重試煉！
+    // 直接與關卡主面對面對話！由對話彈窗提供親切引導與問句挑戰
     if (typeof window.openGuardianTrial === 'function') {
       window.openGuardianTrial(zoneId);
     } else if (this.world && typeof this.world.openGuardianTrial === 'function') {
       this.world.openGuardianTrial(zoneId);
     } else {
-      this.world.showToast('⚓ 關卡主試煉已就緒！');
+      this.world.showToast('⚓ 關卡主對話已就緒！');
     }
   }
 

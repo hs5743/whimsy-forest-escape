@@ -237,12 +237,16 @@ class SpeechManager {
 
   playSentenceVoice(sentence) {
     if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(sentence);
-      utter.lang = 'en-US';
-      utter.rate = 0.85;
-      utter.pitch = 1.05;
-      window.speechSynthesis.speak(utter);
+      try {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(sentence);
+        utter.lang = 'en-US';
+        utter.rate = 0.85;
+        utter.pitch = 1.05;
+        window.speechSynthesis.speak(utter);
+      } catch (err) {
+        console.warn("Speech synthesis error:", err);
+      }
     }
   }
 
