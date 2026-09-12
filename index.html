@@ -654,6 +654,9 @@
           關閉地圖
         </button>
       </div>
+    </div>
+  </div>
+
   <!-- 關卡主英語問句三重試煉彈窗 (Guardian Question Trial Modal) -->
   <div id="guardianTrialModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 160; display: none; justify-content: center; align-items: center; padding: 12px;">
     <div class="guardian-dialog-container">
@@ -856,15 +859,15 @@
 
   <!-- 核心庫與遊戲腳本 -->
   <script src="three.min.js"></script>
-  <script src="vocab-data.js?v=20260912_v2"></script>
-  <script src="vocab-passport-bank.js?v=20260912_v2"></script>
-  <script src="speech-manager.js?v=20260912_v2"></script>
-  <script src="audio-manager.js?v=20260912_v2"></script>
-  <script src="touch-controls.js?v=20260912_v2"></script>
-  <script src="cloud-sync-manager.js?v=20260912_v2"></script>
-  <script src="spatial-zone-manager.js?v=20260912_v2"></script>
-  <script src="minimap-manager.js?v=20260912_v2"></script>
-  <script src="world-3d.js?v=20260912_v2"></script>
+  <script src="vocab-data.js?v=20260912_v3"></script>
+  <script src="vocab-passport-bank.js?v=20260912_v3"></script>
+  <script src="speech-manager.js?v=20260912_v3"></script>
+  <script src="audio-manager.js?v=20260912_v3"></script>
+  <script src="touch-controls.js?v=20260912_v3"></script>
+  <script src="cloud-sync-manager.js?v=20260912_v3"></script>
+  <script src="spatial-zone-manager.js?v=20260912_v3"></script>
+  <script src="minimap-manager.js?v=20260912_v3"></script>
+  <script src="world-3d.js?v=20260912_v3"></script>
 
   <script>
     let curLeaderboardTab = 'school';
@@ -1496,6 +1499,14 @@
       if (mapModal) mapModal.style.display = 'none';
       const passModal = document.getElementById('passportModal');
       if (passModal) passModal.style.display = 'none';
+      const magicPassModal = document.getElementById('magicPassportModal');
+      if (magicPassModal) magicPassModal.style.display = 'none';
+      const studentModal = document.getElementById('studentLoginModal');
+      if (studentModal) studentModal.style.display = 'none';
+      const leaderModal = document.getElementById('leaderboardModal');
+      if (leaderModal) leaderModal.style.display = 'none';
+      const cloudModal = document.getElementById('cloudConfigModal');
+      if (cloudModal) cloudModal.style.display = 'none';
       const guideModal = document.getElementById('guideModal');
       if (guideModal) guideModal.style.display = 'none';
 

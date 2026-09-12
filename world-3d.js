@@ -771,7 +771,9 @@ class World3D {
       'speechModal',
       'guardianTrialModal',
       'worldMapModal',
+      'magicPassportModal',
       'passportModal',
+      'studentLoginModal',
       'studentModal',
       'leaderboardModal',
       'cloudConfigModal',
@@ -859,15 +861,40 @@ class World3D {
 
       this.camera.position.copy(this.player.pos);
 
-      // 檢查互動鍵 (E 或 手機互動鈕)
+      // 檢查互動鍵 (E、手機互動鈕 或 滑鼠點擊)
       if (window.touchControls.consumeInteract()) {
-        if (this.hoveredObject) {
-          this.triggerInteraction(this.hoveredObject);
+        let target = this.hoveredObject;
+        if (!target) {
+          target = this.findNearbyInteractable(3.8);
+        }
+        if (target) {
+          this.triggerInteraction(target);
         } else {
           this.showToast('請靠近並對準魔法物件再按下互動鍵！');
         }
       }
     }
+  }
+
+  // 尋找玩家身邊最近的可互動目標 (半徑容錯輔助，防止準心微偏時按 E 或點擊沒反應)
+  findNearbyInteractable(maxDist = 3.8) {
+    if (!this.interactables || this.interactables.length === 0) return null;
+    let closest = null;
+    let minDist = maxDist;
+    const playerPos = this.player.pos;
+    const tempVec = new THREE.Vector3();
+
+    for (let i = 0; i < this.interactables.length; i++) {
+      const obj = this.interactables[i];
+      if (!obj || !obj.userData || !obj.userData.id) continue;
+      obj.getWorldPosition(tempVec);
+      const dist = Math.hypot(tempVec.x - playerPos.x, tempVec.z - playerPos.z);
+      if (dist < minDist) {
+        minDist = dist;
+        closest = obj;
+      }
+    }
+    return closest;
   }
 
   // 射線偵測滑鼠/螢幕正中心的物件
@@ -878,7 +905,7 @@ class World3D {
     const tooltip = document.getElementById('interactPrompt');
     const crosshair = document.getElementById('crosshair');
 
-    if (intersects.length > 0 && intersects[0].distance < 4.2) {
+    if (intersects.length > 0 && intersects[0].distance < 4.5) {
       let root = intersects[0].object;
       while (root.parent && !root.userData.id && root !== this.scene) {
         root = root.parent;

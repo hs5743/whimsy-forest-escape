@@ -39,7 +39,7 @@ class TouchControls {
       if (this.keys.hasOwnProperty(e.code)) {
         this.keys[e.code] = true;
       }
-      if (e.code === 'KeyE') {
+      if (e.code === 'KeyE' || e.key === 'e' || e.key === 'E') {
         this.interactRequested = true;
       }
     });
@@ -53,15 +53,39 @@ class TouchControls {
 
   initMouse() {
     const canvas = document.getElementById('renderCanvas');
+    let mouseDownStart = { x: 0, y: 0, time: 0 };
 
     window.addEventListener('mousedown', (e) => {
-      // 點擊UI元素時不觸發旋轉視角
-      if (e.target.closest('#uiLayer') || e.target.closest('#speechModal') || e.target.closest('.touch-button')) return;
+      // 點擊UI元素或開啟中的彈窗時不觸發旋轉視角與點擊互動
+      if (
+        e.target.closest('#uiLayer') ||
+        e.target.closest('#speechModal') ||
+        e.target.closest('#guardianTrialModal') ||
+        e.target.closest('#worldMapModal') ||
+        e.target.closest('#magicPassportModal') ||
+        e.target.closest('#studentLoginModal') ||
+        e.target.closest('#leaderboardModal') ||
+        e.target.closest('#cloudConfigModal') ||
+        e.target.closest('#guideModal') ||
+        e.target.closest('#victoryModal') ||
+        e.target.closest('.touch-button')
+      ) return;
+
       this.isMouseDown = true;
       this.lastMousePos = { x: e.clientX, y: e.clientY };
+      mouseDownStart = { x: e.clientX, y: e.clientY, time: Date.now() };
     });
 
-    window.addEventListener('mouseup', () => {
+    window.addEventListener('mouseup', (e) => {
+      if (this.isMouseDown && e.button === 0) {
+        const dx = e.clientX - mouseDownStart.x;
+        const dy = e.clientY - mouseDownStart.y;
+        const dt = Date.now() - mouseDownStart.time;
+        // 若位移極小 (< 8px) 且在 450ms 內，判定為點擊 3D 空間目標互動！
+        if (Math.hypot(dx, dy) < 8 && dt < 450) {
+          this.interactRequested = true;
+        }
+      }
       this.isMouseDown = false;
     });
 
