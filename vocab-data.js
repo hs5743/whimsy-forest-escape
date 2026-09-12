@@ -271,6 +271,57 @@ const VOCAB_DATA = {
     matchKeywords: ["water", "waters", "waiter"],
     xp: 50,
     color: "#06b6d4"
+  },
+  "MOON": {
+    word: "MOON",
+    phonics: "/muːn/ • M-O-O-N",
+    zh: "月亮、蒼月",
+    category: "雲頂星空觀測站",
+    mascot: "aethel",
+    mascotName: "艾瑟爾賢者 Aethel",
+    mascotImg: "assets/textures/tex-clocktower-face.jpg",
+    dialogue: "“Look up! The silvery crescent moon watches over our magical academy.”",
+    dialogueZh: "「抬頭看！銀白色的弦月正在雲頂天幕守護著我們的魔法學院。」",
+    prompt: "請看著觀測站的蒼月潮汐日晷儀，唸出：MOON！",
+    puzzleHint: "觀測站中央的潮汐日晷正隨著月相緩緩旋轉，散發出銀藍光芒！",
+    audioFile: "assets/sounds/vocab/MOON.wav",
+    matchKeywords: ["moon", "moons", "mood"],
+    xp: 60,
+    color: "#93c5fd"
+  },
+  "CLOUD": {
+    word: "CLOUD",
+    phonics: "/klaʊd/ • C-L-O-U-D",
+    zh: "雲朵、雲海",
+    category: "雲頂星空觀測站",
+    mascot: "aethel",
+    mascotName: "艾瑟爾賢者 Aethel",
+    mascotImg: "assets/textures/tex-clocktower-face.jpg",
+    dialogue: "“Fluffy white clouds float peacefully like an ocean beneath our feet.”",
+    dialogueZh: "「綿密蓬鬆的白色雲朵就像腳下一望無際的雲海，靜靜飄動。」",
+    prompt: "請俯瞰觀星露台邊緣起伏的雲海，唸出：CLOUD！",
+    puzzleHint: "觀景浮台四周翻湧著純白的立體雲海，踩上去彷彿漫步空中！",
+    audioFile: "assets/sounds/vocab/CLOUD.wav",
+    matchKeywords: ["cloud", "clouds", "clown", "crowd"],
+    xp: 50,
+    color: "#e2e8f0"
+  },
+  "SKY": {
+    word: "SKY",
+    phonics: "/skaɪ/ • S-K-Y",
+    zh: "天空、星空蒼穹",
+    category: "雲頂星空觀測站",
+    mascot: "aethel",
+    mascotName: "艾瑟爾賢者 Aethel",
+    mascotImg: "assets/textures/tex-clocktower-face.jpg",
+    dialogue: "“The endless night sky is filled with glowing stars and distant galaxies!”",
+    dialogueZh: "「無垠的夜空蒼穹中點綴著閃耀的恆星與遙遠星系！」",
+    prompt: "請透過巨型天文望遠鏡望向無垠夜空，唸出：SKY！",
+    puzzleHint: "巨型折射望遠鏡正指向天頂星河，窺探浩瀚宇宙的奧秘！",
+    audioFile: "assets/sounds/vocab/SKY.wav",
+    matchKeywords: ["sky", "skies", "ski"],
+    xp: 50,
+    color: "#38bdf8"
   }
 };
 
@@ -401,6 +452,68 @@ const GUARDIAN_TRIALS = {
         targetKeywords: ["can", "you", "see", "the", "golden", "light"],
         requiredAccuracy: 80,
         audioText: "Can you see the golden light?"
+      }
+    ]
+  },
+  'zone7': {
+    zoneId: 'zone7',
+    zoneName: '雲頂星空觀測站',
+    bossId: 'astrologer_aethel',
+    bossName: '艾瑟爾賢者 (Astrologer Aethel)',
+    bossRole: '🔭 星象總監・蒼穹觀星大師',
+    bossAvatar: 'assets/textures/tex-clocktower-face.jpg',
+    bossEmoji: '🔭',
+    introDialogue: "Greetings, 年輕的尋星使者！我是雲頂星空觀測站的守護者——艾瑟爾 🔭。你已經攀登至學院最高的蒼穹之巔，掌握了星空的核心詞彙。想要解開通向星界大魔導士殿堂的終極星門，並獲得象徵最高榮譽的【星空守護之星 🌟】，請接受我的「英語問句三重試煉」！",
+    rewardXP: 200,
+    starName: "星空守護之星 🌟",
+    victoryDialogue: "Magnificent! 你的英語問句宛如夜空中最璀璨的星光，發音自信流暢！以星象總監之名，我將這顆至高榮耀的【星空守護之星】授予你，你已正式通關雲頂星空觀測站，大魔導士殿堂的榮耀星門為你敞開！",
+    questions: [
+      {
+        stage: 1,
+        type: 'choice',
+        title: '問句試煉 1/3：疑問詞選擇題 (Question Words)',
+        scenario: '天象觀測情境：你仰望夜空，想向艾瑟爾賢者打聽今晚明月升起的時間',
+        prompt: '請問句中的空格應填入哪一個疑問詞？',
+        sentence: "“_____ does the bright moon rise tonight?”",
+        sentenceZh: "「今晚明亮的月亮會在什麼時候升起？」",
+        audioText: "When does the bright moon rise tonight?",
+        options: [
+          { key: 'A', text: 'When', correct: true, hint: '完全正確！詢問時間或時刻使用 When。' },
+          { key: 'B', text: 'Where', correct: false, hint: 'Where 是詢問「地點」，這裡詢問的是時間喔！' },
+          { key: 'C', text: 'Who', correct: false, hint: 'Who 是詢問「人物」，不能用來詢問天象時間喔！' },
+          { key: 'D', text: 'Why', correct: false, hint: 'Why 是詢問「原因/為什麼」，詢問時間要用 When！' }
+        ],
+        explanation: '【When】用於詢問時間或何時發生。「When does the bright moon rise tonight?」意為「今晚明月何時升起？」。'
+      },
+      {
+        stage: 2,
+        type: 'choice',
+        title: '問句試煉 2/3：情境助動詞選擇題 (Auxiliary Verbs)',
+        scenario: '望遠鏡觀測情境：賢者調整好巨型望遠鏡鏡頭，詢問你是否能看見發光的星辰',
+        prompt: '請問句中的空格應填入哪一個助動詞？',
+        sentence: "“_____ you see the glowing star through the telescope?”",
+        sentenceZh: "「你能透過望遠鏡看見那顆發光的星星嗎？」",
+        audioText: "Can you see the glowing star through the telescope?",
+        options: [
+          { key: 'A', text: 'Can', correct: true, hint: '太優秀了！「Can you see...」是用於詢問能力與感官觀察最經典的問句！' },
+          { key: 'B', text: 'Are', correct: false, hint: '主詞是 you 且搭配原形動詞 see，接 Are 會違反文法喔！' },
+          { key: 'C', text: 'Do', correct: false, hint: 'Do you 一般用於日常習慣；詢問當下能否看見通常使用 Can。' },
+          { key: 'D', text: 'Is', correct: false, hint: '主詞為 you，絕不能使用 Is 喔！' }
+        ],
+        explanation: '【Can】表示能力或感官觀察，「Can you see...?」是英語中詢問「你能看見...嗎？」最道地的問法。'
+      },
+      {
+        stage: 3,
+        type: 'speech',
+        title: '終極試煉 3/3：英語問句口說朗讀 (Required Accuracy ≥ 80%)',
+        scenario: '星空終極口說任務：請向艾瑟爾賢者清晰大聲朗讀經典問句，解開星界終極星門！',
+        prompt: '請點擊下方麥克風，完整清晰地朗讀出這句英語問句：',
+        targetSentence: "Can you see the bright star in the sky?",
+        targetSentenceZh: "「你能看見天空中那顆明亮的星星嗎？」",
+        phoneticGuide: "/kæn juː siː ðə braɪt stɑːr ɪn ðə skaɪ/",
+        targetKeywords: ["can", "you", "see", "the", "bright", "star", "in", "the", "sky"],
+        requiredAccuracy: 80,
+        audioText: "Can you see the bright star in the sky?"
       }
     ]
   }

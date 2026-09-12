@@ -122,8 +122,19 @@ class MinimapManager {
         { x: 5.0, z: 2.2, label: '鮮美漁獲貨堆', icon: '🐟', color: '#06b6d4' },
         { x: 0.0, z: -10.5, label: '港灣觀景台', icon: '🌊', color: '#3b82f6' },
         { x: 0.0, z: -13.0, label: '海關凱旋門/往新世界', icon: '🚪', color: '#10b981', isPortal: true },
+        { x: 8.5, z: -3.8, label: '雲霄星光空橋/往觀測站', icon: '🌟', color: '#facc15', isPortal: true },
         { x: 1.5, z: -5.0, label: '關卡主・瑪琳娜船長', icon: '👑', color: '#facc15', isGuardian: true },
         { x: 0.0, z: 12.0, label: '南側鐵道閘門/往車站', icon: '🚂', color: '#a855f7', isPortal: true }
+      ],
+      'zone7': [
+        { x: 0.0, z: -6.5, label: '星穹折射望遠鏡', icon: '🔭', color: '#38bdf8' },
+        { x: -6.5, z: -1.0, label: '遠古星辰羅盤儀', icon: '⭐', color: '#facc15' },
+        { x: 6.5, z: -1.0, label: '蒼月潮汐日晷儀', icon: '🌙', color: '#93c5fd' },
+        { x: -5.0, z: 4.0, label: '日冕三棱分光鏡', icon: '☀️', color: '#fbbf24' },
+        { x: 5.0, z: 4.0, label: '雲海浮島祭壇', icon: '☁️', color: '#e2e8f0' },
+        { x: 0.0, z: -12.5, label: '星界凱旋星門/往榮譽殿堂', icon: '🚪', color: '#10b981', isPortal: true },
+        { x: 1.5, z: -3.5, label: '關卡主・艾瑟爾賢者', icon: '👑', color: '#facc15', isGuardian: true },
+        { x: 0.0, z: 11.8, label: '降落星光空橋/往海港', icon: '⚓', color: '#0284c7', isPortal: true }
       ]
     };
 
@@ -290,6 +301,56 @@ class MinimapManager {
       ctx.fillStyle = '#fef08a';
       ctx.beginPath();
       ctx.arc(8.5 * s, -8.0 * s, 1.2 * s, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (curZone === 'zone7') {
+      // 雲頂星空觀測站：深邃宇宙星海底色 + 圓形浮島 + 內層觀星台 + 望遠鏡等標記
+      ctx.fillStyle = '#060919';
+      ctx.fillRect(-18 * s, -18 * s, 36 * s, 36 * s);
+
+      // 下層圓形主浮島 (半徑 14.5m)
+      ctx.fillStyle = '#1e293b';
+      ctx.beginPath();
+      ctx.arc(0, 0, 14.5 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ca8a04';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // 上層同心圓觀星高台 (半徑 7.5m)
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.arc(0, 0, 7.5 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#facc15';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // 望遠鏡基座 (北側)
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(-1.5 * s, -8.0 * s, 3.0 * s, 3.0 * s);
+
+      // 星羅盤 (西側)
+      ctx.fillStyle = '#fde047';
+      ctx.beginPath();
+      ctx.arc(-6.5 * s, -1.0 * s, 1.4 * s, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 月晷儀 (東側)
+      ctx.fillStyle = '#93c5fd';
+      ctx.beginPath();
+      ctx.arc(6.5 * s, -1.0 * s, 1.4 * s, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 日冕分光鏡 (西南)
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath();
+      ctx.arc(-5.0 * s, 4.0 * s, 1.2 * s, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 雲祭壇 (東南)
+      ctx.fillStyle = '#e2e8f0';
+      ctx.beginPath();
+      ctx.arc(5.0 * s, 4.0 * s, 1.2 * s, 0, Math.PI * 2);
       ctx.fill();
     }
 
