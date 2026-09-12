@@ -1289,6 +1289,22 @@ class World3D {
 
     modal.style.display = 'flex';
 
+    // 每次開啟單字卡時，重置錄音狀態與按鈕外觀
+    if (window.speechManager) {
+      window.speechManager.stopListening();
+    }
+    const micBtn = document.getElementById('micButton');
+    if (micBtn) {
+      micBtn.className = 'btn-mic';
+      micBtn.style.background = '';
+      micBtn.innerHTML = '<span>🎙️ 按下開始口說挑戰 (Speak)</span>';
+    }
+    const statusBox = document.getElementById('speechStatus');
+    if (statusBox) {
+      statusBox.textContent = '點擊上方「開始口說挑戰」，靠近麥克風唸出單字！';
+      statusBox.className = 'speech-status';
+    }
+
     // 自動播放一次外師發音
     if (window.speechManager) {
       window.speechManager.playWordVoice(wordKey);
@@ -1296,13 +1312,14 @@ class World3D {
 
     // 綁定發音按鈕
     const voiceBtn = document.getElementById('playVoiceBtn');
-    voiceBtn.onclick = () => {
+    voiceBtn.onclick = (e) => {
+      if (e) e.stopPropagation();
       if (window.speechManager) window.speechManager.playWordVoice(wordKey);
     };
 
     // 綁定麥克風口說辨識
-    const micBtn = document.getElementById('micButton');
-    micBtn.onclick = () => {
+    micBtn.onclick = (e) => {
+      if (e) e.stopPropagation();
       if (window.speechManager) {
         window.speechManager.startListening(wordKey, (success) => {
           if (success) {
@@ -1322,7 +1339,8 @@ class World3D {
 
     // 綁定教師/備用過關按鈕 (免於雜音卡關)
     const passBtn = document.getElementById('teacherPassBtn');
-    passBtn.onclick = () => {
+    passBtn.onclick = (e) => {
+      if (e) e.stopPropagation();
       if (window.speechManager) {
         window.speechManager.forcePass();
         if (window.cloudSyncManager) {

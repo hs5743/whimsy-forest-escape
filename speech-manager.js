@@ -116,7 +116,9 @@ class SpeechManager {
   }
 
   startListening(wordKey, callback) {
-    this.currentWordKey = wordKey.toUpperCase();
+    // 關鍵修復 1：明確將狀態切換回單字評測模式，杜絕被問句朗讀殘留的 mode 干擾
+    this.mode = 'word';
+    this.currentWordKey = (wordKey || "").toUpperCase();
     this.targetData = VOCAB_DATA[this.currentWordKey];
 
     if (!this.targetData && window.PassportBankHelper) {
@@ -139,26 +141,57 @@ class SpeechManager {
 
     this.onResultCallback = callback;
 
+    // 關鍵修復 2：停止正在播放的外師或系統 TTS，避免干擾麥克風錄音
+    if ('speechSynthesis' in window) {
+      try { window.speechSynthesis.cancel(); } catch (e) {}
+    }
+
+    // 延遲初始化偵測：若當前尚未建立 recognition 物件，嘗試再次初始化
     if (!this.recognition) {
-      this.updateUIStatus("unsupported", "⚠️ 瀏覽器未支援語音辨識，請使用下方「發音驗證通過」按鈕。");
+      this.initRecognition();
+    }
+
+    // 若瀏覽器確定無語音 API，即時提示並切換按鈕狀態
+    if (!this.recognition) {
+      this.updateUIStatus("unsupported", "⚠️ 瀏覽器未支援語音辨識，請使用下方「老師驗證通過」過關。");
       return;
+    }
+
+    // 關鍵修復 3：按下瞬間立即改變按鈕外觀與狀態文字（紅光脈衝 + 提示開口），不再因等待 onstart 而卡住
+    this.updateUIStatus("listening", "🎙️ 正在聆聽... 請靠近麥克風大聲唸出單字！");
+    if (window.audioManager) {
+      window.audioManager.playSfx("click");
     }
 
     try {
       if (this.isListening) {
-        this.recognition.stop();
+        try { this.recognition.stop(); } catch (stopErr) {}
       }
       this.recognition.start();
     } catch (e) {
       console.warn("Recognition start error:", e);
+      // 容錯機制：若遭遇 InvalidStateError (如前次未完全釋放)，先強制 abort 後微延遲重啟
+      try {
+        this.recognition.abort();
+        setTimeout(() => {
+          try {
+            this.recognition.start();
+          } catch (retryErr) {
+            console.warn("Recognition retry failed:", retryErr);
+          }
+        }, 120);
+      } catch (abortErr) {}
     }
   }
 
   stopListening() {
     if (this.recognition && this.isListening) {
-      this.recognition.stop();
+      try {
+        this.recognition.stop();
+      } catch (e) {}
       this.isListening = false;
     }
+    this.mode = 'word';
   }
 
   evaluatePronunciation(userTranscript) {
@@ -223,9 +256,33 @@ class SpeechManager {
     if (micBtn) {
       if (state === "listening") {
         micBtn.classList.add("pulsing");
-        micBtn.innerHTML = "<span>🔴 正在錄音... (請開口)</span>";
+        micBtn.classList.remove("success");
+        micBtn.style.background = "";
+        micBtn.innerHTML = "<span>🔴 正在錄音... (請開口唸)</span>";
+      } else if (state === "detecting") {
+        micBtn.classList.add("pulsing");
+        micBtn.classList.remove("success");
+        micBtn.style.background = "";
+        micBtn.innerHTML = "<span>🎧 偵測聲音中...</span>";
+      } else if (state === "success") {
+        micBtn.classList.remove("pulsing");
+        micBtn.classList.add("success");
+        micBtn.style.background = "linear-gradient(135deg, #10b981, #059669)";
+        micBtn.innerHTML = "<span>✅ 辨識成功！</span>";
+      } else if (state === "unsupported") {
+        micBtn.classList.remove("pulsing");
+        micBtn.classList.remove("success");
+        micBtn.style.background = "linear-gradient(135deg, #64748b, #475569)";
+        micBtn.innerHTML = "<span>⚠️ 語音功能受限 (點下方驗證)</span>";
+      } else if (state === "error") {
+        micBtn.classList.remove("pulsing");
+        micBtn.classList.remove("success");
+        micBtn.style.background = "linear-gradient(135deg, #ef4444, #b91c1c)";
+        micBtn.innerHTML = "<span>⚠️ 點擊重試口說挑戰</span>";
       } else {
         micBtn.classList.remove("pulsing");
+        micBtn.classList.remove("success");
+        micBtn.style.background = "";
         micBtn.innerHTML = "<span>🎙️ 按下開始口說挑戰 (Speak)</span>";
       }
     }
@@ -259,18 +316,41 @@ class SpeechManager {
     this.sentenceRequiredAcc = reqAccuracy || 80;
     this.onSentenceResultCallback = callback;
 
+    if ('speechSynthesis' in window) {
+      try { window.speechSynthesis.cancel(); } catch (e) {}
+    }
+
+    if (!this.recognition) {
+      this.initRecognition();
+    }
+
     if (!this.recognition) {
       this.updateSentenceUI("unsupported", "⚠️ 瀏覽器未支援語音辨識，可點擊「老師驗證通過」按鈕。");
       return;
     }
 
+    this.updateSentenceUI("listening", "🎙️ 正在聆聽問句... 請完整大聲朗讀！");
+    if (window.audioManager) {
+      window.audioManager.playSfx("click");
+    }
+
     try {
       if (this.isListening) {
-        this.recognition.stop();
+        try { this.recognition.stop(); } catch (e) {}
       }
       this.recognition.start();
     } catch (e) {
       console.warn("Sentence recognition start error:", e);
+      try {
+        this.recognition.abort();
+        setTimeout(() => {
+          try {
+            this.recognition.start();
+          } catch (retryErr) {
+            console.warn("Sentence retry start error:", retryErr);
+          }
+        }, 120);
+      } catch (abortErr) {}
     }
   }
 
