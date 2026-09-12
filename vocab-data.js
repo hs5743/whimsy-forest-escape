@@ -322,6 +322,108 @@ const VOCAB_DATA = {
     matchKeywords: ["sky", "skies", "ski"],
     xp: 50,
     color: "#38bdf8"
+  },
+  "SNOW": {
+    word: "SNOW",
+    phonics: "/snoʊ/ • S-N-O-W",
+    zh: "雪、積雪、下雪",
+    category: "極光冰雪聖域",
+    mascot: "frost",
+    mascotName: "佛洛斯特長老 Frost",
+    mascotImg: "assets/textures/tex-clocktower-face.jpg",
+    dialogue: "“Pure white snow is gently falling from the shimmering aurora sky!”",
+    dialogueZh: "「純白的雪花正從閃爍的極光天幕中輕盈飄落！」",
+    prompt: "請看著旋轉的冰雪結晶風向儀，唸出：SNOW！",
+    puzzleHint: "六角萬年雪花結晶正隨著極光微風旋轉，散發出冰藍光芒！",
+    audioFile: "assets/sounds/vocab/SNOW.wav",
+    matchKeywords: ["snow", "snows", "slow", "no"],
+    xp: 50,
+    color: "#e0f2fe"
+  },
+  "COLD": {
+    word: "COLD",
+    phonics: "/koʊld/ • C-O-L-D",
+    zh: "寒冷的、冰涼的",
+    category: "極光冰雪聖域",
+    mascot: "frost",
+    mascotName: "佛洛斯特長老 Frost",
+    mascotImg: "assets/textures/tex-clocktower-face.jpg",
+    dialogue: "“Brrr! The arctic frost wind is very cold, but your spirit is brave!”",
+    dialogueZh: "「呼！極地的寒風雖然非常寒冷，但你的冒險意志十分堅定！」",
+    prompt: "請觸碰刻有寒霜符文的極寒方尖碑，唸出：COLD！",
+    puzzleHint: "晶透的萬年玄冰方尖碑正散發陣陣寒氣冷霧，凍結了四周的時間！",
+    audioFile: "assets/sounds/vocab/COLD.wav",
+    matchKeywords: ["cold", "colds", "call", "hold", "gold"],
+    xp: 50,
+    color: "#38bdf8"
+  },
+  "WINTER": {
+    word: "WINTER",
+    phonics: "/ˈwɪn.tər/ • W-I-N-T-E-R",
+    zh: "冬天、冬季",
+    category: "極光冰雪聖域",
+    mascot: "frost",
+    mascotName: "佛洛斯特長老 Frost",
+    mascotImg: "assets/textures/tex-clocktower-face.jpg",
+    dialogue: "“Winter brings peaceful white blankets and magical sparkling icicles.”",
+    dialogueZh: "「冬天為神峰披上了平靜的白雪毛毯，掛滿了奇幻的晶瑩冰錐。」",
+    prompt: "請仰望披上雪毯的冬之常青松，唸出：WINTER！",
+    puzzleHint: "傲雪挺立的冬之常青松上垂掛著晶瑩冰柱與溫暖冬燈！",
+    audioFile: "assets/sounds/vocab/WINTER.wav",
+    matchKeywords: ["winter", "winters", "winner", "wind"],
+    xp: 60,
+    color: "#93c5fd"
+  },
+  "WHITE": {
+    word: "WHITE",
+    phonics: "/waɪt/ • W-H-I-T-E",
+    zh: "白色的、純白",
+    category: "極光冰雪聖域",
+    mascot: "frost",
+    mascotName: "佛洛斯特長老 Frost",
+    mascotImg: "assets/textures/tex-clocktower-face.jpg",
+    dialogue: "“The snowman guardian wears a soft blue scarf over his white coat!”",
+    dialogueZh: "「純白的雪人守護者在他的白衣上繫了一條溫暖的藍色圍巾！」",
+    prompt: "請對著戴單片眼鏡的雪境守護者，唸出：WHITE！",
+    puzzleHint: "圓滾滾的純白雪人正俏皮地向你眨眼，守護著冰雪聖殿！",
+    audioFile: "assets/sounds/vocab/WHITE.wav",
+    matchKeywords: ["white", "whites", "why", "wait"],
+    xp: 50,
+    color: "#f8fafc"
+  },
+  "WARM": {
+    word: "WARM",
+    phonics: "/wɔːrm/ • W-A-R-M",
+    zh: "溫暖的、暖和的",
+    category: "極光冰雪聖域",
+    mascot: "frost",
+    mascotName: "佛洛斯特長老 Frost",
+    mascotImg: "assets/textures/tex-clocktower-face.jpg",
+    dialogue: "“Come close to the magic hearth. Its glowing fire keeps us warm and safe.”",
+    dialogueZh: "「靠近這座極光暖心魔爐吧，它跳動的金色暖焰讓我們溫暖又安全。」",
+    prompt: "請伸手靠近跳動金焰的極光魔爐，唸出：WARM！",
+    puzzleHint: "在冰天雪地中燃燒著永不熄滅的暖心魔火，驅散了刺骨寒氣！",
+    audioFile: "assets/sounds/vocab/WARM.wav",
+    matchKeywords: ["warm", "warms", "worm", "wall"],
+    xp: 60,
+    color: "#fbbf24"
+  },
+  "CLIMB": {
+    word: "CLIMB",
+    phonics: "/klaɪm/ • C-L-I-M-B",
+    zh: "攀登、攀爬",
+    category: "極光冰雪聖域",
+    mascot: "frost",
+    mascotName: "佛洛斯特長老 Frost",
+    mascotImg: "assets/textures/tex-clocktower-face.jpg",
+    dialogue: "“Brave hero, climb the frosted steps to reach the highest peak of magic!”",
+    dialogueZh: "「勇敢的英雄，攀登這座寒霜冰階，抵達魔法大陸至高無上的頂峰！」",
+    prompt: "請踏上通往聖域極光之巔的旋轉冰階，唸出：CLIMB！",
+    puzzleHint: "旋轉上升的晶瑩冰階穿透雲霄，攀登上去即可啟程前往大魔導士殿堂！",
+    audioFile: "assets/sounds/vocab/CLIMB.wav",
+    matchKeywords: ["climb", "climbs", "climbed", "climate", "line"],
+    xp: 70,
+    color: "#a855f7"
   }
 };
 
@@ -514,6 +616,68 @@ const GUARDIAN_TRIALS = {
         targetKeywords: ["can", "you", "see", "the", "bright", "star", "in", "the", "sky"],
         requiredAccuracy: 80,
         audioText: "Can you see the bright star in the sky?"
+      }
+    ]
+  },
+  'zone8': {
+    zoneId: 'zone8',
+    zoneName: '極光冰雪聖域',
+    bossId: 'archmage_frost',
+    bossName: '佛洛斯特長老 (Archmage Frost)',
+    bossRole: '❄️ 極光雪境長老・冰霜大魔導士',
+    bossAvatar: 'assets/textures/tex-clocktower-face.jpg',
+    bossEmoji: '❄️',
+    introDialogue: "Greetings, 頂風冒雪的尋星使者！我是極光冰雪聖域的守護者——佛洛斯特 ❄️。你已經成功跨越雲頂觀測站，抵達了大陸最高聳的極光冰封之巔。想要解開通向星界大魔導士殿堂的終極攀登冰階，並獲頒至高榮譽的【極光冰晶之星 ❄️】，請接受我的「英語問句三重試煉」！",
+    rewardXP: 200,
+    starName: "極光冰晶之星 ❄️",
+    victoryDialogue: "Brilliant! 你的英語問句宛如極光般璀璨耀眼，發音清晰堅定！以冰霜大魔導士之名，我將這顆【極光冰晶之星】授予你。你已正式征服極光冰雪聖域，聖域之巔的攀登冰階為你全面解鎖，榮耀邁向星界大魔導士殿堂！",
+    questions: [
+      {
+        stage: 1,
+        type: 'choice',
+        title: '問句試煉 1/3：天氣疑問詞選擇題 (Weather Questions)',
+        scenario: '極地氣候情境：你裹緊防寒法袍，向佛洛斯特賢者詢問冬天這裡的天氣如何',
+        prompt: '請問句中的空格應填入哪一個疑問詞？',
+        sentence: "“_____ is the weather in winter?”",
+        sentenceZh: "「冬天的天氣通常如何呢？」",
+        audioText: "How is the weather in winter?",
+        options: [
+          { key: 'A', text: 'How', correct: true, hint: '完全正確！「How is the weather?」是英語中詢問天氣最經典標準的問句！' },
+          { key: 'B', text: 'Who', correct: false, hint: 'Who 是詢問「人物/誰」，不能用來詢問天氣狀況喔！' },
+          { key: 'C', text: 'Where', correct: false, hint: 'Where 是詢問「地點/在哪裡」，詢問天氣如何要用 How！' },
+          { key: 'D', text: 'Why', correct: false, hint: 'Why 是詢問「原因/為什麼」，詢問天氣狀況請用 How！' }
+        ],
+        explanation: '【How】用於詢問狀態或狀況。「How is the weather?」意為「天氣如何？」，可搭配季節如「in winter」詢問冬天氣候。'
+      },
+      {
+        stage: 2,
+        type: 'choice',
+        title: '問句試煉 2/3：情境助動詞/Be動詞選擇題 (Auxiliary & Be Verbs)',
+        scenario: '雪峰觀測情境：賢者望著漫天飛舞的白雪，詢問你今天聖域是否非常寒冷且在下雪',
+        prompt: '請問句中的空格應填入哪一個動詞？',
+        sentence: "“_____ it cold and snowy today?”",
+        sentenceZh: "「今天天氣寒冷而且在下雪嗎？」",
+        audioText: "Is it cold and snowy today?",
+        options: [
+          { key: 'A', text: 'Is', correct: true, hint: '太優秀了！天氣虛主詞 it 在現在式疑問句中搭配 Be 動詞 Is。' },
+          { key: 'B', text: 'Do', correct: false, hint: '主詞 it 後接形容詞 cold，不可使用 Do，必須使用 Be 動詞！' },
+          { key: 'C', text: 'Are', correct: false, hint: '主詞 it 為單數第三人稱，不可搭配複數 Are 喔！' },
+          { key: 'D', text: 'Can', correct: false, hint: '詢問當天天氣狀態通常使用「Is it cold...?」而非 Can it cold。' }
+        ],
+        explanation: '【Is】搭配天氣虛主詞 it，「Is it cold and snowy today?」是用於確認當天天氣狀態最道地的問法。'
+      },
+      {
+        stage: 3,
+        type: 'speech',
+        title: '終極試煉 3/3：英語問句口說朗讀 (Required Accuracy ≥ 80%)',
+        scenario: '雪山極限口說任務：請向佛洛斯特長老清晰大聲朗讀攀登問句，解開聖域終極攀登冰階！',
+        prompt: '請點擊下方麥克風，完整清晰地朗讀出這句英語問句：',
+        targetSentence: "Can you climb the white snow mountain?",
+        targetSentenceZh: "「你能攀登這座白雪皚皚的高山嗎？」",
+        phoneticGuide: "/kæn juː klaɪm ðə waɪt snoʊ ˈmaʊntən/",
+        targetKeywords: ["can", "you", "climb", "the", "white", "snow", "mountain"],
+        requiredAccuracy: 80,
+        audioText: "Can you climb the white snow mountain?"
       }
     ]
   }

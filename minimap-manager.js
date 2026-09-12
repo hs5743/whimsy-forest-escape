@@ -133,8 +133,19 @@ class MinimapManager {
         { x: -5.0, z: 4.0, label: '日冕三棱分光鏡', icon: '☀️', color: '#fbbf24' },
         { x: 5.0, z: 4.0, label: '雲海浮島祭壇', icon: '☁️', color: '#e2e8f0' },
         { x: 0.0, z: -12.5, label: '星界凱旋星門/往榮譽殿堂', icon: '🚪', color: '#10b981', isPortal: true },
+        { x: -8.5, z: -3.8, label: '極光冰橋/往冰雪聖域', icon: '❄️', color: '#38bdf8', isPortal: true },
         { x: 1.5, z: -3.5, label: '關卡主・艾瑟爾賢者', icon: '👑', color: '#facc15', isGuardian: true },
         { x: 0.0, z: 11.8, label: '降落星光空橋/往海港', icon: '⚓', color: '#0284c7', isPortal: true }
+      ],
+      'zone8': [
+        { x: 0.0, z: -6.5, label: '冰雪結晶風向儀 (SNOW)', icon: '❄️', color: '#38bdf8' },
+        { x: -6.5, z: -1.0, label: '極寒玄冰方尖碑 (COLD)', icon: '🧊', color: '#0284c7' },
+        { x: 6.5, z: -1.0, label: '冬之常青松 (WINTER)', icon: '🌲', color: '#93c5fd' },
+        { x: -5.0, z: 4.0, label: '雪境雪精靈守護者 (WHITE)', icon: '⛄', color: '#f8fafc' },
+        { x: 5.0, z: 4.0, label: '極光暖心魔法火爐 (WARM)', icon: '🔥', color: '#f59e0b' },
+        { x: 0.0, z: -12.5, label: '極光寒霜冰階 (CLIMB)', icon: '🪜', color: '#a855f7', isPortal: true },
+        { x: 1.5, z: -3.5, label: '關卡主・佛洛斯特長老', icon: '👑', color: '#facc15', isGuardian: true },
+        { x: 0.0, z: 11.8, label: '降落極光冰橋/往觀測站', icon: '🔭', color: '#38bdf8', isPortal: true }
       ]
     };
 
@@ -351,6 +362,79 @@ class MinimapManager {
       ctx.fillStyle = '#e2e8f0';
       ctx.beginPath();
       ctx.arc(5.0 * s, 4.0 * s, 1.2 * s, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (curZone === 'zone8') {
+      // 極光冰雪聖域：極夜深邃青黑底色 + 鋸齒冰川浮島 + 翡翠紫羅蘭極光弧線 + 各冰雪祭壇
+      ctx.fillStyle = '#030712';
+      ctx.fillRect(-18 * s, -18 * s, 36 * s, 36 * s);
+
+      // 極光輝光弧 (Aurora Arcs)
+      ctx.strokeStyle = 'rgba(16, 185, 129, 0.35)';
+      ctx.lineWidth = 3.0 * s;
+      ctx.beginPath();
+      ctx.arc(0, -18 * s, 16 * s, 0.2 * Math.PI, 0.8 * Math.PI);
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(139, 92, 246, 0.25)';
+      ctx.beginPath();
+      ctx.arc(0, -22 * s, 18 * s, 0.25 * Math.PI, 0.75 * Math.PI);
+      ctx.stroke();
+
+      // 鋸齒不規則寒冰浮島多邊形主體 (Jagged Glacial Polygon)
+      ctx.fillStyle = '#0f2b3e';
+      ctx.beginPath();
+      const numPts = 12;
+      const baseR = 13.5 * s;
+      const jagRadii = [1.0, 0.92, 1.05, 0.95, 1.02, 0.9, 1.06, 0.93, 1.03, 0.94, 1.05, 0.91];
+      for (let i = 0; i < numPts; i++) {
+        const angle = (i / numPts) * Math.PI * 2;
+        const r = baseR * jagRadii[i];
+        const x = Math.cos(angle) * r;
+        const y = Math.sin(angle) * r;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // 冰雪積層高台 (Snow Plateaus)
+      ctx.fillStyle = '#1e3a5f';
+      ctx.beginPath();
+      ctx.arc(0, 0, 7.5 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#7dd3fc';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // 冰雪結晶風向儀 (北側)
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(0.0 * s, -6.5 * s, 1.6 * s, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 玄冰方尖碑 (西側)
+      ctx.fillStyle = '#0284c7';
+      ctx.fillRect(-7.2 * s, -1.8 * s, 1.4 * s, 1.6 * s);
+
+      // 冬之常青松 (東側)
+      ctx.fillStyle = '#065f46';
+      ctx.beginPath();
+      ctx.arc(6.5 * s, -1.0 * s, 1.6 * s, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 純白雪人 (西南)
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.arc(-5.0 * s, 4.0 * s, 1.3 * s, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 極光暖心魔爐 (東南)
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.arc(5.0 * s, 4.0 * s, 1.4 * s, 0, Math.PI * 2);
       ctx.fill();
     }
 

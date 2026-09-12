@@ -94,6 +94,18 @@ class SpatialZoneManager {
         words: ['STAR', 'MOON', 'CLOUD', 'SUN', 'SKY', 'OPEN'],
         spawnPos: [0, 1.6, 7.5],
         spawnYaw: 0
+      },
+      'zone8': {
+        id: 'zone8',
+        name: '極光冰雪聖域',
+        englishName: 'Aurora Frost Sanctuary',
+        icon: '❄️',
+        topic: 'Winter, Climate & Arctic Nature',
+        reqLevel: 8,
+        desc: '懸浮於大陸極峰的萬年寒冰聖域，翡翠綠與紫羅蘭色的極光在夜空中輕盈起伏！',
+        words: ['SNOW', 'COLD', 'WINTER', 'WHITE', 'WARM', 'CLIMB'],
+        spawnPos: [0, 1.6, 7.5],
+        spawnYaw: 0
       }
     };
 
@@ -211,6 +223,27 @@ class SpatialZoneManager {
         // 9. 南側空橋出入口石柱兩側防跌落邊界
         { type: 'box', minX: -14.5, maxX: -2.4, minZ: 12.0, maxZ: 14.5 },
         { type: 'box', minX: 2.4, maxX: 14.5, minZ: 12.0, maxZ: 14.5 }
+      ],
+      'zone8': [
+        // 1. 冰雪結晶風向儀基座實體 (SNOW POI, 中心: 0, -6.5, 半徑 2.0)
+        { type: 'box', minX: -2.0, maxX: 2.0, minZ: -8.5, maxZ: -4.5 },
+        // 2. 極寒玄冰方尖碑基座實體 (COLD POI, 中心: -6.5, -1.0, 半徑 1.6)
+        { type: 'box', minX: -8.0, maxX: -5.0, minZ: -2.5, maxZ: 0.5 },
+        // 3. 冬之永凍常青松樹幹基座 (WINTER POI, 中心: 6.5, -1.0, 半徑 1.6)
+        { type: 'box', minX: 5.0, maxX: 8.0, minZ: -2.5, maxZ: 0.5 },
+        // 4. 純白雪境雪精靈守護者 (WHITE POI, 中心: -5.0, 4.0, 半徑 1.4)
+        { type: 'box', minX: -6.2, maxX: -3.8, minZ: 2.8, maxZ: 5.2 },
+        // 5. 極光暖心魔法火爐基座 (WARM POI, 中心: 5.0, 4.0, 半徑 1.5)
+        { type: 'box', minX: 3.8, maxX: 6.2, minZ: 2.8, maxZ: 5.2 },
+        // 6. 西側冰崖空域安全護欄邊界 (防跌落虛空)
+        { type: 'box', minX: -16.5, maxX: -13.8, minZ: -14.5, maxZ: 14.5 },
+        // 7. 東側冰崖空域安全護欄邊界 (防跌落虛空)
+        { type: 'box', minX: 13.8, maxX: 16.5, minZ: -14.5, maxZ: 14.5 },
+        // 8. 北側終極冰階兩側邊界 (防跌落虛空)
+        { type: 'box', minX: -14.5, maxX: 14.5, minZ: -16.5, maxZ: -13.8 },
+        // 9. 南側接駁空橋出入口石柱兩側防跌落邊界
+        { type: 'box', minX: -14.5, maxX: -2.4, minZ: 12.0, maxZ: 14.5 },
+        { type: 'box', minX: 2.4, maxX: 14.5, minZ: 12.0, maxZ: 14.5 }
       ]
     };
   }
@@ -261,7 +294,9 @@ class SpatialZoneManager {
       lighthouseBrick: loader.load('assets/textures/lighthouse_brick.jpg'),
       galleonHull: loader.load('assets/textures/galleon_hull.jpg'),
       celestialMarble: loader.load('assets/textures/celestial_marble.jpg'),
-      astrolabeBrass: loader.load('assets/textures/astrolabe_brass.jpg')
+      astrolabeBrass: loader.load('assets/textures/astrolabe_brass.jpg'),
+      glacialIce: loader.load('assets/textures/glacial_ice.jpg'),
+      snowFrost: loader.load('assets/textures/snow_frost.jpg')
     };
 
     this.tex.marketCobble.wrapS = THREE.RepeatWrapping;
@@ -318,6 +353,16 @@ class SpatialZoneManager {
       this.tex.astrolabeBrass.wrapS = THREE.RepeatWrapping;
       this.tex.astrolabeBrass.wrapT = THREE.RepeatWrapping;
       this.tex.astrolabeBrass.repeat.set(1, 1);
+    }
+    if (this.tex.glacialIce) {
+      this.tex.glacialIce.wrapS = THREE.RepeatWrapping;
+      this.tex.glacialIce.wrapT = THREE.RepeatWrapping;
+      this.tex.glacialIce.repeat.set(2, 2);
+    }
+    if (this.tex.snowFrost) {
+      this.tex.snowFrost.wrapS = THREE.RepeatWrapping;
+      this.tex.snowFrost.wrapT = THREE.RepeatWrapping;
+      this.tex.snowFrost.repeat.set(3, 3);
     }
 
     this.texturesLoaded = true;
@@ -381,6 +426,8 @@ class SpatialZoneManager {
       this.buildZone6_Harbor(group);
     } else if (zoneId === 'zone7') {
       this.buildZone7_Observatory(group);
+    } else if (zoneId === 'zone8') {
+      this.buildZone8_GlacialSanctuary(group);
     }
 
     this.world.scene.add(group);
@@ -415,7 +462,12 @@ class SpatialZoneManager {
     let fogColor = 0xe0f2fe;
     let fogDensity = 0.012;
 
-    if (zoneId === 'zone7') {
+    if (zoneId === 'zone8') {
+      // 極光冰雪聖域：極夜深藍、幽綠微光與薄霜迷霧
+      skyColorTop = 0x030712;
+      fogColor = 0x0a1526;
+      fogDensity = 0.008;
+    } else if (zoneId === 'zone7') {
       // 雲頂星空觀測站：深邃宇宙星海與微光薄霧
       skyColorTop = 0x060919;
       fogColor = 0x0f172a;
@@ -3930,10 +3982,11 @@ class SpatialZoneManager {
 
     // 文字
     ctx.textAlign = 'center';
+    const isZone8 = (zoneId === 'zone8');
     const isZone7 = (zoneId === 'zone7');
-    const bossIcon = isZone7 ? '🔭' : '⚓';
-    const bossEn = isZone7 ? 'Astrologer Aethel' : 'Captain Marina';
-    const bossAction = isZone7 ? '💬 [E] 與賢者對話 / 接受試煉' : '💬 [E] 與船長對話 / 接受試煉';
+    const bossIcon = isZone8 ? '❄️' : (isZone7 ? '🔭' : '⚓');
+    const bossEn = isZone8 ? 'Archmage Frost' : (isZone7 ? 'Astrologer Aethel' : 'Captain Marina');
+    const bossAction = isZone8 ? '💬 [E] 與長老對話 / 接受試煉' : (isZone7 ? '💬 [E] 與賢者對話 / 接受試煉' : '💬 [E] 與船長對話 / 接受試煉');
 
     if (isReady) {
       ctx.fillStyle = '#fde047';
@@ -4072,6 +4125,12 @@ class SpatialZoneManager {
         this.world.addXP(100);
         this.checkZoneCompletionStatus();
       });
+    });
+
+    // 9b. 璀璨極光冰橋 (通往 Zone 8 極光冰雪聖域, x: -8.5, z: -3.8)
+    this.buildObservatorySanctuaryGate(group, -8.5, 0, -3.8, '❄️ 璀璨極光冰橋 ➔ 登上【極光冰雪聖域】', () => {
+      this.world.showToast('❄️ 踏上極光冰橋，躍升至極光冰雪聖域！');
+      this.switchZone('zone8');
     });
 
     // 10. 南側降落星光空橋 (返回 Zone 6 蔚藍秘境海港, x: 0.0, z: 11.8)
@@ -4748,6 +4807,53 @@ class SpatialZoneManager {
     group.add(stargate);
   }
 
+  // 9b. 極光冰橋光柱傳送門 (通往 Zone 8 極光冰雪聖域)
+  buildObservatorySanctuaryGate(group, x, y, z, label, onTravel) {
+    const gate = new THREE.Group();
+    gate.position.set(x, y, z);
+
+    const brassMat = new THREE.MeshStandardMaterial({ map: this.tex.astrolabeBrass, metalness: 0.85, roughness: 0.2 });
+    const iceMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1, transparent: true, opacity: 0.85 });
+
+    // 極光基座
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.8, 0.35, 16), brassMat);
+    base.position.y = 0.18;
+    gate.add(base);
+
+    // 極光翡翠藍直衝天際光柱
+    const beamMat = new THREE.MeshBasicMaterial({ color: 0x10b981, transparent: true, opacity: 0.45, side: THREE.DoubleSide });
+    const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.2, 16, 16, 1, true), beamMat);
+    beam.position.y = 8.0;
+    gate.add(beam);
+
+    // 冰晶微粒
+    const orbitCrystal = new THREE.Mesh(new THREE.OctahedronGeometry(0.35, 0), iceMat);
+    orbitCrystal.position.set(1.2, 1.6, 0);
+    gate.add(orbitCrystal);
+
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.2, 4.0, 3.2), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 2.0;
+    hitBox.userData = {
+      id: 'travel_portal_zone8_from_observatory',
+      label,
+      onClick: () => {
+        if (onTravel) onTravel();
+      }
+    };
+    gate.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      beamMat.opacity = 0.35 + Math.sin(time * 3) * 0.15;
+      orbitCrystal.position.x = Math.cos(time * 2) * 1.2;
+      orbitCrystal.position.z = Math.sin(time * 2) * 1.2;
+      orbitCrystal.position.y = 1.6 + Math.sin(time * 3) * 0.3;
+      orbitCrystal.rotation.y = time * 2;
+    });
+
+    group.add(gate);
+  }
+
   // 10. 南側降落星光空橋 (返回 Zone 6 蔚藍秘境海港)
   buildObservatoryHarborSkybridgeGate(group, x, y, z, label, onTravel) {
     const gate = new THREE.Group();
@@ -4895,8 +5001,1128 @@ class SpatialZoneManager {
 
     group.add(npc);
   }
+
+  // =========================================================================
+  // Zone 8: 極光冰雪聖域 (Aurora Frost Sanctuary)
+  // =========================================================================
+  buildZone8_GlacialSanctuary(group) {
+    this.initTextures();
+
+    // 1. 光照系統 (極光幽藍、微霜冷光與暖心魔爐火光)
+    this.buildGlacialLighting(group);
+
+    // 2. 翡翠綠與紫羅蘭極光帷幕、雪峰天際線、600星芒
+    this.buildGlacialAuroraSky(group);
+
+    // 3. 鋸齒不規則寒冰浮島、冰晶斷崖與防跌落冰柱護欄
+    this.buildGlacialFloatingTerrace(group);
+
+    // 4. 冰雪結晶風向儀 (SNOW POI, x: 0.0, z: -6.5)
+    this.buildGlacialSnowflakeShrine(group, 0.0, 0, -6.5);
+
+    // 5. 極寒玄冰方尖碑 (COLD POI, x: -6.5, z: -1.0)
+    this.buildGlacialColdObelisk(group, -6.5, 0, -1.0);
+
+    // 6. 冬之永凍常青松 (WINTER POI, x: 6.5, z: -1.0)
+    this.buildGlacialWinterPine(group, 6.5, 0, -1.0);
+
+    // 7. 純白雪境雪精靈守護者 (WHITE POI, x: -5.0, z: 4.0)
+    this.buildGlacialSnowman(group, -5.0, 0, 4.0);
+
+    // 8. 極光暖心魔法火爐 (WARM POI, x: 5.0, z: 4.0)
+    this.buildGlacialWarmHearth(group, 5.0, 0, 4.0);
+
+    // 9. 寒霜攀登冰階 (CLIMB POI, x: 0.0, z: -12.5)
+    this.buildGlacialClimbStaircase(group, 0.0, 0, -12.5, '🪜 極光寒霜冰階 (CLIMB)', 'CLIMB', () => {
+      this.world.openSpeechCard('CLIMB', () => {
+        this.world.addXP(100);
+        this.checkZoneCompletionStatus();
+      });
+    });
+
+    // 10. 南側極光冰橋傳送門 (返回 Zone 7 雲頂星空觀測站, x: 0.0, z: 11.8)
+    this.buildGlacialObservatoryReturnGate(group, 0.0, 0, 11.8, '🔭 降落極光冰橋 ➔ 返回【雲頂星空觀測站】', () => {
+      this.world.showToast('🔭 沿著極光冰橋平穩降落，返回雲頂星空觀測站！');
+      this.switchZone('zone7');
+    });
+
+    // 11. 👑 關卡主 NPC：極光冬之賢者・佛洛斯特長老 (Archmage Frost, x: 1.5, z: -3.5)
+    this.buildGlacialGuardianNPC(group, 1.5, 0, -3.5);
+
+    // 12. 飄浮鑽石雪晶微粒 (Diamond Snow Particles)
+    this.addFloatingParticles(group, 0xe0f2fe, 250, 36, 8);
+  }
+
+  // 1. 光照系統
+  buildGlacialLighting(group) {
+    const hemiLight = new THREE.HemisphereLight(0x38bdf8, 0x064e3b, 0.9);
+    group.add(hemiLight);
+
+    const polarStarLight = new THREE.DirectionalLight(0xe0f2fe, 1.1);
+    polarStarLight.position.set(16, 32, 10);
+    polarStarLight.castShadow = true;
+    polarStarLight.shadow.mapSize.width = 1024;
+    polarStarLight.shadow.mapSize.height = 1024;
+    group.add(polarStarLight);
+
+    const centerGlow = new THREE.PointLight(0x38bdf8, 1.2, 22);
+    centerGlow.position.set(0, 3.0, 0);
+    group.add(centerGlow);
+
+    const hearthGlow = new THREE.PointLight(0xf59e0b, 1.6, 12);
+    hearthGlow.position.set(5.0, 1.8, 4.0);
+    group.add(hearthGlow);
+  }
+
+  // 2. 翡翠綠與紫羅蘭極光帷幕、雪峰天際線、600星芒
+  buildGlacialAuroraSky(group) {
+    const skyGroup = new THREE.Group();
+
+    // 翡翠綠極光絲帶 1
+    const auroraMat1 = new THREE.MeshBasicMaterial({
+      color: 0x10b981,
+      transparent: true,
+      opacity: 0.55,
+      side: THREE.DoubleSide
+    });
+    const ribbonGeo1 = new THREE.PlaneGeometry(120, 24, 32, 4);
+    const pos1 = ribbonGeo1.attributes.position;
+    for (let i = 0; i < pos1.count; i++) {
+      const vx = pos1.getX(i);
+      const vz = Math.sin((vx / 120) * Math.PI * 3) * 14;
+      pos1.setZ(i, vz);
+    }
+    ribbonGeo1.computeVertexNormals();
+    const ribbon1 = new THREE.Mesh(ribbonGeo1, auroraMat1);
+    ribbon1.position.set(0, 48, -60);
+    ribbon1.rotation.x = 0.18;
+    skyGroup.add(ribbon1);
+
+    // 青翠碧藍極光絲帶 2
+    const auroraMat2 = new THREE.MeshBasicMaterial({
+      color: 0x06b6d4,
+      transparent: true,
+      opacity: 0.48,
+      side: THREE.DoubleSide
+    });
+    const ribbonGeo2 = new THREE.PlaneGeometry(110, 20, 28, 4);
+    const pos2 = ribbonGeo2.attributes.position;
+    for (let i = 0; i < pos2.count; i++) {
+      const vx = pos2.getX(i);
+      const vz = Math.cos((vx / 110) * Math.PI * 3.5) * 12;
+      pos2.setZ(i, vz);
+    }
+    ribbonGeo2.computeVertexNormals();
+    const ribbon2 = new THREE.Mesh(ribbonGeo2, auroraMat2);
+    ribbon2.position.set(10, 56, -45);
+    ribbon2.rotation.x = 0.12;
+    ribbon2.rotation.y = -0.15;
+    skyGroup.add(ribbon2);
+
+    // 紫羅蘭極光絲帶 3
+    const auroraMat3 = new THREE.MeshBasicMaterial({
+      color: 0x8b5cf6,
+      transparent: true,
+      opacity: 0.42,
+      side: THREE.DoubleSide
+    });
+    const ribbonGeo3 = new THREE.PlaneGeometry(130, 26, 30, 4);
+    const pos3 = ribbonGeo3.attributes.position;
+    for (let i = 0; i < pos3.count; i++) {
+      const vx = pos3.getX(i);
+      const vz = Math.sin((vx / 130) * Math.PI * 2.5 + 1.0) * 16;
+      pos3.setZ(i, vz);
+    }
+    ribbonGeo3.computeVertexNormals();
+    const ribbon3 = new THREE.Mesh(ribbonGeo3, auroraMat3);
+    ribbon3.position.set(-15, 62, -75);
+    ribbon3.rotation.x = 0.22;
+    skyGroup.add(ribbon3);
+
+    // 遙遠天際群峰 (Distant Snowy Mountain Peaks)
+    const peakMat = new THREE.MeshStandardMaterial({
+      color: 0x1e293b,
+      roughness: 0.85,
+      metalness: 0.1
+    });
+    const peakSnowMat = new THREE.MeshStandardMaterial({
+      map: this.tex.snowFrost,
+      roughness: 0.4,
+      metalness: 0.1
+    });
+
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2;
+      const dist = 80 + (i % 3) * 10;
+      const px = Math.cos(angle) * dist;
+      const pz = Math.sin(angle) * dist;
+      const h = 30 + (i % 4) * 8;
+      const r = 16 + (i % 3) * 4;
+
+      const mountain = new THREE.Mesh(new THREE.ConeGeometry(r, h, 6), peakMat);
+      mountain.position.set(px, h / 2 - 8, pz);
+      mountain.rotation.y = angle + 0.4;
+      skyGroup.add(mountain);
+
+      // 雪峰頂帽
+      const snowCap = new THREE.Mesh(new THREE.ConeGeometry(r * 0.42, h * 0.42, 6), peakSnowMat);
+      snowCap.position.set(px, h - 8 - (h * 0.42) / 2, pz);
+      snowCap.rotation.y = angle + 0.4;
+      skyGroup.add(snowCap);
+    }
+
+    // 寒霜蒼穹圓頂 600 星芒 (Twinkling Polar Star Dome)
+    const starCount = 600;
+    const starGeo = new THREE.BufferGeometry();
+    const starCoords = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount; i++) {
+      const phi = Math.acos(-1 + (2 * i) / starCount);
+      const theta = Math.sqrt(starCount * Math.PI) * phi;
+      const r = 110 + (i % 20);
+      starCoords[i * 3] = r * Math.cos(theta) * Math.sin(phi);
+      starCoords[i * 3 + 1] = Math.max(10, r * Math.cos(phi));
+      starCoords[i * 3 + 2] = r * Math.sin(theta) * Math.sin(phi);
+    }
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starCoords, 3));
+    const starMat = new THREE.PointsMaterial({
+      color: 0xe0f2fe,
+      size: 1.2,
+      transparent: true,
+      opacity: 0.85
+    });
+    const starField = new THREE.Points(starGeo, starMat);
+    skyGroup.add(starField);
+
+    // 冰晶極地滿月 (Pale Ice Moon)
+    const moonMat = new THREE.MeshBasicMaterial({ color: 0xe0f2fe });
+    const moon = new THREE.Mesh(new THREE.SphereGeometry(6, 16, 16), moonMat);
+    moon.position.set(-45, 52, -80);
+    skyGroup.add(moon);
+
+    const haloMat = new THREE.MeshBasicMaterial({
+      color: 0x38bdf8,
+      transparent: true,
+      opacity: 0.3,
+      side: THREE.DoubleSide
+    });
+    const halo = new THREE.Mesh(new THREE.RingGeometry(6.5, 12, 32), haloMat);
+    halo.position.set(-45, 52, -79.5);
+    skyGroup.add(halo);
+
+    // 極光波動動畫
+    this.world.animators.push((time) => {
+      ribbon1.rotation.z = Math.sin(time * 0.4) * 0.05;
+      ribbon1.position.y = 48 + Math.sin(time * 0.6) * 2.0;
+      auroraMat1.opacity = 0.48 + Math.sin(time * 0.8) * 0.12;
+
+      ribbon2.rotation.z = Math.cos(time * 0.35) * 0.06;
+      ribbon2.position.y = 56 + Math.cos(time * 0.5) * 2.5;
+      auroraMat2.opacity = 0.42 + Math.cos(time * 0.7) * 0.14;
+
+      ribbon3.rotation.z = -Math.sin(time * 0.3) * 0.04;
+      auroraMat3.opacity = 0.38 + Math.sin(time * 0.55) * 0.10;
+    });
+
+    group.add(skyGroup);
+  }
+
+  // 3. 鋸齒不規則寒冰浮島、冰晶斷崖與防跌落冰柱護欄
+  buildGlacialFloatingTerrace(group) {
+    const terraceGroup = new THREE.Group();
+
+    const iceMat = new THREE.MeshStandardMaterial({
+      map: this.tex.glacialIce,
+      color: 0x38bdf8,
+      roughness: 0.15,
+      metalness: 0.25,
+      transparent: true,
+      opacity: 0.92
+    });
+
+    const snowPlateauMat = new THREE.MeshStandardMaterial({
+      map: this.tex.snowFrost,
+      roughness: 0.65,
+      metalness: 0.05
+    });
+
+    // 主浮島上層積雪地表 (12邊形不規則自然島嶼)
+    const islandGeo = new THREE.CylinderGeometry(13.8, 14.5, 1.2, 16);
+    const island = new THREE.Mesh(islandGeo, snowPlateauMat);
+    island.position.y = -0.55;
+    island.receiveShadow = true;
+    terraceGroup.add(island);
+
+    // 浮島下層懸垂尖刺冰晶基座 (Tapered Underbelly)
+    const coneGeo = new THREE.ConeGeometry(14.0, 9.5, 16);
+    const underbelly = new THREE.Mesh(coneGeo, iceMat);
+    underbelly.position.y = -5.8;
+    underbelly.rotation.x = Math.PI;
+    terraceGroup.add(underbelly);
+
+    // 地表玄冰符文同心環 (Glowing Frost Rune Rings)
+    const runeMat = new THREE.MeshBasicMaterial({
+      color: 0x38bdf8,
+      transparent: true,
+      opacity: 0.55,
+      side: THREE.DoubleSide
+    });
+    const runeRing1 = new THREE.Mesh(new THREE.RingGeometry(6.8, 7.2, 32), runeMat);
+    runeRing1.rotation.x = -Math.PI / 2;
+    runeRing1.position.y = 0.06;
+    terraceGroup.add(runeRing1);
+
+    const runeRing2 = new THREE.Mesh(new THREE.RingGeometry(11.2, 11.5, 40), runeMat);
+    runeRing2.rotation.x = -Math.PI / 2;
+    runeRing2.position.y = 0.06;
+    terraceGroup.add(runeRing2);
+
+    // 島嶼邊緣防跌落冰柱與寒霜結晶護欄 (Crystalline Spikes Perimeter)
+    const spikeMat = new THREE.MeshStandardMaterial({
+      color: 0xbae6fd,
+      roughness: 0.2,
+      metalness: 0.4,
+      transparent: true,
+      opacity: 0.85
+    });
+
+    // 沿著邊緣設置 16 根冰晶立柱，避開北側 (z < -11) 與南側 (z > 10) 的門戶
+    for (let i = 0; i < 16; i++) {
+      const angle = (i / 16) * Math.PI * 2;
+      const x = Math.cos(angle) * 14.0;
+      const z = Math.sin(angle) * 14.0;
+
+      // 避開正北出入口 (x: -2.5 ~ 2.5, z: -14) 與正南出入口 (x: -2.5 ~ 2.5, z: 14)
+      if (Math.abs(x) < 3.0 && Math.abs(z) > 10.0) continue;
+
+      const spike = new THREE.Mesh(new THREE.ConeGeometry(0.45, 2.4 + (i % 3) * 0.4, 6), spikeMat);
+      spike.position.set(x, 1.2, z);
+      spike.rotation.y = angle;
+      terraceGroup.add(spike);
+
+      // 小冰晶簇
+      const smallShard = new THREE.Mesh(new THREE.OctahedronGeometry(0.28, 0), spikeMat);
+      smallShard.position.set(x * 0.94, 0.4, z * 0.94);
+      terraceGroup.add(smallShard);
+    }
+
+    this.world.animators.push((time) => {
+      runeMat.opacity = 0.45 + Math.sin(time * 2.5) * 0.18;
+    });
+
+    group.add(terraceGroup);
+  }
+
+  // 4. 冰雪結晶風向儀 (SNOW POI, x: 0.0, z: -6.5)
+  buildGlacialSnowflakeShrine(group, x, y, z) {
+    const shrine = new THREE.Group();
+    shrine.position.set(x, y, z);
+
+    const iceMat = new THREE.MeshStandardMaterial({
+      map: this.tex.glacialIce,
+      color: 0x7dd3fc,
+      roughness: 0.15,
+      metalness: 0.3,
+      transparent: true,
+      opacity: 0.9
+    });
+
+    const glowMat = new THREE.MeshBasicMaterial({
+      color: 0x38bdf8,
+      transparent: true,
+      opacity: 0.65,
+      side: THREE.DoubleSide
+    });
+
+    // 六角形分層祭壇基座
+    const base1 = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 2.0, 0.35, 6), iceMat);
+    base1.position.y = 0.18;
+    base1.receiveShadow = true;
+    shrine.add(base1);
+
+    const base2 = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.5, 0.4, 6), iceMat);
+    base2.position.y = 0.55;
+    shrine.add(base2);
+
+    // 懸浮六芒雪晶大風向儀 (Rotating 3D Snowflake)
+    const snowflake = new THREE.Group();
+    snowflake.position.y = 2.2;
+
+    // 中心八面體冰晶
+    const coreCrystal = new THREE.Mesh(new THREE.OctahedronGeometry(0.45, 0), iceMat);
+    snowflake.add(coreCrystal);
+
+    // 六支主要雪晶分枝 (6 Arms)
+    for (let i = 0; i < 6; i++) {
+      const armAngle = (i / 6) * Math.PI * 2;
+      const armGroup = new THREE.Group();
+      armGroup.rotation.z = armAngle;
+
+      const armShaft = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.6, 0.12), iceMat);
+      armShaft.position.y = 0.8;
+      armGroup.add(armShaft);
+
+      // 分枝倒鉤刺 (Chevron Shards)
+      [-0.22, 0.22].forEach(ox => {
+        const shard = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.45, 0.08), iceMat);
+        shard.position.set(ox, 1.1, 0);
+        shard.rotation.z = (ox > 0 ? -1 : 1) * 0.6;
+        armGroup.add(shard);
+
+        const shard2 = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.35, 0.08), iceMat);
+        shard2.position.set(ox * 0.8, 0.65, 0);
+        shard2.rotation.z = (ox > 0 ? -1 : 1) * 0.6;
+        armGroup.add(shard2);
+      });
+
+      snowflake.add(armGroup);
+    }
+
+    shrine.add(snowflake);
+
+    // 外環雪花光圈
+    const haloRing = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.04, 6, 24), glowMat);
+    haloRing.position.y = 2.2;
+    shrine.add(haloRing);
+
+    // POI 銘牌標籤
+    const tag = this.createPoiNameplate('❄️ 冰雪結晶風向儀 (SNOW)');
+    tag.position.set(0, 3.4, 0);
+    shrine.add(tag);
+
+    // 互動點擊判定盒
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.6, 4.0, 3.6), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 1.8;
+    hitBox.userData = {
+      id: 'interact_SNOW',
+      label: '❄️ 觸碰冰雪結晶風向儀 (SNOW)',
+      onClick: () => {
+        this.world.openSpeechCard('SNOW', () => {
+          this.world.addXP(50);
+          this.checkZoneCompletionStatus();
+        });
+      }
+    };
+    shrine.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      snowflake.rotation.z = time * 0.6;
+      snowflake.rotation.y = Math.sin(time * 0.8) * 0.2;
+      snowflake.position.y = 2.2 + Math.sin(time * 2.0) * 0.12;
+      haloRing.rotation.y = -time * 0.8;
+    });
+
+    group.add(shrine);
+  }
+
+  // 5. 極寒玄冰方尖碑 (COLD POI, x: -6.5, z: -1.0)
+  buildGlacialColdObelisk(group, x, y, z) {
+    const obeliskGroup = new THREE.Group();
+    obeliskGroup.position.set(x, y, z);
+
+    const iceMat = new THREE.MeshStandardMaterial({
+      map: this.tex.glacialIce,
+      color: 0x0284c7,
+      roughness: 0.1,
+      metalness: 0.4,
+      transparent: true,
+      opacity: 0.9
+    });
+
+    const glowMat = new THREE.MeshBasicMaterial({
+      color: 0x38bdf8,
+      transparent: true,
+      opacity: 0.7,
+      side: THREE.DoubleSide
+    });
+
+    // 基座
+    const base = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.4, 2.4), iceMat);
+    base.position.y = 0.2;
+    base.receiveShadow = true;
+    obeliskGroup.add(base);
+
+    // 尖聳玄冰方尖碑 (Tapered Pyramidal Obelisk)
+    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.9, 4.8, 4), iceMat);
+    shaft.position.y = 2.7;
+    shaft.rotation.y = Math.PI / 4;
+    shaft.castShadow = true;
+    obeliskGroup.add(shaft);
+
+    // 尖頂
+    const cap = new THREE.Mesh(new THREE.ConeGeometry(0.45 * Math.SQRT2, 0.9, 4), iceMat);
+    cap.position.y = 5.35;
+    cap.rotation.y = Math.PI / 4;
+    obeliskGroup.add(cap);
+
+    // 3 顆環繞飛行的玄冰晶體 (Orbiting Shards)
+    const shards = [];
+    for (let i = 0; i < 3; i++) {
+      const shard = new THREE.Mesh(new THREE.OctahedronGeometry(0.24, 0), glowMat);
+      obeliskGroup.add(shard);
+      shards.push({ mesh: shard, angle: (i / 3) * Math.PI * 2, radius: 1.4 + (i % 2) * 0.3, yOffset: 2.2 + i * 0.8 });
+    }
+
+    // 地面冰霧環
+    const mistRing = new THREE.Mesh(new THREE.RingGeometry(1.6, 2.2, 24), glowMat);
+    mistRing.rotation.x = -Math.PI / 2;
+    mistRing.position.y = 0.08;
+    obeliskGroup.add(mistRing);
+
+    // POI 標籤
+    const tag = this.createPoiNameplate('🧊 極寒玄冰方尖碑 (COLD)');
+    tag.position.set(0, 5.8, 0);
+    obeliskGroup.add(tag);
+
+    // 互動點擊判定盒
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.0, 5.5, 3.0), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 2.7;
+    hitBox.userData = {
+      id: 'interact_COLD',
+      label: '🧊 觸碰極寒玄冰方尖碑 (COLD)',
+      onClick: () => {
+        this.world.openSpeechCard('COLD', () => {
+          this.world.addXP(50);
+          this.checkZoneCompletionStatus();
+        });
+      }
+    };
+    obeliskGroup.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      shards.forEach((s, idx) => {
+        const curAngle = s.angle + time * (1.2 + idx * 0.2);
+        s.mesh.position.x = Math.cos(curAngle) * s.radius;
+        s.mesh.position.z = Math.sin(curAngle) * s.radius;
+        s.mesh.position.y = s.yOffset + Math.sin(time * 2.5 + idx) * 0.25;
+        s.mesh.rotation.y = curAngle * 2;
+      });
+      mistRing.material.opacity = 0.45 + Math.sin(time * 3.0) * 0.2;
+    });
+
+    group.add(obeliskGroup);
+  }
+
+  // 6. 冬之永凍常青松 (WINTER POI, x: 6.5, z: -1.0)
+  buildGlacialWinterPine(group, x, y, z) {
+    const pine = new THREE.Group();
+    pine.position.set(x, y, z);
+
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x3e2723, roughness: 0.9 });
+    const foliageMat = new THREE.MeshStandardMaterial({ color: 0x064e3b, roughness: 0.8 });
+    const snowCapMat = new THREE.MeshStandardMaterial({
+      map: this.tex.snowFrost,
+      roughness: 0.5,
+      metalness: 0.05
+    });
+    const icicleMat = new THREE.MeshStandardMaterial({
+      color: 0xbae6fd,
+      roughness: 0.15,
+      metalness: 0.2,
+      transparent: true,
+      opacity: 0.88
+    });
+    const lanternMat = new THREE.MeshStandardMaterial({
+      color: 0xfde047,
+      emissive: 0xf59e0b,
+      emissiveIntensity: 0.8,
+      roughness: 0.3
+    });
+
+    // 樹幹
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.5, 6.0, 8), trunkMat);
+    trunk.position.y = 3.0;
+    trunk.castShadow = true;
+    pine.add(trunk);
+
+    // 4 層綠意與厚雪覆蓋錐 (Tiered Pine Branches with Snow Caps)
+    const tiers = [
+      { y: 2.2, r: 2.4, h: 2.0 },
+      { y: 3.4, r: 1.9, h: 1.8 },
+      { y: 4.5, r: 1.4, h: 1.6 },
+      { y: 5.5, r: 0.9, h: 1.4 }
+    ];
+
+    tiers.forEach((t, idx) => {
+      // 綠意松針
+      const foliage = new THREE.Mesh(new THREE.ConeGeometry(t.r, t.h, 8), foliageMat);
+      foliage.position.y = t.y;
+      foliage.castShadow = true;
+      pine.add(foliage);
+
+      // 上層白雪覆蓋
+      const snow = new THREE.Mesh(new THREE.ConeGeometry(t.r * 0.94, t.h * 0.65, 8), snowCapMat);
+      snow.position.y = t.y + t.h * 0.2;
+      pine.add(snow);
+
+      // 垂掛晶瑩冰錐 (Icicles)
+      for (let i = 0; i < 4; i++) {
+        const angle = (i / 4) * Math.PI * 2 + idx * 0.4;
+        const ix = Math.cos(angle) * (t.r * 0.85);
+        const iz = Math.sin(angle) * (t.r * 0.85);
+        const icicle = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.45, 4), icicleMat);
+        icicle.position.set(ix, t.y - t.h * 0.45, iz);
+        icicle.rotation.x = Math.PI;
+        pine.add(icicle);
+      }
+    });
+
+    // 暖冬提燈 (Golden Winter Lanterns)
+    const lanternAngles = [0.8, 2.8, 4.8];
+    const lanterns = [];
+    lanternAngles.forEach((ang) => {
+      const lx = Math.cos(ang) * 1.5;
+      const lz = Math.sin(ang) * 1.5;
+      const lanternGroup = new THREE.Group();
+      lanternGroup.position.set(lx, 2.6, lz);
+
+      const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 8), lanternMat);
+      lanternGroup.add(lamp);
+
+      pine.add(lanternGroup);
+      lanterns.push(lanternGroup);
+    });
+
+    // POI 標籤
+    const tag = this.createPoiNameplate('🌲 冬之永凍常青松 (WINTER)');
+    tag.position.set(0, 6.8, 0);
+    pine.add(tag);
+
+    // 互動點擊判定盒
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.5, 6.5, 3.5), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 3.2;
+    hitBox.userData = {
+      id: 'interact_WINTER',
+      label: '🌲 仰望冬之永凍常青松 (WINTER)',
+      onClick: () => {
+        this.world.openSpeechCard('WINTER', () => {
+          this.world.addXP(60);
+          this.checkZoneCompletionStatus();
+        });
+      }
+    };
+    pine.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      lanterns.forEach((l, idx) => {
+        l.rotation.z = Math.sin(time * 2.0 + idx) * 0.15;
+      });
+    });
+
+    group.add(pine);
+  }
+
+  // 7. 純白雪境雪精靈守護者 (WHITE POI, x: -5.0, z: 4.0)
+  buildGlacialSnowman(group, x, y, z) {
+    const snowman = new THREE.Group();
+    snowman.position.set(x, y, z);
+
+    const snowMat = new THREE.MeshStandardMaterial({
+      map: this.tex.snowFrost,
+      roughness: 0.55,
+      metalness: 0.05
+    });
+    const scarfMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.7 });
+    const hatMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
+    const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.8, roughness: 0.2 });
+    const carrotMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.6 });
+    const coalMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 });
+    const branchMat = new THREE.MeshStandardMaterial({ color: 0x5c3d2e, roughness: 0.9 });
+
+    // 底層大雪球 (Base)
+    const baseSnow = new THREE.Mesh(new THREE.SphereGeometry(1.0, 16, 16), snowMat);
+    baseSnow.position.y = 0.9;
+    baseSnow.castShadow = true;
+    snowman.add(baseSnow);
+
+    // 中層身體雪球 (Torso)
+    const torsoSnow = new THREE.Mesh(new THREE.SphereGeometry(0.72, 16, 16), snowMat);
+    torsoSnow.position.y = 2.1;
+    torsoSnow.castShadow = true;
+    snowman.add(torsoSnow);
+
+    // 頂層頭部雪球 (Head)
+    const headSnow = new THREE.Mesh(new THREE.SphereGeometry(0.52, 16, 16), snowMat);
+    headSnow.position.y = 3.0;
+    headSnow.castShadow = true;
+    snowman.add(headSnow);
+
+    // 藍色保暖圍巾 (Cozy Blue Scarf)
+    const scarf = new THREE.Mesh(new THREE.TorusGeometry(0.54, 0.12, 8, 16), scarfMat);
+    scarf.rotation.x = Math.PI / 2;
+    scarf.position.y = 2.65;
+    snowman.add(scarf);
+
+    const scarfTail = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.55, 0.1), scarfMat);
+    scarfTail.position.set(0.25, 2.35, 0.48);
+    scarfTail.rotation.z = -0.2;
+    snowman.add(scarfTail);
+
+    // 紳士禮帽 (Top Hat)
+    const hatBrim = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.65, 0.08, 16), hatMat);
+    hatBrim.position.y = 3.45;
+    snowman.add(hatBrim);
+
+    const hatCrown = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.65, 16), hatMat);
+    hatCrown.position.y = 3.8;
+    snowman.add(hatCrown);
+
+    const hatRibbon = new THREE.Mesh(new THREE.CylinderGeometry(0.44, 0.44, 0.12, 16), goldMat);
+    hatRibbon.position.y = 3.55;
+    snowman.add(hatRibbon);
+
+    // 眼睛 (Coal Eyes)
+    [-0.16, 0.16].forEach(ex => {
+      const eye = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), coalMat);
+      eye.position.set(ex, 3.12, 0.48);
+      snowman.add(eye);
+    });
+
+    // 胡蘿蔔鼻子 (Carrot Nose)
+    const nose = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.4, 8), carrotMat);
+    nose.rotation.x = Math.PI / 2;
+    nose.position.set(0, 3.0, 0.65);
+    snowman.add(nose);
+
+    // 笑容煤炭鈕扣 (Smile Buttons)
+    for (let i = -2; i <= 2; i++) {
+      const sx = i * 0.08;
+      const sy = 2.86 + Math.abs(i) * 0.03;
+      const smileDot = new THREE.Mesh(new THREE.SphereGeometry(0.035, 6, 6), coalMat);
+      smileDot.position.set(sx, sy, 0.49);
+      snowman.add(smileDot);
+    }
+
+    // 樹枝手臂 (Branch Arms)
+    const armLeft = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.2, 6), branchMat);
+    armLeft.position.set(-1.0, 2.2, 0);
+    armLeft.rotation.z = 0.8;
+    snowman.add(armLeft);
+
+    const armRight = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.2, 6), branchMat);
+    armRight.position.set(1.0, 2.2, 0);
+    armRight.rotation.z = -0.8;
+    snowman.add(armRight);
+
+    // POI 標籤
+    const tag = this.createPoiNameplate('⛄ 純白雪境精靈守護者 (WHITE)');
+    tag.position.set(0, 4.4, 0);
+    snowman.add(tag);
+
+    // 互動點擊判定盒
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(2.8, 4.2, 2.8), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 2.1;
+    hitBox.userData = {
+      id: 'interact_WHITE',
+      label: '⛄ 拜訪純白雪境雪精靈守護者 (WHITE)',
+      onClick: () => {
+        this.world.openSpeechCard('WHITE', () => {
+          this.world.addXP(50);
+          this.checkZoneCompletionStatus();
+        });
+      }
+    };
+    snowman.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      // 微微呼吸起伏
+      const breath = 1.0 + Math.sin(time * 2.2) * 0.025;
+      torsoSnow.scale.set(breath, breath, breath);
+      headSnow.position.y = 3.0 + Math.sin(time * 2.2) * 0.04;
+      hatBrim.position.y = 3.45 + Math.sin(time * 2.2) * 0.04;
+      hatCrown.position.y = 3.8 + Math.sin(time * 2.2) * 0.04;
+      hatRibbon.position.y = 3.55 + Math.sin(time * 2.2) * 0.04;
+      armLeft.rotation.z = 0.8 + Math.sin(time * 1.5) * 0.08;
+      armRight.rotation.z = -0.8 - Math.sin(time * 1.5) * 0.08;
+    });
+
+    group.add(snowman);
+  }
+
+  // 8. 極光暖心魔法火爐 (WARM POI, x: 5.0, z: 4.0)
+  buildGlacialWarmHearth(group, x, y, z) {
+    const hearth = new THREE.Group();
+    hearth.position.set(x, y, z);
+
+    const stoneMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.85 });
+    const woodMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.8 });
+    const emberMat = new THREE.MeshStandardMaterial({
+      color: 0xef4444,
+      emissive: 0xb91c1c,
+      emissiveIntensity: 0.8,
+      roughness: 0.4
+    });
+    const flameMat = new THREE.MeshBasicMaterial({
+      color: 0xfbbf24,
+      transparent: true,
+      opacity: 0.85,
+      side: THREE.DoubleSide
+    });
+    const innerFlameMat = new THREE.MeshBasicMaterial({
+      color: 0xf97316,
+      transparent: true,
+      opacity: 0.9,
+      side: THREE.DoubleSide
+    });
+
+    // 環形圓石火塘 (Cobblestone Hearth Ring)
+    const stoneRing = new THREE.Mesh(new THREE.TorusGeometry(1.2, 0.28, 8, 16), stoneMat);
+    stoneRing.rotation.x = Math.PI / 2;
+    stoneRing.position.y = 0.28;
+    stoneRing.receiveShadow = true;
+    hearth.add(stoneRing);
+
+    // 塘底紅熱火炭床 (Glowing Ember Bed)
+    const emberBed = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 1.1, 0.2, 12), emberMat);
+    emberBed.position.y = 0.15;
+    hearth.add(emberBed);
+
+    // 圍繞火塘的柴火 (Firewood Logs)
+    for (let i = 0; i < 5; i++) {
+      const ang = (i / 5) * Math.PI * 2;
+      const log = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 1.2, 6), woodMat);
+      log.position.set(Math.cos(ang) * 0.45, 0.35, Math.sin(ang) * 0.45);
+      log.rotation.z = 0.4;
+      log.rotation.y = ang;
+      hearth.add(log);
+    }
+
+    // 躍動魔火 (Multi-layer Pulsing Flame Cones)
+    const flameOuter = new THREE.Mesh(new THREE.ConeGeometry(0.75, 1.8, 8), flameMat);
+    flameOuter.position.y = 1.1;
+    hearth.add(flameOuter);
+
+    const flameInner = new THREE.Mesh(new THREE.ConeGeometry(0.48, 1.4, 8), innerFlameMat);
+    flameInner.position.y = 0.9;
+    hearth.add(flameInner);
+
+    // 休憩防寒長椅 (Rustic Wood Bench)
+    const bench = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.14, 0.6), woodMat);
+    bench.position.set(0, 0.45, 1.7);
+    hearth.add(bench);
+    [-0.8, 0.8].forEach(bx => {
+      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.45, 6), woodMat);
+      leg.position.set(bx, 0.22, 1.7);
+      hearth.add(leg);
+    });
+
+    // POI 標籤
+    const tag = this.createPoiNameplate('🔥 極光暖心魔法火爐 (WARM)');
+    tag.position.set(0, 2.8, 0);
+    hearth.add(tag);
+
+    // 互動點擊判定盒
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.2, 3.5, 3.2), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 1.6;
+    hitBox.userData = {
+      id: 'interact_WARM',
+      label: '🔥 伸手靠近極光暖心魔爐 (WARM)',
+      onClick: () => {
+        this.world.openSpeechCard('WARM', () => {
+          this.world.addXP(60);
+          this.checkZoneCompletionStatus();
+        });
+      }
+    };
+    hearth.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      const s = 1.0 + Math.sin(time * 8.0) * 0.12;
+      const s2 = 1.0 + Math.cos(time * 10.0) * 0.15;
+      flameOuter.scale.set(s, s2, s);
+      flameOuter.rotation.y = time * 2.0;
+      flameInner.scale.set(s2, s, s2);
+      flameInner.rotation.y = -time * 2.5;
+    });
+
+    group.add(hearth);
+  }
+
+  // 9. 寒霜攀登冰階 (CLIMB POI, x: 0.0, z: -12.5)
+  buildGlacialClimbStaircase(group, x, y, z, label, word, onOpen) {
+    const stairGroup = new THREE.Group();
+    stairGroup.position.set(x, y, z);
+
+    const iceMat = new THREE.MeshStandardMaterial({
+      map: this.tex.glacialIce,
+      color: 0x38bdf8,
+      roughness: 0.12,
+      metalness: 0.4,
+      transparent: true,
+      opacity: 0.92
+    });
+
+    const portalGlowMat = new THREE.MeshBasicMaterial({
+      color: 0xa855f7,
+      transparent: true,
+      opacity: 0.65,
+      side: THREE.DoubleSide
+    });
+
+    // 兩側寒霜凱旋冰柱拱門 (Twin Glacial Ice Pillars)
+    [-2.2, 2.2].forEach(px => {
+      const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.75, 6.5, 8), iceMat);
+      pillar.position.set(px, 3.25, 0);
+      pillar.castShadow = true;
+      stairGroup.add(pillar);
+
+      const cap = new THREE.Mesh(new THREE.ConeGeometry(0.7, 1.2, 8), iceMat);
+      cap.position.set(px, 7.1, 0);
+      stairGroup.add(cap);
+    });
+
+    // 頂部拱門橫樑 (Archway Beam)
+    const archBeam = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.6, 0.9), iceMat);
+    archBeam.position.set(0, 6.2, 0);
+    stairGroup.add(archBeam);
+
+    // 階梯層級 (Ascending Ice Steps - 6 tiers)
+    for (let i = 0; i < 6; i++) {
+      const stepY = 0.2 + i * 0.35;
+      const stepZ = 1.8 - i * 0.7;
+      const step = new THREE.Mesh(new THREE.BoxGeometry(2.8 - i * 0.15, 0.35, 0.75), iceMat);
+      step.position.set(0, stepY, stepZ);
+      step.receiveShadow = true;
+      stairGroup.add(step);
+    }
+
+    // 拱門後方極光旋渦星門 (Aurora Vortex to Grand Master Citadel)
+    const vortexGeo = new THREE.RingGeometry(0.3, 1.9, 24);
+    const vortex = new THREE.Mesh(vortexGeo, portalGlowMat);
+    vortex.position.set(0, 3.6, -0.2);
+    stairGroup.add(vortex);
+
+    // POI 標籤
+    const tag = this.createPoiNameplate(label);
+    tag.position.set(0, 7.6, 0);
+    stairGroup.add(tag);
+
+    // 互動點擊判定盒
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(4.8, 6.5, 4.0), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.set(0, 3.0, 0);
+    hitBox.userData = {
+      id: 'interact_CLIMB',
+      label,
+      onClick: () => {
+        if (onOpen) onOpen();
+      }
+    };
+    stairGroup.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      vortex.rotation.z = -time * 1.6;
+      portalGlowMat.opacity = 0.55 + Math.sin(time * 3.5) * 0.2;
+    });
+
+    group.add(stairGroup);
+  }
+
+  // 10. 南側極光冰橋傳送門 (返回 Zone 7 雲頂星空觀測站, x: 0.0, z: 11.8)
+  buildGlacialObservatoryReturnGate(group, x, y, z, label, onTravel) {
+    const gate = new THREE.Group();
+    gate.position.set(x, y, z);
+
+    const brassMat = new THREE.MeshStandardMaterial({
+      map: this.tex.astrolabeBrass,
+      metalness: 0.85,
+      roughness: 0.2
+    });
+    const iceMat = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      roughness: 0.1,
+      transparent: true,
+      opacity: 0.85
+    });
+
+    // 極光基座
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 2.0, 0.35, 16), brassMat);
+    base.position.y = 0.18;
+    gate.add(base);
+
+    // 極光藍綠色下降光柱
+    const beamMat = new THREE.MeshBasicMaterial({
+      color: 0x06b6d4,
+      transparent: true,
+      opacity: 0.45,
+      side: THREE.DoubleSide
+    });
+    const beam = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 0.8, 12, 16, 1, true), beamMat);
+    beam.position.y = -4.0;
+    gate.add(beam);
+
+    // 兩側引導冰柱
+    [-1.6, 1.6].forEach(px => {
+      const p = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.18, 3.2, 8), iceMat);
+      p.position.set(px, 1.6, 0);
+      gate.add(p);
+    });
+
+    // 傳送光圈
+    const glowPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.8, 3.0),
+      new THREE.MeshBasicMaterial({ color: 0x0284c7, transparent: true, opacity: 0.4, side: THREE.DoubleSide })
+    );
+    glowPlane.position.set(0, 1.6, 0);
+    gate.add(glowPlane);
+
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.6, 4.0, 2.5), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 1.8;
+    hitBox.userData = {
+      id: 'return_portal_zone7_from_sanctuary',
+      label,
+      onClick: () => {
+        if (onTravel) onTravel();
+      }
+    };
+    gate.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      glowPlane.material.opacity = 0.35 + Math.sin(time * 3) * 0.15;
+    });
+
+    group.add(gate);
+  }
+
+  // 11. 👑 關卡主 NPC：極光冬之賢者・佛洛斯特長老 (Archmage Frost, x: 1.5, z: -3.5)
+  buildGlacialGuardianNPC(group, x, y, z) {
+    const npc = new THREE.Group();
+    npc.position.set(x, y, z);
+
+    const robeMat = new THREE.MeshStandardMaterial({ color: 0x0f766e, roughness: 0.6 });
+    const capeMat = new THREE.MeshStandardMaterial({ color: 0x115e59, roughness: 0.7 });
+    const furMat = new THREE.MeshStandardMaterial({
+      map: this.tex.snowFrost,
+      roughness: 0.8,
+      metalness: 0.05
+    });
+    const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.85, roughness: 0.2 });
+    const skinMat = new THREE.MeshStandardMaterial({ color: 0xfed7aa, roughness: 0.8 });
+    const hairMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 });
+    const iceCrystalMat = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      emissive: 0x0284c7,
+      emissiveIntensity: 0.8,
+      roughness: 0.1
+    });
+
+    // 寒霜符文石基座 (Pedestal)
+    const pedestal = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.3, 0.2, 16), goldMat);
+    pedestal.position.y = 0.1;
+    pedestal.receiveShadow = true;
+    npc.add(pedestal);
+
+    // 金色極光魔法陣 (Golden Aurora Aura)
+    const auraMat = new THREE.MeshBasicMaterial({
+      color: 0xfde047,
+      transparent: true,
+      opacity: 0.65,
+      side: THREE.DoubleSide
+    });
+    const aura = new THREE.Mesh(new THREE.RingGeometry(1.25, 1.55, 24), auraMat);
+    aura.rotation.x = -Math.PI / 2;
+    aura.position.y = 0.12;
+    npc.add(aura);
+
+    // 法袍長袍 (Archmage Robes)
+    const robe = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.55, 1.8, 10), robeMat);
+    robe.position.y = 1.05;
+    robe.castShadow = true;
+    npc.add(robe);
+
+    // 毛皮鑲邊披肩 (Fur-trimmed Cape)
+    const cape = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.52, 1.4, 8, 1, true), capeMat);
+    cape.position.y = 1.35;
+    npc.add(cape);
+
+    const furTrim = new THREE.Mesh(new THREE.TorusGeometry(0.44, 0.08, 6, 16), furMat);
+    furTrim.rotation.x = Math.PI / 2;
+    furTrim.position.y = 1.95;
+    npc.add(furTrim);
+
+    // 頭部與面容 (Head)
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.26, 12, 12), skinMat);
+    head.position.y = 2.22;
+    head.castShadow = true;
+    npc.add(head);
+
+    // 飄逸長白鬍鬚 (Long White Beard)
+    const beard = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.65, 8), hairMat);
+    beard.rotation.x = -0.15;
+    beard.position.set(0, 1.92, 0.18);
+    npc.add(beard);
+
+    // 白髮 (White Hair)
+    const hair = new THREE.Mesh(new THREE.SphereGeometry(0.3, 10, 10), hairMat);
+    hair.position.set(0, 2.26, -0.06);
+    npc.add(hair);
+
+    // 寒霜冰冠 (Diadem with Ice Shards)
+    const diadem = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.04, 6, 16), goldMat);
+    diadem.rotation.x = Math.PI / 2;
+    diadem.position.set(0, 2.32, 0);
+    npc.add(diadem);
+
+    const diademShard = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.28, 4), iceCrystalMat);
+    diademShard.position.set(0, 2.48, 0.26);
+    npc.add(diademShard);
+
+    // 冰霜魔導法杖 (Frost Archmage Staff)
+    const staff = new THREE.Group();
+    staff.position.set(0.48, 1.5, 0.2);
+
+    const staffPole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.2, 8), goldMat);
+    staff.add(staffPole);
+
+    const staffRing = new THREE.Mesh(new THREE.TorusGeometry(0.25, 0.03, 6, 16), goldMat);
+    staffRing.position.y = 1.1;
+    staff.add(staffRing);
+
+    // 法杖頂端懸浮六芒冰晶星 (Spinning Frost Crystal)
+    const staffStar = new THREE.Mesh(new THREE.OctahedronGeometry(0.16, 0), iceCrystalMat);
+    staffStar.position.y = 1.1;
+    staff.add(staffStar);
+
+    npc.add(staff);
+
+    // 關卡主專屬懸浮銘牌
+    const billboard = this.createGuardianBillboard('zone8', '佛洛斯特長老');
+    billboard.position.set(0, 3.2, 0);
+    npc.add(billboard);
+
+    // 互動點擊判定盒
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(2.6, 3.6, 2.6), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 1.8;
+    hitBox.userData = {
+      id: 'guardian_zone8',
+      label: '💬 [E] 與關卡主・佛洛斯特長老對話 (Archmage Frost)',
+      onClick: () => {
+        this.handleGuardianInteraction('zone8');
+      }
+    };
+    npc.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      aura.rotation.z = time * 0.5;
+      const s = 1.0 + Math.sin(time * 2.5) * 0.08;
+      aura.scale.set(s, s, s);
+      billboard.position.y = 3.2 + Math.sin(time * 2.0) * 0.06;
+      staffStar.rotation.y = time * 2.0;
+      staffStar.rotation.z = time * 1.5;
+      staffRing.rotation.y = time * 1.0;
+    });
+
+    group.add(npc);
+  }
 }
 
 // 建立全域空間實例
 window.SpatialZoneManager = SpatialZoneManager;
+
 
