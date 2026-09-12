@@ -463,10 +463,10 @@ class SpatialZoneManager {
     let fogDensity = 0.012;
 
     if (zoneId === 'zone8') {
-      // 極光冰雪聖域：極夜深藍、幽綠微光與薄霜迷霧
-      skyColorTop = 0x030712;
-      fogColor = 0x0a1526;
-      fogDensity = 0.008;
+      // 極光冰雪聖域：極夜深邃青藍微光與清朗薄霜
+      skyColorTop = 0x07152b;
+      fogColor = 0x0a1d38;
+      fogDensity = 0.005;
     } else if (zoneId === 'zone7') {
       // 雲頂星空觀測站：深邃宇宙星海與微光薄霧
       skyColorTop = 0x060919;
@@ -502,15 +502,17 @@ class SpatialZoneManager {
     this.world.scene.background = new THREE.Color(skyColorTop);
     this.world.scene.fog = new THREE.FogExp2(fogColor, fogDensity);
 
-    // 建立 3D 半球形天頂 (Sky Dome, 內表面渲染)
-    const skyGeo = new THREE.SphereGeometry(65, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.5);
-    const skyMat = new THREE.MeshBasicMaterial({
-      color: skyColorTop,
-      side: THREE.BackSide
-    });
-    const skyDome = new THREE.Mesh(skyGeo, skyMat);
-    skyDome.position.y = -2;
-    group.add(skyDome);
+    // 建立 3D 半球形天頂 (Sky Dome, 內表面渲染 - Zone 7 與 Zone 8 擁有專屬廣闊星穹天景，不覆蓋封閉天頂)
+    if (zoneId !== 'zone7' && zoneId !== 'zone8') {
+      const skyGeo = new THREE.SphereGeometry(65, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.5);
+      const skyMat = new THREE.MeshBasicMaterial({
+        color: skyColorTop,
+        side: THREE.BackSide
+      });
+      const skyDome = new THREE.Mesh(skyGeo, skyMat);
+      skyDome.position.y = -2;
+      group.add(skyDome);
+    }
 
     // 星光車站加入星宿微光粒子
     if (zoneId === 'zone5') {
@@ -4013,6 +4015,11 @@ class SpatialZoneManager {
     return sprite;
   }
 
+  // POI 標籤安全防護方法 (若有外部呼叫亦不產生例外)
+  createPoiNameplate(text) {
+    return new THREE.Group();
+  }
+
   // 關卡主互動決策 (Guardian Interaction Handler)
   handleGuardianInteraction(zoneId) {
     const zone = this.zones[zoneId];
@@ -5055,67 +5062,69 @@ class SpatialZoneManager {
 
   // 1. 光照系統
   buildGlacialLighting(group) {
-    const hemiLight = new THREE.HemisphereLight(0x38bdf8, 0x064e3b, 0.9);
+    const hemiLight = new THREE.HemisphereLight(0xbae6fd, 0x1e3a5f, 1.25);
     group.add(hemiLight);
 
-    const polarStarLight = new THREE.DirectionalLight(0xe0f2fe, 1.1);
+    const polarStarLight = new THREE.DirectionalLight(0xf0f9ff, 1.35);
     polarStarLight.position.set(16, 32, 10);
     polarStarLight.castShadow = true;
     polarStarLight.shadow.mapSize.width = 1024;
     polarStarLight.shadow.mapSize.height = 1024;
     group.add(polarStarLight);
 
-    const centerGlow = new THREE.PointLight(0x38bdf8, 1.2, 22);
-    centerGlow.position.set(0, 3.0, 0);
+    const centerGlow = new THREE.PointLight(0x38bdf8, 1.8, 30);
+    centerGlow.position.set(0, 3.5, 0);
     group.add(centerGlow);
 
-    const hearthGlow = new THREE.PointLight(0xf59e0b, 1.6, 12);
-    hearthGlow.position.set(5.0, 1.8, 4.0);
+    const hearthGlow = new THREE.PointLight(0xf59e0b, 2.5, 16);
+    hearthGlow.position.set(5.0, 2.0, 4.0);
     group.add(hearthGlow);
   }
 
-  // 2. 翡翠綠與紫羅蘭極光帷幕、雪峰天際線、600星芒
+  // 2. 翡翠綠與紫羅蘭極光帷幕、雪峰天際線、星芒
   buildGlacialAuroraSky(group) {
     const skyGroup = new THREE.Group();
 
-    // 翡翠綠極光絲帶 1
+    // 翡翠綠極光絲帶 1 (發光疊加模式)
     const auroraMat1 = new THREE.MeshBasicMaterial({
       color: 0x10b981,
       transparent: true,
-      opacity: 0.55,
+      opacity: 0.65,
+      blending: THREE.AdditiveBlending,
       side: THREE.DoubleSide
     });
-    const ribbonGeo1 = new THREE.PlaneGeometry(120, 24, 32, 4);
+    const ribbonGeo1 = new THREE.PlaneGeometry(90, 20, 28, 4);
     const pos1 = ribbonGeo1.attributes.position;
     for (let i = 0; i < pos1.count; i++) {
       const vx = pos1.getX(i);
-      const vz = Math.sin((vx / 120) * Math.PI * 3) * 14;
+      const vz = Math.sin((vx / 90) * Math.PI * 3) * 10;
       pos1.setZ(i, vz);
     }
     ribbonGeo1.computeVertexNormals();
     const ribbon1 = new THREE.Mesh(ribbonGeo1, auroraMat1);
-    ribbon1.position.set(0, 48, -60);
-    ribbon1.rotation.x = 0.18;
+    ribbon1.position.set(0, 28, -32);
+    ribbon1.rotation.x = 0.2;
     skyGroup.add(ribbon1);
 
     // 青翠碧藍極光絲帶 2
     const auroraMat2 = new THREE.MeshBasicMaterial({
       color: 0x06b6d4,
       transparent: true,
-      opacity: 0.48,
+      opacity: 0.58,
+      blending: THREE.AdditiveBlending,
       side: THREE.DoubleSide
     });
-    const ribbonGeo2 = new THREE.PlaneGeometry(110, 20, 28, 4);
+    const ribbonGeo2 = new THREE.PlaneGeometry(80, 18, 24, 4);
     const pos2 = ribbonGeo2.attributes.position;
     for (let i = 0; i < pos2.count; i++) {
       const vx = pos2.getX(i);
-      const vz = Math.cos((vx / 110) * Math.PI * 3.5) * 12;
+      const vz = Math.cos((vx / 80) * Math.PI * 3.5) * 8;
       pos2.setZ(i, vz);
     }
     ribbonGeo2.computeVertexNormals();
     const ribbon2 = new THREE.Mesh(ribbonGeo2, auroraMat2);
-    ribbon2.position.set(10, 56, -45);
-    ribbon2.rotation.x = 0.12;
+    ribbon2.position.set(8, 34, -26);
+    ribbon2.rotation.x = 0.15;
     ribbon2.rotation.y = -0.15;
     skyGroup.add(ribbon2);
 
@@ -5123,19 +5132,20 @@ class SpatialZoneManager {
     const auroraMat3 = new THREE.MeshBasicMaterial({
       color: 0x8b5cf6,
       transparent: true,
-      opacity: 0.42,
+      opacity: 0.52,
+      blending: THREE.AdditiveBlending,
       side: THREE.DoubleSide
     });
-    const ribbonGeo3 = new THREE.PlaneGeometry(130, 26, 30, 4);
+    const ribbonGeo3 = new THREE.PlaneGeometry(95, 22, 26, 4);
     const pos3 = ribbonGeo3.attributes.position;
     for (let i = 0; i < pos3.count; i++) {
       const vx = pos3.getX(i);
-      const vz = Math.sin((vx / 130) * Math.PI * 2.5 + 1.0) * 16;
+      const vz = Math.sin((vx / 95) * Math.PI * 2.5 + 1.0) * 12;
       pos3.setZ(i, vz);
     }
     ribbonGeo3.computeVertexNormals();
     const ribbon3 = new THREE.Mesh(ribbonGeo3, auroraMat3);
-    ribbon3.position.set(-15, 62, -75);
+    ribbon3.position.set(-10, 38, -38);
     ribbon3.rotation.x = 0.22;
     skyGroup.add(ribbon3);
 
@@ -5153,40 +5163,40 @@ class SpatialZoneManager {
 
     for (let i = 0; i < 8; i++) {
       const angle = (i / 8) * Math.PI * 2;
-      const dist = 80 + (i % 3) * 10;
+      const dist = 52 + (i % 3) * 6;
       const px = Math.cos(angle) * dist;
       const pz = Math.sin(angle) * dist;
-      const h = 30 + (i % 4) * 8;
-      const r = 16 + (i % 3) * 4;
+      const h = 20 + (i % 4) * 5;
+      const r = 12 + (i % 3) * 3;
 
       const mountain = new THREE.Mesh(new THREE.ConeGeometry(r, h, 6), peakMat);
-      mountain.position.set(px, h / 2 - 8, pz);
+      mountain.position.set(px, h / 2 - 6, pz);
       mountain.rotation.y = angle + 0.4;
       skyGroup.add(mountain);
 
       // 雪峰頂帽
       const snowCap = new THREE.Mesh(new THREE.ConeGeometry(r * 0.42, h * 0.42, 6), peakSnowMat);
-      snowCap.position.set(px, h - 8 - (h * 0.42) / 2, pz);
+      snowCap.position.set(px, h - 6 - (h * 0.42) / 2, pz);
       snowCap.rotation.y = angle + 0.4;
       skyGroup.add(snowCap);
     }
 
-    // 寒霜蒼穹圓頂 600 星芒 (Twinkling Polar Star Dome)
-    const starCount = 600;
+    // 寒霜蒼穹圓頂 450 星芒 (Twinkling Polar Star Dome)
+    const starCount = 450;
     const starGeo = new THREE.BufferGeometry();
     const starCoords = new Float32Array(starCount * 3);
     for (let i = 0; i < starCount; i++) {
       const phi = Math.acos(-1 + (2 * i) / starCount);
       const theta = Math.sqrt(starCount * Math.PI) * phi;
-      const r = 110 + (i % 20);
+      const r = 58 + (i % 12);
       starCoords[i * 3] = r * Math.cos(theta) * Math.sin(phi);
-      starCoords[i * 3 + 1] = Math.max(10, r * Math.cos(phi));
+      starCoords[i * 3 + 1] = Math.max(8, r * Math.cos(phi));
       starCoords[i * 3 + 2] = r * Math.sin(theta) * Math.sin(phi);
     }
     starGeo.setAttribute('position', new THREE.BufferAttribute(starCoords, 3));
     const starMat = new THREE.PointsMaterial({
       color: 0xe0f2fe,
-      size: 1.2,
+      size: 0.18,
       transparent: true,
       opacity: 0.85
     });
@@ -5195,32 +5205,33 @@ class SpatialZoneManager {
 
     // 冰晶極地滿月 (Pale Ice Moon)
     const moonMat = new THREE.MeshBasicMaterial({ color: 0xe0f2fe });
-    const moon = new THREE.Mesh(new THREE.SphereGeometry(6, 16, 16), moonMat);
-    moon.position.set(-45, 52, -80);
+    const moon = new THREE.Mesh(new THREE.SphereGeometry(4.5, 16, 16), moonMat);
+    moon.position.set(-25, 28, -42);
     skyGroup.add(moon);
 
     const haloMat = new THREE.MeshBasicMaterial({
       color: 0x38bdf8,
       transparent: true,
-      opacity: 0.3,
+      opacity: 0.4,
+      blending: THREE.AdditiveBlending,
       side: THREE.DoubleSide
     });
-    const halo = new THREE.Mesh(new THREE.RingGeometry(6.5, 12, 32), haloMat);
-    halo.position.set(-45, 52, -79.5);
+    const halo = new THREE.Mesh(new THREE.RingGeometry(5.0, 9.5, 32), haloMat);
+    halo.position.set(-25, 28, -41.5);
     skyGroup.add(halo);
 
     // 極光波動動畫
     this.world.animators.push((time) => {
       ribbon1.rotation.z = Math.sin(time * 0.4) * 0.05;
-      ribbon1.position.y = 48 + Math.sin(time * 0.6) * 2.0;
-      auroraMat1.opacity = 0.48 + Math.sin(time * 0.8) * 0.12;
+      ribbon1.position.y = 28 + Math.sin(time * 0.6) * 1.5;
+      auroraMat1.opacity = 0.58 + Math.sin(time * 0.8) * 0.12;
 
       ribbon2.rotation.z = Math.cos(time * 0.35) * 0.06;
-      ribbon2.position.y = 56 + Math.cos(time * 0.5) * 2.5;
-      auroraMat2.opacity = 0.42 + Math.cos(time * 0.7) * 0.14;
+      ribbon2.position.y = 34 + Math.cos(time * 0.5) * 1.8;
+      auroraMat2.opacity = 0.52 + Math.cos(time * 0.7) * 0.14;
 
       ribbon3.rotation.z = -Math.sin(time * 0.3) * 0.04;
-      auroraMat3.opacity = 0.38 + Math.sin(time * 0.55) * 0.10;
+      auroraMat3.opacity = 0.48 + Math.sin(time * 0.55) * 0.10;
     });
 
     group.add(skyGroup);
@@ -5384,11 +5395,6 @@ class SpatialZoneManager {
     haloRing.position.y = 2.2;
     shrine.add(haloRing);
 
-    // POI 銘牌標籤
-    const tag = this.createPoiNameplate('❄️ 冰雪結晶風向儀 (SNOW)');
-    tag.position.set(0, 3.4, 0);
-    shrine.add(tag);
-
     // 互動點擊判定盒
     const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.6, 4.0, 3.6), new THREE.MeshBasicMaterial({ visible: false }));
     hitBox.position.y = 1.8;
@@ -5468,11 +5474,6 @@ class SpatialZoneManager {
     mistRing.rotation.x = -Math.PI / 2;
     mistRing.position.y = 0.08;
     obeliskGroup.add(mistRing);
-
-    // POI 標籤
-    const tag = this.createPoiNameplate('🧊 極寒玄冰方尖碑 (COLD)');
-    tag.position.set(0, 5.8, 0);
-    obeliskGroup.add(tag);
 
     // 互動點擊判定盒
     const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.0, 5.5, 3.0), new THREE.MeshBasicMaterial({ visible: false }));
@@ -5583,11 +5584,6 @@ class SpatialZoneManager {
       pine.add(lanternGroup);
       lanterns.push(lanternGroup);
     });
-
-    // POI 標籤
-    const tag = this.createPoiNameplate('🌲 冬之永凍常青松 (WINTER)');
-    tag.position.set(0, 6.8, 0);
-    pine.add(tag);
 
     // 互動點擊判定盒
     const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.5, 6.5, 3.5), new THREE.MeshBasicMaterial({ visible: false }));
@@ -5706,11 +5702,6 @@ class SpatialZoneManager {
     armRight.rotation.z = -0.8;
     snowman.add(armRight);
 
-    // POI 標籤
-    const tag = this.createPoiNameplate('⛄ 純白雪境精靈守護者 (WHITE)');
-    tag.position.set(0, 4.4, 0);
-    snowman.add(tag);
-
     // 互動點擊判定盒
     const hitBox = new THREE.Mesh(new THREE.BoxGeometry(2.8, 4.2, 2.8), new THREE.MeshBasicMaterial({ visible: false }));
     hitBox.position.y = 2.1;
@@ -5809,11 +5800,6 @@ class SpatialZoneManager {
       hearth.add(leg);
     });
 
-    // POI 標籤
-    const tag = this.createPoiNameplate('🔥 極光暖心魔法火爐 (WARM)');
-    tag.position.set(0, 2.8, 0);
-    hearth.add(tag);
-
     // 互動點擊判定盒
     const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.2, 3.5, 3.2), new THREE.MeshBasicMaterial({ visible: false }));
     hitBox.position.y = 1.6;
@@ -5895,11 +5881,6 @@ class SpatialZoneManager {
     const vortex = new THREE.Mesh(vortexGeo, portalGlowMat);
     vortex.position.set(0, 3.6, -0.2);
     stairGroup.add(vortex);
-
-    // POI 標籤
-    const tag = this.createPoiNameplate(label);
-    tag.position.set(0, 7.6, 0);
-    stairGroup.add(tag);
 
     // 互動點擊判定盒
     const hitBox = new THREE.Mesh(new THREE.BoxGeometry(4.8, 6.5, 4.0), new THREE.MeshBasicMaterial({ visible: false }));
