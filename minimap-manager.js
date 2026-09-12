@@ -314,63 +314,133 @@ class MinimapManager {
       ctx.arc(8.5 * s, -8.0 * s, 1.2 * s, 0, Math.PI * 2);
       ctx.fill();
     } else if (curZone === 'zone7') {
-      // 雲頂星空觀測站：深邃宇宙星海底色 + 圓形浮島 + 內層觀星台 + 望遠鏡等標記
-      ctx.fillStyle = '#060919';
+      // 雲頂星空觀測站：深邃宇宙星海底色 + 大理石柱廊 + 黃道十二宮星圖台 + 儀器陣列
+      ctx.fillStyle = '#050814';
       ctx.fillRect(-18 * s, -18 * s, 36 * s, 36 * s);
 
+      // 背景微光星芒 (Tiny stars)
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      const bgStars = [[-12, -10], [14, -8], [-10, 12], [11, 13], [-14, 0], [13, 2], [0, -15]];
+      bgStars.forEach(([sx, sy]) => {
+        ctx.fillRect(sx * s, sy * s, 1.5, 1.5);
+      });
+
       // 下層圓形主浮島 (半徑 14.5m)
-      ctx.fillStyle = '#1e293b';
+      ctx.fillStyle = '#0f172a';
       ctx.beginPath();
       ctx.arc(0, 0, 14.5 * s, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = '#ca8a04';
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 3;
       ctx.stroke();
 
-      // 上層同心圓觀星高台 (半徑 7.5m)
-      ctx.fillStyle = '#0f172a';
+      // 外圍大理石迴廊欄杆圈 (Balustrade Ring, R = 13.8m)
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.arc(0, 0, 13.8 * s, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // 古典愛奧尼柱廊 (8根大理石柱, R = 11.5m)
+      for (let i = 0; i < 8; i++) {
+        const ang = (i / 8) * Math.PI * 2;
+        const cx = Math.cos(ang) * 11.5 * s;
+        const cy = Math.sin(ang) * 11.5 * s;
+        ctx.fillStyle = '#e2e8f0';
+        ctx.beginPath();
+        ctx.arc(cx, cy, 0.9 * s, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // 上層同心圓黃道十二宮觀星高台 (半徑 7.5m, 青金石青藍底色)
+      ctx.fillStyle = '#172554';
       ctx.beginPath();
       ctx.arc(0, 0, 7.5 * s, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = '#facc15';
-      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2;
       ctx.stroke();
 
-      // 望遠鏡基座 (北側)
-      ctx.fillStyle = '#38bdf8';
-      ctx.fillRect(-1.5 * s, -8.0 * s, 3.0 * s, 3.0 * s);
-
-      // 星羅盤 (西側)
-      ctx.fillStyle = '#fde047';
+      // 黃道十二宮金色同心圈與八芒星羅盤指針
+      ctx.strokeStyle = 'rgba(251, 191, 36, 0.45)';
+      ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.arc(-6.5 * s, -1.0 * s, 1.4 * s, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.arc(0, 0, 5.0 * s, 0, Math.PI * 2);
+      ctx.stroke();
+      for (let i = 0; i < 8; i++) {
+        const ang = (i / 8) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(Math.cos(ang) * 4.8 * s, Math.sin(ang) * 4.8 * s);
+        ctx.stroke();
+      }
 
-      // 月晷儀 (東側)
+      // 1. SKY 望遠鏡基座與鏡筒 (北側, [0, -6.5])
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(-1.8 * s, -7.8 * s, 3.6 * s, 2.6 * s);
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(0, -6.5 * s, 1.2 * s, 0, Math.PI * 2);
+      ctx.fill();
+      // 鏡筒斜向
+      ctx.strokeStyle = '#0284c7';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(-0.5 * s, -6.0 * s);
+      ctx.lineTo(1.2 * s, -8.2 * s);
+      ctx.stroke();
+
+      // 2. STAR 遠古星羅盤儀 (西側, [-6.5, -1])
+      ctx.fillStyle = '#d97706';
+      ctx.beginPath();
+      ctx.arc(-6.5 * s, -1.0 * s, 1.5 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fef08a';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+
+      // 3. MOON 蒼月日晷儀 (東側, [6.5, -1])
+      ctx.fillStyle = '#1e3a8a';
+      ctx.beginPath();
+      ctx.arc(6.5 * s, -1.0 * s, 1.5 * s, 0, Math.PI * 2);
+      ctx.fill();
       ctx.fillStyle = '#93c5fd';
       ctx.beginPath();
-      ctx.arc(6.5 * s, -1.0 * s, 1.4 * s, 0, Math.PI * 2);
+      ctx.arc(6.2 * s, -1.0 * s, 1.1 * s, -0.5 * Math.PI, 0.5 * Math.PI, false);
       ctx.fill();
 
-      // 日冕分光鏡 (西南)
+      // 4. SUN 日冕分光三棱鏡 (西南, [-5, 4])
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.moveTo(-5.0 * s, 3.0 * s);
+      ctx.lineTo(-3.8 * s, 4.8 * s);
+      ctx.lineTo(-6.2 * s, 4.8 * s);
+      ctx.closePath();
+      ctx.fill();
+
+      // 5. CLOUD 雲海風琴祭壇 (東南, [5, 4])
+      ctx.fillStyle = '#94a3b8';
+      ctx.beginPath();
+      ctx.arc(5.0 * s, 4.0 * s, 1.4 * s, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 6. OPEN 雙拱星門 (南側, [0, -12.5])
       ctx.fillStyle = '#fbbf24';
-      ctx.beginPath();
-      ctx.arc(-5.0 * s, 4.0 * s, 1.2 * s, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.fillRect(-2.2 * s, -13.0 * s, 4.4 * s, 1.0 * s);
 
-      // 雲祭壇 (東南)
-      ctx.fillStyle = '#e2e8f0';
-      ctx.beginPath();
-      ctx.arc(5.0 * s, 4.0 * s, 1.2 * s, 0, Math.PI * 2);
-      ctx.fill();
     } else if (curZone === 'zone8') {
-      // 極光冰雪聖域：極夜深邃青黑底色 + 鋸齒冰川浮島 + 翡翠紫羅蘭極光弧線 + 各冰雪祭壇
-      ctx.fillStyle = '#030712';
+      // 極光冰雪聖域：極夜深邃青黑底色 + 鋸齒冰川浮島 + 翡翠紫羅蘭極光弧線 + 符文冰台 + 營火與遺跡
+      ctx.fillStyle = '#020617';
       ctx.fillRect(-18 * s, -18 * s, 36 * s, 36 * s);
 
       // 極光輝光弧 (Aurora Arcs)
       ctx.strokeStyle = 'rgba(16, 185, 129, 0.35)';
-      ctx.lineWidth = 3.0 * s;
+      ctx.lineWidth = 3.2 * s;
       ctx.beginPath();
       ctx.arc(0, -18 * s, 16 * s, 0.2 * Math.PI, 0.8 * Math.PI);
       ctx.stroke();
@@ -380,12 +450,12 @@ class MinimapManager {
       ctx.arc(0, -22 * s, 18 * s, 0.25 * Math.PI, 0.75 * Math.PI);
       ctx.stroke();
 
-      // 鋸齒不規則寒冰浮島多邊形主體 (Jagged Glacial Polygon)
-      ctx.fillStyle = '#0f2b3e';
+      // 鋸齒不規則寒冰浮島多邊形主體 (Jagged Glacial Polygon, 16邊形)
+      ctx.fillStyle = '#082f49';
       ctx.beginPath();
-      const numPts = 12;
-      const baseR = 13.5 * s;
-      const jagRadii = [1.0, 0.92, 1.05, 0.95, 1.02, 0.9, 1.06, 0.93, 1.03, 0.94, 1.05, 0.91];
+      const numPts = 16;
+      const baseR = 14.2 * s;
+      const jagRadii = [1.0, 0.94, 1.04, 0.96, 1.02, 0.92, 1.05, 0.95, 1.01, 0.93, 1.03, 0.95, 1.04, 0.91, 1.02, 0.95];
       for (let i = 0; i < numPts; i++) {
         const angle = (i / numPts) * Math.PI * 2;
         const r = baseR * jagRadii[i];
@@ -397,45 +467,98 @@ class MinimapManager {
       ctx.closePath();
       ctx.fill();
       ctx.strokeStyle = '#38bdf8';
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 2.5;
       ctx.stroke();
 
-      // 冰雪積層高台 (Snow Plateaus)
-      ctx.fillStyle = '#1e3a5f';
+      // 遠古風化遺跡殘柱 (6根雪染巨石柱, R = 11.2m)
+      for (let i = 0; i < 6; i++) {
+        const ang = (i / 6) * Math.PI * 2 + 0.3;
+        const px = Math.cos(ang) * 11.2 * s;
+        const py = Math.sin(ang) * 11.2 * s;
+        ctx.fillStyle = '#475569';
+        ctx.fillRect(px - 0.7 * s, py - 0.7 * s, 1.4 * s, 1.4 * s);
+        ctx.fillStyle = '#e2e8f0';
+        ctx.fillRect(px - 0.5 * s, py - 0.7 * s, 1.0 * s, 0.4 * s);
+      }
+
+      // 中央神聖冰霜符文台 (R = 6.5m)
+      ctx.fillStyle = '#0c4a6e';
       ctx.beginPath();
-      ctx.arc(0, 0, 7.5 * s, 0, Math.PI * 2);
+      ctx.arc(0, 0, 6.5 * s, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = '#7dd3fc';
+      ctx.strokeStyle = '#0284c7';
       ctx.lineWidth = 1.5;
       ctx.stroke();
 
-      // 冰雪結晶風向儀 (北側)
-      ctx.fillStyle = '#38bdf8';
+      // 符文六芒冰霜內芒
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.5)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 6; i++) {
+        const ang = (i / 6) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(Math.cos(ang) * 5.0 * s, Math.sin(ang) * 5.0 * s);
+        ctx.stroke();
+      }
+
+      // 1. SNOW 3D碎形雪花風向儀與冰晶祭壇 (北側, [0, -6.5])
+      ctx.fillStyle = '#bae6fd';
       ctx.beginPath();
-      ctx.arc(0.0 * s, -6.5 * s, 1.6 * s, 0, Math.PI * 2);
+      ctx.arc(0.0 * s, -6.5 * s, 1.5 * s, 0, Math.PI * 2);
       ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
 
-      // 玄冰方尖碑 (西側)
-      ctx.fillStyle = '#0284c7';
-      ctx.fillRect(-7.2 * s, -1.8 * s, 1.4 * s, 1.6 * s);
-
-      // 冬之常青松 (東側)
-      ctx.fillStyle = '#065f46';
+      // 2. COLD 極寒玄冰方尖碑與鏈條碎屑 (西側, [-6.5, -1])
+      ctx.fillStyle = '#0369a1';
       ctx.beginPath();
-      ctx.arc(6.5 * s, -1.0 * s, 1.6 * s, 0, Math.PI * 2);
+      ctx.moveTo(-6.5 * s, -2.5 * s);
+      ctx.lineTo(-5.3 * s, -1.0 * s);
+      ctx.lineTo(-6.5 * s, 0.5 * s);
+      ctx.lineTo(-7.7 * s, -1.0 * s);
+      ctx.closePath();
       ctx.fill();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.stroke();
 
-      // 純白雪人 (西南)
+      // 3. WINTER 冬之常青松 (東側, [6.5, -1])
+      ctx.fillStyle = '#064e3b';
+      ctx.beginPath();
+      ctx.arc(6.5 * s, -1.0 * s, 2.0 * s, 0, Math.PI * 2);
+      ctx.fill();
       ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.arc(6.5 * s, -1.0 * s, 1.0 * s, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 4. WHITE 圍巾雪人與小雪兔 (西南, [-5, 4])
+      ctx.fillStyle = '#ffffff';
       ctx.beginPath();
       ctx.arc(-5.0 * s, 4.0 * s, 1.3 * s, 0, Math.PI * 2);
       ctx.fill();
-
-      // 極光暖心魔爐 (東南)
-      ctx.fillStyle = '#f59e0b';
+      // 紅色小圍巾點
+      ctx.fillStyle = '#ef4444';
       ctx.beginPath();
-      ctx.arc(5.0 * s, 4.0 * s, 1.4 * s, 0, Math.PI * 2);
+      ctx.arc(-5.0 * s, 4.0 * s, 0.5 * s, 0, Math.PI * 2);
       ctx.fill();
+
+      // 5. WARM 極地營火、柴堆與鐵壺 (東南, [5, 4])
+      ctx.fillStyle = '#475569';
+      ctx.beginPath();
+      ctx.arc(5.0 * s, 4.0 * s, 1.6 * s, 0, Math.PI * 2);
+      ctx.fill();
+      // 炭火微光
+      ctx.fillStyle = '#f97316';
+      ctx.beginPath();
+      ctx.arc(5.0 * s, 4.0 * s, 0.8 * s, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 6. CLIMB 登頂冰階與雙巨石拱門 (南側, [0, -12.5])
+      ctx.fillStyle = '#38bdf8';
+      for (let st = 0; st < 3; st++) {
+        ctx.fillRect(-1.6 * s, (-11.8 - st * 0.8) * s, 3.2 * s, 0.6 * s);
+      }
     }
 
     ctx.restore();
