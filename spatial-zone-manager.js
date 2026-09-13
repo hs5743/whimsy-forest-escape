@@ -361,13 +361,34 @@ class SpatialZoneManager {
       glacialIce: loader.load('assets/textures/glacial_ice.jpg'),
       snowFrost: loader.load('assets/textures/snow_frost.jpg'),
       skyIslandPanorama: loader.load('assets/textures/sky_island_panorama.jpg'),
-      ariaGuardianPortrait: loader.load('assets/textures/aria_guardian_portrait.png')
+      ariaGuardianPortrait: loader.load('assets/textures/aria_guardian_portrait.png'),
+      astralPantheonPanorama: loader.load('assets/textures/astral_pantheon_panorama.jpg'),
+      auroraGlacierPanorama: loader.load('assets/textures/aurora_glacier_panorama.jpg'),
+      starlitObservatoryPanorama: loader.load('assets/textures/starlit_observatory_panorama.jpg'),
+      azureHarborPanorama: loader.load('assets/textures/azure_harbor_panorama.jpg'),
+      steamStationPanorama: loader.load('assets/textures/steam_station_panorama.jpg'),
+      athleticParkPanorama: loader.load('assets/textures/athletic_park_panorama.jpg'),
+      enchantedForestPanorama: loader.load('assets/textures/enchanted_forest_panorama.jpg'),
+      sunbreezeMarketPanorama: loader.load('assets/textures/sunbreeze_market_panorama.jpg')
     };
 
-    if (this.tex.skyIslandPanorama) {
-      this.tex.skyIslandPanorama.wrapS = THREE.RepeatWrapping;
-      this.tex.skyIslandPanorama.wrapT = THREE.ClampToEdgeWrapping || THREE.RepeatWrapping;
-    }
+    const panoramaKeys = [
+      'skyIslandPanorama',
+      'astralPantheonPanorama',
+      'auroraGlacierPanorama',
+      'starlitObservatoryPanorama',
+      'azureHarborPanorama',
+      'steamStationPanorama',
+      'athleticParkPanorama',
+      'enchantedForestPanorama',
+      'sunbreezeMarketPanorama'
+    ];
+    panoramaKeys.forEach(k => {
+      if (this.tex[k]) {
+        this.tex[k].wrapS = THREE.RepeatWrapping;
+        this.tex[k].wrapT = THREE.ClampToEdgeWrapping || THREE.RepeatWrapping;
+      }
+    });
 
     this.tex.marketCobble.wrapS = THREE.RepeatWrapping;
     this.tex.marketCobble.wrapT = THREE.RepeatWrapping;
@@ -1069,48 +1090,39 @@ class SpatialZoneManager {
       // 雲頂星空觀測站：深邃宇宙星海與微光薄霧
       skyColorTop = 0x060919;
       fogColor = 0x0f172a;
-      fogDensity = 0.007;
+      fogDensity = 0.006;
     } else if (zoneId === 'zone5') {
       // 星光鐘樓車站：深邃午夜星空
       skyColorTop = 0x090d16;
       fogColor = 0x111827;
-      fogDensity = 0.016;
+      fogDensity = 0.008;
     } else if (zoneId === 'zone3') {
       // 守護獸花園：晨曦天藍與清透薄霧
       skyColorTop = 0x7dd3fc;
       fogColor = 0xdcfce7;
-      fogDensity = 0.012;
+      fogDensity = 0.007;
     } else if (zoneId === 'zone4') {
       // 活力操場：明亮晴空碧藍
       skyColorTop = 0x60a5fa;
       fogColor = 0xe0f2fe;
-      fogDensity = 0.01;
+      fogDensity = 0.006;
     } else if (zoneId === 'zone6') {
       // 蔚藍秘境海港：陽光海岸海天一色與遠洋微風
       skyColorTop = 0x0284c7;
       fogColor = 0xbae6fd;
-      fogDensity = 0.009;
+      fogDensity = 0.005;
     } else {
       // 陽光微風市集：地中海溫暖日光藍天
       skyColorTop = 0x38bdf8;
       fogColor = 0xfef3c7;
-      fogDensity = 0.012;
+      fogDensity = 0.006;
     }
 
     this.world.scene.background = new THREE.Color(skyColorTop);
     this.world.scene.fog = new THREE.FogExp2(fogColor, fogDensity);
 
-    // 建立 3D 半球形天頂 (Sky Dome, 內表面渲染 - Zone 7, 8, 9, 10 擁有專屬廣闊天景，不覆蓋封閉天頂)
-    if (zoneId !== 'zone7' && zoneId !== 'zone8' && zoneId !== 'zone9' && zoneId !== 'zone10') {
-      const skyGeo = new THREE.SphereGeometry(65, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.5);
-      const skyMat = new THREE.MeshBasicMaterial({
-        color: skyColorTop,
-        side: THREE.BackSide
-      });
-      const skyDome = new THREE.Mesh(skyGeo, skyMat);
-      skyDome.position.y = -2;
-      group.add(skyDome);
-    }
+    // 注意：全戶外關卡 (Zone 2~10) 皆已採用 360 度圓柱全景天穹 (Panoramic Sky Cylinder, 半徑 85~96m)，
+    // 不再覆蓋舊版半徑 65m 的純色半球形天頂，確保遼闊自然地平線無任何遮蔽。
 
     // 星光車站加入星宿微光粒子
     if (zoneId === 'zone5') {
@@ -1131,6 +1143,69 @@ class SpatialZoneManager {
       );
       group.add(stars);
     }
+  }
+
+  // =========================================================================
+  // 戶外關卡 360 度圓柱全景天穹生成器 (Panoramic Sky Cylinder System)
+  // 為各戶外關卡構築無縫超寬全景地平線，結合微速大氣視差自轉與邊界過渡光環
+  // =========================================================================
+  buildZoneSkyPanorama(group, zoneId, texture, options = {}) {
+    if (!texture) return null;
+    const radius = options.radius || 92;
+    const height = options.height || 75;
+    const yOffset = options.yOffset !== undefined ? options.yOffset : 6.0;
+    const rotationSpeed = options.rotationSpeed !== undefined ? options.rotationSpeed : 0.001;
+    const mistColor = options.mistColor !== undefined ? options.mistColor : null;
+    const mistOpacity = options.mistOpacity !== undefined ? options.mistOpacity : 0.35;
+    const mistY = options.mistY !== undefined ? options.mistY : -2.0;
+
+    const skyGroup = new THREE.Group();
+
+    // 1. 360 度反向渲染圓柱全景天穹 (保持地平線水平平直，消除球形極點扭曲拉伸)
+    const panoramaGeo = new THREE.CylinderGeometry(radius, radius, height, 48, 1, true);
+    const panoramaMat = new THREE.MeshBasicMaterial({
+      map: texture,
+      side: THREE.BackSide,
+      fog: false,
+      depthWrite: false
+    });
+    const panoramaMesh = new THREE.Mesh(panoramaGeo, panoramaMat);
+    panoramaMesh.position.y = yOffset;
+    panoramaMesh.renderOrder = -10;
+    skyGroup.add(panoramaMesh);
+
+    // 2. 地平線薄霧/過渡柔光環 (柔和融接遠景地平線與近景地表)
+    let mistRing = null;
+    let mistMat = null;
+    if (mistColor !== null) {
+      const mistGeo = new THREE.RingGeometry(18, radius * 0.98, 32);
+      mistMat = new THREE.MeshBasicMaterial({
+        color: mistColor,
+        transparent: true,
+        opacity: mistOpacity,
+        side: THREE.DoubleSide,
+        depthWrite: false
+      });
+      mistRing = new THREE.Mesh(mistGeo, mistMat);
+      mistRing.rotation.x = Math.PI / 2;
+      mistRing.position.y = mistY;
+      mistRing.renderOrder = -9;
+      skyGroup.add(mistRing);
+    }
+
+    // 3. 大氣微幅視差自轉 (Atmospheric Parallax Drift)
+    if (rotationSpeed !== 0 && this.world && this.world.animators) {
+      this.world.animators.push((time) => {
+        panoramaMesh.rotation.y = time * rotationSpeed;
+        if (mistRing && mistMat) {
+          mistRing.rotation.z = time * (rotationSpeed * 1.5);
+          mistMat.opacity = mistOpacity + Math.sin(time * 0.8) * 0.05;
+        }
+      });
+    }
+
+    group.add(skyGroup);
+    return skyGroup;
   }
 
   // ==========================================
@@ -1155,6 +1230,17 @@ class SpatialZoneManager {
 
     const hemiLight = new THREE.HemisphereLight(0xffedd5, 0x9a3412, 0.7);
     group.add(hemiLight);
+
+    // 360 度地中海陽光海岸山城全景天穹 (Panoramic Sky Cylinder)
+    this.buildZoneSkyPanorama(group, 'zone2', this.tex.sunbreezeMarketPanorama, {
+      radius: 88,
+      height: 72,
+      yOffset: 6.0,
+      rotationSpeed: 0.0008,
+      mistColor: 0x38bdf8,
+      mistOpacity: 0.32,
+      mistY: -1.0
+    });
 
     // 開闊歐陸古鎮鵝卵石街區
     const ground = new THREE.Mesh(
@@ -1299,6 +1385,17 @@ class SpatialZoneManager {
     const hemiLight = new THREE.HemisphereLight(0xdcfce7, 0x14532d, 0.8);
     group.add(hemiLight);
 
+    // 360 度幻境神木與晨曦密林全景天穹 (Panoramic Sky Cylinder)
+    this.buildZoneSkyPanorama(group, 'zone3', this.tex.enchantedForestPanorama, {
+      radius: 90,
+      height: 75,
+      yOffset: 5.0,
+      rotationSpeed: 0.0008,
+      mistColor: 0x166534,
+      mistOpacity: 0.30,
+      mistY: -1.0
+    });
+
     // 開闊草坪 (72m x 72m)
     const grass = new THREE.Mesh(
       new THREE.PlaneGeometry(72, 72),
@@ -1421,6 +1518,17 @@ class SpatialZoneManager {
 
     const hemiLight = new THREE.HemisphereLight(0xe0f2fe, 0x15803d, 0.7);
     group.add(hemiLight);
+
+    // 360 度陽光田徑場與群山校園全景天穹 (Panoramic Sky Cylinder)
+    this.buildZoneSkyPanorama(group, 'zone4', this.tex.athleticParkPanorama, {
+      radius: 88,
+      height: 72,
+      yOffset: 5.0,
+      rotationSpeed: 0.0008,
+      mistColor: 0x60a5fa,
+      mistOpacity: 0.28,
+      mistY: -1.0
+    });
 
     // 外圍校園草坪 (76m x 76m)
     const outerGrass = new THREE.Mesh(
@@ -1728,6 +1836,17 @@ class SpatialZoneManager {
 
     const hemiLight = new THREE.HemisphereLight(0x312e81, 0x1e1b4b, 0.6);
     group.add(hemiLight);
+
+    // 360 度暮色鐵道與維多利亞街景全景天穹 (Panoramic Sky Cylinder)
+    this.buildZoneSkyPanorama(group, 'zone5', this.tex.steamStationPanorama, {
+      radius: 85,
+      height: 70,
+      yOffset: 6.0,
+      rotationSpeed: 0.0008,
+      mistColor: 0x1e293b,
+      mistOpacity: 0.38,
+      mistY: -1.0
+    });
 
     // 月台復古紅磚地面 (64m x 64m)
     const platform = new THREE.Mesh(
@@ -3656,6 +3775,17 @@ class SpatialZoneManager {
     const hemiLight = new THREE.HemisphereLight(0x38bdf8, 0x0f766e, 0.75);
     group.add(hemiLight);
 
+    // 360 度蔚藍海灣與遠洋群島全景天穹 (Panoramic Sky Cylinder)
+    this.buildZoneSkyPanorama(group, 'zone6', this.tex.azureHarborPanorama, {
+      radius: 92,
+      height: 75,
+      yOffset: 4.0,
+      rotationSpeed: 0.0008,
+      mistColor: 0x0284c7,
+      mistOpacity: 0.32,
+      mistY: -1.5
+    });
+
     // 2. 動態蔚藍海洋水面 (160m x 160m, 附波浪漣漪)
     this.buildHarborDynamicOcean(group);
 
@@ -4745,6 +4875,17 @@ class SpatialZoneManager {
 
     // 2. 浩瀚宇宙天體奇觀 (環狀氣態巨行星、自轉月球、真實星座星軌連線、600星芒、動態流星群)
     this.buildObservatoryCosmicSky(group);
+
+    // 360 度浩瀚星雲雲海全景天穹 (Panoramic Sky Cylinder)
+    this.buildZoneSkyPanorama(group, 'zone7', this.tex.starlitObservatoryPanorama, {
+      radius: 95,
+      height: 85,
+      yOffset: 6.0,
+      rotationSpeed: 0.0012,
+      mistColor: 0x1e1b4b,
+      mistOpacity: 0.35,
+      mistY: -4.0
+    });
 
     // 3. 古典星穹列柱迴廊、黃道十二宮金嵌大理石地坪與浮石浮島
     this.buildObservatoryFloatingTerrace(group);
@@ -6078,6 +6219,17 @@ class SpatialZoneManager {
     // 2. 翡翠綠與紫羅蘭極光帷幕、雪峰天際線、600極星
     this.buildGlacialAuroraSky(group);
 
+    // 360 度極光冰川群峰全景天穹 (Panoramic Sky Cylinder)
+    this.buildZoneSkyPanorama(group, 'zone8', this.tex.auroraGlacierPanorama, {
+      radius: 95,
+      height: 85,
+      yOffset: 8.0,
+      rotationSpeed: 0.0012,
+      mistColor: 0x075985,
+      mistOpacity: 0.35,
+      mistY: -4.0
+    });
+
     // 3. 鋸齒萬年冰川浮島、遠古寒霜神廟殘垣、冰川斷崖與垂懸晶簇
     this.buildGlacialFloatingTerrace(group);
 
@@ -6170,13 +6322,15 @@ class SpatialZoneManager {
       side: THREE.DoubleSide
     });
     const ribbonGeo1 = new THREE.PlaneGeometry(90, 20, 28, 4);
-    const pos1 = ribbonGeo1.attributes.position;
-    for (let i = 0; i < pos1.count; i++) {
-      const vx = pos1.getX(i);
-      const vz = Math.sin((vx / 90) * Math.PI * 3) * 10;
-      pos1.setZ(i, vz);
+    const pos1 = (ribbonGeo1.attributes && ribbonGeo1.attributes.position) ? ribbonGeo1.attributes.position : null;
+    if (pos1) {
+      for (let i = 0; i < pos1.count; i++) {
+        const vx = pos1.getX(i);
+        const vz = Math.sin((vx / 90) * Math.PI * 3) * 10;
+        pos1.setZ(i, vz);
+      }
+      if (ribbonGeo1.computeVertexNormals) ribbonGeo1.computeVertexNormals();
     }
-    ribbonGeo1.computeVertexNormals();
     const ribbon1 = new THREE.Mesh(ribbonGeo1, auroraMat1);
     ribbon1.position.set(0, 28, -32);
     ribbon1.rotation.x = 0.2;
@@ -6191,13 +6345,15 @@ class SpatialZoneManager {
       side: THREE.DoubleSide
     });
     const ribbonGeo2 = new THREE.PlaneGeometry(80, 18, 24, 4);
-    const pos2 = ribbonGeo2.attributes.position;
-    for (let i = 0; i < pos2.count; i++) {
-      const vx = pos2.getX(i);
-      const vz = Math.cos((vx / 80) * Math.PI * 3.5) * 8;
-      pos2.setZ(i, vz);
+    const pos2 = (ribbonGeo2.attributes && ribbonGeo2.attributes.position) ? ribbonGeo2.attributes.position : null;
+    if (pos2) {
+      for (let i = 0; i < pos2.count; i++) {
+        const vx = pos2.getX(i);
+        const vz = Math.cos((vx / 80) * Math.PI * 3.5) * 8;
+        pos2.setZ(i, vz);
+      }
+      if (ribbonGeo2.computeVertexNormals) ribbonGeo2.computeVertexNormals();
     }
-    ribbonGeo2.computeVertexNormals();
     const ribbon2 = new THREE.Mesh(ribbonGeo2, auroraMat2);
     ribbon2.position.set(8, 34, -26);
     ribbon2.rotation.x = 0.15;
@@ -6213,13 +6369,15 @@ class SpatialZoneManager {
       side: THREE.DoubleSide
     });
     const ribbonGeo3 = new THREE.PlaneGeometry(95, 22, 26, 4);
-    const pos3 = ribbonGeo3.attributes.position;
-    for (let i = 0; i < pos3.count; i++) {
-      const vx = pos3.getX(i);
-      const vz = Math.sin((vx / 95) * Math.PI * 2.5 + 1.0) * 12;
-      pos3.setZ(i, vz);
+    const pos3 = (ribbonGeo3.attributes && ribbonGeo3.attributes.position) ? ribbonGeo3.attributes.position : null;
+    if (pos3) {
+      for (let i = 0; i < pos3.count; i++) {
+        const vx = pos3.getX(i);
+        const vz = Math.sin((vx / 95) * Math.PI * 2.5 + 1.0) * 12;
+        pos3.setZ(i, vz);
+      }
+      if (ribbonGeo3.computeVertexNormals) ribbonGeo3.computeVertexNormals();
     }
-    ribbonGeo3.computeVertexNormals();
     const ribbon3 = new THREE.Mesh(ribbonGeo3, auroraMat3);
     ribbon3.position.set(-10, 38, -38);
     ribbon3.rotation.x = 0.22;
@@ -7367,6 +7525,17 @@ class SpatialZoneManager {
 
     // 2. 浩瀚星穹深邃天際、紫金星雲帷幕、600星芒
     this.buildPantheonCelestialSky(group);
+
+    // 360 度浩瀚星界星雲殿堂全景天穹 (Panoramic Sky Cylinder)
+    this.buildZoneSkyPanorama(group, 'zone9', this.tex.astralPantheonPanorama, {
+      radius: 95,
+      height: 85,
+      yOffset: 10.0,
+      rotationSpeed: 0.0012,
+      mistColor: 0x312e81,
+      mistOpacity: 0.35,
+      mistY: -4.0
+    });
 
     // 3. 羅馬萬神殿圓形大理石基台、8根科林斯凹槽柱廊與天頂環樑
     this.buildPantheonColonnadeAndDais(group);
