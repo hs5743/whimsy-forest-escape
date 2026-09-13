@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>童趣森林魔法書齋逃脫：蒼月之約 (Whimsy Forest 3D Escape)</title>
-  <link rel="stylesheet" href="style.css?v=20260912_v2">
+  <link rel="stylesheet" href="style.css?v=20260913_v11">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%20%22100%22><text y=%22.9em%22 font-size=%2290%22>🗝️</text></svg>">
   <style>
     /* ========================================================= */
@@ -230,8 +230,11 @@
       <div id="hudCurrentZoneTag" style="display: none;"><span id="hudCurrentZoneLabel">🏰 見習學徒書齋</span></div>
     </div>
 
-    <!-- 右側：核心快捷鈕 (📘 魔法護照 + ⚙️ 系統選單) -->
+    <!-- 右側：核心快捷鈕 (🧭 聽力尋寶 + 📘 魔法護照 + ⚙️ 系統選單) -->
     <div class="hud-quick-actions">
+      <button id="scavengerHuntBtn" class="hud-btn scavenger-btn-highlight" onclick="if(window.scavengerHuntManager) window.scavengerHuntManager.openScavengerModal();" type="button" title="開啟情境聽力尋寶任務">
+        <span>🧭</span> <span class="btn-text">聽力尋寶</span>
+      </button>
       <button id="magicPassportBtn" class="hud-btn passport-btn-highlight" onclick="togglePassportModal()" type="button" title="翻開數位魔法護照手帳">
         <span>📘</span> <span class="btn-text">魔法護照</span>
       </button>
@@ -274,6 +277,14 @@
           </div>
         </button>
 
+        <button id="scavengerHuntMenuBtn" class="drawer-action-btn" onclick="if(window.scavengerHuntManager) window.scavengerHuntManager.openScavengerModal(); closeSystemMenu();" type="button">
+          <span class="drawer-btn-icon">🧭</span>
+          <div class="drawer-btn-info">
+            <span class="drawer-btn-title">聽力尋寶任務</span>
+            <span class="drawer-btn-sub">空間雷達語音尋寶</span>
+          </div>
+        </button>
+
         <button id="guideBtn" class="drawer-action-btn" onclick="toggleGuideModal(); closeSystemMenu();" type="button">
           <span class="drawer-btn-icon">📖</span>
           <div class="drawer-btn-info">
@@ -288,6 +299,149 @@
           <span>⚪</span> 單機模式 (點此設定學校雲端)
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- 懸浮尋寶任務雷達追蹤條 (Scavenger Quest Tracker) -->
+  <div id="scavengerTrackerBar" style="display: none;">
+    <div class="tracker-top-row">
+      <div class="tracker-title-box">
+        <span class="tracker-icon">🧭</span>
+        <span class="tracker-title-text">聽力尋寶進行中</span>
+        <div id="scavengerVoiceViz" class="voice-viz">
+          <span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+      <div id="scavengerRadarPill" class="radar-pill radar-cold">
+        <span id="scavengerRadarDist">❄️ 距離：--m</span>
+      </div>
+    </div>
+
+    <div id="scavengerTargetHintText" style="font-size: 11px; color: #fde047; font-weight: 700;">
+      🎧 聽力謎題進行中 (請仔細聆聽)
+    </div>
+
+    <div id="scavengerClueTextBox" class="tracker-clue-text" style="display: none;"></div>
+    <div id="scavengerClueZhBox" class="tracker-clue-zh" style="display: none;"></div>
+
+    <div class="tracker-controls-row">
+      <div style="display: flex; gap: 4px;">
+        <button type="button" class="tracker-btn btn-listen" onclick="if(window.playScavengerClueVoice) window.playScavengerClueVoice(0.85);" title="重新播放外師線索發音">
+          🔊 聆聽線索
+        </button>
+        <button type="button" class="tracker-btn" onclick="if(window.playScavengerClueVoice) window.playScavengerClueVoice(0.65);" title="慢速重讀 (0.65x)">
+          🐢 慢速
+        </button>
+        <button type="button" id="btnToggleClueText" class="tracker-btn" onclick="if(window.toggleScavengerClueText) window.toggleScavengerClueText();" title="切換顯示英文文字提示">
+          👁️ 看文字
+        </button>
+      </div>
+      <div style="display: flex; gap: 4px;">
+        <button type="button" id="scavengerVerifyBtn" class="tracker-btn btn-verify" style="display: none;" onclick="if(window.verifyCurrentScavengerTarget) window.verifyCurrentScavengerTarget();" title="到達目標！點此直接驗證通關">
+          🔍 點此驗證寶物！
+        </button>
+        <button type="button" class="tracker-btn btn-abandon" onclick="if(window.abandonScavengerQuest) window.abandonScavengerQuest();" title="暫停當前任務">
+          ✕ 放棄
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 聽力尋寶任務中心彈窗 (Scavenger Hunt Center Modal) -->
+  <div id="scavengerHuntModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 155; display: none; justify-content: center; align-items: center; padding: 16px;">
+    <div class="parchment-card" style="max-width: 580px; width: 100%;">
+      <button class="modal-close-btn" type="button" onclick="closeScavengerModal()" aria-label="關閉">✕</button>
+      <div style="text-align: center; border-bottom: 2px dashed #dfc79b; padding-bottom: 12px; margin-bottom: 12px;">
+        <h2 style="color: var(--warm-brown); font-size: 22px; margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          🧭 <span>情境聽力尋寶任務</span>
+        </h2>
+        <p style="font-size: 13px; color: #78350f; margin-top: 4px;">
+          仔細聆聽外師英語線索，化身小神探，在 3D 空間中找出隱藏的寶物！
+        </p>
+        <div style="display: flex; justify-content: center; gap: 12px; margin-top: 8px;">
+          <span id="scavengerStreakBadge" class="scavenger-mode-badge" style="background: rgba(245, 158, 11, 0.2); border-color: #f59e0b; color: #b45309;">🔥 連續尋寶：0 / 3 題</span>
+          <span id="scavengerCoinsTotal" class="scavenger-mode-badge" style="background: rgba(16, 185, 129, 0.2); border-color: #10b981; color: #047857;">🪙 尋寶金幣：0 枚</span>
+        </div>
+      </div>
+
+      <div class="scavenger-modes-grid">
+        <div class="scavenger-mode-card featured" onclick="startScavengerHunt('zone')" role="button">
+          <div class="scavenger-mode-icon">📍</div>
+          <div id="scavengerZoneModeTitle" class="scavenger-mode-title">📍 當前空間尋寶</div>
+          <div class="scavenger-mode-desc">針對目前身處的空間出題，適合課堂即時探險！</div>
+          <div class="scavenger-mode-badge">+80 XP • 1 🪙</div>
+        </div>
+
+        <div class="scavenger-mode-card" onclick="startScavengerHunt('streak')" role="button">
+          <div class="scavenger-mode-icon">🔥</div>
+          <div class="scavenger-mode-title">每日三連挑戰</div>
+          <div class="scavenger-mode-desc">連續解開 3 道聽力謎題，贏得神探徽章與大獎！</div>
+          <div class="scavenger-mode-badge">+150 XP • 3 🪙</div>
+        </div>
+
+        <div class="scavenger-mode-card" onclick="startScavengerHunt('all')" role="button">
+          <div class="scavenger-mode-icon">🗺️</div>
+          <div class="scavenger-mode-title">全境奇幻尋寶</div>
+          <div class="scavenger-mode-desc">隨機穿梭各大解鎖空間，考驗跨界探索聽力！</div>
+          <div class="scavenger-mode-badge">+80 XP • 1 🪙</div>
+        </div>
+      </div>
+
+      <div style="background: rgba(254, 243, 199, 0.6); border: 1px solid #fde68a; border-radius: 12px; padding: 10px; font-size: 12px; color: #92400e; line-height: 1.6;">
+        💡 <strong>探險家提示：</strong>啟動任務後，請將角色靠近發光雷達目標（距離 &le; 3.5m），按下鍵盤 <code>E</code> 鍵或點擊目標直接驗證！
+      </div>
+    </div>
+  </div>
+
+  <!-- 尋寶成功雙軌學習卡彈窗 (Scavenger Victory Modal) -->
+  <div id="scavengerVictoryModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 160; display: none; justify-content: center; align-items: center; padding: 16px;">
+    <div class="parchment-card" style="max-width: 540px; width: 100%; text-align: center;">
+      <button class="modal-close-btn" type="button" onclick="closeScavengerVictory()" aria-label="關閉">✕</button>
+      <div style="font-size: 44px; margin-bottom: 4px;">🎉🪙</div>
+      <h2 style="color: #065f46; font-size: 24px; margin: 0 0 6px 0;">聽力神探！尋寶成功！</h2>
+      <p style="font-size: 13px; color: #52525b; margin-bottom: 12px;">
+        你精準辨識出外師語音中的關鍵線索，成功在 3D 空間中找到了目標！
+      </p>
+
+      <div id="scavengerVictStreakNotice" style="display: none; background: linear-gradient(135deg, #fef08a, #fde047); border: 2px solid #eab308; border-radius: 12px; padding: 8px; font-weight: 800; color: #854d0e; margin-bottom: 12px;">
+        🏆 恭喜完成【每日三連尋寶挑戰】！榮獲額外 +150 XP 與雙倍金幣！
+      </div>
+
+      <!-- 雙軌單字學習卡 -->
+      <div class="scavenger-dual-cards">
+        <!-- 左卡：空間實體目標詞 -->
+        <div class="scavenger-learn-card anchor-card">
+          <span class="learn-card-tag">🎯 3D 尋獲標的</span>
+          <div id="scavengerVictTargetWord" class="learn-card-word">APPLE</div>
+          <div id="scavengerVictTargetZh" class="learn-card-zh">甜美紅蘋果攤位</div>
+          <div id="scavengerVictTargetLabel" class="learn-card-phonetic">Starts with A • /ˈæp.l̩/</div>
+          <button type="button" class="btn-listen-mini" style="margin-top: 6px;" onclick="if(window.speechManager) window.speechManager.playWordVoice(document.getElementById('scavengerVictTargetWord').textContent);">
+            🔊 聽單字發音
+          </button>
+        </div>
+
+        <!-- 右卡：706 護照延伸生活單字 -->
+        <div class="scavenger-learn-card companion-card">
+          <span class="learn-card-tag">💡 護照生活延伸詞</span>
+          <div id="scavengerVictCompWord" class="learn-card-word">FRUIT</div>
+          <div id="scavengerVictCompZh" class="learn-card-zh">水果</div>
+          <div id="scavengerVictCompPhonetic" class="learn-card-phonetic">/fruːt/</div>
+          <div id="scavengerVictCompSentence" class="learn-card-sentence">💬 "Eating fresh fruit every day keeps you healthy."</div>
+          <button type="button" class="btn-listen-mini" style="margin-top: 6px;" onclick="if(window.speechManager) window.speechManager.playWordVoice(document.getElementById('scavengerVictCompWord').textContent);">
+            🔊 聽生活單字發音
+          </button>
+        </div>
+      </div>
+
+      <!-- 獎勵數值與按鈕 -->
+      <div style="display: flex; justify-content: center; gap: 16px; margin: 12px 0;">
+        <span id="scavengerVictXpText" class="victory-reward-badge" style="background: rgba(16, 185, 129, 0.2); border-color: #10b981; color: #047857;">+80 XP</span>
+        <span id="scavengerVictCoinsText" class="victory-reward-badge" style="background: rgba(245, 158, 11, 0.2); border-color: #f59e0b; color: #b45309;">+1 🪙 尋寶金幣</span>
+      </div>
+
+      <button type="button" class="btn-voice" onclick="closeScavengerVictory()" style="background: linear-gradient(135deg, #059669, #047857); color: #fff; font-weight: 800; width: 100%; padding: 10px; border-radius: 12px;">
+        ✨ 太棒了！繼續冒險探索 ➔
+      </button>
     </div>
   </div>
 
@@ -906,15 +1060,16 @@
 
   <!-- 核心庫與遊戲腳本 -->
   <script src="three.min.js"></script>
-  <script src="vocab-data.js?v=20260913_v10"></script>
-  <script src="vocab-passport-bank.js?v=20260913_v10"></script>
-  <script src="speech-manager.js?v=20260913_v10"></script>
-  <script src="audio-manager.js?v=20260913_v10"></script>
-  <script src="touch-controls.js?v=20260913_v10"></script>
-  <script src="cloud-sync-manager.js?v=20260913_v10"></script>
-  <script src="spatial-zone-manager.js?v=20260913_v10"></script>
-  <script src="minimap-manager.js?v=20260913_v10"></script>
-  <script src="world-3d.js?v=20260913_v10"></script>
+  <script src="vocab-data.js?v=20260913_v11"></script>
+  <script src="vocab-passport-bank.js?v=20260913_v11"></script>
+  <script src="speech-manager.js?v=20260913_v11"></script>
+  <script src="audio-manager.js?v=20260913_v11"></script>
+  <script src="touch-controls.js?v=20260913_v11"></script>
+  <script src="cloud-sync-manager.js?v=20260913_v11"></script>
+  <script src="spatial-zone-manager.js?v=20260913_v11"></script>
+  <script src="minimap-manager.js?v=20260913_v11"></script>
+  <script src="scavenger-hunt-manager.js?v=20260913_v11"></script>
+  <script src="world-3d.js?v=20260913_v11"></script>
 
   <script>
     let curLeaderboardTab = 'school';

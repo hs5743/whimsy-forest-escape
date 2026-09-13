@@ -65,6 +65,11 @@ class World3D {
       this.minimap = new MinimapManager(this);
     }
 
+    if (window.ScavengerHuntManager) {
+      this.scavengerHunt = new ScavengerHuntManager(this);
+      window.scavengerHuntManager = this.scavengerHunt;
+    }
+
     this.animate();
   }
 
@@ -778,7 +783,9 @@ class World3D {
       'leaderboardModal',
       'cloudConfigModal',
       'guideModal',
-      'victoryModal'
+      'victoryModal',
+      'scavengerHuntModal',
+      'scavengerVictoryModal'
     ];
     for (let i = 0; i < modalIds.length; i++) {
       const el = document.getElementById(modalIds[i]);
@@ -938,7 +945,21 @@ class World3D {
 
     if (window.audioManager) window.audioManager.playSfx('interact');
 
-    // 支援通用空間物件自訂點擊回呼 (Zone 2~5 POIs & Portals)
+    // 若尋寶任務進行中，優先判定是否命中尋寶目標
+    if (this.scavengerHunt && this.scavengerHunt.isQuestActive()) {
+      const q = this.scavengerHunt.currentQuest;
+      const targetId = (target.userData.id || '').toLowerCase();
+      const targetLabel = (target.userData.label || target.userData.name || '').toUpperCase();
+      const qWord = q.targetWord.toUpperCase();
+      const zone1Map = { 'candle': 'LIGHT', 'book': 'BOOK', 'key': 'KEY', 'drawer': 'RED', 'alchemy': 'BLUE', 'cat': 'CAT', 'mimic': 'CAT', 'door': 'OPEN' };
+      const resolvedWord = zone1Map[targetId] || targetId.toUpperCase();
+      if (resolvedWord === qWord || targetLabel.includes(qWord) || targetId.includes(qWord.toLowerCase())) {
+        this.scavengerHunt.handleQuestSuccess();
+        return;
+      }
+    }
+
+    // 支援通用空間物件自訂點擊回呼 (Zone 2~9 POIs & Portals)
     if (typeof target.userData.onClick === 'function') {
       target.userData.onClick();
       return;
@@ -1537,6 +1558,10 @@ class World3D {
 
     if (this.minimap) {
       this.minimap.update();
+    }
+
+    if (this.scavengerHunt) {
+      this.scavengerHunt.update(delta);
     }
 
     this.renderer.render(this.scene, this.camera);

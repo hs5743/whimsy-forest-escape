@@ -2896,4 +2896,390 @@ body, html {
   }
 }
 
+/* ========================================================= */
+/* 🧭 情境聽力尋寶任務專用樣式 (Scavenger Hunt Styles) */
+/* ========================================================= */
+
+.hud-btn.scavenger-btn-highlight {
+  background: linear-gradient(135deg, #065f46 0%, #047857 100%) !important;
+  border: 2px solid #34d399 !important;
+  color: #ecfdf5 !important;
+  font-weight: 800 !important;
+  font-size: 13px !important;
+  padding: 7px 14px !important;
+  border-radius: 24px !important;
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.45) !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 6px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5) !important;
+}
+.hud-btn.scavenger-btn-highlight:hover {
+  transform: translateY(-2px);
+  border-color: #6ee7b7 !important;
+  box-shadow: 0 6px 18px rgba(5, 150, 105, 0.6) !important;
+}
+
+/* 懸浮尋寶任務雷達追蹤條 (HUD Overlay Tracker) */
+#scavengerTrackerBar {
+  position: fixed;
+  top: 66px;
+  right: 14px;
+  z-index: 105;
+  background: linear-gradient(135deg, rgba(26, 20, 16, 0.94) 0%, rgba(15, 12, 10, 0.97) 100%);
+  border: 2px solid #10b981;
+  border-radius: 18px;
+  padding: 8px 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 380px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: slideDownTracker 0.3s ease-out;
+}
+
+@keyframes slideDownTracker {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.tracker-top-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.tracker-title-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tracker-icon {
+  font-size: 18px;
+  animation: compassPulse 2s infinite ease-in-out;
+}
+
+@keyframes compassPulse {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.15) rotate(15deg); }
+}
+
+.tracker-title-text {
+  font-size: 12px;
+  font-weight: 800;
+  color: #a7f3d0;
+  letter-spacing: 0.5px;
+}
+
+/* 雷達距離膠囊 */
+.radar-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.radar-pill.radar-cold {
+  background: rgba(56, 189, 248, 0.18);
+  border: 1px solid #38bdf8;
+  color: #bae6fd;
+}
+
+.radar-pill.radar-warm {
+  background: rgba(245, 158, 11, 0.22);
+  border: 1px solid #f59e0b;
+  color: #fef08a;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.35);
+}
+
+.radar-pill.radar-hot {
+  background: rgba(239, 68, 68, 0.28);
+  border: 1px solid #ef4444;
+  color: #fecaca;
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.6);
+  animation: hotPulse 1s infinite alternate ease-in-out;
+}
+
+@keyframes hotPulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.05); }
+}
+
+.radar-pill.radar-cross-zone {
+  background: rgba(168, 85, 247, 0.2);
+  border: 1px solid #c084fc;
+  color: #e9d5ff;
+}
+
+/* 語音控制與動作行 */
+.tracker-controls-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.tracker-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f8fafc;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+}
+
+.tracker-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.tracker-btn.btn-listen {
+  background: linear-gradient(135deg, #059669, #047857);
+  border-color: #34d399;
+  color: #ffffff;
+}
+
+.tracker-btn.btn-listen:hover {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.tracker-btn.btn-verify {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  border-color: #f87171;
+  color: #ffffff;
+  font-weight: 800;
+  animation: hotPulse 0.9s infinite alternate;
+}
+
+.tracker-btn.btn-abandon {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+}
+
+/* 聲音聲波視覺化 (Soundwave Visualizer) */
+.voice-viz {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 12px;
+}
+.voice-viz span {
+  display: inline-block;
+  width: 3px;
+  height: 4px;
+  background-color: #34d399;
+  border-radius: 2px;
+  transition: height 0.15s;
+}
+.voice-viz.playing span:nth-child(1) { animation: waveBar 0.5s infinite alternate; }
+.voice-viz.playing span:nth-child(2) { animation: waveBar 0.5s infinite 0.15s alternate; }
+.voice-viz.playing span:nth-child(3) { animation: waveBar 0.5s infinite 0.3s alternate; }
+.voice-viz.playing span:nth-child(4) { animation: waveBar 0.5s infinite 0.45s alternate; }
+
+@keyframes waveBar {
+  0% { height: 3px; }
+  100% { height: 14px; background-color: #6ee7b7; }
+}
+
+.tracker-clue-text {
+  font-size: 12px;
+  line-height: 1.45;
+  color: #f1f5f9;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 8px;
+  padding: 6px 10px;
+  border-left: 3px solid #10b981;
+}
+
+.tracker-clue-zh {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+/* 尋寶主彈窗模式卡片網格 */
+.scavenger-modes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.scavenger-mode-card {
+  background: linear-gradient(135deg, rgba(45, 34, 26, 0.9) 0%, rgba(26, 18, 12, 0.95) 100%);
+  border: 2px solid #8c7361;
+  border-radius: 14px;
+  padding: 16px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.scavenger-mode-card:hover {
+  transform: translateY(-4px);
+  border-color: #10b981;
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35);
+  background: linear-gradient(135deg, rgba(50, 40, 30, 0.95) 0%, rgba(20, 26, 22, 0.98) 100%);
+}
+
+.scavenger-mode-card.featured {
+  border-color: #f59e0b;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.25);
+}
+
+.scavenger-mode-icon {
+  font-size: 32px;
+}
+
+.scavenger-mode-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: #fef08a;
+}
+
+.scavenger-mode-desc {
+  font-size: 11px;
+  color: #d1d5db;
+  line-height: 1.4;
+}
+
+.scavenger-mode-badge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid #10b981;
+  color: #6ee7b7;
+}
+
+/* 雙軌單字學習卡結算區 (Scavenger Victory) */
+.scavenger-dual-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 16px 0;
+}
+
+.scavenger-learn-card {
+  background: rgba(15, 23, 42, 0.85);
+  border-radius: 14px;
+  padding: 14px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+}
+
+.scavenger-learn-card.anchor-card {
+  border: 2px solid #f59e0b;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.25);
+}
+
+.scavenger-learn-card.companion-card {
+  border: 2px solid #38bdf8;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.25);
+}
+
+.learn-card-tag {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 10px;
+  display: inline-block;
+  align-self: flex-start;
+}
+
+.anchor-card .learn-card-tag {
+  background: rgba(245, 158, 11, 0.25);
+  color: #fef08a;
+  border: 1px solid #f59e0b;
+}
+
+.companion-card .learn-card-tag {
+  background: rgba(56, 189, 248, 0.25);
+  color: #bae6fd;
+  border: 1px solid #38bdf8;
+}
+
+.learn-card-word {
+  font-size: 22px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 1px;
+}
+
+.learn-card-zh {
+  font-size: 14px;
+  font-weight: 700;
+  color: #93c5fd;
+}
+
+.anchor-card .learn-card-zh {
+  color: #fde047;
+}
+
+.learn-card-phonetic {
+  font-size: 11px;
+  font-family: monospace;
+  color: #94a3b8;
+}
+
+.learn-card-sentence {
+  font-size: 12px;
+  color: #cbd5e1;
+  line-height: 1.4;
+  margin-top: 4px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.15);
+  padding-top: 6px;
+}
+
+@media (max-width: 768px) {
+  #scavengerTrackerBar {
+    top: 56px;
+    right: 8px;
+    left: 8px;
+    max-width: none;
+    padding: 6px 10px;
+  }
+  .scavenger-modes-grid {
+    grid-template-columns: 1fr;
+  }
+  .scavenger-dual-cards {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .hud-btn.scavenger-btn-highlight {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+  }
+}
+
+
 
