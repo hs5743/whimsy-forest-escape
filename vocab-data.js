@@ -526,6 +526,108 @@ const VOCAB_DATA = {
     matchKeywords: ["fly", "flies", "flying", "flew", "light"],
     xp: 70,
     color: "#c084fc"
+  },
+  "ISLAND": {
+    word: "ISLAND",
+    phonics: "/ˈaɪ.lənd/ • I-S-L-A-N-D",
+    zh: "島嶼、浮空仙島",
+    category: "蒼穹虹光空島",
+    mascot: "aria",
+    mascotName: "艾莉雅 Aria",
+    mascotImg: "assets/textures/owl-guide.png",
+    dialogue: "“Welcome to the Celestial Sky Island, floating freely high above the sea of clouds!”",
+    dialogueZh: "「歡迎來到蒼穹浮空仙島！這座神聖空島自由自在地懸浮在無垠九天雲海之上！」",
+    prompt: "請邁步登上這座懸浮於雲端的翡翠空島，唸出：ISLAND！",
+    puzzleHint: "懸浮於九天雲海之上的翡翠仙島，四周流轉著輕柔的微風與祥雲！",
+    audioFile: "assets/sounds/vocab/ISLAND.wav",
+    matchKeywords: ["island", "islands", "eye", "land", "highland"],
+    xp: 60,
+    color: "#38bdf8"
+  },
+  "RAINBOW": {
+    word: "RAINBOW",
+    phonics: "/ˈreɪn.boʊ/ • R-A-I-N-B-O-W",
+    zh: "彩虹、虹霓天橋",
+    category: "蒼穹虹光空島",
+    mascot: "aria",
+    mascotName: "艾莉雅 Aria",
+    mascotImg: "assets/textures/owl-guide.png",
+    dialogue: "“Walk across the shining rainbow bridge to connect your dreams with the infinite sky.”",
+    dialogueZh: "「走過這座璀璨的彩虹天橋，讓七彩光芒將你的夢想與無垠蒼穹相連。」",
+    prompt: "請踏上橫跨島嶼間的七彩虹霓以太天橋，唸出：RAINBOW！",
+    puzzleHint: "橫跨空島的半透明天橋流動著赤橙黃綠青藍紫七重光芒，如夢似幻！",
+    audioFile: "assets/sounds/vocab/RAINBOW.wav",
+    matchKeywords: ["rainbow", "rainbows", "rain", "bow", "bows"],
+    xp: 60,
+    color: "#f43f5e"
+  },
+  "MUSIC": {
+    word: "MUSIC",
+    phonics: "/ˈmjuː.zɪk/ • M-U-S-I-C",
+    zh: "音樂、天籟樂曲",
+    category: "蒼穹虹光空島",
+    mascot: "aria",
+    mascotName: "艾莉雅 Aria",
+    mascotImg: "assets/textures/owl-guide.png",
+    dialogue: "“Listen to the celestial music played by the starry wind and crystalline keys.”",
+    dialogueZh: "「聆聽這由星風與水晶琴鍵彈奏出的天界天籟音樂，它是撫慰心靈的奇蹟。」",
+    prompt: "請撫過浮空涼亭中的天籟水晶星琴，唸出：MUSIC！",
+    puzzleHint: "水晶鋼琴上的琴鍵自行跳躍律動，五線譜光環正飄揚在半空中！",
+    audioFile: "assets/sounds/vocab/MUSIC.wav",
+    matchKeywords: ["music", "musics", "muse", "musical", "amuse"],
+    xp: 60,
+    color: "#a855f7"
+  },
+  "SING": {
+    word: "SING",
+    phonics: "/sɪŋ/ • S-I-N-G",
+    zh: "唱歌、歌詠詠唱",
+    category: "蒼穹虹光空島",
+    mascot: "aria",
+    mascotName: "艾莉雅 Aria",
+    mascotImg: "assets/textures/owl-guide.png",
+    dialogue: "“Let your joyful voice soar! Sing like the sapphire skybird welcoming the dawn.”",
+    dialogueZh: "「讓歡欣的歌聲扶搖直上！如同天青靈鳥迎接破曉晨曦般盡情高歌吧！」",
+    prompt: "請走近天青靈鳥棲息的歌詠鳥居，唸出：SING！",
+    puzzleHint: "展翅的天青靈鳥在金色鳥居上振翅清啼，金色音符粒子如雨般灑落！",
+    audioFile: "assets/sounds/vocab/SING.wav",
+    matchKeywords: ["sing", "sings", "singer", "singing", "song", "thing"],
+    xp: 60,
+    color: "#06b6d4"
+  },
+  "DANCE": {
+    word: "DANCE",
+    phonics: "/dæns/ • D-A-N-C-E",
+    zh: "跳舞、翩翩起舞",
+    category: "蒼穹虹光空島",
+    mascot: "aria",
+    mascotName: "艾莉雅 Aria",
+    mascotImg: "assets/textures/owl-guide.png",
+    dialogue: "“Step onto the starlight quartz floor and dance to the rhythm of the floating islands.”",
+    dialogueZh: "「踏上星光石英舞池，跟隨空島的旋律翩翩起舞，每一步都能綻放出絢爛光芒。」",
+    prompt: "請踏上中央環形星光石英律動舞池，唸出：DANCE！",
+    puzzleHint: "環狀石英舞池的音階踏板踩下時會發出清脆的八音盒聲響與七彩光環！",
+    audioFile: "assets/sounds/vocab/DANCE.wav",
+    matchKeywords: ["dance", "dances", "dancer", "dancing", "danced"],
+    xp: 60,
+    color: "#10b981"
+  },
+  "DREAM": {
+    word: "DREAM",
+    phonics: "/driːm/ • D-R-E-A-M",
+    zh: "夢想、美夢、許願",
+    category: "蒼穹虹光空島",
+    mascot: "aria",
+    mascotName: "艾莉雅 Aria",
+    mascotImg: "assets/textures/owl-guide.png",
+    dialogue: "“Every grand achievement begins with a dream. Hold tight to your dreams and conquer the future!”",
+    dialogueZh: "「所有偉大的成就都始於一個勇敢的夢想。緊握你的夢想，展翅開拓未來吧！」",
+    prompt: "請在空島巔峰的祈願星泉前許下願望，唸出：DREAM！",
+    puzzleHint: "八角星光祈願天池向虛空傾瀉成落雲瀑布，水面泛起璀璨星光，在此許願夢想成真！",
+    audioFile: "assets/sounds/vocab/DREAM.wav",
+    matchKeywords: ["dream", "dreams", "dreamer", "dreaming", "team"],
+    xp: 70,
+    color: "#fbbf24"
   }
 };
 
@@ -842,6 +944,68 @@ const GUARDIAN_TRIALS = {
         targetKeywords: ["i", "can", "read", "and", "think", "to", "be", "smart"],
         requiredAccuracy: 80,
         audioText: "I can read and think to be smart."
+      }
+    ]
+  },
+  'zone10': {
+    zoneId: 'zone10',
+    zoneName: '蒼穹虹光空島',
+    bossId: 'boss_aria',
+    bossName: '艾莉雅 (Aria, Queen of Rainbow Skies)',
+    bossRole: '🌈 蒼穹彩虹之主・天籟精靈使',
+    bossAvatar: 'assets/textures/owl-guide.png',
+    bossEmoji: '🧝‍♀️',
+    introDialogue: "Greetings, 天空與星界的傳奇旅人！我是蒼穹虹光空島的守護精靈使——艾莉雅 🧝‍♀️🌈。你歷經萬神殿堂的智慧洗禮，展開雙翼飛到了天際最神聖的虹彩仙境！在這裡，風聲成曲，彩虹為橋。想要獲得全境終極榮譽【虹彩夢想之星 🌈🌟】，請接受我的「英語問句三重天籟試煉」！",
+    rewardXP: 350,
+    starName: "虹彩夢想之星 🌈🌟",
+    victoryDialogue: "Sublime! 你的心靈純淨如晴空、歌聲與發音如彩虹般繽紛動人！以蒼穹彩虹之主之名，我將這顆【虹彩夢想之星】授予你！你已走遍童趣王國的十座奇幻境域，正式加冕為「全境傳奇大魔導士」！",
+    questions: [
+      {
+        stage: 1,
+        type: 'choice',
+        title: '問句試煉 1/3：感官聽力生活單字題 (Sensory Perception Questions)',
+        scenario: '天籟空島情境：艾莉雅詢問你在這片純淨的空島天空中聽到了什麼美妙的聲音',
+        prompt: '請問句中的空格應填入哪一個生活單字？',
+        sentence: "“What do you hear in the sky? I hear sweet _____.”",
+        sentenceZh: "「你在天空中聽到了什麼？我聽見了甜美的音樂。」",
+        audioText: "What do you hear in the sky? I hear sweet music.",
+        options: [
+          { key: 'A', text: 'music', correct: true, hint: '太棒了！「sweet music」指美妙悅耳的音樂，完全符合天籟空島的旋律！' },
+          { key: 'B', text: 'desk', correct: false, hint: 'desk 是書桌，不能搭配聽覺上的 sweet 喔！' },
+          { key: 'C', text: 'pencil', correct: false, hint: 'pencil 是鉛筆，空中聽見的不是文具喔！' },
+          { key: 'D', text: 'soup', correct: false, hint: 'soup 是熱湯，在天空中聆聽的是美妙的音樂喔！' }
+        ],
+        explanation: '【music】表示音樂，「I hear sweet music.」為在天空中聽見悠揚樂曲之標準日常表達。'
+      },
+      {
+        stage: 2,
+        type: 'choice',
+        title: '問句試煉 2/3：自然天氣情境選擇題 (Weather & Nature Inquiries)',
+        scenario: '七彩虹霓情境：艾莉雅指著雨後的蔚藍天空，請你指出橫跨在空島上的大自然奇觀',
+        prompt: '請問句中的空格應填入哪一個天氣單字？',
+        sentence: "“Look at the sky! After the rain, there is a beautiful _____.”",
+        sentenceZh: "「看那天邊！雨過天晴後，出現了一道美麗的彩虹。」",
+        audioText: "Look at the sky! After the rain, there is a beautiful rainbow.",
+        options: [
+          { key: 'A', text: 'rainbow', correct: true, hint: '答對了！雨過天晴後空中出現的七彩光弧就是「rainbow (彩虹)」！' },
+          { key: 'B', text: 'eraser', correct: false, hint: 'eraser 是橡皮擦，大自然雨後出現的是彩虹喔！' },
+          { key: 'C', text: 'tiger', correct: false, hint: 'tiger 是老虎，天空出現的壯觀景象是彩虹！' },
+          { key: 'D', text: 'fork', correct: false, hint: 'fork 是叉子，請選擇象徵七彩天橋的 rainbow！' }
+        ],
+        explanation: '【rainbow】意為彩虹，「After the rain, there is a beautiful rainbow.」為雨過天晴出現美麗彩虹的生活表達。'
+      },
+      {
+        stage: 3,
+        type: 'speech',
+        title: '終極試煉 3/3：英語整句口說朗讀 (Required Accuracy ≥ 80%)',
+        scenario: '傳奇加冕任務：請向艾莉雅精靈使大聲朗讀出這句歡欣誓詞，榮耀加冕為傳奇大魔導士！',
+        prompt: '請點擊下方麥克風，完整清晰地朗讀出這句彩虹誓詞：',
+        targetSentence: "We sing and dance under the rainbow.",
+        targetSentenceZh: "「我們在彩虹下唱歌與跳舞。」",
+        phoneticGuide: "/wiː sɪŋ ænd dæns ˈʌn.dɚ ðə ˈreɪn.boʊ/",
+        targetKeywords: ["we", "sing", "and", "dance", "under", "the", "rainbow"],
+        requiredAccuracy: 80,
+        audioText: "We sing and dance under the rainbow."
       }
     ]
   }

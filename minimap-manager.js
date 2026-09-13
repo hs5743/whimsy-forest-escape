@@ -670,6 +670,102 @@ class MinimapManager {
       ctx.strokeStyle = '#c084fc';
       ctx.lineWidth = 1.5;
       ctx.stroke();
+    } else if (curZone === 'zone10') {
+      // 蒼穹虹光空島：天際蔚藍微風底色 + 三座翡翠水晶空島 + 七彩以太天橋 + 天籟水晶星琴 + 靈鳥歌詠鳥居 + 星光石英舞池 + 祈願星泉
+      ctx.fillStyle = '#0284c7';
+      ctx.fillRect(-18 * s, -18 * s, 36 * s, 36 * s);
+
+      // 外圍雲海漫射環
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+      ctx.lineWidth = 3 * s;
+      ctx.beginPath();
+      ctx.arc(0, 0, 16.0 * s, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // 1. 浮空中央主島 (半徑 11.5m, 翡翠綠草地)
+      ctx.fillStyle = '#10b981';
+      ctx.beginPath();
+      ctx.arc(0, 1.5 * s, 9.5 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fef08a';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // 2. 東側旋律小島 (半徑 5.0m, [7.5, -2.5])
+      ctx.fillStyle = '#059669';
+      ctx.beginPath();
+      ctx.arc(7.5 * s, -2.5 * s, 5.0 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#a7f3d0';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // 3. 西側律動小島 (半徑 5.0m, [-7.5, -2.5])
+      ctx.fillStyle = '#059669';
+      ctx.beginPath();
+      ctx.arc(-7.5 * s, -2.5 * s, 5.0 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#a7f3d0';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // 4. RAINBOW 拱形彩虹天橋 (橫跨東南西北，連接兩島)
+      const rainbowColors = ['#ff4d6d', '#ffa600', '#ffea00', '#06d6a0', '#00b4d8', '#4361ee', '#7209b7'];
+      rainbowColors.forEach((rc, rIdx) => {
+        ctx.strokeStyle = rc;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(0, 0.5 * s, (8.5 + rIdx * 0.4) * s, Math.PI * 0.85, Math.PI * 0.15, true);
+        ctx.stroke();
+      });
+
+      // 5. ISLAND 浮空仙島方尖碑 (中心偏南, [0, 5.0])
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(0, 5.0 * s, 1.2 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // 6. MUSIC 水晶星琴涼亭 (東側, [7.5, -2.5])
+      ctx.fillStyle = '#a855f7';
+      ctx.beginPath();
+      ctx.arc(7.5 * s, -2.5 * s, 1.8 * s, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 7. SING 天青靈鳥歌詠鳥居 (東北, [8.5, 2.5])
+      ctx.fillStyle = '#06b6d4';
+      ctx.fillRect(7.5 * s, 1.8 * s, 2.0 * s, 1.4 * s);
+      ctx.strokeStyle = '#fde047';
+      ctx.strokeRect(7.5 * s, 1.8 * s, 2.0 * s, 1.4 * s);
+
+      // 8. DANCE 星光石英舞池 (西側, [-7.5, -2.5])
+      ctx.fillStyle = '#ec4899';
+      ctx.beginPath();
+      ctx.arc(-7.5 * s, -2.5 * s, 1.8 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fbcfe8';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+
+      // 9. DREAM 祈願星泉與落雲瀑布 (西北, [-8.5, 2.5])
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath();
+      ctx.arc(-8.5 * s, 2.5 * s, 1.6 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // 10. 守護者艾莉雅 (正北, [0, -7.5])
+      ctx.fillStyle = '#f43f5e';
+      ctx.beginPath();
+      ctx.arc(0, -7.5 * s, 1.2 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fef08a';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
     }
 
     ctx.restore();

@@ -118,6 +118,18 @@ class SpatialZoneManager {
         words: ['LIBRARY', 'READ', 'WRITE', 'THINK', 'SMART', 'FLY'],
         spawnPos: [0, 1.6, 7.5],
         spawnYaw: 0
+      },
+      'zone10': {
+        id: 'zone10',
+        name: '蒼穹虹光空島',
+        englishName: 'The Prismatic Sky Isles',
+        icon: '🌈',
+        topic: 'Aether, Rainbow & Melody',
+        reqLevel: 10,
+        desc: '懸浮於天際雲端之上的三座水晶翡翠空島，七彩虹霓以太天橋與天籟星琴奏響夢想樂章！',
+        words: ['ISLAND', 'RAINBOW', 'MUSIC', 'SING', 'DANCE', 'DREAM'],
+        spawnPos: [0, 1.6, 7.5],
+        spawnYaw: 0
       }
     };
 
@@ -277,6 +289,24 @@ class SpatialZoneManager {
         // 9. 南側接駁空橋出入口石柱兩側防跌落邊界
         { type: 'box', minX: -14.5, maxX: -2.4, minZ: 12.0, maxZ: 14.5 },
         { type: 'box', minX: 2.4, maxX: 14.5, minZ: 12.0, maxZ: 14.5 }
+      ],
+      'zone10': [
+        // 1. 浮空主島歡迎基座 (ISLAND POI, 中心: 0, 5.0)
+        { type: 'box', minX: -1.8, maxX: 1.8, minZ: 3.5, maxZ: 6.5 },
+        // 2. 東側天籟水晶星琴基座 (MUSIC POI, 中心: 7.5, -2.5)
+        { type: 'box', minX: 6.0, maxX: 9.0, minZ: -4.0, maxZ: -1.0 },
+        // 3. 東側歌詠鳥居實體 (SING POI, 中心: 8.5, 2.5)
+        { type: 'box', minX: 7.0, maxX: 10.0, minZ: 1.2, maxZ: 3.8 },
+        // 4. 西側星光石英舞池外圍立柱 (DANCE POI, 中心: -7.5, -2.5)
+        { type: 'box', minX: -9.0, maxX: -6.0, minZ: -4.0, maxZ: -1.0 },
+        // 5. 西側祈願天池圍欄實體 (DREAM POI, 中心: -8.5, 2.5)
+        { type: 'box', minX: -10.0, maxX: -7.0, minZ: 1.2, maxZ: 3.8 },
+        // 6. 空島邊界空氣牆 (防跌落虛空雲海)
+        { type: 'box', minX: -16.5, maxX: -13.5, minZ: -16.5, maxZ: 16.5 },
+        { type: 'box', minX: 13.5, maxX: 16.5, minZ: -16.5, maxZ: 16.5 },
+        { type: 'box', minX: -16.5, maxX: 16.5, minZ: -16.5, maxZ: -13.5 },
+        { type: 'box', minX: -16.5, maxX: -2.4, minZ: 11.5, maxZ: 16.5 },
+        { type: 'box', minX: 2.4, maxX: 16.5, minZ: 11.5, maxZ: 16.5 }
       ]
     };
   }
@@ -977,6 +1007,8 @@ class SpatialZoneManager {
       this.buildZone8_GlacialSanctuary(group);
     } else if (zoneId === 'zone9') {
       this.buildZone9_AstralPantheon(group);
+    } else if (zoneId === 'zone10') {
+      this.buildZone10_PrismaticSkyIsles(group);
     }
 
     this.world.scene.add(group);
@@ -1011,7 +1043,12 @@ class SpatialZoneManager {
     let fogColor = 0xe0f2fe;
     let fogDensity = 0.012;
 
-    if (zoneId === 'zone9') {
+    if (zoneId === 'zone10') {
+      // 蒼穹虹光空島：天際清澈晨曦蔚藍與天界柔彩薄霞
+      skyColorTop = 0x38bdf8;
+      fogColor = 0xe0f2fe;
+      fogDensity = 0.004;
+    } else if (zoneId === 'zone9') {
       // 星界萬神殿堂：浩瀚星穹深邃靛藍與神聖金輝薄霧
       skyColorTop = 0x0c102b;
       fogColor = 0x1e1b4b;
@@ -1056,8 +1093,8 @@ class SpatialZoneManager {
     this.world.scene.background = new THREE.Color(skyColorTop);
     this.world.scene.fog = new THREE.FogExp2(fogColor, fogDensity);
 
-    // 建立 3D 半球形天頂 (Sky Dome, 內表面渲染 - Zone 7, 8, 9 擁有專屬廣闊星穹天景，不覆蓋封閉天頂)
-    if (zoneId !== 'zone7' && zoneId !== 'zone8' && zoneId !== 'zone9') {
+    // 建立 3D 半球形天頂 (Sky Dome, 內表面渲染 - Zone 7, 8, 9, 10 擁有專屬廣闊天景，不覆蓋封閉天頂)
+    if (zoneId !== 'zone7' && zoneId !== 'zone8' && zoneId !== 'zone9' && zoneId !== 'zone10') {
       const skyGeo = new THREE.SphereGeometry(65, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.5);
       const skyMat = new THREE.MeshBasicMaterial({
         color: skyColorTop,
@@ -4539,11 +4576,13 @@ class SpatialZoneManager {
 
     // 文字
     ctx.textAlign = 'center';
+    const isZone10 = (zoneId === 'zone10');
+    const isZone9 = (zoneId === 'zone9');
     const isZone8 = (zoneId === 'zone8');
     const isZone7 = (zoneId === 'zone7');
-    const bossIcon = isZone8 ? '❄️' : (isZone7 ? '🔭' : '⚓');
-    const bossEn = isZone8 ? 'Archmage Frost' : (isZone7 ? 'Astrologer Aethel' : 'Captain Marina');
-    const bossAction = isZone8 ? '💬 [E] 與長老對話 / 接受試煉' : (isZone7 ? '💬 [E] 與賢者對話 / 接受試煉' : '💬 [E] 與船長對話 / 接受試煉');
+    const bossIcon = isZone10 ? '🧝‍♀️' : (isZone9 ? '🦉' : (isZone8 ? '❄️' : (isZone7 ? '🔭' : '⚓')));
+    const bossEn = isZone10 ? 'Aria' : (isZone9 ? 'Headmaster Oliver' : (isZone8 ? 'Archmage Frost' : (isZone7 ? 'Astrologer Aethel' : 'Captain Marina')));
+    const bossAction = isZone10 ? '💬 [E] 與精靈使對話 / 接受試煉' : (isZone9 ? '💬 [E] 與校長對話 / 接受試煉' : (isZone8 ? '💬 [E] 與長老對話 / 接受試煉' : (isZone7 ? '💬 [E] 與賢者對話 / 接受試煉' : '💬 [E] 與船長對話 / 接受試煉')));
 
     if (isReady) {
       ctx.fillStyle = '#fde047';
@@ -4568,6 +4607,43 @@ class SpatialZoneManager {
     const sprite = new THREE.Sprite(spriteMat);
     sprite.scale.set(3.2, 0.8, 1);
     return sprite;
+  }
+
+  // 手工羊皮紙與古典文字標示材質生成器
+  createParchmentSignTexture(word, zh) {
+    if (typeof document === 'undefined' || !document.createElement) return new THREE.Texture();
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return new THREE.Texture();
+
+    // 典雅羊皮紙底色
+    ctx.fillStyle = 'rgba(254, 243, 199, 0.95)';
+    ctx.fillRect(0, 0, 512, 256);
+
+    // 金棕色雙重典雅邊框
+    ctx.strokeStyle = '#b45309';
+    ctx.lineWidth = 8;
+    ctx.strokeRect(12, 12, 488, 232);
+    ctx.strokeStyle = '#d97706';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(22, 22, 468, 212);
+
+    // 英語大字
+    ctx.fillStyle = '#78350f';
+    ctx.font = 'bold 52px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(word, 256, 95);
+
+    // 中文小字
+    ctx.fillStyle = '#92400e';
+    ctx.font = 'bold 36px sans-serif';
+    ctx.fillText(zh, 256, 175);
+
+    const tex = new THREE.CanvasTexture(canvas);
+    return tex;
   }
 
   // POI 標籤安全防護方法 (若有外部呼叫亦不產生例外)
@@ -7309,6 +7385,12 @@ class SpatialZoneManager {
     // 10. 星界榮耀展翅天台 (FLY POI, x: 0.0, z: -12.5) - 白玉天台、金鷹石雕與展翅星光傳送門
     this.buildPantheonFlightTerrace(group, 0.0, 0, -12.5);
 
+    // 10b. 展翅天台虹光天門 (前往 Zone 10 蒼穹虹光空島, x: 0.0, z: -14.2)
+    this.buildPantheonSkyIslesGate(group, 0.0, 0, -14.2, '🌈 蒼穹虹光天門 ➔ 飛升登上【蒼穹虹光空島】', () => {
+      this.world.showToast('🌈 展開智慧光翼穿梭天門，飛升登上蒼穹虹光空島！');
+      this.switchZone('zone10');
+    });
+
     // 11. 南側降落星界天梯 (返回 Zone 8 極光冰雪聖域, x: 0.0, z: 11.8)
     this.buildPantheonGlacialReturnGate(group, 0.0, 0, 11.8, '❄️ 降落星界天梯 ➔ 返回【極光冰雪聖域】', () => {
       this.world.showToast('❄️ 沿著星界天梯緩降，返回極光冰雪聖域！');
@@ -8270,6 +8352,44 @@ class SpatialZoneManager {
     group.add(gate);
   }
 
+  // 11b. 展翅天台虹光天門 (飛升前往 Zone 10 蒼穹虹光空島)
+  buildPantheonSkyIslesGate(group, x, y, z, label, onTravel) {
+    const gate = new THREE.Group();
+    gate.position.set(x, y, z);
+
+    const goldMat = new THREE.MeshStandardMaterial({ map: this.tex.astrolabeBrass, metalness: 0.88, roughness: 0.22 });
+    const rainbowMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.65, side: THREE.DoubleSide });
+
+    // 圓形立體拱門
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(1.8, 0.12, 12, 32), goldMat);
+    ring.position.y = 2.0;
+    gate.add(ring);
+
+    // 旋轉內部彩虹星雲光渦
+    const portalCore = new THREE.Mesh(new THREE.CircleGeometry(1.68, 32), rainbowMat);
+    portalCore.position.y = 2.0;
+    gate.add(portalCore);
+
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.6, 4.0, 2.5), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 2.0;
+    hitBox.userData = {
+      id: 'portal_zone10_from_pantheon',
+      label,
+      onClick: () => {
+        if (onTravel) onTravel();
+      }
+    };
+    gate.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      ring.rotation.z = time * 0.6;
+      portalCore.material.opacity = 0.5 + Math.sin(time * 3.0) * 0.2;
+    });
+
+    group.add(gate);
+  }
+
   // 12. 👑 關卡主 NPC：星界大導師・奧利弗大校長 (Grand Archmage Oliver)
   buildPantheonGuardianNPC(group, x, y, z) {
     const npc = new THREE.Group();
@@ -8389,6 +8509,938 @@ class SpatialZoneManager {
     });
 
     group.add(npc);
+  }
+
+  // =========================================================================
+  // Zone 10: 蒼穹虹光空島・天籟夢想神苑 (The Prismatic Sky Isles & Sanctuary)
+  // =========================================================================
+  buildZone10_PrismaticSkyIsles(group) {
+    this.initTextures();
+
+    // 1. 光照系統 (天際晨曦、彩虹微光、天籟星光與水泉冷光)
+    this.buildSkyIslesLighting(group);
+
+    // 2. 蒼穹雲海天際與漫天漂浮浮雲帷幕
+    this.buildSkyIslesAtmosphere(group);
+
+    // 3. 浮空仙島群幾何 (中央主島 + 東側旋律島 + 西側律動島 + 水晶步道)
+    this.buildSkyIslesTerrain(group);
+
+    // 4. 浮空主島迎賓方尖碑 (ISLAND POI, x: 0.0, z: 5.0)
+    this.buildSkyIslesIslandMonolith(group, 0.0, 0, 5.0);
+
+    // 5. 七彩虹霓以太天橋 (RAINBOW POI, x: 0.0, z: 0.0)
+    this.buildSkyIslesRainbowBridge(group, 0.0, 0, 0.0);
+
+    // 6. 浮空涼亭天籟水晶星琴 (MUSIC POI, x: 7.5, z: -2.5)
+    this.buildSkyIslesMusicPavilion(group, 7.5, 0.4, -2.5);
+
+    // 7. 天青靈鳥歌詠鳥居 (SING POI, x: 8.5, z: 2.5)
+    this.buildSkyIslesSongbirdTorii(group, 8.5, 0.4, 2.5);
+
+    // 8. 星光石英律動舞池 (DANCE POI, x: -7.5, z: -2.5)
+    this.buildSkyIslesDancePlaza(group, -7.5, 0.4, -2.5);
+
+    // 9. 蒼穹祈願星泉與落雲飛瀑 (DREAM POI, x: -8.5, z: 2.5)
+    this.buildSkyIslesDreamWishingPool(group, -8.5, 0.4, 2.5);
+
+    // 10. 👑 關卡主 NPC：艾莉雅精靈使 (Aria, Queen of Rainbow Skies, x: 0.0, z: -7.5)
+    this.buildSkyIslesGuardianAria(group, 0.0, 0, -7.5);
+
+    // 11. 南側萬神回天之階 (返回 Zone 9 星界萬神殿堂, x: 0.0, z: 11.2)
+    this.buildSkyIslesPantheonReturnGate(group, 0.0, 0, 11.2, '🏛️ 萬神回天之階 ➔ 返回【星界萬神殿堂】', () => {
+      this.world.showToast('🏛️ 沿著萬神星階徐徐緩降，重返星界萬神殿堂！');
+      this.switchZone('zone9');
+    });
+
+    // 12. 飄浮天界彩虹星塵與音符微粒 (Prismatic Rainbow Stardust Particles)
+    this.addFloatingParticles(group, 0x38bdf8, 320, 36, 10);
+  }
+
+  // 1. 光照系統
+  buildSkyIslesLighting(group) {
+    const hemiLight = new THREE.HemisphereLight(0xdbeafe, 0x0369a1, 1.55);
+    group.add(hemiLight);
+
+    const celestialSun = new THREE.DirectionalLight(0xfffbeb, 1.65);
+    celestialSun.position.set(15, 42, 12);
+    celestialSun.castShadow = true;
+    celestialSun.shadow.mapSize.width = 1024;
+    celestialSun.shadow.mapSize.height = 1024;
+    group.add(celestialSun);
+
+    // 彩虹天橋中心七彩漫射光
+    const rainbowGlow = new THREE.PointLight(0xf43f5e, 2.2, 22);
+    rainbowGlow.position.set(0, 3.5, 0);
+    group.add(rainbowGlow);
+
+    // 天籟星琴涼亭幽紫旋律光
+    const pianoGlow = new THREE.PointLight(0xa855f7, 1.8, 16);
+    pianoGlow.position.set(7.5, 3.2, -2.5);
+    group.add(pianoGlow);
+
+    // 歌詠鳥居天青晨曦光
+    const toriiGlow = new THREE.PointLight(0x06b6d4, 1.6, 14);
+    toriiGlow.position.set(8.5, 3.0, 2.5);
+    group.add(toriiGlow);
+
+    // 律動舞池玫瑰星光
+    const danceGlow = new THREE.PointLight(0xec4899, 1.8, 16);
+    danceGlow.position.set(-7.5, 3.0, -2.5);
+    group.add(danceGlow);
+
+    // 祈願天池黃金星泉暖光
+    const dreamGlow = new THREE.PointLight(0xfbbf24, 1.8, 16);
+    dreamGlow.position.set(-8.5, 2.8, 2.5);
+    group.add(dreamGlow);
+  }
+
+  // 2. 蒼穹雲海天際與漫天漂浮浮雲帷幕
+  buildSkyIslesAtmosphere(group) {
+    const cloudGroup = new THREE.Group();
+    cloudGroup.position.y = -9.0;
+
+    const cloudMat = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.62,
+      side: THREE.DoubleSide
+    });
+
+    // 多層浩瀚空島下層厚實雲海圓盤
+    const cloudCoords = [
+      [0, -2.0, 0, 32],
+      [-18, -4.5, -12, 24],
+      [18, -3.5, -10, 22],
+      [-14, -5.0, 16, 26],
+      [16, -4.0, 15, 25],
+      [0, -6.0, 28, 30]
+    ];
+
+    cloudCoords.forEach(([cx, cy, cz, rad]) => {
+      const cGeo = new THREE.CylinderGeometry(rad, rad * 1.15, 1.6, 24);
+      const cMesh = new THREE.Mesh(cGeo, cloudMat);
+      cMesh.position.set(cx, cy, cz);
+      cloudGroup.add(cMesh);
+    });
+
+    this.world.animators.push((time) => {
+      cloudGroup.rotation.y = time * 0.012;
+    });
+
+    group.add(cloudGroup);
+  }
+
+  // 3. 浮空仙島群幾何
+  buildSkyIslesTerrain(group) {
+    const grassTex = this.createSkyIslandGrassTexture();
+    const grassMat = new THREE.MeshStandardMaterial({
+      map: grassTex,
+      roughness: 0.65,
+      metalness: 0.1
+    });
+
+    const rockMat = new THREE.MeshStandardMaterial({
+      color: 0x475569,
+      roughness: 0.88,
+      metalness: 0.15
+    });
+
+    const goldTrimMat = new THREE.MeshStandardMaterial({
+      map: this.tex.astrolabeBrass,
+      metalness: 0.88,
+      roughness: 0.22
+    });
+
+    const marbleMat = new THREE.MeshStandardMaterial({
+      map: this.tex.celestialMarble,
+      roughness: 0.35
+    });
+
+    // 3a. 中央主空島 (Main Sky Island, 直徑 23m)
+    const mainIsland = new THREE.Group();
+    mainIsland.position.set(0, 0, 0);
+
+    // 主島表層翡翠草坪台基
+    const mainTurf = new THREE.Mesh(new THREE.CylinderGeometry(11.5, 11.2, 0.45, 36), grassMat);
+    mainTurf.position.y = 0.22;
+    mainTurf.receiveShadow = true;
+    mainIsland.add(mainTurf);
+
+    // 主島外圍愛奧尼克白大理石滾邊
+    const mainRim = new THREE.Mesh(new THREE.TorusGeometry(11.5, 0.22, 8, 36), goldTrimMat);
+    mainRim.rotation.x = Math.PI / 2;
+    mainRim.position.y = 0.45;
+    mainIsland.add(mainRim);
+
+    // 主島倒錐形下沉懸浮基岩 (Tapered Bedrock Underside)
+    const underside = new THREE.Mesh(new THREE.ConeGeometry(11.2, 7.8, 24), rockMat);
+    underside.rotation.x = Math.PI;
+    underside.position.y = -3.8;
+    mainIsland.add(underside);
+
+    // 島底垂掛發光紫晶地脈倒錐 (Hanging Crystal Geodes)
+    const crystalColors = [0xc084fc, 0x38bdf8, 0xfde047, 0xf43f5e];
+    for (let c = 0; c < 12; c++) {
+      const ang = (c / 12) * Math.PI * 2;
+      const dist = 3.5 + (c % 4) * 1.8;
+      const cMat = new THREE.MeshStandardMaterial({
+        color: crystalColors[c % crystalColors.length],
+        emissive: crystalColors[c % crystalColors.length],
+        emissiveIntensity: 0.65,
+        roughness: 0.18
+      });
+      const cone = new THREE.Mesh(new THREE.ConeGeometry(0.45, 2.2 + (c % 3) * 0.8, 6), cMat);
+      cone.rotation.x = Math.PI;
+      cone.position.set(Math.cos(ang) * dist, -3.2 - (c % 3) * 0.9, Math.sin(ang) * dist);
+      mainIsland.add(cone);
+    }
+    group.add(mainIsland);
+
+    // 3b. 東側旋律小島 (The Melody Isle, 直徑 10.5m, x: 7.5, z: -2.5)
+    const eastIsland = new THREE.Group();
+    eastIsland.position.set(7.5, 0.4, -2.5);
+
+    const eastTurf = new THREE.Mesh(new THREE.CylinderGeometry(5.2, 5.0, 0.4, 28), grassMat);
+    eastTurf.position.y = 0.2;
+    eastTurf.receiveShadow = true;
+    eastIsland.add(eastTurf);
+
+    const eastUnderside = new THREE.Mesh(new THREE.ConeGeometry(5.0, 4.8, 20), rockMat);
+    eastUnderside.rotation.x = Math.PI;
+    eastUnderside.position.y = -2.3;
+    eastIsland.add(eastUnderside);
+    group.add(eastIsland);
+
+    // 3c. 西側律動小島 (The Rhythm Isle, 直徑 10.5m, x: -7.5, z: -2.5)
+    const westIsland = new THREE.Group();
+    westIsland.position.set(-7.5, 0.4, -2.5);
+
+    const westTurf = new THREE.Mesh(new THREE.CylinderGeometry(5.2, 5.0, 0.4, 28), grassMat);
+    westTurf.position.y = 0.2;
+    westTurf.receiveShadow = true;
+    westIsland.add(westTurf);
+
+    const westUnderside = new THREE.Mesh(new THREE.ConeGeometry(5.0, 4.8, 20), rockMat);
+    westUnderside.rotation.x = Math.PI;
+    westUnderside.position.y = -2.3;
+    westIsland.add(westUnderside);
+    group.add(westIsland);
+
+    // 3d. 懸浮六角星晶跳石步道 (Floating Crystal Stepping Stones)
+    const crystalMat = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      emissive: 0x0284c7,
+      emissiveIntensity: 0.55,
+      roughness: 0.15,
+      metalness: 0.3
+    });
+
+    const bridgeCoords = [
+      [3.8, 0.25, -1.0], [5.1, 0.32, -1.6], [6.3, 0.38, -2.1], // 東橋踏石
+      [-3.8, 0.25, -1.0], [-5.1, 0.32, -1.6], [-6.3, 0.38, -2.1] // 西橋踏石
+    ];
+
+    bridgeCoords.forEach(([bx, by, bz], sIdx) => {
+      const step = new THREE.Mesh(new THREE.CylinderGeometry(0.72, 0.65, 0.18, 6), crystalMat);
+      step.position.set(bx, by, bz);
+      group.add(step);
+
+      this.world.animators.push((time) => {
+        step.position.y = by + Math.sin(time * 2.0 + sIdx * 0.8) * 0.05;
+      });
+    });
+
+    // 動態浮島微呼吸動畫 (Subtle Parallax Island Hover)
+    this.world.animators.push((time) => {
+      eastIsland.position.y = 0.4 + Math.sin(time * 1.5) * 0.12;
+      westIsland.position.y = 0.4 + Math.sin(time * 1.5 + 1.2) * 0.12;
+    });
+  }
+
+  // 4. 浮空主島迎賓方尖碑 (ISLAND POI)
+  buildSkyIslesIslandMonolith(group, x, y, z) {
+    const obelisk = new THREE.Group();
+    obelisk.position.set(x, y, z);
+
+    const marbleMat = new THREE.MeshStandardMaterial({ map: this.tex.celestialMarble, roughness: 0.35 });
+    const goldMat = new THREE.MeshStandardMaterial({ map: this.tex.astrolabeBrass, metalness: 0.88, roughness: 0.22 });
+    const crystalMat = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      emissive: 0x0284c7,
+      emissiveIntensity: 0.8,
+      roughness: 0.15
+    });
+
+    // 雙層大理石八角迎賓底座
+    const base1 = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.7, 0.25, 8), marbleMat);
+    base1.position.y = 0.12;
+    obelisk.add(base1);
+
+    const base2 = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.35, 0.22, 8), goldMat);
+    base2.position.y = 0.35;
+    obelisk.add(base2);
+
+    // 巍峨方尖碑柱身
+    const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.65, 3.2, 4), marbleMat);
+    pillar.position.y = 1.95;
+    pillar.rotation.y = Math.PI / 4;
+    pillar.castShadow = true;
+    obelisk.add(pillar);
+
+    // 柱頂金字塔尖 (Pyramidion)
+    const cap = new THREE.Mesh(new THREE.ConeGeometry(0.48, 0.85, 4), goldMat);
+    cap.position.y = 3.95;
+    cap.rotation.y = Math.PI / 4;
+    obelisk.add(cap);
+
+    // 凌空懸浮自轉四葉星晶
+    const core = new THREE.Mesh(new THREE.OctahedronGeometry(0.38, 0), crystalMat);
+    core.position.set(0, 4.8, 0);
+    obelisk.add(core);
+
+    // 銘文文字招牌
+    const signTex = this.createParchmentSignTexture('ISLAND', '蒼穹浮空仙島');
+    const signPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.6, 0.8),
+      new THREE.MeshBasicMaterial({ map: signTex, side: THREE.DoubleSide })
+    );
+    signPlane.position.set(0, 2.2, 0.52);
+    obelisk.add(signPlane);
+
+    // 互動點擊判定盒
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.2, 4.5, 3.2), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 2.0;
+    hitBox.userData = {
+      id: 'sky_island_monolith',
+      label: '🏝️ [E] 蒼穹浮空主島迎賓方尖碑 (ISLAND)',
+      onClick: () => {
+        this.world.openSpeechCard('ISLAND', () => {
+          this.world.addXP(60);
+          this.checkZoneCompletionStatus();
+        });
+      }
+    };
+    obelisk.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      core.rotation.y = time * 2.0;
+      core.rotation.z = time * 1.5;
+      core.position.y = 4.8 + Math.sin(time * 2.5) * 0.12;
+    });
+
+    group.add(obelisk);
+  }
+
+  // 5. 七彩虹霓以太天橋 (RAINBOW POI)
+  buildSkyIslesRainbowBridge(group, x, y, z) {
+    const rainbowBridge = new THREE.Group();
+    rainbowBridge.position.set(x, y, z);
+
+    const goldMat = new THREE.MeshStandardMaterial({ map: this.tex.astrolabeBrass, metalness: 0.88, roughness: 0.22 });
+    const marbleMat = new THREE.MeshStandardMaterial({ map: this.tex.celestialMarble, roughness: 0.35 });
+
+    // 橋頭漢白玉拱柱與立柱
+    [-2.2, 2.2].forEach(px => {
+      const p = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.42, 2.8, 12), marbleMat);
+      p.position.set(px, 1.4, 0);
+      p.castShadow = true;
+      rainbowBridge.add(p);
+
+      const cap = new THREE.Mesh(new THREE.SphereGeometry(0.38, 12, 12), goldMat);
+      cap.position.set(px, 2.9, 0);
+      rainbowBridge.add(cap);
+    });
+
+    // 7 彩半透明漸變以太光弧天橋 (The Rainbow Arch)
+    const rainbowColors = [0xff2a5f, 0xff9200, 0xffe600, 0x00e575, 0x00d2ff, 0x3b82f6, 0x9333ea];
+    const rainbowRings = [];
+
+    rainbowColors.forEach((col, idx) => {
+      const rMat = new THREE.MeshBasicMaterial({
+        color: col,
+        transparent: true,
+        opacity: 0.72,
+        side: THREE.DoubleSide
+      });
+      const rMesh = new THREE.Mesh(new THREE.TorusGeometry(3.6 + idx * 0.15, 0.07, 8, 36, Math.PI), rMat);
+      rMesh.rotation.z = 0;
+      rMesh.position.set(0, 0.2, -0.4 + idx * 0.12);
+      rainbowBridge.add(rMesh);
+      rainbowRings.push(rMesh);
+    });
+
+    // 銘文文字標籤
+    const signTex = this.createParchmentSignTexture('RAINBOW', '七彩虹霓天橋');
+    const signPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.8, 0.85),
+      new THREE.MeshBasicMaterial({ map: signTex, side: THREE.DoubleSide })
+    );
+    signPlane.position.set(0, 3.8, 0);
+    rainbowBridge.add(signPlane);
+
+    // 互動點擊判定盒
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(4.8, 4.8, 3.2), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 2.2;
+    hitBox.userData = {
+      id: 'rainbow_aether_bridge',
+      label: '🌈 [E] 七彩虹霓以太天橋 (RAINBOW)',
+      onClick: () => {
+        this.world.openSpeechCard('RAINBOW', () => {
+          this.world.addXP(60);
+          this.checkZoneCompletionStatus();
+        });
+      }
+    };
+    rainbowBridge.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      rainbowRings.forEach((r, idx) => {
+        r.material.opacity = 0.58 + Math.sin(time * 3.0 + idx * 0.5) * 0.22;
+      });
+      signPlane.position.y = 3.8 + Math.sin(time * 2.0) * 0.08;
+    });
+
+    group.add(rainbowBridge);
+  }
+
+  // 6. 浮空涼亭天籟水晶星琴 (MUSIC POI)
+  buildSkyIslesMusicPavilion(group, x, y, z) {
+    const pavilion = new THREE.Group();
+    pavilion.position.set(x, y, z);
+
+    const marbleMat = new THREE.MeshStandardMaterial({ map: this.tex.celestialMarble, roughness: 0.35 });
+    const goldMat = new THREE.MeshStandardMaterial({ map: this.tex.astrolabeBrass, metalness: 0.88, roughness: 0.22 });
+    const crystalMat = new THREE.MeshStandardMaterial({
+      color: 0xa855f7,
+      emissive: 0x7c3aed,
+      emissiveIntensity: 0.75,
+      roughness: 0.12,
+      metalness: 0.2
+    });
+
+    // 圓形涼亭白玉台基
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.8, 0.25, 16), marbleMat);
+    base.position.y = 0.12;
+    pavilion.add(base);
+
+    // 6 根科林斯圓柱支撐穹頂
+    for (let c = 0; c < 6; c++) {
+      const ang = (c / 6) * Math.PI * 2;
+      const col = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.15, 3.2, 10), marbleMat);
+      col.position.set(Math.cos(ang) * 2.2, 1.7, Math.sin(ang) * 2.2);
+      col.castShadow = true;
+      pavilion.add(col);
+    }
+
+    // 涼亭半透明圓頂
+    const domeMat = new THREE.MeshStandardMaterial({ color: 0x7c3aed, transparent: true, opacity: 0.45, roughness: 0.2 });
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(2.4, 16, 12, 0, Math.PI * 2, 0, Math.PI * 0.5), domeMat);
+    dome.position.y = 3.3;
+    pavilion.add(dome);
+
+    // 水晶天籟大鋼琴 (The Crystal Grand Piano)
+    const pianoBody = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.45, 1.2), crystalMat);
+    pianoBody.position.set(0, 1.1, 0);
+    pavilion.add(pianoBody);
+
+    // 鋼琴黑白鍵
+    const keysGroup = new THREE.Group();
+    keysGroup.position.set(0, 1.34, 0.5);
+    const keyMeshes = [];
+
+    for (let k = 0; k < 7; k++) {
+      const keyMesh = new THREE.Mesh(
+        new THREE.BoxGeometry(0.16, 0.08, 0.38),
+        new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 })
+      );
+      keyMesh.position.set(-0.52 + k * 0.18, 0, 0);
+      keysGroup.add(keyMesh);
+      keyMeshes.push(keyMesh);
+    }
+    pavilion.add(keysGroup);
+
+    // 懸浮黃金旋律五線譜光環
+    const staveMat = new THREE.MeshBasicMaterial({ color: 0xfde047, side: THREE.DoubleSide, transparent: true, opacity: 0.75 });
+    const staveRing = new THREE.Mesh(new THREE.TorusGeometry(1.4, 0.04, 6, 24), staveMat);
+    staveRing.rotation.x = Math.PI / 3;
+    staveRing.position.set(0, 2.2, 0);
+    pavilion.add(staveRing);
+
+    // 互動點擊判定盒
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.6, 3.8, 3.6), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 1.8;
+    hitBox.userData = {
+      id: 'crystal_melody_piano',
+      label: '🎵 [E] 浮空涼亭天籟水晶星琴 (MUSIC)',
+      onClick: () => {
+        this.world.openSpeechCard('MUSIC', () => {
+          this.world.addXP(60);
+          this.checkZoneCompletionStatus();
+        });
+      }
+    };
+    pavilion.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      staveRing.rotation.z = time * 0.8;
+      keyMeshes.forEach((km, idx) => {
+        km.position.y = Math.sin(time * 5.0 + idx * 0.9) * 0.04;
+      });
+    });
+
+    group.add(pavilion);
+  }
+
+  // 7. 天青靈鳥歌詠鳥居 (SING POI)
+  buildSkyIslesSongbirdTorii(group, x, y, z) {
+    const torii = new THREE.Group();
+    torii.position.set(x, y, z);
+
+    const goldMat = new THREE.MeshStandardMaterial({ map: this.tex.astrolabeBrass, metalness: 0.88, roughness: 0.22 });
+    const lapisMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.45, metalness: 0.3 });
+    const birdMat = new THREE.MeshStandardMaterial({
+      color: 0x06b6d4,
+      emissive: 0x0891b2,
+      emissiveIntensity: 0.65,
+      roughness: 0.3
+    });
+
+    // 雙青金石柱
+    [-1.1, 1.1].forEach(px => {
+      const col = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.2, 3.4, 12), lapisMat);
+      col.position.set(px, 1.7, 0);
+      col.castShadow = true;
+      torii.add(col);
+    });
+
+    // 頂部鍍金雙橫樑
+    const beam1 = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.18, 0.3), goldMat);
+    beam1.position.set(0, 3.4, 0);
+    torii.add(beam1);
+
+    const beam2 = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.14, 0.24), lapisMat);
+    beam2.position.set(0, 3.0, 0);
+    torii.add(beam2);
+
+    // 棲息在橫樑上的天青靈鳥 (The Sapphire Songbird)
+    const bird = new THREE.Group();
+    bird.position.set(0, 3.55, 0);
+
+    const body = new THREE.Mesh(new THREE.SphereGeometry(0.24, 10, 10), birdMat);
+    bird.add(body);
+
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.16, 8, 8), birdMat);
+    head.position.set(0.16, 0.18, 0);
+    bird.add(head);
+
+    const beak = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.18, 6), goldMat);
+    beak.rotation.z = -Math.PI / 2;
+    beak.position.set(0.32, 0.18, 0);
+    bird.add(beak);
+
+    // 雙翼
+    const leftWing = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.05, 0.2), birdMat);
+    leftWing.position.set(0, 0.08, -0.22);
+    bird.add(leftWing);
+
+    const rightWing = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.05, 0.2), birdMat);
+    rightWing.position.set(0, 0.08, 0.22);
+    bird.add(rightWing);
+
+    torii.add(bird);
+
+    // 互動點擊判定盒
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.0, 4.2, 2.5), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 2.0;
+    hitBox.userData = {
+      id: 'songbird_singing_torii',
+      label: '🎶 [E] 天青靈鳥歌詠鳥居 (SING)',
+      onClick: () => {
+        this.world.openSpeechCard('SING', () => {
+          this.world.addXP(60);
+          this.checkZoneCompletionStatus();
+        });
+      }
+    };
+    torii.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      const wingRot = Math.sin(time * 6.0) * 0.28;
+      leftWing.rotation.x = -wingRot;
+      rightWing.rotation.x = wingRot;
+      bird.position.y = 3.55 + Math.sin(time * 3.0) * 0.06;
+    });
+
+    group.add(torii);
+  }
+
+  // 8. 星光石英律動舞池 (DANCE POI)
+  buildSkyIslesDancePlaza(group, x, y, z) {
+    const dancePlaza = new THREE.Group();
+    dancePlaza.position.set(x, y, z);
+
+    const plazaTex = this.createMusicPlazaTexture();
+    const plazaMat = new THREE.MeshStandardMaterial({ map: plazaTex, roughness: 0.4 });
+    const goldMat = new THREE.MeshStandardMaterial({ map: this.tex.astrolabeBrass, metalness: 0.88, roughness: 0.22 });
+
+    // 圓形律動舞池地坪
+    const floor = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.5, 0.16, 24), plazaMat);
+    floor.position.y = 0.08;
+    floor.receiveShadow = true;
+    dancePlaza.add(floor);
+
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(2.4, 0.08, 6, 24), goldMat);
+    rim.rotation.x = Math.PI / 2;
+    rim.position.y = 0.16;
+    dancePlaza.add(rim);
+
+    // 8 塊環狀發光音階踏板 (Musical Stepping Pads)
+    const padColors = [0xff2a5f, 0xff9200, 0xffe600, 0x00e575, 0x00d2ff, 0x3b82f6, 0x9333ea, 0xec4899];
+    const pads = [];
+
+    for (let p = 0; p < 8; p++) {
+      const ang = (p / 8) * Math.PI * 2;
+      const pMat = new THREE.MeshStandardMaterial({
+        color: padColors[p],
+        emissive: padColors[p],
+        emissiveIntensity: 0.6,
+        roughness: 0.2
+      });
+      const padMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.06, 12), pMat);
+      padMesh.position.set(Math.cos(ang) * 1.6, 0.19, Math.sin(ang) * 1.6);
+      dancePlaza.add(padMesh);
+      pads.push(padMesh);
+    }
+
+    // 互動點擊判定盒
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.5, 3.2, 3.5), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 1.6;
+    hitBox.userData = {
+      id: 'starlight_dance_plaza',
+      label: '💃 [E] 星光石英律動舞池 (DANCE)',
+      onClick: () => {
+        this.world.openSpeechCard('DANCE', () => {
+          this.world.addXP(60);
+          this.checkZoneCompletionStatus();
+        });
+      }
+    };
+    dancePlaza.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      pads.forEach((pad, pIdx) => {
+        pad.material.emissiveIntensity = 0.4 + Math.sin(time * 4.0 + pIdx * 0.8) * 0.45;
+      });
+    });
+
+    group.add(dancePlaza);
+  }
+
+  // 9. 蒼穹祈願星泉與落雲飛瀑 (DREAM POI)
+  buildSkyIslesDreamWishingPool(group, x, y, z) {
+    const pool = new THREE.Group();
+    pool.position.set(x, y, z);
+
+    const marbleMat = new THREE.MeshStandardMaterial({ map: this.tex.celestialMarble, roughness: 0.35 });
+    const goldMat = new THREE.MeshStandardMaterial({ map: this.tex.astrolabeBrass, metalness: 0.88, roughness: 0.22 });
+    const waterMat = new THREE.MeshStandardMaterial({
+      color: 0x0284c7,
+      roughness: 0.1,
+      metalness: 0.8,
+      transparent: true,
+      opacity: 0.78
+    });
+    const starMat = new THREE.MeshStandardMaterial({
+      color: 0xfde047,
+      emissive: 0xd97706,
+      emissiveIntensity: 0.85,
+      roughness: 0.15
+    });
+
+    // 八角白玉池基座
+    const basin = new THREE.Mesh(new THREE.CylinderGeometry(2.0, 2.2, 0.65, 8), marbleMat);
+    basin.position.y = 0.32;
+    basin.castShadow = true;
+    pool.add(basin);
+
+    // 澄澈星泉水面
+    const water = new THREE.Mesh(new THREE.CylinderGeometry(1.85, 1.85, 0.05, 16), waterMat);
+    water.position.y = 0.65;
+    pool.add(water);
+
+    // 泉心懸浮自轉十二面體「夢想之星」(The Dream Star Core)
+    const dreamStar = new THREE.Mesh(new THREE.DodecahedronGeometry(0.38, 0), starMat);
+    dreamStar.position.set(0, 1.5, 0);
+    pool.add(dreamStar);
+
+    // 雙層旋轉鍍金同心光環
+    const ring1 = new THREE.Mesh(new THREE.TorusGeometry(0.75, 0.03, 6, 24), goldMat);
+    ring1.rotation.x = Math.PI / 3;
+    ring1.position.set(0, 1.5, 0);
+    pool.add(ring1);
+
+    // 懸崖傾瀉落雲飛瀑 (Aetherial Cloudfall Sheet)
+    const fallMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.52, side: THREE.DoubleSide });
+    const fall = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 6.0), fallMat);
+    fall.position.set(0, -2.5, 1.95);
+    pool.add(fall);
+
+    // 互動點擊判定盒
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.6, 3.6, 3.6), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 1.8;
+    hitBox.userData = {
+      id: 'starlight_dream_pool',
+      label: '✨ [E] 蒼穹祈願星泉與落雲飛瀑 (DREAM)',
+      onClick: () => {
+        this.world.openSpeechCard('DREAM', () => {
+          this.world.addXP(70);
+          this.checkZoneCompletionStatus();
+        });
+      }
+    };
+    pool.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      dreamStar.rotation.y = time * 1.8;
+      dreamStar.rotation.z = time * 1.2;
+      dreamStar.position.y = 1.5 + Math.sin(time * 2.0) * 0.1;
+      ring1.rotation.y = time * 1.2;
+      fall.material.opacity = 0.45 + Math.sin(time * 4.0) * 0.15;
+    });
+
+    group.add(pool);
+  }
+
+  // 10. 👑 關卡主 NPC：艾莉雅精靈使 (Aria, Queen of Rainbow Skies)
+  buildSkyIslesGuardianAria(group, x, y, z) {
+    const npc = new THREE.Group();
+    npc.position.set(x, y, z);
+
+    const dressMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.45 });
+    const wingMat = new THREE.MeshBasicMaterial({
+      color: 0xf43f5e,
+      transparent: true,
+      opacity: 0.68,
+      side: THREE.DoubleSide
+    });
+    const skinMat = new THREE.MeshStandardMaterial({ color: 0xfed7aa, roughness: 0.8 });
+    const hairMat = new THREE.MeshStandardMaterial({ color: 0xfef08a, roughness: 0.5 });
+    const goldMat = new THREE.MeshStandardMaterial({ map: this.tex.astrolabeBrass, metalness: 0.88, roughness: 0.22 });
+
+    // 白理石精靈祭台
+    const pedestal = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.35, 0.22, 16), goldMat);
+    pedestal.position.y = 0.11;
+    npc.add(pedestal);
+
+    // 精靈使身軀與飄逸長裙
+    const gown = new THREE.Mesh(new THREE.ConeGeometry(0.52, 1.7, 12), dressMat);
+    gown.position.y = 0.95;
+    npc.add(gown);
+
+    // 頭部與金黃秀髮
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.24, 12, 12), skinMat);
+    head.position.y = 2.05;
+    npc.add(head);
+
+    const hair = new THREE.Mesh(new THREE.SphereGeometry(0.28, 10, 10), hairMat);
+    hair.position.set(0, 2.12, -0.06);
+    npc.add(hair);
+
+    // 璀璨精靈星冠
+    const tiara = new THREE.Mesh(new THREE.TorusGeometry(0.25, 0.03, 6, 16), goldMat);
+    tiara.rotation.x = Math.PI / 2;
+    tiara.position.set(0, 2.22, 0);
+    npc.add(tiara);
+
+    // 薄紗彩虹雙翼 (Gossamer Rainbow Wings)
+    const leftWing = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.4), wingMat);
+    leftWing.position.set(-0.65, 1.6, -0.22);
+    leftWing.rotation.y = -0.35;
+    npc.add(leftWing);
+
+    const rightWing = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.4), wingMat);
+    rightWing.position.set(0.65, 1.6, -0.22);
+    rightWing.rotation.y = 0.35;
+    npc.add(rightWing);
+
+    // 天籟星光音叉法杖 (Tuning Fork Scepter)
+    const staff = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 2.0, 8), goldMat);
+    staff.position.set(0.45, 1.35, 0.2);
+    npc.add(staff);
+
+    const fork = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.03, 6, 16, Math.PI), goldMat);
+    fork.position.set(0.45, 2.38, 0.2);
+    npc.add(fork);
+
+    // 關卡主專屬銘牌
+    const billboard = this.createGuardianBillboard('zone10', '艾莉雅 (Aria)');
+    billboard.position.set(0, 3.2, 0);
+    npc.add(billboard);
+
+    // 互動點擊判定盒
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(2.6, 3.6, 2.6), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 1.8;
+    hitBox.userData = {
+      id: 'guardian_zone10',
+      label: '💬 [E] 與關卡主・艾莉雅精靈使對話 (Aria, Queen of Rainbow Skies)',
+      onClick: () => {
+        this.handleGuardianInteraction('zone10');
+      }
+    };
+    npc.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      const flutter = Math.sin(time * 5.5) * 0.22;
+      leftWing.rotation.y = -0.35 + flutter;
+      rightWing.rotation.y = 0.35 - flutter;
+      billboard.position.y = 3.2 + Math.sin(time * 2.0) * 0.06;
+    });
+
+    group.add(npc);
+  }
+
+  // 11. 南側萬神回天之階 (返回 Zone 9 星界萬神殿堂)
+  buildSkyIslesPantheonReturnGate(group, x, y, z, label, onTravel) {
+    const gate = new THREE.Group();
+    gate.position.set(x, y, z);
+
+    const marbleMat = new THREE.MeshStandardMaterial({ map: this.tex.celestialMarble, roughness: 0.35 });
+    const goldMat = new THREE.MeshStandardMaterial({ map: this.tex.astrolabeBrass, metalness: 0.88, roughness: 0.22 });
+    const beamMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.48, side: THREE.DoubleSide });
+
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.85, 0.38, 16), marbleMat);
+    base.position.y = 0.19;
+    gate.add(base);
+
+    const beam = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 0.8, 12, 16, 1, true), beamMat);
+    beam.position.y = -4.0;
+    gate.add(beam);
+
+    [-1.6, 1.6].forEach(px => {
+      const p = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 3.2, 10), goldMat);
+      p.position.set(px, 1.6, 0);
+      gate.add(p);
+    });
+
+    const glowPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.8, 3.0),
+      new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.42, side: THREE.DoubleSide })
+    );
+    glowPlane.position.set(0, 1.6, 0);
+    gate.add(glowPlane);
+
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.6, 4.0, 2.5), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 1.8;
+    hitBox.userData = {
+      id: 'return_portal_zone9_from_sky_isles',
+      label,
+      onClick: () => {
+        if (onTravel) onTravel();
+      }
+    };
+    gate.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      glowPlane.material.opacity = 0.35 + Math.sin(time * 3.0) * 0.15;
+    });
+
+    group.add(gate);
+  }
+
+  // 手工程序化天界草皮材質 (1024x1024 超高解析天界翡翠草皮與白石鑲嵌)
+  createSkyIslandGrassTexture() {
+    if (this._skyIslandGrassTex) return this._skyIslandGrassTex;
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 1024;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return new THREE.Texture();
+
+    // 翡翠草皮底色
+    const grad = ctx.createRadialGradient(512, 512, 50, 512, 512, 512);
+    grad.addColorStop(0, '#10b981');
+    grad.addColorStop(0.7, '#059669');
+    grad.addColorStop(1, '#047857');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 1024, 1024);
+
+    // 遍布細膩草絲斑點
+    for (let i = 0; i < 4000; i++) {
+      const gx = Math.random() * 1024;
+      const gy = Math.random() * 1024;
+      ctx.fillStyle = Math.random() > 0.5 ? '#34d399' : '#065f46';
+      ctx.fillRect(gx, gy, 2 + Math.random() * 4, 3 + Math.random() * 6);
+    }
+
+    // 金色四葉幸運草與旋律圖騰裝飾
+    ctx.strokeStyle = 'rgba(253, 224, 71, 0.45)';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(512, 512, 420, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.strokeStyle = 'rgba(253, 224, 71, 0.25)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(512, 512, 280, 0, Math.PI * 2);
+    ctx.stroke();
+
+    this._skyIslandGrassTex = new THREE.CanvasTexture(canvas);
+    this._skyIslandGrassTex.wrapS = THREE.RepeatWrapping;
+    this._skyIslandGrassTex.wrapT = THREE.RepeatWrapping;
+    return this._skyIslandGrassTex;
+  }
+
+  // 手工程序化天籟舞池石英材質 (1024x1024 白石英與金色音符鑲嵌)
+  createMusicPlazaTexture() {
+    if (this._musicPlazaTex) return this._musicPlazaTex;
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 1024;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return new THREE.Texture();
+
+    // 珍珠白石英地坪底色
+    ctx.fillStyle = '#faf5ff';
+    ctx.fillRect(0, 0, 1024, 1024);
+
+    // 雙層黃金環狀刻度
+    ctx.strokeStyle = '#d97706';
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.arc(512, 512, 460, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(512, 512, 340, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // 16 芒射線與音符刻印
+    ctx.font = 'bold 36px serif';
+    ctx.fillStyle = '#b45309';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const notes = ['𝄞', '𝄢', '♫', '♩', '♪', '♬', '♫', '♩', '𝄞', '𝄢', '♫', '♩', '♪', '♬', '♫', '♩'];
+
+    for (let i = 0; i < 16; i++) {
+      const ang = (i / 16) * Math.PI * 2;
+      const nx = 512 + Math.cos(ang) * 400;
+      const ny = 512 + Math.sin(ang) * 400;
+      ctx.fillText(notes[i], nx, ny);
+    }
+
+    this._musicPlazaTex = new THREE.CanvasTexture(canvas);
+    return this._musicPlazaTex;
   }
 }
 
