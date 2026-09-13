@@ -359,8 +359,15 @@ class SpatialZoneManager {
       celestialMarble: loader.load('assets/textures/celestial_marble.jpg'),
       astrolabeBrass: loader.load('assets/textures/astrolabe_brass.jpg'),
       glacialIce: loader.load('assets/textures/glacial_ice.jpg'),
-      snowFrost: loader.load('assets/textures/snow_frost.jpg')
+      snowFrost: loader.load('assets/textures/snow_frost.jpg'),
+      skyIslandPanorama: loader.load('assets/textures/sky_island_panorama.jpg'),
+      ariaGuardianPortrait: loader.load('assets/textures/aria_guardian_portrait.png')
     };
+
+    if (this.tex.skyIslandPanorama) {
+      this.tex.skyIslandPanorama.wrapS = THREE.RepeatWrapping;
+      this.tex.skyIslandPanorama.wrapT = THREE.ClampToEdgeWrapping || THREE.RepeatWrapping;
+    }
 
     this.tex.marketCobble.wrapS = THREE.RepeatWrapping;
     this.tex.marketCobble.wrapT = THREE.RepeatWrapping;
@@ -8595,19 +8602,48 @@ class SpatialZoneManager {
     group.add(dreamGlow);
   }
 
-  // 2. 蒼穹雲海天際與漫天漂浮浮雲帷幕
+  // 2. 蒼穹雲海天際與 360 度全景遠景穹頂 (Panoramic Sky Vista & Floating Clouds Horizon)
   buildSkyIslesAtmosphere(group) {
+    const skyGroup = new THREE.Group();
+
+    // A. 巨型 360 度全景圓柱天穹 (半徑 96m, 高 85m, 內壁反向渲染)
+    // 圓柱形展開保持地平線水平延伸，呈現無與倫比的天界雲海、浮島飛瀑與朝霞
+    const panoramaGeo = new THREE.CylinderGeometry(96, 96, 85, 48, 1, true);
+    const panoramaMat = new THREE.MeshBasicMaterial({
+      map: this.tex.skyIslandPanorama,
+      side: THREE.BackSide,
+      fog: false,
+      depthWrite: false
+    });
+    const panoramaMesh = new THREE.Mesh(panoramaGeo, panoramaMat);
+    panoramaMesh.position.y = 8.0;
+    skyGroup.add(panoramaMesh);
+
+    // B. 下層低空雲海微光過渡環 (Soft Horizon Cloud Transition Ring - 柔和交融空島與深淵)
+    const mistGeo = new THREE.RingGeometry(18, 95, 32);
+    const mistMat = new THREE.MeshBasicMaterial({
+      color: 0xbae6fd,
+      transparent: true,
+      opacity: 0.52,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    });
+    const mistRing = new THREE.Mesh(mistGeo, mistMat);
+    mistRing.rotation.x = Math.PI / 2;
+    mistRing.position.y = -6.5;
+    skyGroup.add(mistRing);
+
+    // C. 漫天漂浮浮雲圓盤 (Fluffy Cloud Discs beneath Isles)
     const cloudGroup = new THREE.Group();
     cloudGroup.position.y = -9.0;
 
     const cloudMat = new THREE.MeshBasicMaterial({
       color: 0xffffff,
       transparent: true,
-      opacity: 0.62,
+      opacity: 0.58,
       side: THREE.DoubleSide
     });
 
-    // 多層浩瀚空島下層厚實雲海圓盤
     const cloudCoords = [
       [0, -2.0, 0, 32],
       [-18, -4.5, -12, 24],
@@ -8623,12 +8659,17 @@ class SpatialZoneManager {
       cMesh.position.set(cx, cy, cz);
       cloudGroup.add(cMesh);
     });
+    skyGroup.add(cloudGroup);
 
+    // D. 全景天穹大氣微幅視差自轉 (Atmospheric Parallax Drift)
     this.world.animators.push((time) => {
+      panoramaMesh.rotation.y = time * 0.003;
+      mistRing.rotation.z = time * 0.005;
+      mistMat.opacity = 0.46 + Math.sin(time * 0.8) * 0.08;
       cloudGroup.rotation.y = time * 0.012;
     });
 
-    group.add(cloudGroup);
+    group.add(skyGroup);
   }
 
   // 3. 浮空仙島群幾何
@@ -9218,75 +9259,64 @@ class SpatialZoneManager {
     group.add(pool);
   }
 
-  // 10. 👑 關卡主 NPC：艾莉雅精靈使 (Aria, Queen of Rainbow Skies)
+  // 10. 👑 關卡主 NPC：艾莉雅精靈使 (Aria, Queen of Rainbow Skies - Living 2.5D Standee & 3D Altar)
   buildSkyIslesGuardianAria(group, x, y, z) {
     const npc = new THREE.Group();
     npc.position.set(x, y, z);
 
-    const dressMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.45 });
-    const wingMat = new THREE.MeshBasicMaterial({
-      color: 0xf43f5e,
-      transparent: true,
-      opacity: 0.68,
-      side: THREE.DoubleSide
-    });
-    const skinMat = new THREE.MeshStandardMaterial({ color: 0xfed7aa, roughness: 0.8 });
-    const hairMat = new THREE.MeshStandardMaterial({ color: 0xfef08a, roughness: 0.5 });
+    const marbleMat = new THREE.MeshStandardMaterial({ map: this.tex.celestialMarble, roughness: 0.35 });
     const goldMat = new THREE.MeshStandardMaterial({ map: this.tex.astrolabeBrass, metalness: 0.88, roughness: 0.22 });
 
-    // 白理石精靈祭台
-    const pedestal = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.35, 0.22, 16), goldMat);
-    pedestal.position.y = 0.11;
-    npc.add(pedestal);
+    // 1. 漢白玉八角精靈祭台 (Dais Pedestal)
+    const baseDais = new THREE.Mesh(new THREE.CylinderGeometry(1.35, 1.5, 0.24, 16), marbleMat);
+    baseDais.position.y = 0.12;
+    baseDais.receiveShadow = true;
+    npc.add(baseDais);
 
-    // 精靈使身軀與飄逸長裙
-    const gown = new THREE.Mesh(new THREE.ConeGeometry(0.52, 1.7, 12), dressMat);
-    gown.position.y = 0.95;
-    npc.add(gown);
+    const innerDais = new THREE.Mesh(new THREE.CylinderGeometry(1.15, 1.25, 0.12, 16), goldMat);
+    innerDais.position.y = 0.28;
+    npc.add(innerDais);
 
-    // 頭部與金黃秀髮
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.24, 12, 12), skinMat);
-    head.position.y = 2.05;
-    npc.add(head);
+    // 2. 腳下 3D 旋轉金色星軌星盤法陣 (Astral Summoning Ring)
+    const ringGeo = new THREE.TorusGeometry(1.05, 0.035, 8, 32);
+    const astralRing = new THREE.Mesh(ringGeo, goldMat);
+    astralRing.rotation.x = Math.PI / 2;
+    astralRing.position.y = 0.35;
+    npc.add(astralRing);
 
-    const hair = new THREE.Mesh(new THREE.SphereGeometry(0.28, 10, 10), hairMat);
-    hair.position.set(0, 2.12, -0.06);
-    npc.add(hair);
+    // 3. 高精美繪 2.5D 動態立繪守護神 (Living High-Res Character Standee)
+    const standeeGeo = new THREE.PlaneGeometry(2.35, 3.15);
+    const standeeMat = new THREE.MeshBasicMaterial({
+      map: this.tex.ariaGuardianPortrait,
+      transparent: true,
+      alphaTest: 0.03,
+      side: THREE.DoubleSide
+    });
+    const standee = new THREE.Mesh(standeeGeo, standeeMat);
+    standee.position.y = 1.88;
+    npc.add(standee);
 
-    // 璀璨精靈星冠
-    const tiara = new THREE.Mesh(new THREE.TorusGeometry(0.25, 0.03, 6, 16), goldMat);
-    tiara.rotation.x = Math.PI / 2;
-    tiara.position.set(0, 2.22, 0);
-    npc.add(tiara);
+    // 4. 身後彩虹神聖光暈環 (Luminous Rainbow Halo)
+    const haloGeo = new THREE.RingGeometry(0.85, 1.45, 32);
+    const haloMat = new THREE.MeshBasicMaterial({
+      color: 0x38bdf8,
+      transparent: true,
+      opacity: 0.38,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    });
+    const halo = new THREE.Mesh(haloGeo, haloMat);
+    halo.position.set(0, 2.15, -0.05);
+    npc.add(halo);
 
-    // 薄紗彩虹雙翼 (Gossamer Rainbow Wings)
-    const leftWing = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.4), wingMat);
-    leftWing.position.set(-0.65, 1.6, -0.22);
-    leftWing.rotation.y = -0.35;
-    npc.add(leftWing);
-
-    const rightWing = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.4), wingMat);
-    rightWing.position.set(0.65, 1.6, -0.22);
-    rightWing.rotation.y = 0.35;
-    npc.add(rightWing);
-
-    // 天籟星光音叉法杖 (Tuning Fork Scepter)
-    const staff = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 2.0, 8), goldMat);
-    staff.position.set(0.45, 1.35, 0.2);
-    npc.add(staff);
-
-    const fork = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.03, 6, 16, Math.PI), goldMat);
-    fork.position.set(0.45, 2.38, 0.2);
-    npc.add(fork);
-
-    // 關卡主專屬銘牌
+    // 5. 關卡主專屬銘牌
     const billboard = this.createGuardianBillboard('zone10', '艾莉雅 (Aria)');
-    billboard.position.set(0, 3.2, 0);
+    billboard.position.set(0, 3.65, 0);
     npc.add(billboard);
 
-    // 互動點擊判定盒
-    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(2.6, 3.6, 2.6), new THREE.MeshBasicMaterial({ visible: false }));
-    hitBox.position.y = 1.8;
+    // 6. 互動點擊判定盒
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(2.8, 3.8, 2.8), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 1.9;
     hitBox.userData = {
       id: 'guardian_zone10',
       label: '💬 [E] 與關卡主・艾莉雅精靈使對話 (Aria, Queen of Rainbow Skies)',
@@ -9297,11 +9327,28 @@ class SpatialZoneManager {
     npc.add(hitBox);
     this.world.interactables.push(hitBox);
 
+    // 7. 每幀動態生命力動畫器 (Y-axis Billboard Facing + Breathing + Halo Pulses)
     this.world.animators.push((time) => {
-      const flutter = Math.sin(time * 5.5) * 0.22;
-      leftWing.rotation.y = -0.35 + flutter;
-      rightWing.rotation.y = 0.35 - flutter;
-      billboard.position.y = 3.2 + Math.sin(time * 2.0) * 0.06;
+      // 呼吸起伏微懸浮
+      const hover = Math.sin(time * 2.2) * 0.08;
+      standee.position.y = 1.88 + hover;
+      halo.position.y = 2.15 + hover;
+      billboard.position.y = 3.65 + hover + Math.sin(time * 1.5) * 0.04;
+
+      // 腳底法陣自轉與光暈呼吸
+      astralRing.rotation.z = time * 0.6;
+      halo.rotation.z = -time * 0.4;
+      haloMat.opacity = 0.32 + Math.sin(time * 3.0) * 0.12;
+
+      // Y 軸面向相機 (Billboard tracking - 始終優雅面向玩家)
+      if (this.world && this.world.player && this.world.player.pos) {
+        const pPos = this.world.player.pos;
+        const dx = pPos.x - x;
+        const dz = pPos.z - z;
+        const angle = Math.atan2(dx, dz);
+        standee.rotation.y = angle;
+        halo.rotation.y = angle;
+      }
     });
 
     group.add(npc);

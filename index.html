@@ -1873,7 +1873,16 @@
       const actionRow = document.getElementById('guardianIntroActionRow');
 
       const bossName = trialData.bossName || '瑪琳娜船長';
-      if (emojiEl) emojiEl.textContent = trialData.bossEmoji || '⚓';
+      const avatarWrap = document.getElementById('guardianAvatarWrap');
+      if (trialData.bossAvatar && (trialData.bossAvatar.endsWith('.png') || trialData.bossAvatar.endsWith('.jpg'))) {
+        if (avatarWrap) {
+          avatarWrap.innerHTML = `<img src="${trialData.bossAvatar}" alt="${bossName}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 2px solid #fde047; box-shadow: 0 0 12px rgba(253,224,71,0.5); background: #38bdf8;">`;
+        }
+      } else {
+        if (avatarWrap) {
+          avatarWrap.innerHTML = `<span id="guardianAvatarEmoji">${trialData.bossEmoji || '⚓'}</span>`;
+        }
+      }
       if (roleEl) roleEl.textContent = trialData.bossRole || '關卡主';
       if (nameEl) nameEl.textContent = bossName;
       if (introSpeakerEl) introSpeakerEl.textContent = `📢 ${bossName} 對話：`;

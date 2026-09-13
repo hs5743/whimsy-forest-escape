@@ -953,7 +953,7 @@ const GUARDIAN_TRIALS = {
     bossId: 'boss_aria',
     bossName: '艾莉雅 (Aria, Queen of Rainbow Skies)',
     bossRole: '🌈 蒼穹彩虹之主・天籟精靈使',
-    bossAvatar: 'assets/textures/owl-guide.png',
+    bossAvatar: 'assets/textures/aria_guardian_portrait.png',
     bossEmoji: '🧝‍♀️',
     introDialogue: "Greetings, 天空與星界的傳奇旅人！我是蒼穹虹光空島的守護精靈使——艾莉雅 🧝‍♀️🌈。你歷經萬神殿堂的智慧洗禮，展開雙翼飛到了天際最神聖的虹彩仙境！在這裡，風聲成曲，彩虹為橋。想要獲得全境終極榮譽【虹彩夢想之星 🌈🌟】，請接受我的「英語問句三重天籟試煉」！",
     rewardXP: 350,
