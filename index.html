@@ -148,6 +148,28 @@
       pointer-events: auto !important;
       flex-shrink: 0 !important;
     }
+    .hud-btn.scavenger-btn-highlight {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+      border: 2px solid #6ee7b7 !important;
+      color: #ffffff !important;
+      font-weight: 800 !important;
+      font-size: 13px !important;
+      padding: 7px 14px !important;
+      border-radius: 24px !important;
+      box-shadow: 0 4px 14px rgba(5, 150, 105, 0.45) !important;
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      gap: 6px !important;
+      cursor: pointer !important;
+      transition: all 0.2s ease !important;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5) !important;
+      animation: pulseScavengerGlow 2.5s infinite ease-in-out !important;
+    }
+    @keyframes pulseScavengerGlow {
+      0%, 100% { box-shadow: 0 4px 14px rgba(5, 150, 105, 0.45); }
+      50% { box-shadow: 0 4px 20px rgba(52, 211, 153, 0.8), 0 0 12px rgba(52, 211, 153, 0.5); }
+    }
     .hud-btn.passport-btn-highlight {
       background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%) !important;
       border: 2px solid #93c5fd !important;
@@ -191,13 +213,13 @@
       .adventurer-avatar-icon { font-size: 16px !important; }
       .adventurer-name { font-size: 12px !important; max-width: 85px !important; }
       .mini-xp-bar-container { width: 50px !important; }
-      .hud-btn.passport-btn-highlight, .hud-btn.system-menu-btn { padding: 6px 10px !important; font-size: 12px !important; }
+      .hud-btn.scavenger-btn-highlight, .hud-btn.passport-btn-highlight, .hud-btn.system-menu-btn { padding: 6px 10px !important; font-size: 12px !important; }
     }
     @media (max-width: 480px) {
       .adventurer-name { max-width: 70px !important; }
       .adventurer-lv-tag { max-width: 55px !important; overflow: hidden; text-overflow: ellipsis; }
       .mini-xp-bar-container { width: 40px !important; }
-      .hud-btn.passport-btn-highlight, .hud-btn.system-menu-btn { padding: 5px 8px !important; font-size: 11px !important; }
+      .hud-btn.scavenger-btn-highlight, .hud-btn.passport-btn-highlight, .hud-btn.system-menu-btn { padding: 5px 8px !important; font-size: 11px !important; }
     }
   </style>
 </head>
@@ -232,8 +254,8 @@
 
     <!-- 右側：核心快捷鈕 (🧭 聽力尋寶 + 📘 魔法護照 + ⚙️ 系統選單) -->
     <div class="hud-quick-actions">
-      <button id="scavengerHuntBtn" class="hud-btn scavenger-btn-highlight" onclick="if(window.scavengerHuntManager) window.scavengerHuntManager.openScavengerModal();" type="button" title="開啟情境聽力尋寶任務">
-        <span>🧭</span> <span class="btn-text">聽力尋寶</span>
+      <button id="scavengerHuntBtn" class="hud-btn scavenger-btn-highlight" onclick="openScavengerModal();" type="button" title="開啟情境聽力尋寶任務 (快捷鍵 H)">
+        <span>🧭</span> <span class="btn-text">聽力尋寶</span> <span class="btn-badge" style="background: #f59e0b; color: #fff; font-size: 9px; font-weight: 900; border-radius: 8px; padding: 1px 5px; margin-left: 2px;">NEW</span>
       </button>
       <button id="magicPassportBtn" class="hud-btn passport-btn-highlight" onclick="togglePassportModal()" type="button" title="翻開數位魔法護照手帳">
         <span>📘</span> <span class="btn-text">魔法護照</span>
@@ -277,10 +299,10 @@
           </div>
         </button>
 
-        <button id="scavengerHuntMenuBtn" class="drawer-action-btn" onclick="if(window.scavengerHuntManager) window.scavengerHuntManager.openScavengerModal(); closeSystemMenu();" type="button">
+        <button id="scavengerHuntMenuBtn" class="drawer-action-btn" onclick="openScavengerModal(); closeSystemMenu();" type="button">
           <span class="drawer-btn-icon">🧭</span>
           <div class="drawer-btn-info">
-            <span class="drawer-btn-title">聽力尋寶任務</span>
+            <span class="drawer-btn-title">聽力尋寶任務 (快捷鍵 H)</span>
             <span class="drawer-btn-sub">空間雷達語音尋寶</span>
           </div>
         </button>
@@ -535,6 +557,8 @@
         <p>• <strong>滑鼠</strong>：按住拖曳轉動視角，點擊物件互動。</p>
         <p style="margin-top: 8px;"><strong>🎙️ 口說過關：</strong></p>
         <p>• 靠近燭台、古書、抽屜、調劑台、貓咪寶箱與石門，按下麥克風大聲唸出英語單字，解開所有魔法封印！</p>
+        <p style="margin-top: 8px;"><strong>🧭 情境聽力尋寶（全新特色功能）：</strong></p>
+        <p>• 點擊畫面右上角「🧭 聽力尋寶」按鈕，或電腦鍵盤按 <code>H</code> 鍵，即可開啟尋寶任務中心！聆聽外師生活英語謎題，跟隨頂部雷達指引在 3D 空間中尋找隱藏寶物！</p>
       </div>
       <button class="btn-voice" onclick="toggleGuideModal()" style="margin-top: 10px; width: 100%;">
         了解，開始探索書齋！
@@ -1292,6 +1316,45 @@
       modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
       if (window.audioManager) window.audioManager.playSfx('click');
     }
+
+    function openScavengerModal() {
+      if (window.scavengerHuntManager && typeof window.scavengerHuntManager.openScavengerModal === 'function') {
+        window.scavengerHuntManager.openScavengerModal();
+      } else {
+        const modal = document.getElementById('scavengerHuntModal');
+        if (modal) modal.style.display = 'flex';
+      }
+      if (window.audioManager) window.audioManager.playSfx('click');
+    }
+    window.openScavengerModal = openScavengerModal;
+
+    function closeScavengerModal() {
+      if (window.scavengerHuntManager && typeof window.scavengerHuntManager.closeScavengerModal === 'function') {
+        window.scavengerHuntManager.closeScavengerModal();
+      } else {
+        const modal = document.getElementById('scavengerHuntModal');
+        if (modal) modal.style.display = 'none';
+      }
+      if (window.audioManager) window.audioManager.playSfx('click');
+    }
+    window.closeScavengerModal = closeScavengerModal;
+
+    function startScavengerHunt(mode) {
+      if (window.scavengerHuntManager && typeof window.scavengerHuntManager.startHunt === 'function') {
+        window.scavengerHuntManager.startHunt(mode);
+      }
+    }
+    window.startScavengerHunt = startScavengerHunt;
+
+    function closeScavengerVictory() {
+      if (window.scavengerHuntManager && typeof window.scavengerHuntManager.closeVictoryModal === 'function') {
+        window.scavengerHuntManager.closeVictoryModal();
+      } else {
+        const modal = document.getElementById('scavengerVictoryModal');
+        if (modal) modal.style.display = 'none';
+      }
+    }
+    window.closeScavengerVictory = closeScavengerVictory;
 
     function toggleStudentModal() {
       const modal = document.getElementById('studentLoginModal');

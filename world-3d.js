@@ -68,6 +68,11 @@ class World3D {
     if (window.ScavengerHuntManager) {
       this.scavengerHunt = new ScavengerHuntManager(this);
       window.scavengerHuntManager = this.scavengerHunt;
+      setTimeout(() => {
+        if (typeof this.showToast === 'function') {
+          this.showToast('🧭【情境聽力尋寶】已就緒！點擊右上角「聽力尋寶」按鈕或按 [H] 鍵即可啟動！');
+        }
+      }, 1500);
     }
 
     this.animate();
@@ -698,8 +703,21 @@ class World3D {
       }
     });
 
-    // ESC 鍵關閉彈窗
+    // 鍵盤快速鍵與彈窗控制
     window.addEventListener('keydown', (e) => {
+      // 按 H 鍵快速開啟/關閉聽力尋寶任務
+      if ((e.code === 'KeyH' || e.key === 'h' || e.key === 'H') && !e.repeat) {
+        if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
+          return;
+        }
+        const huntModal = document.getElementById('scavengerHuntModal');
+        if (huntModal && huntModal.style.display === 'flex') {
+          if (typeof window.closeScavengerModal === 'function') window.closeScavengerModal();
+        } else if (!this.isAnyModalOpen()) {
+          if (typeof window.openScavengerModal === 'function') window.openScavengerModal();
+        }
+      }
+
       if (e.code === 'Escape') {
         this.closeSpeechCard();
         const guideModal = document.getElementById('guideModal');
@@ -712,6 +730,14 @@ class World3D {
         const mapModal = document.getElementById('worldMapModal');
         if (mapModal && mapModal.style.display === 'flex') {
           mapModal.style.display = 'none';
+        }
+        const scavengerModal = document.getElementById('scavengerHuntModal');
+        if (scavengerModal && scavengerModal.style.display === 'flex') {
+          if (typeof window.closeScavengerModal === 'function') window.closeScavengerModal();
+        }
+        const scavengerVictModal = document.getElementById('scavengerVictoryModal');
+        if (scavengerVictModal && scavengerVictModal.style.display === 'flex') {
+          if (typeof window.closeScavengerVictory === 'function') window.closeScavengerVictory();
         }
       }
     });
