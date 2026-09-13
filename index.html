@@ -906,15 +906,15 @@
 
   <!-- 核心庫與遊戲腳本 -->
   <script src="three.min.js"></script>
-  <script src="vocab-data.js?v=20260912_v9"></script>
-  <script src="vocab-passport-bank.js?v=20260912_v9"></script>
-  <script src="speech-manager.js?v=20260912_v9"></script>
-  <script src="audio-manager.js?v=20260912_v9"></script>
-  <script src="touch-controls.js?v=20260912_v9"></script>
-  <script src="cloud-sync-manager.js?v=20260912_v9"></script>
-  <script src="spatial-zone-manager.js?v=20260912_v9"></script>
-  <script src="minimap-manager.js?v=20260912_v9"></script>
-  <script src="world-3d.js?v=20260912_v9"></script>
+  <script src="vocab-data.js?v=20260913_v10"></script>
+  <script src="vocab-passport-bank.js?v=20260913_v10"></script>
+  <script src="speech-manager.js?v=20260913_v10"></script>
+  <script src="audio-manager.js?v=20260913_v10"></script>
+  <script src="touch-controls.js?v=20260913_v10"></script>
+  <script src="cloud-sync-manager.js?v=20260913_v10"></script>
+  <script src="spatial-zone-manager.js?v=20260913_v10"></script>
+  <script src="minimap-manager.js?v=20260913_v10"></script>
+  <script src="world-3d.js?v=20260913_v10"></script>
 
   <script>
     let curLeaderboardTab = 'school';
@@ -1455,7 +1455,7 @@
 
       listEl.innerHTML = '';
 
-      const orderedZoneIds = ['zone1', 'zone2', 'zone3', 'zone4', 'zone5', 'zone6', 'zone7', 'zone8'];
+      const orderedZoneIds = ['zone1', 'zone2', 'zone3', 'zone4', 'zone5', 'zone6', 'zone7', 'zone8', 'zone9'];
       const connectors = [
         '🌾 陽光花海古徑 (走出書齋石門花田，邁入微風市集)',
         '🌉 護城河古石橋 (降下市集要塞吊橋，前往精靈花園)',
@@ -1463,7 +1463,8 @@
         '🛤️ 凱旋星光鐵道 (穿過操場終點金拱門，抵達鐘樓車站)',
         '⚓ 蔚藍航海專線鐵路 (從車站北月台出發，抵達蔚藍秘境海港)',
         '🌟 雲霄星光空橋 (踏上燈塔指引光柱，躍升至雲頂星空觀測站)',
-        '💎 璀璨極光冰橋 (穿過觀測站星界傳送門，登上極光冰雪聖域)'
+        '💎 璀璨極光冰橋 (穿過觀測站星界傳送門，登上極光冰雪聖域)',
+        '✨ 星界萬神天梯 (極光之巔終極攀登，登上星界萬神殿堂)'
       ];
 
       orderedZoneIds.forEach((zid, idx) => {
@@ -1531,7 +1532,7 @@
       // 終點：大魔導士殿堂終極傳送
       const finalTrail = document.createElement('div');
       finalTrail.className = 'node-trail-connector';
-      finalTrail.innerHTML = `<span>✨ 極光之巔終極攀登 ➔ 榮耀晉升星界大魔導士殿堂 (Grand Master Citadel)</span>`;
+      finalTrail.innerHTML = `<span>🏆 榮耀加冕大魔導士 ➔ 圓滿通關全 9 大奇幻空間 (Grand Master Citadel)</span>`;
       listEl.appendChild(finalTrail);
     }
 

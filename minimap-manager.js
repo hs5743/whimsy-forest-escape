@@ -559,6 +559,117 @@ class MinimapManager {
       for (let st = 0; st < 3; st++) {
         ctx.fillRect(-1.6 * s, (-11.8 - st * 0.8) * s, 3.2 * s, 0.6 * s);
       }
+    } else if (curZone === 'zone9') {
+      // 星界萬神殿堂：深邃星海金輝底色 + 圓形萬神殿堂 + 8根科林斯大理石圓柱 + 智慧大書架 + 魔法大典 + 金羽書桌 + 沉思之泉 + 天秤儀 + 展翅天台
+      ctx.fillStyle = '#090a1a';
+      ctx.fillRect(-18 * s, -18 * s, 36 * s, 36 * s);
+
+      // 外圍星光雲海環
+      ctx.strokeStyle = 'rgba(192, 132, 252, 0.35)';
+      ctx.lineWidth = 2 * s;
+      ctx.beginPath();
+      ctx.arc(0, 0, 15.2 * s, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // 主殿堂圓形大理石基台 (半徑 14.5m)
+      ctx.fillStyle = '#1e1b4b';
+      ctx.beginPath();
+      ctx.arc(0, 0, 14.5 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      // 8 根科林斯大理石立柱 (半徑 11.8m)
+      for (let i = 0; i < 8; i++) {
+        const ang = (i / 8) * Math.PI * 2;
+        const px = Math.cos(ang) * 11.8 * s;
+        const py = Math.sin(ang) * 11.8 * s;
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath();
+        ctx.arc(px, py, 1.0 * s, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // 中央神聖同心幾何地坪與萬神天頂光束圈 (半徑 7.0m)
+      ctx.fillStyle = '#312e81';
+      ctx.beginPath();
+      ctx.arc(0, 0, 7.0 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
+
+      // 十二芒星射線
+      ctx.strokeStyle = 'rgba(253, 224, 71, 0.4)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 12; i++) {
+        const ang = (i / 12) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(Math.cos(ang) * 6.5 * s, Math.sin(ang) * 6.5 * s);
+        ctx.stroke();
+      }
+
+      // 1. LIBRARY 弧形大書架 (北側, [0, -6.5])
+      ctx.fillStyle = '#78350f';
+      ctx.beginPath();
+      ctx.arc(0, -6.5 * s, 2.2 * s, Math.PI * 0.8, Math.PI * 0.2, true);
+      ctx.lineTo(1.8 * s, -6.5 * s);
+      ctx.arc(0, -6.5 * s, 1.4 * s, Math.PI * 0.2, Math.PI * 0.8, false);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#d97706';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // 2. READ 遠古懸浮魔法大典 (西側, [-6.5, -1])
+      ctx.fillStyle = '#4338ca';
+      ctx.fillRect(-7.5 * s, -1.8 * s, 2.0 * s, 1.6 * s);
+      ctx.strokeStyle = '#a5b4fc';
+      ctx.strokeRect(-7.5 * s, -1.8 * s, 2.0 * s, 1.6 * s);
+
+      // 3. WRITE 金羽書寫台 (東側, [6.5, -1])
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(5.5 * s, -1.8 * s, 2.0 * s, 1.6 * s);
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath();
+      ctx.arc(6.5 * s, -1.0 * s, 0.4 * s, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 4. THINK 深思水晶沉思之泉 (西南, [-5, 4])
+      ctx.fillStyle = '#0284c7';
+      ctx.beginPath();
+      ctx.arc(-5.0 * s, 4.0 * s, 1.6 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#e0f2fe';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+
+      // 5. SMART 智慧賢者之冠天秤儀 (東南, [5, 4])
+      ctx.fillStyle = '#d97706';
+      ctx.beginPath();
+      ctx.arc(5.0 * s, 4.0 * s, 1.5 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fde047';
+      ctx.stroke();
+
+      // 6. FLY 星界榮耀展翅天台 (正北, [0, -12.5])
+      ctx.fillStyle = '#6366f1';
+      ctx.beginPath();
+      ctx.moveTo(-2.5 * s, -12.5 * s);
+      ctx.lineTo(0, -14.2 * s);
+      ctx.lineTo(2.5 * s, -12.5 * s);
+      ctx.lineTo(1.5 * s, -11.5 * s);
+      ctx.lineTo(-1.5 * s, -11.5 * s);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#c084fc';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
     }
 
     ctx.restore();

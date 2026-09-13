@@ -106,6 +106,18 @@ class SpatialZoneManager {
         words: ['SNOW', 'COLD', 'WINTER', 'WHITE', 'WARM', 'CLIMB'],
         spawnPos: [0, 1.6, 7.5],
         spawnYaw: 0
+      },
+      'zone9': {
+        id: 'zone9',
+        name: '星界萬神殿堂',
+        englishName: 'Grand Astral Pantheon',
+        icon: '🏛️',
+        topic: 'Wisdom, Study & Philosophy',
+        reqLevel: 9,
+        desc: '懸浮於浩瀚星界雲海之上的古典萬神殿堂，大理石柱廊與智慧萬卷圖書館交相輝映！',
+        words: ['LIBRARY', 'READ', 'WRITE', 'THINK', 'SMART', 'FLY'],
+        spawnPos: [0, 1.6, 7.5],
+        spawnYaw: 0
       }
     };
 
@@ -244,6 +256,27 @@ class SpatialZoneManager {
         // 9. 南側接駁空橋出入口石柱兩側防跌落邊界
         { type: 'box', minX: -14.5, maxX: -2.4, minZ: 12.0, maxZ: 14.5 },
         { type: 'box', minX: 2.4, maxX: 14.5, minZ: 12.0, maxZ: 14.5 }
+      ],
+      'zone9': [
+        // 1. 智慧萬卷大書閣基座實體 (LIBRARY POI, 中心: 0, -6.5, 半徑 2.0)
+        { type: 'box', minX: -2.0, maxX: 2.0, minZ: -8.5, maxZ: -4.5 },
+        // 2. 遠古懸浮魔法大典講台基座實體 (READ POI, 中心: -6.5, -1.0, 半徑 1.6)
+        { type: 'box', minX: -8.0, maxX: -5.0, minZ: -2.5, maxZ: 0.5 },
+        // 3. 大魔導士金羽書寫台基座實體 (WRITE POI, 中心: 6.5, -1.0, 半徑 1.6)
+        { type: 'box', minX: 5.0, maxX: 8.0, minZ: -2.5, maxZ: 0.5 },
+        // 4. 深思水晶沉思之泉基座 (THINK POI, 中心: -5.0, 4.0, 半徑 1.4)
+        { type: 'box', minX: -6.2, maxX: -3.8, minZ: 2.8, maxZ: 5.2 },
+        // 5. 智慧賢者之冠天秤儀基座 (SMART POI, 中心: 5.0, 4.0, 半徑 1.5)
+        { type: 'box', minX: 3.8, maxX: 6.2, minZ: 2.8, maxZ: 5.2 },
+        // 6. 西側萬神殿空域安全護欄邊界 (防跌落虛空)
+        { type: 'box', minX: -16.5, maxX: -13.8, minZ: -14.5, maxZ: 14.5 },
+        // 7. 東側萬神殿空域安全護欄邊界 (防跌落虛空)
+        { type: 'box', minX: 13.8, maxX: 16.5, minZ: -14.5, maxZ: 14.5 },
+        // 8. 北側展翅天台兩側邊界 (防跌落虛空)
+        { type: 'box', minX: -14.5, maxX: 14.5, minZ: -16.5, maxZ: -13.8 },
+        // 9. 南側接駁空橋出入口石柱兩側防跌落邊界
+        { type: 'box', minX: -14.5, maxX: -2.4, minZ: 12.0, maxZ: 14.5 },
+        { type: 'box', minX: 2.4, maxX: 14.5, minZ: 12.0, maxZ: 14.5 }
       ]
     };
   }
@@ -372,6 +405,7 @@ class SpatialZoneManager {
     if (!this.tex.knittedWool) this.tex.knittedWool = this.createKnittedWoolTexture();
     if (!this.tex.pineBark) this.tex.pineBark = this.createPineBarkTexture();
     if (!this.tex.emberBed) this.tex.emberBed = this.createEmberBedTexture();
+    if (!this.tex.pantheonMosaic) this.tex.pantheonMosaic = this.createPantheonMosaicTexture();
 
     this.texturesLoaded = true;
   }
@@ -755,6 +789,132 @@ class SpatialZoneManager {
     return tex;
   }
 
+  // 7. 古典萬神殿堂黃金嵌線青金大理石地坪紋理 (1024x1024)
+  createPantheonMosaicTexture() {
+    if (typeof document === 'undefined' || !document.createElement) {
+      return (typeof THREE !== 'undefined' && THREE.CanvasTexture) ? new THREE.CanvasTexture() : { wrapS: 0, wrapT: 0, repeat: { set: () => {} } };
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 1024;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return (typeof THREE !== 'undefined' && THREE.CanvasTexture) ? new THREE.CanvasTexture() : null;
+
+    const cx = 512;
+    const cy = 512;
+
+    // 深邃靛青青金石與黑曜石大理石底色
+    const grad = ctx.createRadialGradient(cx, cy, 30, cx, cy, 512);
+    grad.addColorStop(0, '#312e81');
+    grad.addColorStop(0.2, '#1e1b4b');
+    grad.addColorStop(0.5, '#0f172a');
+    grad.addColorStop(0.8, '#090a1a');
+    grad.addColorStop(1, '#020617');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 1024, 1024);
+
+    // 金色星光粉塵與大理石細微裂理
+    ctx.save();
+    ctx.strokeStyle = 'rgba(253, 224, 71, 0.12)';
+    ctx.lineWidth = 1.2;
+    for (let i = 0; i < 50; i++) {
+      ctx.beginPath();
+      let x = Math.random() * 1024;
+      let y = Math.random() * 1024;
+      ctx.moveTo(x, y);
+      for (let j = 0; j < 4; j++) {
+        x += (Math.random() - 0.5) * 160;
+        y += (Math.random() - 0.5) * 160;
+        ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // 繪製多層金嵌黃銅同心圓環 (Concentric Golden Bands)
+    const rings = [504, 482, 440, 360, 270, 180, 85];
+    rings.forEach((r, idx) => {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.strokeStyle = (idx % 2 === 0) ? '#f59e0b' : '#fde047';
+      ctx.lineWidth = (idx === 0 || idx === 3) ? 5 : 2.5;
+      ctx.stroke();
+    });
+
+    // 外圈古典羅馬迴紋邊飾 (Greek Key / Roman Meander Fret Band, r: 440 ~ 482)
+    ctx.strokeStyle = '#facc15';
+    ctx.lineWidth = 2;
+    const meanderSteps = 48;
+    for (let i = 0; i < meanderSteps; i++) {
+      const a1 = (i / meanderSteps) * Math.PI * 2;
+      const a2 = ((i + 0.5) / meanderSteps) * Math.PI * 2;
+      const a3 = ((i + 1.0) / meanderSteps) * Math.PI * 2;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(a1) * 448, cy + Math.sin(a1) * 448);
+      ctx.lineTo(cx + Math.cos(a1) * 474, cy + Math.sin(a1) * 474);
+      ctx.lineTo(cx + Math.cos(a2) * 474, cy + Math.sin(a2) * 474);
+      ctx.lineTo(cx + Math.cos(a2) * 458, cy + Math.sin(a2) * 458);
+      ctx.lineTo(cx + Math.cos(a3) * 458, cy + Math.sin(a3) * 458);
+      ctx.lineTo(cx + Math.cos(a3) * 474, cy + Math.sin(a3) * 474);
+      ctx.stroke();
+    }
+
+    // 中圈十二芒星射線與神聖幾何光芒 (Twelve-Pointed Astral Star Rays)
+    for (let i = 0; i < 12; i++) {
+      const ang = (i / 12) * Math.PI * 2;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(ang) * 85, cy + Math.sin(ang) * 85);
+      ctx.lineTo(cx + Math.cos(ang) * 360, cy + Math.sin(ang) * 360);
+      ctx.strokeStyle = (i % 3 === 0) ? '#fde047' : 'rgba(250, 204, 21, 0.45)';
+      ctx.lineWidth = (i % 3 === 0) ? 3 : 1.5;
+      ctx.stroke();
+
+      // 星芒頂端菱形神聖幾何金印
+      const rx = cx + Math.cos(ang) * 315;
+      const ry = cy + Math.sin(ang) * 315;
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath();
+      ctx.arc(rx, ry, 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 次圈拉丁智慧哲言羅馬數字與星盤刻度 (Wisdom Glyphs & Roman Numerals)
+    const wisdomWords = ['SAPIENTIA', 'VERITAS', 'LUMEN', 'ASTRUM', 'SCIENTIA', 'VIRTUS'];
+    ctx.font = 'bold 22px "Cinzel", "Times New Roman", serif';
+    ctx.fillStyle = '#fde047';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (let i = 0; i < 6; i++) {
+      const ang = (i / 6) * Math.PI * 2;
+      const tx = cx + Math.cos(ang) * 225;
+      const ty = cy + Math.sin(ang) * 225;
+      ctx.save();
+      ctx.translate(tx, ty);
+      ctx.rotate(ang + Math.PI / 2);
+      ctx.fillText(wisdomWords[i], 0, 0);
+      ctx.restore();
+    }
+
+    // 核心莨苕葉與萬神太陽同心浮雕金章 (Central Oculus Sun Medallion)
+    const sunGrad = ctx.createRadialGradient(cx, cy, 5, cx, cy, 80);
+    sunGrad.addColorStop(0, '#fef08a');
+    sunGrad.addColorStop(0.4, '#f59e0b');
+    sunGrad.addColorStop(0.85, '#d97706');
+    sunGrad.addColorStop(1, '#78350f');
+    ctx.fillStyle = sunGrad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 80, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#fef08a';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    return tex;
+  }
+
   // 取得目前空間資訊
   getCurrentZone() {
     return this.zones[this.currentZoneId] || this.zones['zone1'];
@@ -815,6 +975,8 @@ class SpatialZoneManager {
       this.buildZone7_Observatory(group);
     } else if (zoneId === 'zone8') {
       this.buildZone8_GlacialSanctuary(group);
+    } else if (zoneId === 'zone9') {
+      this.buildZone9_AstralPantheon(group);
     }
 
     this.world.scene.add(group);
@@ -849,7 +1011,12 @@ class SpatialZoneManager {
     let fogColor = 0xe0f2fe;
     let fogDensity = 0.012;
 
-    if (zoneId === 'zone8') {
+    if (zoneId === 'zone9') {
+      // 星界萬神殿堂：浩瀚星穹深邃靛藍與神聖金輝薄霧
+      skyColorTop = 0x0c102b;
+      fogColor = 0x1e1b4b;
+      fogDensity = 0.005;
+    } else if (zoneId === 'zone8') {
       // 極光冰雪聖域：極夜深邃青藍微光與清朗薄霜
       skyColorTop = 0x07152b;
       fogColor = 0x0a1d38;
@@ -889,8 +1056,8 @@ class SpatialZoneManager {
     this.world.scene.background = new THREE.Color(skyColorTop);
     this.world.scene.fog = new THREE.FogExp2(fogColor, fogDensity);
 
-    // 建立 3D 半球形天頂 (Sky Dome, 內表面渲染 - Zone 7 與 Zone 8 擁有專屬廣闊星穹天景，不覆蓋封閉天頂)
-    if (zoneId !== 'zone7' && zoneId !== 'zone8') {
+    // 建立 3D 半球形天頂 (Sky Dome, 內表面渲染 - Zone 7, 8, 9 擁有專屬廣闊星穹天景，不覆蓋封閉天頂)
+    if (zoneId !== 'zone7' && zoneId !== 'zone8' && zoneId !== 'zone9') {
       const skyGeo = new THREE.SphereGeometry(65, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.5);
       const skyMat = new THREE.MeshBasicMaterial({
         color: skyColorTop,
@@ -4346,6 +4513,7 @@ class SpatialZoneManager {
 
   // 關卡主動態畫布稱號牌 (Canvas Billboard)
   createGuardianBillboard(zoneId, name) {
+    if (typeof document === 'undefined' || !document.createElement) return new THREE.Group();
     const canvas = document.createElement('canvas');
     canvas.width = 512;
     canvas.height = 128;
@@ -5853,7 +6021,16 @@ class SpatialZoneManager {
       this.world.openSpeechCard('CLIMB', () => {
         this.world.addXP(100);
         this.checkZoneCompletionStatus();
+        if (this.isZoneUnlocked('zone9')) {
+          this.world.showToast('✨ 登上寒霜冰階之巔！通往【星界萬神殿堂】的天梯已完全開啟！');
+        }
       });
+    });
+
+    // 10b. 星界萬神天梯傳送門 (通往 Zone 9 星界萬神殿堂, x: -8.5, z: -3.8)
+    this.buildGlacialPantheonGate(group, -8.5, 0, -3.8, '🏛️ 星界萬神天梯 ➔ 登上【星界萬神殿堂】', () => {
+      this.world.showToast('🏛️ 踏上星界萬神天梯，躍升至星界萬神殿堂！');
+      this.switchZone('zone9');
     });
 
     // 11. 南側極光冰橋傳送門 (返回 Zone 7 雲頂星空觀測站, x: 0.0, z: 11.8)
@@ -7033,6 +7210,1169 @@ class SpatialZoneManager {
       label: '💬 [E] 與關卡主・佛洛斯特長老對話 (Archmage Frost)',
       onClick: () => {
         this.handleGuardianInteraction('zone8');
+      }
+    };
+    npc.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      aura.rotation.z = time * 0.5;
+      const s = 1.0 + Math.sin(time * 2.5) * 0.08;
+      aura.scale.set(s, s, s);
+      billboard.position.y = 3.2 + Math.sin(time * 2.0) * 0.06;
+      staffStar.rotation.y = time * 2.0;
+      staffStar.rotation.z = time * 1.5;
+      staffRing.rotation.y = time * 1.0;
+    });
+
+    group.add(npc);
+  }
+
+  // 10b. 星界萬神天梯傳送門 (通往 Zone 9 星界萬神殿堂)
+  buildGlacialPantheonGate(group, x, y, z, label, onTravel) {
+    const gate = new THREE.Group();
+    gate.position.set(x, y, z);
+
+    const goldMat = new THREE.MeshStandardMaterial({ map: this.tex.astrolabeBrass, metalness: 0.88, roughness: 0.22 });
+    const iceMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1, transparent: true, opacity: 0.88 });
+
+    // 天梯基座
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.85, 0.38, 16), goldMat);
+    base.position.y = 0.19;
+    gate.add(base);
+
+    // 金輝星芒直衝天際光柱 (Ascension Gold Beam)
+    const beamMat = new THREE.MeshBasicMaterial({ color: 0xfacc15, transparent: true, opacity: 0.48, side: THREE.DoubleSide });
+    const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 1.25, 16, 16, 1, true), beamMat);
+    beam.position.y = 8.0;
+    gate.add(beam);
+
+    // 懸浮黃金智慧星象儀光環
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(1.2, 0.06, 8, 24), goldMat);
+    ring.position.y = 2.2;
+    gate.add(ring);
+
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.2, 4.0, 3.2), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 2.0;
+    hitBox.userData = {
+      id: 'travel_portal_zone9_from_sanctuary',
+      label,
+      onClick: () => {
+        if (onTravel) onTravel();
+      }
+    };
+    gate.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      beamMat.opacity = 0.42 + Math.sin(time * 2.5) * 0.15;
+      ring.rotation.y = time * 1.5;
+      ring.rotation.z = Math.sin(time * 0.8) * 0.2;
+    });
+
+    group.add(gate);
+  }
+
+  // =========================================================================
+  // Zone 9: 星界萬神殿堂・智慧大圖書館 (The Grand Astral Pantheon & Library)
+  // =========================================================================
+  buildZone9_AstralPantheon(group) {
+    this.initTextures();
+
+    // 1. 光照系統 (萬神天光、黃金神芒、青金石書齋幽藍光與沉思泉水冷光)
+    this.buildPantheonLighting(group);
+
+    // 2. 浩瀚星穹深邃天際、紫金星雲帷幕、600星芒
+    this.buildPantheonCelestialSky(group);
+
+    // 3. 羅馬萬神殿圓形大理石基台、8根科林斯凹槽柱廊與天頂環樑
+    this.buildPantheonColonnadeAndDais(group);
+
+    // 4. Oculus 天窗垂直投射柔和半透明金色天光束 (Volumetric Sunbeam)
+    this.buildPantheonVolumetricSunbeam(group);
+
+    // 5. 智慧萬卷大書閣 (LIBRARY POI, x: 0.0, z: -6.5) - 雙層弧形紫檀木書架、古籍與黃金天梯
+    this.buildPantheonLibraryAlcove(group, 0.0, 0, -6.5);
+
+    // 6. 遠古懸浮魔法大典 (READ POI, x: -6.5, z: -1.0) - 展開法典、自轉符文金環與懸浮文字
+    this.buildPantheonFloatingGrimoire(group, -6.5, 0, -1.0);
+
+    // 7. 大魔導士金羽書寫台 (WRITE POI, x: 6.5, z: -1.0) - 黑曜石書桌、金色羽毛筆與發光羊皮卷軸
+    this.buildPantheonScribeDesk(group, 6.5, 0, -1.0);
+
+    // 8. 深思水晶沉思之泉 (THINK POI, x: -5.0, z: 4.0) - 八角白玉池、倒映星芒與自轉多面體稜鏡
+    this.buildPantheonReflectionPool(group, -5.0, 0, 4.0);
+
+    // 9. 智慧賢者之冠天秤儀 (SMART POI, x: 5.0, z: 4.0) - 青銅黃金天平、金色智慧之腦與星光水晶
+    this.buildPantheonScalesOfWisdom(group, 5.0, 0, 4.0);
+
+    // 10. 星界榮耀展翅天台 (FLY POI, x: 0.0, z: -12.5) - 白玉天台、金鷹石雕與展翅星光傳送門
+    this.buildPantheonFlightTerrace(group, 0.0, 0, -12.5);
+
+    // 11. 南側降落星界天梯 (返回 Zone 8 極光冰雪聖域, x: 0.0, z: 11.8)
+    this.buildPantheonGlacialReturnGate(group, 0.0, 0, 11.8, '❄️ 降落星界天梯 ➔ 返回【極光冰雪聖域】', () => {
+      this.world.showToast('❄️ 沿著星界天梯緩降，返回極光冰雪聖域！');
+      this.switchZone('zone8');
+    });
+
+    // 12. 👑 關卡主 NPC：星界大導師・奧利弗大校長 (Grand Archmage Oliver, x: 1.5, z: -3.5)
+    this.buildPantheonGuardianNPC(group, 1.5, 0, -3.5);
+
+    // 13. 飄浮星界智慧金色塵埃微粒 (Astral Stardust Particles)
+    this.addFloatingParticles(group, 0xfde047, 300, 36, 8);
+  }
+
+  // 1. 光照系統
+  buildPantheonLighting(group) {
+    const hemiLight = new THREE.HemisphereLight(0xfffbeb, 0x1e1b4b, 1.45);
+    group.add(hemiLight);
+
+    const celestialSun = new THREE.DirectionalLight(0xfffbeb, 1.6);
+    celestialSun.position.set(12, 38, 10);
+    celestialSun.castShadow = true;
+    celestialSun.shadow.mapSize.width = 1024;
+    celestialSun.shadow.mapSize.height = 1024;
+    group.add(celestialSun);
+
+    // 中央萬神天頂直射黃金神光 (Oculus Beam Light)
+    const oculusGlow = new THREE.PointLight(0xfde047, 2.6, 26);
+    oculusGlow.position.set(0, 5.8, 0);
+    group.add(oculusGlow);
+
+    // 書閣幽香暖琥珀光
+    const libraryGlow = new THREE.PointLight(0xf59e0b, 1.8, 15);
+    libraryGlow.position.set(0, 3.2, -6.5);
+    group.add(libraryGlow);
+
+    // 沉思之泉澄澈水波幽藍光
+    const poolGlow = new THREE.PointLight(0x38bdf8, 1.8, 15);
+    poolGlow.position.set(-5.0, 2.4, 4.0);
+    group.add(poolGlow);
+
+    // 金羽書寫桌明亮閱讀光
+    const deskGlow = new THREE.PointLight(0xfef08a, 1.6, 14);
+    deskGlow.position.set(6.5, 2.2, -1.0);
+    group.add(deskGlow);
+  }
+
+  // 2. 浩瀚星穹深邃天際、紫金星雲帷幕、600星芒
+  buildPantheonCelestialSky(group) {
+    const skyGroup = new THREE.Group();
+
+    // 紫金星雲帷幕 1 (發光疊加模式)
+    const nebulaMat1 = new THREE.MeshBasicMaterial({
+      color: 0x8b5cf6,
+      transparent: true,
+      opacity: 0.45,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide
+    });
+    const nebGeo1 = new THREE.PlaneGeometry(96, 24, 28, 4);
+    const pos1 = (nebGeo1.attributes && nebGeo1.attributes.position) ? nebGeo1.attributes.position : null;
+    if (pos1) {
+      for (let i = 0; i < pos1.count; i++) {
+        const vx = pos1.getX(i);
+        const vz = Math.sin((vx / 96) * Math.PI * 2.8) * 12;
+        pos1.setZ(i, vz);
+      }
+      if (nebGeo1.computeVertexNormals) nebGeo1.computeVertexNormals();
+    }
+    const nebula1 = new THREE.Mesh(nebGeo1, nebulaMat1);
+    nebula1.position.set(0, 32, -36);
+    nebula1.rotation.x = 0.22;
+    skyGroup.add(nebula1);
+
+    // 深邃星界靛藍星雲 2
+    const nebulaMat2 = new THREE.MeshBasicMaterial({
+      color: 0x3b82f6,
+      transparent: true,
+      opacity: 0.42,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide
+    });
+    const nebGeo2 = new THREE.PlaneGeometry(88, 20, 24, 4);
+    const pos2 = (nebGeo2.attributes && nebGeo2.attributes.position) ? nebGeo2.attributes.position : null;
+    if (pos2) {
+      for (let i = 0; i < pos2.count; i++) {
+        const vx = pos2.getX(i);
+        const vz = Math.cos((vx / 88) * Math.PI * 3.2) * 10;
+        pos2.setZ(i, vz);
+      }
+      if (nebGeo2.computeVertexNormals) nebGeo2.computeVertexNormals();
+    }
+    const nebula2 = new THREE.Mesh(nebGeo2, nebulaMat2);
+    nebula2.position.set(10, 36, -28);
+    nebula2.rotation.x = 0.16;
+    nebula2.rotation.y = -0.18;
+    skyGroup.add(nebula2);
+
+    // 神聖金色晨曦輝光帶 3
+    const nebulaMat3 = new THREE.MeshBasicMaterial({
+      color: 0xf59e0b,
+      transparent: true,
+      opacity: 0.35,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide
+    });
+    const nebGeo3 = new THREE.PlaneGeometry(82, 18, 22, 4);
+    const pos3 = (nebGeo3.attributes && nebGeo3.attributes.position) ? nebGeo3.attributes.position : null;
+    if (pos3) {
+      for (let i = 0; i < pos3.count; i++) {
+        const vx = pos3.getX(i);
+        const vz = Math.sin((vx / 82) * Math.PI * 2.4 + 1.2) * 8;
+        pos3.setZ(i, vz);
+      }
+      if (nebGeo3.computeVertexNormals) nebGeo3.computeVertexNormals();
+    }
+    const nebula3 = new THREE.Mesh(nebGeo3, nebulaMat3);
+    nebula3.position.set(-12, 38, -34);
+    nebula3.rotation.x = 0.2;
+    skyGroup.add(nebula3);
+
+    // 蒼穹 600 星芒星空
+    const starCount = 600;
+    const starGeo = new THREE.BufferGeometry();
+    const starCoords = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount; i++) {
+      const phi = Math.acos(-1 + (2 * i) / starCount);
+      const theta = Math.sqrt(starCount * Math.PI) * phi;
+      const r = 60 + (i % 14);
+      starCoords[i * 3] = r * Math.cos(theta) * Math.sin(phi);
+      starCoords[i * 3 + 1] = Math.max(9, r * Math.cos(phi));
+      starCoords[i * 3 + 2] = r * Math.sin(theta) * Math.sin(phi);
+    }
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starCoords, 3));
+    const starMat = new THREE.PointsMaterial({
+      color: 0xfef08a,
+      size: 0.18,
+      transparent: true,
+      opacity: 0.88
+    });
+    const starField = new THREE.Points(starGeo, starMat);
+    skyGroup.add(starField);
+
+    // 遙遠天際金色星宿光環 (Celestial Astrolabe Rings in Outer Space)
+    const astroMat = new THREE.MeshBasicMaterial({ color: 0xfacc15, transparent: true, opacity: 0.32, side: THREE.DoubleSide });
+    const astroRing1 = new THREE.Mesh(new THREE.TorusGeometry(32, 0.22, 8, 48), astroMat);
+    astroRing1.position.set(0, 30, -50);
+    astroRing1.rotation.x = Math.PI / 3;
+    skyGroup.add(astroRing1);
+
+    const astroRing2 = new THREE.Mesh(new THREE.TorusGeometry(38, 0.18, 8, 48), astroMat);
+    astroRing2.position.set(0, 30, -50);
+    astroRing2.rotation.y = Math.PI / 4;
+    skyGroup.add(astroRing2);
+
+    this.world.animators.push((time) => {
+      nebula1.rotation.z = Math.sin(time * 0.35) * 0.04;
+      nebulaMat1.opacity = 0.42 + Math.sin(time * 0.75) * 0.10;
+      nebula2.rotation.z = Math.cos(time * 0.3) * 0.05;
+      nebulaMat2.opacity = 0.38 + Math.cos(time * 0.65) * 0.12;
+      astroRing1.rotation.z = time * 0.08;
+      astroRing2.rotation.z = -time * 0.06;
+    });
+
+    group.add(skyGroup);
+  }
+
+  // 3. 羅馬萬神殿圓形大理石基台、8根科林斯凹槽柱廊與天頂環樑
+  buildPantheonColonnadeAndDais(group) {
+    const templeGroup = new THREE.Group();
+
+    const marbleMat = new THREE.MeshStandardMaterial({
+      map: this.tex.celestialMarble,
+      roughness: 0.35,
+      metalness: 0.12
+    });
+
+    const mosaicMat = new THREE.MeshStandardMaterial({
+      map: this.tex.pantheonMosaic,
+      roughness: 0.25,
+      metalness: 0.35
+    });
+
+    const goldTrimMat = new THREE.MeshStandardMaterial({
+      map: this.tex.astrolabeBrass,
+      roughness: 0.25,
+      metalness: 0.85
+    });
+
+    const stoneWallMat = new THREE.MeshStandardMaterial({
+      map: this.tex.stoneWall,
+      roughness: 0.85
+    });
+
+    // 萬神殿堂外圍第一層大理石階台 (半徑 15.2m, 高 0.55m)
+    const step1 = new THREE.Mesh(new THREE.CylinderGeometry(15.2, 15.6, 0.55, 32), marbleMat);
+    step1.position.y = -0.28;
+    step1.receiveShadow = true;
+    templeGroup.add(step1);
+
+    // 殿堂中央神聖馬賽克地坪階台 (半徑 14.5m, 高 0.35m)
+    const step2 = new THREE.Mesh(new THREE.CylinderGeometry(14.5, 14.8, 0.35, 32), mosaicMat);
+    step2.position.y = 0.17;
+    step2.receiveShadow = true;
+    templeGroup.add(step2);
+
+    // 殿堂核心祭祀內壇 (半徑 7.2m, 高 0.08m)
+    const innerDais = new THREE.Mesh(new THREE.CylinderGeometry(7.2, 7.4, 0.08, 24), marbleMat);
+    innerDais.position.y = 0.38;
+    innerDais.receiveShadow = true;
+    templeGroup.add(innerDais);
+
+    // 外圍大理石精雕圍欄基座 (Balustrade Base Ring, 半徑 13.8m)
+    const balustradeBase = new THREE.Mesh(new THREE.TorusGeometry(13.8, 0.22, 8, 32), marbleMat);
+    balustradeBase.rotation.x = Math.PI / 2;
+    balustradeBase.position.y = 0.45;
+    templeGroup.add(balustradeBase);
+
+    // 浮島下層懸浮星界岩基 (Tapered Celestial Underbelly)
+    const underbelly = new THREE.Mesh(new THREE.ConeGeometry(15.2, 11.5, 24), stoneWallMat);
+    underbelly.position.y = -6.3;
+    underbelly.rotation.x = Math.PI;
+    templeGroup.add(underbelly);
+
+    // 下層懸浮黃金符文環 (Orbiting Ring Beneath)
+    const underRing = new THREE.Mesh(new THREE.TorusGeometry(11.5, 0.16, 6, 32), goldTrimMat);
+    underRing.position.y = -7.5;
+    underRing.rotation.x = Math.PI / 2;
+    templeGroup.add(underRing);
+
+    // ========================================================
+    // 8 根古典科林斯凹槽大理石立柱廊 (Corinthian Colonnade, R=11.8m)
+    // ========================================================
+    for (let i = 0; i < 8; i++) {
+      const ang = (i / 8) * Math.PI * 2;
+      const px = Math.cos(ang) * 11.8;
+      const pz = Math.sin(ang) * 11.8;
+
+      const colGroup = new THREE.Group();
+      colGroup.position.set(px, 0.35, pz);
+
+      // 方形柱礎 (Square Plinth)
+      const plinth = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.36, 1.4), marbleMat);
+      plinth.position.y = 0.18;
+      plinth.castShadow = true;
+      colGroup.add(plinth);
+
+      // 托斯卡納圓形托環 (Torus Base)
+      const torusBase = new THREE.Mesh(new THREE.CylinderGeometry(0.72, 0.82, 0.25, 16), marbleMat);
+      torusBase.position.y = 0.48;
+      colGroup.add(torusBase);
+
+      // 科林斯凹槽柱身 (Fluted Column Shaft, 高 5.2m)
+      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.52, 0.60, 5.2, 16), marbleMat);
+      shaft.position.y = 3.2;
+      shaft.castShadow = true;
+      colGroup.add(shaft);
+
+      // 柱身 8 條立體凹槽金嵌條飾 (Vertical Fluting Ribs)
+      for (let f = 0; f < 8; f++) {
+        const fang = (f / 8) * Math.PI * 2;
+        const rib = new THREE.Mesh(new THREE.BoxGeometry(0.06, 4.8, 0.06), goldTrimMat);
+        rib.position.set(Math.cos(fang) * 0.55, 3.2, Math.sin(fang) * 0.55);
+        colGroup.add(rib);
+      }
+
+      // 科林斯柱頭：莨苕葉花飾與黃金渦卷 (Corinthian Acanthus & Volutes Capital)
+      const capCore = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.54, 0.72, 12), goldTrimMat);
+      capCore.position.y = 6.15;
+      colGroup.add(capCore);
+
+      // 4 個四角外翻金色渦卷 (Corner Volutes)
+      for (let v = 0; v < 4; v++) {
+        const vang = (v / 4) * Math.PI * 2 + Math.PI / 4;
+        const volute = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.06, 6, 12), goldTrimMat);
+        volute.position.set(Math.cos(vang) * 0.68, 6.4, Math.sin(vang) * 0.68);
+        volute.rotation.y = vang;
+        colGroup.add(volute);
+      }
+
+      // 柱頂大理石頂板 (Abacus)
+      const abacus = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.22, 1.5), marbleMat);
+      abacus.position.y = 6.62;
+      colGroup.add(abacus);
+
+      templeGroup.add(colGroup);
+    }
+
+    // 柱頂連續環狀大理石壓頂橫樑 (Circular Architrave Entablature Beam Ring)
+    const beamRing = new THREE.Mesh(new THREE.TorusGeometry(11.8, 0.45, 8, 32), marbleMat);
+    beamRing.rotation.x = Math.PI / 2;
+    beamRing.position.y = 7.35;
+    templeGroup.add(beamRing);
+
+    // 金飾橫樑下弦線 (Gold Architrave Moulding)
+    const beamMoulding = new THREE.Mesh(new THREE.TorusGeometry(11.8, 0.12, 6, 32), goldTrimMat);
+    beamMoulding.rotation.x = Math.PI / 2;
+    beamMoulding.position.y = 6.95;
+    templeGroup.add(beamMoulding);
+
+    // 萬神殿穹頂外環結構 (Pantheon Upper Oculus Ring)
+    const domeRim = new THREE.Mesh(new THREE.RingGeometry(4.2, 12.2, 32), marbleMat);
+    domeRim.rotation.x = -Math.PI / 2;
+    domeRim.position.y = 7.75;
+    templeGroup.add(domeRim);
+
+    // Oculus 開口金色內圈 (Oculus Skylight Ring)
+    const oculusGoldRing = new THREE.Mesh(new THREE.TorusGeometry(4.2, 0.18, 8, 32), goldTrimMat);
+    oculusGoldRing.rotation.x = Math.PI / 2;
+    oculusGoldRing.position.y = 7.82;
+    templeGroup.add(oculusGoldRing);
+
+    group.add(templeGroup);
+  }
+
+  // 4. Oculus 天窗垂直投射柔和半透明金色天光束 (Volumetric Sunbeam)
+  buildPantheonVolumetricSunbeam(group) {
+    const beamGroup = new THREE.Group();
+
+    // 圓錐天光半透明立體網格 (錐底擴散直達地表)
+    const beamGeo = new THREE.CylinderGeometry(2.4, 5.2, 8.2, 24, 1, true);
+    const beamMat = new THREE.MeshBasicMaterial({
+      color: 0xfef08a,
+      transparent: true,
+      opacity: 0.25,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide
+    });
+
+    const sunbeam = new THREE.Mesh(beamGeo, beamMat);
+    sunbeam.position.y = 4.2;
+    beamGroup.add(sunbeam);
+
+    // 內層細光束核心
+    const innerGeo = new THREE.CylinderGeometry(1.2, 2.6, 8.2, 16, 1, true);
+    const innerMat = new THREE.MeshBasicMaterial({
+      color: 0xfacc15,
+      transparent: true,
+      opacity: 0.28,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide
+    });
+    const innerBeam = new THREE.Mesh(innerGeo, innerMat);
+    innerBeam.position.y = 4.2;
+    beamGroup.add(innerBeam);
+
+    // 地表受光光斑 (Floor Light Pool)
+    const poolMat = new THREE.MeshBasicMaterial({
+      color: 0xfde047,
+      transparent: true,
+      opacity: 0.35,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide
+    });
+    const poolMesh = new THREE.Mesh(new THREE.CircleGeometry(4.6, 24), poolMat);
+    poolMesh.rotation.x = -Math.PI / 2;
+    poolMesh.position.y = 0.42;
+    beamGroup.add(poolMesh);
+
+    this.world.animators.push((time) => {
+      const s = 1.0 + Math.sin(time * 1.5) * 0.05;
+      sunbeam.scale.set(s, 1.0, s);
+      beamMat.opacity = 0.22 + Math.sin(time * 2.0) * 0.08;
+      innerMat.opacity = 0.25 + Math.cos(time * 2.2) * 0.08;
+      sunbeam.rotation.y = time * 0.05;
+    });
+
+    group.add(beamGroup);
+  }
+
+  // 5. 智慧萬卷大書閣 (LIBRARY POI, x: 0.0, z: -6.5)
+  buildPantheonLibraryAlcove(group, x, y, z) {
+    const alcove = new THREE.Group();
+    alcove.position.set(x, y, z);
+
+    const woodMat = new THREE.MeshStandardMaterial({ map: this.tex.woodDesk, roughness: 0.55 });
+    const goldMat = new THREE.MeshStandardMaterial({ map: this.tex.astrolabeBrass, metalness: 0.85, roughness: 0.22 });
+    const marbleMat = new THREE.MeshStandardMaterial({ map: this.tex.celestialMarble, roughness: 0.35 });
+
+    // 大理石基壇
+    const dais = new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.28, 2.4), marbleMat);
+    dais.position.y = 0.14;
+    dais.receiveShadow = true;
+    alcove.add(dais);
+
+    // 弧形雙層紫檀木宏偉書架 (Grand Curved Bookcase)
+    const shelfBack = new THREE.Mesh(new THREE.BoxGeometry(4.2, 3.8, 0.45), woodMat);
+    shelfBack.position.set(0, 2.05, -0.6);
+    shelfBack.castShadow = true;
+    alcove.add(shelfBack);
+
+    // 書架橫向隔板 (4層隔板)
+    for (let l = 0; l < 4; l++) {
+      const plank = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.12, 0.65), woodMat);
+      plank.position.set(0, 0.6 + l * 0.95, -0.4);
+      plank.castShadow = true;
+      alcove.add(plank);
+    }
+
+    // 書架滿排七彩精裝魔法書籍 (Row upon row of leather-bound grimoires)
+    const bookColors = [0x991b1b, 0x1e3a8a, 0x065f46, 0x854d0e, 0x581c87, 0x0f172a, 0xb45309];
+    for (let row = 0; row < 3; row++) {
+      const ry = 0.72 + row * 0.95;
+      for (let b = 0; b < 16; b++) {
+        const bx = -1.8 + b * 0.24;
+        const bColor = bookColors[(row * 16 + b) % bookColors.length];
+        const bMat = new THREE.MeshStandardMaterial({ color: bColor, roughness: 0.6 });
+        const bHeight = 0.65 + (b % 3) * 0.08;
+        const book = new THREE.Mesh(new THREE.BoxGeometry(0.18, bHeight, 0.42), bMat);
+        book.position.set(bx, ry + bHeight / 2, -0.4);
+        book.castShadow = true;
+        alcove.add(book);
+      }
+    }
+
+    // 黃金滑軌書梯 (Golden Rolling Library Ladder)
+    const ladder = new THREE.Group();
+    ladder.position.set(1.4, 0.28, 0.1);
+    ladder.rotation.x = -0.18;
+
+    [-0.32, 0.32].forEach(lx => {
+      const rail = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 3.6, 8), goldMat);
+      rail.position.set(lx, 1.8, 0);
+      ladder.add(rail);
+    });
+    for (let r = 0; r < 6; r++) {
+      const rung = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.64, 8), goldMat);
+      rung.rotation.z = Math.PI / 2;
+      rung.position.set(0, 0.5 + r * 0.52, 0);
+      ladder.add(rung);
+    }
+    alcove.add(ladder);
+
+    // 舒適紫鵝絨學者扶手椅 (Velvet Scholar Chair)
+    const chairMat = new THREE.MeshStandardMaterial({ color: 0x4c1d95, roughness: 0.7 });
+    const chair = new THREE.Group();
+    chair.position.set(-1.2, 0.28, 0.4);
+    chair.rotation.y = 0.35;
+
+    const seat = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.18, 0.75), chairMat);
+    seat.position.y = 0.45;
+    chair.add(seat);
+
+    const backrest = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.85, 0.16), chairMat);
+    backrest.position.set(0, 0.88, -0.3);
+    chair.add(backrest);
+
+    [-0.32, 0.32].forEach(cx => {
+      [-0.32, 0.32].forEach(cz => {
+        const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.03, 0.45, 8), goldMat);
+        leg.position.set(cx, 0.22, cz);
+        chair.add(leg);
+      });
+    });
+    alcove.add(chair);
+
+    // 互動點擊判定盒
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(4.6, 4.2, 3.2), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 2.0;
+    hitBox.userData = {
+      id: 'library_shelves_alcove',
+      label: '📚 智慧萬卷大書閣 (LIBRARY)',
+      onClick: () => {
+        this.world.openSpeechCard('LIBRARY', () => {
+          this.world.addXP(60);
+          this.checkZoneCompletionStatus();
+        });
+      }
+    };
+    alcove.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    group.add(alcove);
+  }
+
+  // 6. 遠古懸浮魔法大典 (READ POI, x: -6.5, z: -1.0)
+  buildPantheonFloatingGrimoire(group, x, y, z) {
+    const shrine = new THREE.Group();
+    shrine.position.set(x, y, z);
+
+    const marbleMat = new THREE.MeshStandardMaterial({ map: this.tex.celestialMarble, roughness: 0.35 });
+    const goldMat = new THREE.MeshStandardMaterial({ map: this.tex.astrolabeBrass, metalness: 0.85, roughness: 0.22 });
+    const bookCoverMat = new THREE.MeshStandardMaterial({ color: 0x1e1b4b, roughness: 0.45 });
+    const pageMat = new THREE.MeshStandardMaterial({ color: 0xfef9c3, roughness: 0.8 });
+    const runeRingMat = new THREE.MeshBasicMaterial({ color: 0x818cf8, transparent: true, opacity: 0.75, side: THREE.DoubleSide });
+
+    // 大理石雕花圓形基壇 (Lectern Dais)
+    const dais = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.85, 0.32, 16), marbleMat);
+    dais.position.y = 0.16;
+    dais.receiveShadow = true;
+    shrine.add(dais);
+
+    // 白理石金雕講台立柱 (Marble Lectern Pedestal)
+    const pedestal = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.48, 1.4, 12), marbleMat);
+    pedestal.position.y = 0.95;
+    pedestal.castShadow = true;
+    shrine.add(pedestal);
+
+    // 金鷹展翅講台托板 (Golden Winged Lectern Plaque)
+    const plaque = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.12, 0.8), goldMat);
+    plaque.position.set(0, 1.7, 0);
+    plaque.rotation.x = 0.35;
+    shrine.add(plaque);
+
+    // 懸浮展開的遠古魔法大典總成 (Floating Open Ancient Grimoire)
+    const grimoire = new THREE.Group();
+    grimoire.position.set(0, 2.15, 0);
+    grimoire.rotation.x = 0.35;
+
+    // 左書頁與右書頁
+    [-0.32, 0.32].forEach((px, idx) => {
+      const cover = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.05, 0.85), bookCoverMat);
+      cover.position.set(px, 0, 0);
+      cover.rotation.z = (idx === 0 ? 0.15 : -0.15);
+      grimoire.add(cover);
+
+      const pages = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.06, 0.80), pageMat);
+      pages.position.set(px, 0.04, 0);
+      pages.rotation.z = (idx === 0 ? 0.15 : -0.15);
+      grimoire.add(pages);
+    });
+
+    // 書脊中央金色魔法書籤
+    const bookmark = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.03, 1.05), goldMat);
+    bookmark.position.set(0, 0.06, 0);
+    grimoire.add(bookmark);
+
+    shrine.add(grimoire);
+
+    // 雙重懸浮旋轉星光符文環 (Counter-rotating Rune Rings)
+    const ring1 = new THREE.Mesh(new THREE.RingGeometry(1.25, 1.45, 24), runeRingMat);
+    ring1.position.y = 2.15;
+    ring1.rotation.x = Math.PI / 2;
+    shrine.add(ring1);
+
+    const ring2 = new THREE.Mesh(new THREE.RingGeometry(1.55, 1.70, 24), runeRingMat);
+    ring2.position.y = 2.15;
+    ring2.rotation.x = Math.PI / 2 + 0.2;
+    shrine.add(ring2);
+
+    // 互動點擊判定盒
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.2, 3.8, 3.2), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 1.9;
+    hitBox.userData = {
+      id: 'floating_grimoire_lectern',
+      label: '📖 遠古懸浮魔法大典 (READ)',
+      onClick: () => {
+        this.world.openSpeechCard('READ', () => {
+          this.world.addXP(50);
+          this.checkZoneCompletionStatus();
+        });
+      }
+    };
+    shrine.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      grimoire.position.y = 2.15 + Math.sin(time * 2.2) * 0.08;
+      grimoire.rotation.y = Math.sin(time * 1.5) * 0.06;
+      ring1.rotation.z = time * 0.8;
+      ring2.rotation.z = -time * 0.6;
+    });
+
+    group.add(shrine);
+  }
+
+  // 7. 大魔導士金羽書寫台 (WRITE POI, x: 6.5, z: -1.0)
+  buildPantheonScribeDesk(group, x, y, z) {
+    const deskGroup = new THREE.Group();
+    deskGroup.position.set(x, y, z);
+
+    const woodMat = new THREE.MeshStandardMaterial({ map: this.tex.woodDesk, roughness: 0.55 });
+    const obsidianMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2, metalness: 0.3 });
+    const goldMat = new THREE.MeshStandardMaterial({ map: this.tex.astrolabeBrass, metalness: 0.85, roughness: 0.22 });
+    const scrollMat = new THREE.MeshStandardMaterial({ color: 0xfef3c7, roughness: 0.85 });
+
+    // 大理石地壇
+    const dais = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.85, 0.32, 16), woodMat);
+    dais.position.y = 0.16;
+    dais.receiveShadow = true;
+    deskGroup.add(dais);
+
+    // 黑曜石面板大書桌主體 (2.4m x 1.2m x 0.9m)
+    const deskTop = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.14, 1.2), obsidianMat);
+    deskTop.position.y = 0.95;
+    deskTop.castShadow = true;
+    deskGroup.add(deskTop);
+
+    // 金飾桌腳 (4支雕花黃金桌腳)
+    [-1.0, 1.0].forEach(dx => {
+      [-0.45, 0.45].forEach(dz => {
+        const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.88, 8), goldMat);
+        leg.position.set(dx, 0.44, dz);
+        leg.castShadow = true;
+        deskGroup.add(leg);
+      });
+    });
+
+    // 展開的金色古老羊皮紙卷軸 (Glowing Scribe Scroll)
+    const scroll = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.03, 0.65), scrollMat);
+    scroll.position.set(-0.2, 1.04, 0.05);
+    deskGroup.add(scroll);
+
+    // 卷軸兩側捲起邊軸
+    [-0.56, 0.56].forEach(sx => {
+      const scrollRoll = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.70, 8), goldMat);
+      scrollRoll.position.set(sx, 1.05, 0.05);
+      scrollRoll.rotation.x = Math.PI / 2;
+      deskGroup.add(scrollRoll);
+    });
+
+    // 水晶墨水瓶 (Crystal Inkwell)
+    const inkwell = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 0.16, 8), obsidianMat);
+    inkwell.position.set(0.65, 1.1, -0.25);
+    deskGroup.add(inkwell);
+
+    // 孔雀金羽毛筆 (Golden Peacock Quill Pen)
+    const quill = new THREE.Group();
+    quill.position.set(0.65, 1.18, -0.25);
+    quill.rotation.z = -0.35;
+    quill.rotation.x = 0.2;
+
+    const quillNib = new THREE.Mesh(new THREE.ConeGeometry(0.02, 0.12, 6), goldMat);
+    quillNib.rotation.x = Math.PI;
+    quill.add(quillNib);
+
+    const quillFeather = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.48, 0.02), goldMat);
+    quillFeather.position.y = 0.28;
+    quill.add(quillFeather);
+    deskGroup.add(quill);
+
+    // 互動點擊判定盒
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.2, 3.6, 3.0), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 1.8;
+    hitBox.userData = {
+      id: 'archmage_scribe_desk',
+      label: '✍️ 大魔導士金羽書寫台 (WRITE)',
+      onClick: () => {
+        this.world.openSpeechCard('WRITE', () => {
+          this.world.addXP(50);
+          this.checkZoneCompletionStatus();
+        });
+      }
+    };
+    deskGroup.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      quill.rotation.y = Math.sin(time * 2.0) * 0.15;
+    });
+
+    group.add(deskGroup);
+  }
+
+  // 8. 深思水晶沉思之泉 (THINK POI, x: -5.0, z: 4.0)
+  buildPantheonReflectionPool(group, x, y, z) {
+    const pool = new THREE.Group();
+    pool.position.set(x, y, z);
+
+    const marbleMat = new THREE.MeshStandardMaterial({ map: this.tex.celestialMarble, roughness: 0.35 });
+    const goldMat = new THREE.MeshStandardMaterial({ map: this.tex.astrolabeBrass, metalness: 0.85, roughness: 0.22 });
+    const waterMat = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      roughness: 0.1,
+      metalness: 0.2,
+      transparent: true,
+      opacity: 0.85
+    });
+    const crystalMat = new THREE.MeshStandardMaterial({
+      color: 0x818cf8,
+      emissive: 0x4338ca,
+      emissiveIntensity: 0.6,
+      roughness: 0.15,
+      metalness: 0.4,
+      transparent: true,
+      opacity: 0.92
+    });
+
+    // 八角形白玉噴泉基座外框 (Octagonal Basin Rim)
+    const basin = new THREE.Mesh(new THREE.CylinderGeometry(2.1, 2.35, 0.45, 8), marbleMat);
+    basin.position.y = 0.22;
+    basin.receiveShadow = true;
+    pool.add(basin);
+
+    // 八角形黃金包邊裝飾框
+    const goldRim = new THREE.Mesh(new THREE.TorusGeometry(2.05, 0.08, 6, 8), goldMat);
+    goldRim.rotation.x = Math.PI / 2;
+    goldRim.position.y = 0.45;
+    pool.add(goldRim);
+
+    // 澄澈星光倒影水面 (Reflection Water Surface)
+    const water = new THREE.Mesh(new THREE.CircleGeometry(1.85, 16), waterMat);
+    water.rotation.x = -Math.PI / 2;
+    water.position.y = 0.42;
+    pool.add(water);
+
+    // 池心白玉雕花小基柱 (Central Pedestal)
+    const centerPost = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.45, 0.65, 8), marbleMat);
+    centerPost.position.y = 0.6;
+    pool.add(centerPost);
+
+    // 池心懸浮緩慢自轉的透明多面體稜鏡球 (Spinning Crystal Polyhedron, 高 1.7m)
+    const crystal = new THREE.Mesh(new THREE.DodecahedronGeometry(0.48, 0), crystalMat);
+    crystal.position.y = 1.65;
+    crystal.castShadow = true;
+    pool.add(crystal);
+
+    // 圍繞晶體的金色沉思光環 (Orbiting Ring of Thought)
+    const thoughtRing = new THREE.Mesh(new THREE.TorusGeometry(0.85, 0.03, 6, 24), goldMat);
+    thoughtRing.position.y = 1.65;
+    pool.add(thoughtRing);
+
+    // 互動點擊判定盒
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.6, 3.6, 3.6), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 1.8;
+    hitBox.userData = {
+      id: 'pool_of_reflection',
+      label: '💡 深思水晶沉思之泉 (THINK)',
+      onClick: () => {
+        this.world.openSpeechCard('THINK', () => {
+          this.world.addXP(60);
+          this.checkZoneCompletionStatus();
+        });
+      }
+    };
+    pool.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      crystal.position.y = 1.65 + Math.sin(time * 2.0) * 0.08;
+      crystal.rotation.y = time * 1.2;
+      crystal.rotation.z = time * 0.8;
+      thoughtRing.rotation.x = time * 1.0;
+      thoughtRing.rotation.y = time * 0.6;
+    });
+
+    group.add(pool);
+  }
+
+  // 9. 智慧賢者之冠天秤儀 (SMART POI, x: 5.0, z: 4.0)
+  buildPantheonScalesOfWisdom(group, x, y, z) {
+    const scales = new THREE.Group();
+    scales.position.set(x, y, z);
+
+    const marbleMat = new THREE.MeshStandardMaterial({ map: this.tex.celestialMarble, roughness: 0.35 });
+    const goldMat = new THREE.MeshStandardMaterial({ map: this.tex.astrolabeBrass, metalness: 0.88, roughness: 0.22 });
+    const crystalMat = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      emissive: 0x0284c7,
+      emissiveIntensity: 0.5,
+      roughness: 0.1,
+      metalness: 0.5
+    });
+
+    // 大理石天壇基座
+    const dais = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 2.0, 0.35, 16), marbleMat);
+    dais.position.y = 0.175;
+    dais.receiveShadow = true;
+    scales.add(dais);
+
+    // 天秤中軸立柱 (Central Balance Pillar)
+    const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, 2.2, 8), goldMat);
+    pillar.position.y = 1.35;
+    pillar.castShadow = true;
+    scales.add(pillar);
+
+    // 頂部轉軸球 (Pivot Sphere)
+    const pivot = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 12), goldMat);
+    pivot.position.y = 2.45;
+    scales.add(pivot);
+
+    // 左右天秤擺臂 (Balance Beam)
+    const beamGroup = new THREE.Group();
+    beamGroup.position.y = 2.45;
+
+    const crossBeam = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.08, 0.08), goldMat);
+    beamGroup.add(crossBeam);
+
+    // 左端吊盤與金色智慧之腦雕塑 (Left Pan: Golden Brain)
+    const leftPanGroup = new THREE.Group();
+    leftPanGroup.position.set(-1.05, -0.65, 0);
+
+    const leftPan = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.36, 0.06, 12), goldMat);
+    leftPanGroup.add(leftPan);
+
+    const brainMesh = new THREE.Mesh(new THREE.SphereGeometry(0.28, 12, 10), goldMat);
+    brainMesh.scale.set(1.0, 0.8, 1.2);
+    brainMesh.position.y = 0.24;
+    brainMesh.castShadow = true;
+    leftPanGroup.add(brainMesh);
+
+    beamGroup.add(leftPanGroup);
+
+    // 右端吊盤與星光璀璨水晶 (Right Pan: Celestial Star Crystal)
+    const rightPanGroup = new THREE.Group();
+    rightPanGroup.position.set(1.05, -0.65, 0);
+
+    const rightPan = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.36, 0.06, 12), goldMat);
+    rightPanGroup.add(rightPan);
+
+    const starCrystal = new THREE.Mesh(new THREE.OctahedronGeometry(0.28, 0), crystalMat);
+    starCrystal.position.y = 0.28;
+    starCrystal.castShadow = true;
+    rightPanGroup.add(starCrystal);
+
+    beamGroup.add(rightPanGroup);
+
+    scales.add(beamGroup);
+
+    // 互動點擊判定盒
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.6, 3.8, 3.2), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 1.9;
+    hitBox.userData = {
+      id: 'scales_of_wisdom',
+      label: '🧠 智慧賢者之冠天秤儀 (SMART)',
+      onClick: () => {
+        this.world.openSpeechCard('SMART', () => {
+          this.world.addXP(60);
+          this.checkZoneCompletionStatus();
+        });
+      }
+    };
+    scales.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      // 天秤微幅靈動上下擺動，象徵知識的動態平衡
+      const tilt = Math.sin(time * 1.4) * 0.08;
+      beamGroup.rotation.z = tilt;
+      leftPanGroup.rotation.z = -tilt;
+      rightPanGroup.rotation.z = -tilt;
+      starCrystal.rotation.y = time * 1.5;
+    });
+
+    group.add(scales);
+  }
+
+  // 10. 星界榮耀展翅天台 (FLY POI, x: 0.0, z: -12.5)
+  buildPantheonFlightTerrace(group, x, y, z) {
+    const terrace = new THREE.Group();
+    terrace.position.set(x, y, z);
+
+    const marbleMat = new THREE.MeshStandardMaterial({ map: this.tex.celestialMarble, roughness: 0.35 });
+    const goldMat = new THREE.MeshStandardMaterial({ map: this.tex.astrolabeBrass, metalness: 0.88, roughness: 0.22 });
+    const wingGlowMat = new THREE.MeshBasicMaterial({
+      color: 0xc084fc,
+      transparent: true,
+      opacity: 0.72,
+      side: THREE.DoubleSide
+    });
+
+    // 伸向星空的白理石飛翔天台 (Flight Terrace Platform)
+    const platform = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.45, 3.8), marbleMat);
+    platform.position.y = 0.22;
+    platform.receiveShadow = true;
+    terrace.add(platform);
+
+    // 左右兩座黃金雄鷹守護石雕 (Twin Golden Eagle Finials)
+    [-2.1, 2.1].forEach(ex => {
+      const eaglePedestal = new THREE.Mesh(new THREE.BoxGeometry(0.55, 1.2, 0.55), marbleMat);
+      eaglePedestal.position.set(ex, 0.85, -1.2);
+      terrace.add(eaglePedestal);
+
+      const eagleBody = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.65, 6), goldMat);
+      eagleBody.position.set(ex, 1.7, -1.2);
+      terrace.add(eagleBody);
+
+      const eagleWing1 = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.16, 0.04), goldMat);
+      eagleWing1.position.set(ex - 0.22, 1.75, -1.2);
+      eagleWing1.rotation.z = 0.45;
+      terrace.add(eagleWing1);
+
+      const eagleWing2 = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.16, 0.04), goldMat);
+      eagleWing2.position.set(ex + 0.22, 1.75, -1.2);
+      eagleWing2.rotation.z = -0.45;
+      terrace.add(eagleWing2);
+    });
+
+    // 天台地面金色星芒展翅圖徽 (Wings of Flight Floor Emblem)
+    const emblem = new THREE.Mesh(new THREE.RingGeometry(0.6, 1.6, 32), wingGlowMat);
+    emblem.rotation.x = -Math.PI / 2;
+    emblem.position.y = 0.46;
+    terrace.add(emblem);
+
+    // 懸浮垂直金色展翅星光門戶光環
+    const portalRing = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.06, 8, 32), goldMat);
+    portalRing.position.set(0, 2.2, -1.0);
+    terrace.add(portalRing);
+
+    // 互動點擊判定盒
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(4.2, 4.0, 3.6), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 2.0;
+    hitBox.userData = {
+      id: 'wings_of_flight_terrace',
+      label: '🦅 星界榮耀展翅天台 (FLY)',
+      onClick: () => {
+        this.world.openSpeechCard('FLY', () => {
+          this.world.addXP(70);
+          this.checkZoneCompletionStatus();
+        });
+      }
+    };
+    terrace.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      portalRing.rotation.z = time * 0.8;
+      wingGlowMat.opacity = 0.55 + Math.sin(time * 3.0) * 0.2;
+    });
+
+    group.add(terrace);
+  }
+
+  // 11. 南側降落星界天梯 (返回 Zone 8 極光冰雪聖域)
+  buildPantheonGlacialReturnGate(group, x, y, z, label, onTravel) {
+    const gate = new THREE.Group();
+    gate.position.set(x, y, z);
+
+    const marbleMat = new THREE.MeshStandardMaterial({ map: this.tex.celestialMarble, roughness: 0.35 });
+    const goldMat = new THREE.MeshStandardMaterial({ map: this.tex.astrolabeBrass, metalness: 0.85, roughness: 0.22 });
+    const beamMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.48, side: THREE.DoubleSide });
+
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.85, 0.38, 16), marbleMat);
+    base.position.y = 0.19;
+    gate.add(base);
+
+    const beam = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 0.8, 12, 16, 1, true), beamMat);
+    beam.position.y = -4.0;
+    gate.add(beam);
+
+    [-1.6, 1.6].forEach(px => {
+      const p = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 3.2, 10), goldMat);
+      p.position.set(px, 1.6, 0);
+      gate.add(p);
+    });
+
+    const glowPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.8, 3.0),
+      new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.42, side: THREE.DoubleSide })
+    );
+    glowPlane.position.set(0, 1.6, 0);
+    gate.add(glowPlane);
+
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.6, 4.0, 2.5), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 1.8;
+    hitBox.userData = {
+      id: 'return_portal_zone8_from_pantheon',
+      label,
+      onClick: () => {
+        if (onTravel) onTravel();
+      }
+    };
+    gate.add(hitBox);
+    this.world.interactables.push(hitBox);
+
+    this.world.animators.push((time) => {
+      glowPlane.material.opacity = 0.35 + Math.sin(time * 3.0) * 0.15;
+    });
+
+    group.add(gate);
+  }
+
+  // 12. 👑 關卡主 NPC：星界大導師・奧利弗大校長 (Grand Archmage Oliver)
+  buildPantheonGuardianNPC(group, x, y, z) {
+    const npc = new THREE.Group();
+    npc.position.set(x, y, z);
+
+    const robeMat = new THREE.MeshStandardMaterial({ color: 0x312e81, roughness: 0.55 });
+    const velvetMat = new THREE.MeshStandardMaterial({ color: 0x4c1d95, roughness: 0.65 });
+    const goldMat = new THREE.MeshStandardMaterial({ map: this.tex.astrolabeBrass, metalness: 0.88, roughness: 0.22 });
+    const skinMat = new THREE.MeshStandardMaterial({ color: 0xfed7aa, roughness: 0.8 });
+    const beardMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.55 });
+    const crystalMat = new THREE.MeshStandardMaterial({
+      color: 0xfde047,
+      emissive: 0xd97706,
+      emissiveIntensity: 0.8,
+      roughness: 0.15,
+      metalness: 0.4
+    });
+
+    // 雕花白理石祭台 (Dais)
+    const pedestal = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.35, 0.22, 16), goldMat);
+    pedestal.position.y = 0.11;
+    pedestal.receiveShadow = true;
+    npc.add(pedestal);
+
+    // 腳下金色星盤光環
+    const auraMat = new THREE.MeshBasicMaterial({ color: 0xfde047, transparent: true, opacity: 0.68, side: THREE.DoubleSide });
+    const aura = new THREE.Mesh(new THREE.RingGeometry(1.25, 1.55, 24), auraMat);
+    aura.rotation.x = -Math.PI / 2;
+    aura.position.y = 0.12;
+    npc.add(aura);
+
+    // 大導師紫天鵝絨長袍 (Grand Archmage Robe)
+    const robe = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.58, 1.8, 12), robeMat);
+    robe.position.y = 1.05;
+    robe.castShadow = true;
+    npc.add(robe);
+
+    // 金飾披肩 (Gold-trimmed Mantle)
+    const mantle = new THREE.Mesh(new THREE.CylinderGeometry(0.44, 0.52, 0.6, 12), velvetMat);
+    mantle.position.y = 1.8;
+    npc.add(mantle);
+
+    // 頭部與飄逸長白鬍鬚 (Head & Scholarly Beard)
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.26, 12, 12), skinMat);
+    head.position.y = 2.22;
+    head.castShadow = true;
+    npc.add(head);
+
+    const beard = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.88, 8), beardMat);
+    beard.position.set(0, 1.74, 0.18);
+    beard.rotation.x = -0.2;
+    npc.add(beard);
+
+    const hair = new THREE.Mesh(new THREE.SphereGeometry(0.3, 10, 10), beardMat);
+    hair.position.set(0, 2.26, -0.06);
+    npc.add(hair);
+
+    // 金邊學者眼鏡 (Scholarly Spectacles)
+    const glasses = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.08, 0.04), goldMat);
+    glasses.position.set(0, 2.24, 0.25);
+    npc.add(glasses);
+
+    // 智慧星宿冠冕 (Wisdom Diadem)
+    const diadem = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.04, 6, 16), goldMat);
+    diadem.rotation.x = Math.PI / 2;
+    diadem.position.set(0, 2.32, 0);
+    npc.add(diadem);
+
+    const diademGem = new THREE.Mesh(new THREE.OctahedronGeometry(0.08, 0), crystalMat);
+    diademGem.position.set(0, 2.45, 0.26);
+    npc.add(diademGem);
+
+    // 星界智慧法杖 (Grand Astral Scepter)
+    const staff = new THREE.Group();
+    staff.position.set(0.48, 1.5, 0.2);
+
+    const staffPole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.2, 8), goldMat);
+    staff.add(staffPole);
+
+    const staffRing = new THREE.Mesh(new THREE.TorusGeometry(0.25, 0.03, 6, 16), goldMat);
+    staffRing.position.y = 1.1;
+    staff.add(staffRing);
+
+    // 法杖頂端自轉金色多面體星核 (Spinning Astral Core)
+    const staffStar = new THREE.Mesh(new THREE.DodecahedronGeometry(0.16, 0), crystalMat);
+    staffStar.position.y = 1.1;
+    staff.add(staffStar);
+
+    npc.add(staff);
+
+    // 關卡主專屬懸浮銘牌
+    const billboard = this.createGuardianBillboard('zone9', '奧利弗大校長');
+    billboard.position.set(0, 3.2, 0);
+    npc.add(billboard);
+
+    // 互動點擊判定盒
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(2.6, 3.6, 2.6), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.y = 1.8;
+    hitBox.userData = {
+      id: 'guardian_zone9',
+      label: '💬 [E] 與關卡主・奧利弗大校長對話 (Grand Archmage Oliver)',
+      onClick: () => {
+        this.handleGuardianInteraction('zone9');
       }
     };
     npc.add(hitBox);

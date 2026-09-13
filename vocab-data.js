@@ -424,6 +424,108 @@ const VOCAB_DATA = {
     matchKeywords: ["climb", "climbs", "climbed", "climate", "line"],
     xp: 70,
     color: "#a855f7"
+  },
+  "LIBRARY": {
+    word: "LIBRARY",
+    phonics: "/ˈlaɪ.brer.i/ • L-I-B-R-A-R-Y",
+    zh: "圖書館、藏書閣",
+    category: "星界萬神殿堂",
+    mascot: "oliver",
+    mascotName: "奧利弗大校長 Oliver",
+    mascotImg: "assets/textures/owl-guide.png",
+    dialogue: "“Welcome to the Astral Library, where thousands of magical grimoires rest quietly.”",
+    dialogueZh: "「歡迎來到星界智慧大圖書館，成千上萬的魔法萬卷古籍在此靜靜守護智慧。」",
+    prompt: "請走向雙層紫檀木智慧大書閣，唸出：LIBRARY！",
+    puzzleHint: "宏偉的大理石書閣典藏著古往今來的宇宙奧秘，書架散發微光！",
+    audioFile: "assets/sounds/vocab/LIBRARY.wav",
+    matchKeywords: ["library", "libraries", "berry", "liberty"],
+    xp: 60,
+    color: "#6366f1"
+  },
+  "READ": {
+    word: "READ",
+    phonics: "/riːd/ • R-E-A-D",
+    zh: "閱讀、朗讀",
+    category: "星界萬神殿堂",
+    mascot: "oliver",
+    mascotName: "奧利弗大校長 Oliver",
+    mascotImg: "assets/textures/owl-guide.png",
+    dialogue: "“Read the ancient floating grimoire to illuminate your path through the stars.”",
+    dialogueZh: "「閱讀這本遠古懸浮魔法大典，讓智慧的光芒照亮你穿行星海的旅途。」",
+    prompt: "請翻閱講台上懸浮發光的遠古大典，唸出：READ！",
+    puzzleHint: "講台上的神聖法典正自動懸浮翻動，星光符文從字裡行間飄散而出！",
+    audioFile: "assets/sounds/vocab/READ.wav",
+    matchKeywords: ["read", "reads", "reader", "reading", "red"],
+    xp: 50,
+    color: "#818cf8"
+  },
+  "WRITE": {
+    word: "WRITE",
+    phonics: "/raɪt/ • W-R-I-T-E",
+    zh: "書寫、筆耕",
+    category: "星界萬神殿堂",
+    mascot: "oliver",
+    mascotName: "奧利弗大校長 Oliver",
+    mascotImg: "assets/textures/owl-guide.png",
+    dialogue: "“Take up the golden quill and write your own legend in the Book of Stars.”",
+    dialogueZh: "「拿起這支黃金羽毛筆，在星辰之書上親手寫下屬於你的英雄傳奇吧。」",
+    prompt: "請在黑曜石書寫桌前提起金色羽毛筆，唸出：WRITE！",
+    puzzleHint: "黑曜石書桌上擺放著金色孔雀羽毛筆與古老羊皮紙，等待你寫下智慧之語！",
+    audioFile: "assets/sounds/vocab/WRITE.wav",
+    matchKeywords: ["write", "writes", "writer", "right", "white"],
+    xp: 50,
+    color: "#f59e0b"
+  },
+  "THINK": {
+    word: "THINK",
+    phonics: "/θɪŋk/ • T-H-I-N-K",
+    zh: "思考、沉思",
+    category: "星界萬神殿堂",
+    mascot: "oliver",
+    mascotName: "奧利弗大校長 Oliver",
+    mascotImg: "assets/textures/owl-guide.png",
+    dialogue: "“Quiet your mind and think deeply by the sacred pool of reflection.”",
+    dialogueZh: "「平靜你的心靈，在沉思之泉旁深度思考，真正的洞察力來自冷靜的思維。」",
+    prompt: "請凝望八角白玉沉思之泉的水中星芒，唸出：THINK！",
+    puzzleHint: "澄澈的白玉泉水倒映著浩瀚宇宙，池心的水晶稜鏡緩緩自轉啟迪思緒！",
+    audioFile: "assets/sounds/vocab/THINK.wav",
+    matchKeywords: ["think", "thinks", "thinking", "thank", "thin"],
+    xp: 60,
+    color: "#38bdf8"
+  },
+  "SMART": {
+    word: "SMART",
+    phonics: "/smɑːrt/ • S-M-A-R-T",
+    zh: "聰明的、智慧的",
+    category: "星界萬神殿堂",
+    mascot: "oliver",
+    mascotName: "奧利弗大校長 Oliver",
+    mascotImg: "assets/textures/owl-guide.png",
+    dialogue: "“Knowledge and curiosity make every young adventurer smart and wise.”",
+    dialogueZh: "「對世界的好奇與知識的累積，能讓每一位年輕冒險者變得無比聰明與睿智。」",
+    prompt: "請注視衡量知識平衡的黃金天秤儀，唸出：SMART！",
+    puzzleHint: "青銅與黃金鑄造的天秤儀左端托著智慧金腦，右端托著璀璨星石！",
+    audioFile: "assets/sounds/vocab/SMART.wav",
+    matchKeywords: ["smart", "smarts", "start", "small", "art"],
+    xp: 60,
+    color: "#fde047"
+  },
+  "FLY": {
+    word: "FLY",
+    phonics: "/flaɪ/ • F-L-Y",
+    zh: "飛翔、展翅高飛",
+    category: "星界萬神殿堂",
+    mascot: "oliver",
+    mascotName: "奧利弗大校長 Oliver",
+    mascotImg: "assets/textures/owl-guide.png",
+    dialogue: "“Spread your wings of wisdom and fly high above the boundless celestial sky!”",
+    dialogueZh: "「展開你的智慧之翼，在無邊無際的星界蒼穹中自在飛翔、傲視天際！」",
+    prompt: "請登上兩側佇立金鷹雕像的白玉展翅天台，唸出：FLY！",
+    puzzleHint: "展翅天台的中央懸浮著巨大的金色光翼光環，踏上去即可展翅飛翔！",
+    audioFile: "assets/sounds/vocab/FLY.wav",
+    matchKeywords: ["fly", "flies", "flying", "flew", "light"],
+    xp: 70,
+    color: "#c084fc"
   }
 };
 
@@ -678,6 +780,68 @@ const GUARDIAN_TRIALS = {
         targetKeywords: ["can", "you", "climb", "the", "white", "snow", "mountain"],
         requiredAccuracy: 80,
         audioText: "Can you climb the white snow mountain?"
+      }
+    ]
+  },
+  'zone9': {
+    zoneId: 'zone9',
+    zoneName: '星界萬神殿堂',
+    bossId: 'grand_archmage_oliver',
+    bossName: '奧利弗大校長 (Grand Archmage Oliver)',
+    bossRole: '🏛️ 星界大導師・智慧萬神殿長老',
+    bossAvatar: 'assets/textures/owl-guide.png',
+    bossEmoji: '🏛️',
+    introDialogue: "Salutations, 卓越的年輕冒險者！我是萬神殿堂大導師——奧利弗 🏛️。你走過了書齋、市集、森林、操場、車站、海港、觀測站與冰雪聖域，終於登上了象徵宇宙智慧殿堂的萬神之巔！想要通過最後的考驗、榮獲至高無上的【星界智慧之星 🌟】，請接受我的「英語問句三重終極試煉」！",
+    rewardXP: 300,
+    starName: "星界智慧之星 🌟",
+    victoryDialogue: "Magnificent! 你的思維敏捷、發音鏗鏘有力，完美詮釋了求知與智慧的真正真諦！以星界萬神殿堂大導師之名，我將【星界智慧之星】頒發給你！恭喜你圓滿通關全 9 大空間，榮耀加冕為全領域英語大魔導士！",
+    questions: [
+      {
+        stage: 1,
+        type: 'choice',
+        title: '問句試煉 1/3：數量疑問詞選擇題 (Quantity Question Words)',
+        scenario: '大圖書館探索情境：奧利弗大校長詢問你在這座宏偉的萬神圖書館中讀了多少本書',
+        prompt: '請問句中的空格應填入哪一個疑問詞？',
+        sentence: "“_____ many books do you read in the library?”",
+        sentenceZh: "「你在這座圖書館裡讀了多少本書呢？」",
+        audioText: "How many books do you read in the library?",
+        options: [
+          { key: 'A', text: 'How', correct: true, hint: '答對了！「How many」是用於詢問可數名詞數量的標準英語問句開頭！' },
+          { key: 'B', text: 'What', correct: false, hint: 'What many 是不合文法的組合，詢問數量要用 How many 喔！' },
+          { key: 'C', text: 'Where', correct: false, hint: 'Where 是詢問地點，詢問多少本要搭配 How many！' },
+          { key: 'D', text: 'Who', correct: false, hint: 'Who 是詢問人物，不能與 many books 搭配詢問數量喔！' }
+        ],
+        explanation: '【How】搭配 many（How many + 複數名詞）用於詢問數量。「How many books do you read in the library?」為最常見的閱讀數量問句。'
+      },
+      {
+        stage: 2,
+        type: 'choice',
+        title: '問句試煉 2/3：情境能力助動詞選擇題 (Modal Auxiliary Verbs)',
+        scenario: '星界展翅情境：大導師指著殿堂外浩瀚的繁星雲海，問你我們能否在星空中展翅高飛',
+        prompt: '請問句中的空格應填入哪一個助動詞？',
+        sentence: "“_____ we fly high in the starry sky?”",
+        sentenceZh: "「我們能在這片繁星閃爍的天空中高飛嗎？」",
+        audioText: "Can we fly high in the starry sky?",
+        options: [
+          { key: 'A', text: 'Can', correct: true, hint: '太優秀了！「Can we fly...」表示詢問能力或提議「我們能...飛翔嗎？」。' },
+          { key: 'B', text: 'Are', correct: false, hint: '搭配原形動詞 fly，不能使用 Be 動詞 Are 喔！' },
+          { key: 'C', text: 'Is', correct: false, hint: '主詞是複數 we，絕對不能使用單數 Is！' },
+          { key: 'D', text: 'Do', correct: false, hint: '詢問展翅飛翔的能力與可能性，以助動詞 Can 最為貼切！' }
+        ],
+        explanation: '【Can】表示能力與可能性，「Can we fly high in the starry sky?」意思為「我們能在繁星璀璨的夜空中翱翔高飛嗎？」。'
+      },
+      {
+        stage: 3,
+        type: 'speech',
+        title: '終極試煉 3/3：英語整句口說朗讀 (Required Accuracy ≥ 80%)',
+        scenario: '智慧加冕任務：請向奧利弗大導師大聲朗讀出這句智慧箴言，加冕為星界大魔導士！',
+        prompt: '請點擊下方麥克風，完整清晰地朗讀出這句智慧誓言：',
+        targetSentence: "I can read and think to be smart.",
+        targetSentenceZh: "「我能透過閱讀與思考變得聰明智慧。」",
+        phoneticGuide: "/aɪ kæn riːd ænd θɪŋk tuː biː smɑːrt/",
+        targetKeywords: ["i", "can", "read", "and", "think", "to", "be", "smart"],
+        requiredAccuracy: 80,
+        audioText: "I can read and think to be smart."
       }
     ]
   }
