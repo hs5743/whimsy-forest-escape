@@ -1161,8 +1161,10 @@ class SpatialZoneManager {
 
     const skyGroup = new THREE.Group();
 
-    // 1. 360 度反向渲染圓柱全景天穹 (保持地平線水平平直，消除球形極點扭曲拉伸)
-    const panoramaGeo = new THREE.CylinderGeometry(radius, radius, height, 48, 1, true);
+    // 1. 360 度反向渲染天穹 (支援圓柱全景 Cylinder 或球形天穹 Sphere)
+    const panoramaGeo = options.shape === 'sphere'
+      ? new THREE.SphereGeometry(radius, 48, 32)
+      : new THREE.CylinderGeometry(radius, radius, height, 48, 1, true);
     const panoramaMat = new THREE.MeshBasicMaterial({
       map: texture,
       side: THREE.BackSide,
@@ -6313,11 +6315,11 @@ class SpatialZoneManager {
   buildGlacialAuroraSky(group) {
     const skyGroup = new THREE.Group();
 
-    // 翡翠綠極光絲帶 1 (發光疊加模式)
+    // 翡翠綠極光絲帶 1 (發光疊加模式 - 柔和通透氛圍)
     const auroraMat1 = new THREE.MeshBasicMaterial({
       color: 0x10b981,
       transparent: true,
-      opacity: 0.65,
+      opacity: 0.22,
       blending: THREE.AdditiveBlending,
       side: THREE.DoubleSide
     });
@@ -6340,7 +6342,7 @@ class SpatialZoneManager {
     const auroraMat2 = new THREE.MeshBasicMaterial({
       color: 0x06b6d4,
       transparent: true,
-      opacity: 0.58,
+      opacity: 0.18,
       blending: THREE.AdditiveBlending,
       side: THREE.DoubleSide
     });
@@ -6364,7 +6366,7 @@ class SpatialZoneManager {
     const auroraMat3 = new THREE.MeshBasicMaterial({
       color: 0x8b5cf6,
       transparent: true,
-      opacity: 0.52,
+      opacity: 0.16,
       blending: THREE.AdditiveBlending,
       side: THREE.DoubleSide
     });
@@ -6456,14 +6458,14 @@ class SpatialZoneManager {
     this.world.animators.push((time) => {
       ribbon1.rotation.z = Math.sin(time * 0.4) * 0.05;
       ribbon1.position.y = 28 + Math.sin(time * 0.6) * 1.5;
-      auroraMat1.opacity = 0.58 + Math.sin(time * 0.8) * 0.12;
+      auroraMat1.opacity = 0.20 + Math.sin(time * 0.8) * 0.04;
 
       ribbon2.rotation.z = Math.cos(time * 0.35) * 0.06;
       ribbon2.position.y = 34 + Math.cos(time * 0.5) * 1.8;
-      auroraMat2.opacity = 0.52 + Math.cos(time * 0.7) * 0.14;
+      auroraMat2.opacity = 0.17 + Math.cos(time * 0.7) * 0.04;
 
       ribbon3.rotation.z = -Math.sin(time * 0.3) * 0.04;
-      auroraMat3.opacity = 0.48 + Math.sin(time * 0.55) * 0.10;
+      auroraMat3.opacity = 0.15 + Math.sin(time * 0.55) * 0.03;
     });
 
     group.add(skyGroup);
@@ -7526,15 +7528,15 @@ class SpatialZoneManager {
     // 2. 浩瀚星穹深邃天際、紫金星雲帷幕、600星芒
     this.buildPantheonCelestialSky(group);
 
-    // 360 度浩瀚星界星雲殿堂全景天穹 (Panoramic Sky Cylinder)
+    // 360 度浩瀚星界星雲殿堂全景球形天穹 (Panoramic Sky Sphere - 覆蓋天頂 Oculus 與四周無縫相接)
     this.buildZoneSkyPanorama(group, 'zone9', this.tex.astralPantheonPanorama, {
-      radius: 95,
-      height: 85,
-      yOffset: 10.0,
-      rotationSpeed: 0.0012,
-      mistColor: 0x312e81,
-      mistOpacity: 0.35,
-      mistY: -4.0
+      shape: 'sphere',
+      radius: 110,
+      yOffset: 0.0,
+      rotationSpeed: 0.0006,
+      mistColor: 0x1e1b4b,
+      mistOpacity: 0.22,
+      mistY: -6.0
     });
 
     // 3. 羅馬萬神殿圓形大理石基台、8根科林斯凹槽柱廊與天頂環樑
@@ -7576,8 +7578,8 @@ class SpatialZoneManager {
     // 12. 👑 關卡主 NPC：星界大導師・奧利弗大校長 (Grand Archmage Oliver, x: 1.5, z: -3.5)
     this.buildPantheonGuardianNPC(group, 1.5, 0, -3.5);
 
-    // 13. 飄浮星界智慧金色塵埃微粒 (Astral Stardust Particles)
-    this.addFloatingParticles(group, 0xfde047, 300, 36, 8);
+    // 13. 飄浮星界智慧金色塵埃微粒 (Astral Stardust Particles - 優化粒子密度，純淨空靈)
+    this.addFloatingParticles(group, 0xfde047, 60, 30, 6.5);
   }
 
   // 1. 光照系統
@@ -7585,15 +7587,15 @@ class SpatialZoneManager {
     const hemiLight = new THREE.HemisphereLight(0xfffbeb, 0x1e1b4b, 1.45);
     group.add(hemiLight);
 
-    const celestialSun = new THREE.DirectionalLight(0xfffbeb, 1.6);
+    const celestialSun = new THREE.DirectionalLight(0xfffbeb, 1.4);
     celestialSun.position.set(12, 38, 10);
     celestialSun.castShadow = true;
     celestialSun.shadow.mapSize.width = 1024;
     celestialSun.shadow.mapSize.height = 1024;
     group.add(celestialSun);
 
-    // 中央萬神天頂直射黃金神光 (Oculus Beam Light)
-    const oculusGlow = new THREE.PointLight(0xfde047, 2.6, 26);
+    // 中央萬神天頂直射黃金神光 (Oculus Beam Light - 溫潤通透，不泛光過曝)
+    const oculusGlow = new THREE.PointLight(0xfde047, 1.4, 22);
     oculusGlow.position.set(0, 5.8, 0);
     group.add(oculusGlow);
 
@@ -7613,121 +7615,24 @@ class SpatialZoneManager {
     group.add(deskGlow);
   }
 
-  // 2. 浩瀚星穹深邃天際、紫金星雲帷幕、600星芒
+  // 2. 浩瀚星穹深邃天際與以太微光 (深邃純淨、通透無雜質)
   buildPantheonCelestialSky(group) {
     const skyGroup = new THREE.Group();
 
-    // 紫金星雲帷幕 1 (發光疊加模式)
-    const nebulaMat1 = new THREE.MeshBasicMaterial({
-      color: 0x8b5cf6,
+    // 天頂深邃星界以太微光層 (Subtle Zenith Ether Aura - 柔和深邃，與 360 度 AI 全景天穹融為一體)
+    const zenithGlowMat = new THREE.MeshBasicMaterial({
+      color: 0x4338ca,
       transparent: true,
-      opacity: 0.45,
+      opacity: 0.12,
       blending: THREE.AdditiveBlending,
-      side: THREE.DoubleSide
+      side: THREE.BackSide,
+      depthWrite: false
     });
-    const nebGeo1 = new THREE.PlaneGeometry(96, 24, 28, 4);
-    const pos1 = (nebGeo1.attributes && nebGeo1.attributes.position) ? nebGeo1.attributes.position : null;
-    if (pos1) {
-      for (let i = 0; i < pos1.count; i++) {
-        const vx = pos1.getX(i);
-        const vz = Math.sin((vx / 96) * Math.PI * 2.8) * 12;
-        pos1.setZ(i, vz);
-      }
-      if (nebGeo1.computeVertexNormals) nebGeo1.computeVertexNormals();
-    }
-    const nebula1 = new THREE.Mesh(nebGeo1, nebulaMat1);
-    nebula1.position.set(0, 32, -36);
-    nebula1.rotation.x = 0.22;
-    skyGroup.add(nebula1);
-
-    // 深邃星界靛藍星雲 2
-    const nebulaMat2 = new THREE.MeshBasicMaterial({
-      color: 0x3b82f6,
-      transparent: true,
-      opacity: 0.42,
-      blending: THREE.AdditiveBlending,
-      side: THREE.DoubleSide
-    });
-    const nebGeo2 = new THREE.PlaneGeometry(88, 20, 24, 4);
-    const pos2 = (nebGeo2.attributes && nebGeo2.attributes.position) ? nebGeo2.attributes.position : null;
-    if (pos2) {
-      for (let i = 0; i < pos2.count; i++) {
-        const vx = pos2.getX(i);
-        const vz = Math.cos((vx / 88) * Math.PI * 3.2) * 10;
-        pos2.setZ(i, vz);
-      }
-      if (nebGeo2.computeVertexNormals) nebGeo2.computeVertexNormals();
-    }
-    const nebula2 = new THREE.Mesh(nebGeo2, nebulaMat2);
-    nebula2.position.set(10, 36, -28);
-    nebula2.rotation.x = 0.16;
-    nebula2.rotation.y = -0.18;
-    skyGroup.add(nebula2);
-
-    // 神聖金色晨曦輝光帶 3
-    const nebulaMat3 = new THREE.MeshBasicMaterial({
-      color: 0xf59e0b,
-      transparent: true,
-      opacity: 0.35,
-      blending: THREE.AdditiveBlending,
-      side: THREE.DoubleSide
-    });
-    const nebGeo3 = new THREE.PlaneGeometry(82, 18, 22, 4);
-    const pos3 = (nebGeo3.attributes && nebGeo3.attributes.position) ? nebGeo3.attributes.position : null;
-    if (pos3) {
-      for (let i = 0; i < pos3.count; i++) {
-        const vx = pos3.getX(i);
-        const vz = Math.sin((vx / 82) * Math.PI * 2.4 + 1.2) * 8;
-        pos3.setZ(i, vz);
-      }
-      if (nebGeo3.computeVertexNormals) nebGeo3.computeVertexNormals();
-    }
-    const nebula3 = new THREE.Mesh(nebGeo3, nebulaMat3);
-    nebula3.position.set(-12, 38, -34);
-    nebula3.rotation.x = 0.2;
-    skyGroup.add(nebula3);
-
-    // 蒼穹 600 星芒星空
-    const starCount = 600;
-    const starGeo = new THREE.BufferGeometry();
-    const starCoords = new Float32Array(starCount * 3);
-    for (let i = 0; i < starCount; i++) {
-      const phi = Math.acos(-1 + (2 * i) / starCount);
-      const theta = Math.sqrt(starCount * Math.PI) * phi;
-      const r = 60 + (i % 14);
-      starCoords[i * 3] = r * Math.cos(theta) * Math.sin(phi);
-      starCoords[i * 3 + 1] = Math.max(9, r * Math.cos(phi));
-      starCoords[i * 3 + 2] = r * Math.sin(theta) * Math.sin(phi);
-    }
-    starGeo.setAttribute('position', new THREE.BufferAttribute(starCoords, 3));
-    const starMat = new THREE.PointsMaterial({
-      color: 0xfef08a,
-      size: 0.18,
-      transparent: true,
-      opacity: 0.88
-    });
-    const starField = new THREE.Points(starGeo, starMat);
-    skyGroup.add(starField);
-
-    // 遙遠天際金色星宿光環 (Celestial Astrolabe Rings in Outer Space)
-    const astroMat = new THREE.MeshBasicMaterial({ color: 0xfacc15, transparent: true, opacity: 0.32, side: THREE.DoubleSide });
-    const astroRing1 = new THREE.Mesh(new THREE.TorusGeometry(32, 0.22, 8, 48), astroMat);
-    astroRing1.position.set(0, 30, -50);
-    astroRing1.rotation.x = Math.PI / 3;
-    skyGroup.add(astroRing1);
-
-    const astroRing2 = new THREE.Mesh(new THREE.TorusGeometry(38, 0.18, 8, 48), astroMat);
-    astroRing2.position.set(0, 30, -50);
-    astroRing2.rotation.y = Math.PI / 4;
-    skyGroup.add(astroRing2);
+    const zenithGlow = new THREE.Mesh(new THREE.SphereGeometry(105, 24, 16), zenithGlowMat);
+    skyGroup.add(zenithGlow);
 
     this.world.animators.push((time) => {
-      nebula1.rotation.z = Math.sin(time * 0.35) * 0.04;
-      nebulaMat1.opacity = 0.42 + Math.sin(time * 0.75) * 0.10;
-      nebula2.rotation.z = Math.cos(time * 0.3) * 0.05;
-      nebulaMat2.opacity = 0.38 + Math.cos(time * 0.65) * 0.12;
-      astroRing1.rotation.z = time * 0.08;
-      astroRing2.rotation.z = -time * 0.06;
+      zenithGlowMat.opacity = 0.11 + Math.sin(time * 0.4) * 0.03;
     });
 
     group.add(skyGroup);
@@ -7881,56 +7786,59 @@ class SpatialZoneManager {
     group.add(templeGroup);
   }
 
-  // 4. Oculus 天窗垂直投射柔和半透明金色天光束 (Volumetric Sunbeam)
+  // 4. Oculus 天窗垂直投射柔和地表光斑與天窗微光光暈 (Subtle Skylight Aura & Floor Light Pool)
   buildPantheonVolumetricSunbeam(group) {
     const beamGroup = new THREE.Group();
 
-    // 圓錐天光半透明立體網格 (錐底擴散直達地表)
-    const beamGeo = new THREE.CylinderGeometry(2.4, 5.2, 8.2, 24, 1, true);
-    const beamMat = new THREE.MeshBasicMaterial({
-      color: 0xfef08a,
-      transparent: true,
-      opacity: 0.25,
-      blending: THREE.AdditiveBlending,
-      side: THREE.DoubleSide
-    });
-
-    const sunbeam = new THREE.Mesh(beamGeo, beamMat);
-    sunbeam.position.y = 4.2;
-    beamGroup.add(sunbeam);
-
-    // 內層細光束核心
-    const innerGeo = new THREE.CylinderGeometry(1.2, 2.6, 8.2, 16, 1, true);
-    const innerMat = new THREE.MeshBasicMaterial({
-      color: 0xfacc15,
-      transparent: true,
-      opacity: 0.28,
-      blending: THREE.AdditiveBlending,
-      side: THREE.DoubleSide
-    });
-    const innerBeam = new THREE.Mesh(innerGeo, innerMat);
-    innerBeam.position.y = 4.2;
-    beamGroup.add(innerBeam);
-
-    // 地表受光光斑 (Floor Light Pool)
-    const poolMat = new THREE.MeshBasicMaterial({
+    // A. 天窗 Oculus 圓孔邊緣柔和黃金光暈圈 (Subtle Oculus Halo - 取代遮蔽視野的突兀粗圓錐)
+    const oculusGlowMat = new THREE.MeshBasicMaterial({
       color: 0xfde047,
       transparent: true,
-      opacity: 0.35,
+      opacity: 0.26,
       blending: THREE.AdditiveBlending,
-      side: THREE.DoubleSide
+      side: THREE.DoubleSide,
+      depthWrite: false
     });
-    const poolMesh = new THREE.Mesh(new THREE.CircleGeometry(4.6, 24), poolMat);
-    poolMesh.rotation.x = -Math.PI / 2;
-    poolMesh.position.y = 0.42;
-    beamGroup.add(poolMesh);
+    const oculusHalo = new THREE.Mesh(new THREE.RingGeometry(3.6, 4.8, 36), oculusGlowMat);
+    oculusHalo.rotation.x = Math.PI / 2;
+    oculusHalo.position.y = 7.76;
+    beamGroup.add(oculusHalo);
 
+    // B. 地表受光暖金色柔和光斑 (Floor Celestial Light Pool - 溫潤典雅，視野通透開闊)
+    const poolCoreMat = new THREE.MeshBasicMaterial({
+      color: 0xfef08a,
+      transparent: true,
+      opacity: 0.22,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    });
+    const poolCore = new THREE.Mesh(new THREE.CircleGeometry(3.2, 32), poolCoreMat);
+    poolCore.rotation.x = -Math.PI / 2;
+    poolCore.position.y = 0.42;
+    beamGroup.add(poolCore);
+
+    // 地表外圈漸層柔光過渡環
+    const poolOuterMat = new THREE.MeshBasicMaterial({
+      color: 0xf59e0b,
+      transparent: true,
+      opacity: 0.10,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    });
+    const poolOuter = new THREE.Mesh(new THREE.RingGeometry(3.2, 5.0, 32), poolOuterMat);
+    poolOuter.rotation.x = -Math.PI / 2;
+    poolOuter.position.y = 0.421;
+    beamGroup.add(poolOuter);
+
+    // 動態微光呼吸波動 (呼吸起伏柔和，消除視野遮擋)
     this.world.animators.push((time) => {
-      const s = 1.0 + Math.sin(time * 1.5) * 0.05;
-      sunbeam.scale.set(s, 1.0, s);
-      beamMat.opacity = 0.22 + Math.sin(time * 2.0) * 0.08;
-      innerMat.opacity = 0.25 + Math.cos(time * 2.2) * 0.08;
-      sunbeam.rotation.y = time * 0.05;
+      poolCoreMat.opacity = 0.20 + Math.sin(time * 1.6) * 0.05;
+      poolOuterMat.opacity = 0.08 + Math.cos(time * 1.4) * 0.03;
+      oculusGlowMat.opacity = 0.24 + Math.sin(time * 1.8) * 0.05;
+      const s = 1.0 + Math.sin(time * 1.2) * 0.03;
+      poolCore.scale.set(s, s, 1.0);
     });
 
     group.add(beamGroup);
