@@ -90,7 +90,7 @@ class World3D {
     this.scene.background = new THREE.Color(0xdce8f5); // 柔和天空淡藍
     this.scene.fog = new THREE.FogExp2(0xf0e6d6, 0.025);
 
-    this.camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 100);
+    this.camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 400);
     this.camera.position.copy(this.player.pos);
 
     this.renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false });

@@ -1163,7 +1163,7 @@ class SpatialZoneManager {
 
     // 1. 360 度反向渲染天穹 (支援圓柱全景 Cylinder 或球形天穹 Sphere)
     const panoramaGeo = options.shape === 'sphere'
-      ? new THREE.SphereGeometry(radius, 48, 32)
+      ? new THREE.SphereGeometry(radius, 64, 32)
       : new THREE.CylinderGeometry(radius, radius, height, 48, 1, true);
     const panoramaMat = new THREE.MeshBasicMaterial({
       map: texture,
@@ -1176,10 +1176,10 @@ class SpatialZoneManager {
     panoramaMesh.renderOrder = -10;
     skyGroup.add(panoramaMesh);
 
-    // 2. 地平線薄霧/過渡柔光環 (柔和融接遠景地平線與近景地表)
+    // 2. 地平線薄霧/過渡柔光環 (柔和融接遠景地平線與近景地表 - 僅在圓柱全景時啟用)
     let mistRing = null;
     let mistMat = null;
-    if (mistColor !== null) {
+    if (mistColor !== null && options.shape !== 'sphere') {
       const mistGeo = new THREE.RingGeometry(18, radius * 0.98, 32);
       mistMat = new THREE.MeshBasicMaterial({
         color: mistColor,
@@ -7531,12 +7531,9 @@ class SpatialZoneManager {
     // 360 度浩瀚星界星雲殿堂全景球形天穹 (Panoramic Sky Sphere - 覆蓋天頂 Oculus 與四周無縫相接)
     this.buildZoneSkyPanorama(group, 'zone9', this.tex.astralPantheonPanorama, {
       shape: 'sphere',
-      radius: 110,
+      radius: 95,
       yOffset: 0.0,
-      rotationSpeed: 0.0006,
-      mistColor: 0x1e1b4b,
-      mistOpacity: 0.22,
-      mistY: -6.0
+      rotationSpeed: 0.0006
     });
 
     // 3. 羅馬萬神殿圓形大理石基台、8根科林斯凹槽柱廊與天頂環樑
@@ -7615,27 +7612,9 @@ class SpatialZoneManager {
     group.add(deskGlow);
   }
 
-  // 2. 浩瀚星穹深邃天際與以太微光 (深邃純淨、通透無雜質)
+  // 2. 浩瀚星穹深邃天際 (純淨通透、由 360 度 AI 高清星穹全景完整呈現，杜絕內層幾何遮擋)
   buildPantheonCelestialSky(group) {
-    const skyGroup = new THREE.Group();
-
-    // 天頂深邃星界以太微光層 (Subtle Zenith Ether Aura - 柔和深邃，與 360 度 AI 全景天穹融為一體)
-    const zenithGlowMat = new THREE.MeshBasicMaterial({
-      color: 0x4338ca,
-      transparent: true,
-      opacity: 0.12,
-      blending: THREE.AdditiveBlending,
-      side: THREE.BackSide,
-      depthWrite: false
-    });
-    const zenithGlow = new THREE.Mesh(new THREE.SphereGeometry(105, 24, 16), zenithGlowMat);
-    skyGroup.add(zenithGlow);
-
-    this.world.animators.push((time) => {
-      zenithGlowMat.opacity = 0.11 + Math.sin(time * 0.4) * 0.03;
-    });
-
-    group.add(skyGroup);
+    // 浩瀚星雲、旋臂星系與萬千星宿已由 360 度無縫球形天穹完整覆蓋，無遮擋展現純淨星河
   }
 
   // 3. 羅馬萬神殿圓形大理石基台、8根科林斯凹槽柱廊與天頂環樑
