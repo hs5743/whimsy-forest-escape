@@ -360,6 +360,10 @@ class SpatialZoneManager {
       astrolabeBrass: loader.load('assets/textures/astrolabe_brass.jpg'),
       glacialIce: loader.load('assets/textures/glacial_ice.jpg'),
       snowFrost: loader.load('assets/textures/snow_frost.jpg'),
+      locomotivePlate: loader.load('assets/textures/steam_locomotive_detail.jpg'),
+      galleonSailCanvas: loader.load('assets/textures/galleon_sail_canvas.jpg'),
+      astrolabeStarChart: loader.load('assets/textures/astrolabe_star_chart.jpg'),
+      glacialIceObelisk: loader.load('assets/textures/glacial_ice_obelisk.jpg'),
       skyIslandPanorama: loader.load('assets/textures/sky_island_panorama.jpg'),
       ariaGuardianPortrait: loader.load('assets/textures/aria_guardian_portrait.png'),
       astralPantheonPanorama: loader.load('assets/textures/astral_pantheon_panorama.jpg'),
@@ -454,6 +458,24 @@ class SpatialZoneManager {
       this.tex.snowFrost.wrapS = THREE.RepeatWrapping;
       this.tex.snowFrost.wrapT = THREE.RepeatWrapping;
       this.tex.snowFrost.repeat.set(3, 3);
+    }
+    if (this.tex.locomotivePlate) {
+      this.tex.locomotivePlate.wrapS = THREE.RepeatWrapping;
+      this.tex.locomotivePlate.wrapT = THREE.RepeatWrapping;
+      this.tex.locomotivePlate.repeat.set(3, 1);
+    }
+    if (this.tex.galleonSailCanvas) {
+      this.tex.galleonSailCanvas.wrapS = THREE.ClampToEdgeWrapping;
+      this.tex.galleonSailCanvas.wrapT = THREE.ClampToEdgeWrapping;
+    }
+    if (this.tex.astrolabeStarChart) {
+      this.tex.astrolabeStarChart.wrapS = THREE.ClampToEdgeWrapping;
+      this.tex.astrolabeStarChart.wrapT = THREE.ClampToEdgeWrapping;
+    }
+    if (this.tex.glacialIceObelisk) {
+      this.tex.glacialIceObelisk.wrapS = THREE.RepeatWrapping;
+      this.tex.glacialIceObelisk.wrapT = THREE.RepeatWrapping;
+      this.tex.glacialIceObelisk.repeat.set(1, 2);
     }
 
     // 初始化高階程序化畫布貼圖 (黃道星盤、古雅星盤刻度、玄冰符文、針織粗毛線、松樹皮、炭火床)
@@ -3163,9 +3185,18 @@ class SpatialZoneManager {
 
     const blackIronMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.4, metalness: 0.7 });
     const brassMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.3, metalness: 0.85 });
-    const frontTexMat = new THREE.MeshStandardMaterial({ map: this.tex.locomotive, roughness: 0.5, metalness: 0.3 });
+    const locomotivePlateMat = this.tex.locomotivePlate ? new THREE.MeshStandardMaterial({
+      map: this.tex.locomotivePlate,
+      roughness: 0.35,
+      metalness: 0.75
+    }) : blackIronMat;
+    const frontTexMat = new THREE.MeshStandardMaterial({
+      map: this.tex.locomotivePlate || this.tex.locomotive,
+      roughness: 0.4,
+      metalness: 0.5
+    });
 
-    const boiler = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.1, 5.2, 16), blackIronMat);
+    const boiler = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.1, 5.2, 24), locomotivePlateMat);
     boiler.rotation.x = Math.PI / 2;
     boiler.position.set(0, 1.6, 0);
     train.add(boiler);
@@ -3222,7 +3253,7 @@ class SpatialZoneManager {
       });
     });
 
-    const cab = new THREE.Mesh(new THREE.BoxGeometry(2.4, 2.6, 2.0), blackIronMat);
+    const cab = new THREE.Mesh(new THREE.BoxGeometry(2.4, 2.6, 2.0), locomotivePlateMat);
     cab.position.set(0, 2.0, -2.4);
     train.add(cab);
 
@@ -3992,7 +4023,13 @@ class SpatialZoneManager {
       metalness: 0.15
     });
     const darkWoodMat = new THREE.MeshStandardMaterial({ color: 0x3e2723, roughness: 0.85 });
-    const sailMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.9, side: THREE.DoubleSide });
+    const sailMat = new THREE.MeshStandardMaterial({
+      map: this.tex.galleonSailCanvas || null,
+      color: this.tex.galleonSailCanvas ? 0xffffff : 0xf8fafc,
+      roughness: 0.85,
+      metalness: 0.1,
+      side: THREE.DoubleSide
+    });
     const brassMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.85, roughness: 0.2 });
     const goldTrimMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.7, roughness: 0.3 });
 
@@ -5403,6 +5440,11 @@ class SpatialZoneManager {
     telescope.position.set(x, y, z);
 
     const brassMat = new THREE.MeshStandardMaterial({ map: this.tex.astrolabeBrass, metalness: 0.88, roughness: 0.28 });
+    const starChartMat = new THREE.MeshStandardMaterial({
+      map: this.tex.astrolabeStarChart || this.tex.astrolabeBrass,
+      metalness: 0.86,
+      roughness: 0.24
+    });
     const navyMat = new THREE.MeshStandardMaterial({ color: 0x0a1128, metalness: 0.8, roughness: 0.3 });
     const lensMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.05, metalness: 0.95, transparent: true, opacity: 0.85 });
     const woodMat = new THREE.MeshStandardMaterial({ map: this.tex.woodDesk, roughness: 0.75 });
@@ -5418,6 +5460,11 @@ class SpatialZoneManager {
     baseTrim.position.y = 0.72;
     telescope.add(baseTrim);
 
+    // 台座青銅星象盤 (Bronze Astrolabe Star Chart Plate)
+    const baseChart = new THREE.Mesh(new THREE.CylinderGeometry(2.0, 2.0, 0.06, 24), starChartMat);
+    baseChart.position.y = 0.76;
+    telescope.add(baseChart);
+
     // 雙叉鑄鐵旋轉支架與極軸箱 (Fork Mount & Polar Axis Housing)
     const polarHousing = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.4, 1.4), ironMat);
     polarHousing.position.set(0, 1.35, 0);
@@ -5430,7 +5477,7 @@ class SpatialZoneManager {
       telescope.add(forkArm);
 
       // 赤緯刻度盤 (Setting Circles)
-      const settingCircle = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.08, 16), brassMat);
+      const settingCircle = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.08, 16), starChartMat);
       settingCircle.position.set(fx * 1.15, 3.2, 0);
       settingCircle.rotation.z = Math.PI / 2;
       telescope.add(settingCircle);
@@ -5523,7 +5570,7 @@ class SpatialZoneManager {
     astrolabe.position.set(x, y, z);
 
     const brassDialMat = new THREE.MeshStandardMaterial({
-      map: this.tex.astrolabeDial,
+      map: this.tex.astrolabeStarChart || this.tex.astrolabeDial,
       metalness: 0.9,
       roughness: 0.22
     });
@@ -5546,6 +5593,15 @@ class SpatialZoneManager {
     base.position.y = 0.28;
     base.castShadow = true;
     astrolabe.add(base);
+
+    // 基座黃銅星盤刻度飾盤 (Astrolabe Star Chart Disc)
+    const starChartDisc = new THREE.Mesh(new THREE.CylinderGeometry(1.45, 1.45, 0.05, 32), new THREE.MeshStandardMaterial({
+      map: this.tex.astrolabeStarChart || this.tex.astrolabeDial,
+      metalness: 0.88,
+      roughness: 0.22
+    }));
+    starChartDisc.position.y = 0.58;
+    astrolabe.add(starChartDisc);
 
     // 四爪黃銅神獸支架 (Brass Claw Feet)
     for (let c = 0; c < 4; c++) {
@@ -6665,7 +6721,7 @@ class SpatialZoneManager {
 
     const runeStoneMat = new THREE.MeshStandardMaterial({ map: this.tex.stoneWall, roughness: 0.85 });
     const iceMat = new THREE.MeshStandardMaterial({
-      map: this.tex.glacialIce,
+      map: this.tex.glacialIceObelisk || this.tex.glacialIce,
       color: 0x7dd3fc,
       roughness: 0.12,
       metalness: 0.35,
@@ -6777,6 +6833,14 @@ class SpatialZoneManager {
       transparent: true,
       opacity: 0.92
     });
+    const obeliskMat = new THREE.MeshStandardMaterial({
+      map: this.tex.glacialIceObelisk || this.tex.glacialIce,
+      color: 0x93c5fd,
+      roughness: 0.12,
+      metalness: 0.35,
+      transparent: true,
+      opacity: 0.95
+    });
     const stoneMat = new THREE.MeshStandardMaterial({ map: this.tex.stoneWall, roughness: 0.85 });
     const ironMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.9, roughness: 0.3 });
     const glowMat = new THREE.MeshBasicMaterial({
@@ -6806,14 +6870,14 @@ class SpatialZoneManager {
     }
 
     // 尖聳玄冰方尖碑本體 (Chiseled Obelisk Shaft, 高 4.8m)
-    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.95, 4.8, 4), iceMat);
+    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.95, 4.8, 4), obeliskMat);
     shaft.position.y = 3.0;
     shaft.rotation.y = Math.PI / 4;
     shaft.castShadow = true;
     obeliskGroup.add(shaft);
 
     // 金字塔尖頂 (Pyramidion Capstone)
-    const cap = new THREE.Mesh(new THREE.ConeGeometry(0.48 * Math.SQRT2, 0.95, 4), iceMat);
+    const cap = new THREE.Mesh(new THREE.ConeGeometry(0.48 * Math.SQRT2, 0.95, 4), obeliskMat);
     cap.position.y = 5.75;
     cap.rotation.y = Math.PI / 4;
     obeliskGroup.add(cap);
