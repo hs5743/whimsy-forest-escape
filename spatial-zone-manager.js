@@ -465,6 +465,16 @@ class SpatialZoneManager {
     if (!this.tex.emberBed) this.tex.emberBed = this.createEmberBedTexture();
     if (!this.tex.pantheonMosaic) this.tex.pantheonMosaic = this.createPantheonMosaicTexture();
 
+    // 全面套用 sRGB 色彩伽馬編碼與最高等級非等方性過濾 (Anisotropic Filtering)
+    Object.values(this.tex).forEach(t => {
+      if (t && (t.isTexture || t instanceof THREE.Texture)) {
+        if (THREE.sRGBEncoding) t.encoding = THREE.sRGBEncoding;
+        if (this.world && this.world.renderer && this.world.renderer.capabilities) {
+          t.anisotropy = Math.min(this.world.renderer.capabilities.getMaxAnisotropy() || 8, 8);
+        }
+      }
+    });
+
     this.texturesLoaded = true;
   }
 
@@ -1046,8 +1056,13 @@ class SpatialZoneManager {
     this.world.player.yaw = zone.spawnYaw;
     this.world.player.pitch = 0;
 
-    // 播放音效與歡迎提示
-    if (window.audioManager) window.audioManager.playSfx('magicSuccess');
+    // 播放音效與歡迎提示，並無縫切換專屬星界主題音樂
+    if (window.audioManager) {
+      if (typeof window.audioManager.setZone === 'function') {
+        window.audioManager.setZone(zoneId);
+      }
+      window.audioManager.playSfx('magicSuccess');
+    }
     if (this.world) {
       this.world.showToast(`🌟 抵達【${zone.name}】！主題：${zone.topic}`);
     }

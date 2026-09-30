@@ -74,8 +74,18 @@ class SpeechManager {
         }
       };
 
+      this.recognition.onstart = () => {
+        this.isListening = true;
+        if (window.audioManager && typeof window.audioManager.duckBgm === 'function') {
+          window.audioManager.duckBgm(0.2);
+        }
+      };
+
       this.recognition.onend = () => {
         this.isListening = false;
+        if (window.audioManager && typeof window.audioManager.unduckBgm === 'function') {
+          window.audioManager.unduckBgm();
+        }
       };
     } else {
       console.warn("Web Speech API not supported on this browser.");
@@ -111,6 +121,21 @@ class SpeechManager {
       const utter = new SpeechSynthesisUtterance(word.toLowerCase());
       utter.lang = 'en-US';
       utter.rate = 0.85;
+      utter.onstart = () => {
+        if (window.audioManager && typeof window.audioManager.duckBgm === 'function') {
+          window.audioManager.duckBgm(0.25);
+        }
+      };
+      utter.onend = () => {
+        if (window.audioManager && typeof window.audioManager.unduckBgm === 'function') {
+          window.audioManager.unduckBgm();
+        }
+      };
+      utter.onerror = () => {
+        if (window.audioManager && typeof window.audioManager.unduckBgm === 'function') {
+          window.audioManager.unduckBgm();
+        }
+      };
       window.speechSynthesis.speak(utter);
     }
   }
@@ -190,6 +215,9 @@ class SpeechManager {
         this.recognition.stop();
       } catch (e) {}
       this.isListening = false;
+    }
+    if (window.audioManager && typeof window.audioManager.unduckBgm === 'function') {
+      window.audioManager.unduckBgm();
     }
     this.mode = 'word';
   }
@@ -300,6 +328,21 @@ class SpeechManager {
         utter.lang = 'en-US';
         utter.rate = 0.85;
         utter.pitch = 1.05;
+        utter.onstart = () => {
+          if (window.audioManager && typeof window.audioManager.duckBgm === 'function') {
+            window.audioManager.duckBgm(0.25);
+          }
+        };
+        utter.onend = () => {
+          if (window.audioManager && typeof window.audioManager.unduckBgm === 'function') {
+            window.audioManager.unduckBgm();
+          }
+        };
+        utter.onerror = () => {
+          if (window.audioManager && typeof window.audioManager.unduckBgm === 'function') {
+            window.audioManager.unduckBgm();
+          }
+        };
         window.speechSynthesis.speak(utter);
       } catch (err) {
         console.warn("Speech synthesis error:", err);

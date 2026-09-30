@@ -222,6 +222,16 @@
       .hud-btn.scavenger-btn-highlight, .hud-btn.passport-btn-highlight, .hud-btn.system-menu-btn { padding: 5px 8px !important; font-size: 11px !important; }
     }
 
+    /* 電影級光學暗角與景深氛圍遮罩 (Cinematic Optical Vignette) */
+    .canvas-vignette-overlay {
+      position: fixed !important;
+      inset: 0 !important;
+      pointer-events: none !important;
+      z-index: 10 !important;
+      background: radial-gradient(circle at 50% 48%, rgba(255,255,255,0) 60%, rgba(12, 18, 35, 0.24) 100%) !important;
+      box-shadow: inset 0 0 80px rgba(10, 16, 32, 0.32) !important;
+    }
+
     /* ========================================================= */
     /* 遊戲封面、劇情前言與操作指南 Onboarding 專屬高階樣式 */
     /* ========================================================= */
@@ -1009,8 +1019,9 @@
     </div>
   </div>
 
-  <!-- 3D 渲染畫布 -->
+  <!-- 3D 渲染畫布與電影級光學暗角 -->
   <canvas id="renderCanvas"></canvas>
+  <div id="canvasVignetteOverlay" class="canvas-vignette-overlay"></div>
 
   <!-- 頂部 HUD (RPG 簡約單行佈局：左側冒險者徽章卡，右側魔法護照與冒險選單) -->
   <div id="hudBar">
@@ -1877,16 +1888,16 @@
 
   <!-- 核心庫與遊戲腳本 -->
   <script src="three.min.js"></script>
-  <script src="vocab-data.js?v=20260926_v15"></script>
-  <script src="vocab-passport-bank.js?v=20260926_v15"></script>
-  <script src="speech-manager.js?v=20260926_v15"></script>
-  <script src="audio-manager.js?v=20260926_v15"></script>
-  <script src="touch-controls.js?v=20260926_v15"></script>
-  <script src="cloud-sync-manager.js?v=20260926_v15"></script>
-  <script src="spatial-zone-manager.js?v=20260926_v15"></script>
-  <script src="minimap-manager.js?v=20260926_v15"></script>
-  <script src="scavenger-hunt-manager.js?v=20260926_v15"></script>
-  <script src="world-3d.js?v=20260926_v15"></script>
+  <script src="vocab-data.js?v=20260930_v16"></script>
+  <script src="vocab-passport-bank.js?v=20260930_v16"></script>
+  <script src="speech-manager.js?v=20260930_v16"></script>
+  <script src="audio-manager.js?v=20260930_v16"></script>
+  <script src="touch-controls.js?v=20260930_v16"></script>
+  <script src="cloud-sync-manager.js?v=20260930_v16"></script>
+  <script src="spatial-zone-manager.js?v=20260930_v16"></script>
+  <script src="minimap-manager.js?v=20260930_v16"></script>
+  <script src="scavenger-hunt-manager.js?v=20260930_v16"></script>
+  <script src="world-3d.js?v=20260930_v16"></script>
 
   <script>
     let curLeaderboardTab = 'school';

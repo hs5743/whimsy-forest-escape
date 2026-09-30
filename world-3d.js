@@ -93,40 +93,53 @@ class World3D {
     this.camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 400);
     this.camera.position.copy(this.player.pos);
 
-    this.renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false });
+    this.renderer = new THREE.WebGLRenderer({
+      canvas: canvas,
+      antialias: true,
+      alpha: false,
+      powerPreference: 'high-performance'
+    });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    if (THREE.sRGBEncoding) {
+      this.renderer.outputEncoding = THREE.sRGBEncoding;
+    }
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.15;
+    this.renderer.toneMappingExposure = 1.08;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     // 溫暖陽光與環境光
-    const hemiLight = new THREE.HemisphereLight(0xfff3db, 0xa0856c, 0.85);
+    const hemiLight = new THREE.HemisphereLight(0xfff6e8, 0x8f7259, 0.95);
     this.scene.add(hemiLight);
 
-    const sunLight = new THREE.DirectionalLight(0xfffaed, 1.2);
-    sunLight.position.set(5, 8, -4);
+    const sunLight = new THREE.DirectionalLight(0xfffaed, 1.25);
+    sunLight.position.set(6, 10, -4);
     sunLight.castShadow = true;
-    sunLight.shadow.mapSize.width = 1024;
-    sunLight.shadow.mapSize.height = 1024;
+    sunLight.shadow.mapSize.width = 2048;
+    sunLight.shadow.mapSize.height = 2048;
     sunLight.shadow.camera.near = 0.5;
-    sunLight.shadow.camera.far = 25;
+    sunLight.shadow.camera.far = 30;
+    sunLight.shadow.camera.left = -14;
+    sunLight.shadow.camera.right = 14;
+    sunLight.shadow.camera.top = 14;
+    sunLight.shadow.camera.bottom = -14;
+    sunLight.shadow.bias = -0.0004;
     this.scene.add(sunLight);
 
     // 漂浮魔力塵埃粒子 (Frieren 暖光微塵)
-    const dustCount = 180;
+    const dustCount = 220;
     const dustGeo = new THREE.BufferGeometry();
     const dustPos = new Float32Array(dustCount * 3);
     for (let i = 0; i < dustCount * 3; i += 3) {
-      dustPos[i] = (Math.random() - 0.5) * 12;
-      dustPos[i + 1] = Math.random() * 4;
-      dustPos[i + 2] = (Math.random() - 0.5) * 12;
+      dustPos[i] = (Math.random() - 0.5) * 14;
+      dustPos[i + 1] = Math.random() * 4.2;
+      dustPos[i + 2] = (Math.random() - 0.5) * 14;
     }
     dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
     const dustMat = new THREE.PointsMaterial({
       color: 0xffe89e,
-      size: 0.08,
+      size: 0.09,
       transparent: true,
       opacity: 0.75,
       blending: THREE.AdditiveBlending
@@ -212,6 +225,21 @@ class World3D {
     const bgMesh = new THREE.Mesh(bgGeo, bgMat);
     bgMesh.position.set(0, 2.5, -11.5);
     roomGroup.add(bgMesh);
+
+    // 溫暖晨曦拱窗斜射光束 (Soft Volumetric Sunbeam / Godray)
+    const beamGeo = new THREE.CylinderGeometry(0.7, 2.3, 5.8, 16, 1, true);
+    const beamMat = new THREE.MeshBasicMaterial({
+      color: 0xfff3db,
+      transparent: true,
+      opacity: 0.12,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    const sunbeam = new THREE.Mesh(beamGeo, beamMat);
+    sunbeam.position.set(0.1, 2.0, -3.2);
+    sunbeam.rotation.x = Math.PI / 4.2;
+    roomGroup.add(sunbeam);
 
     // 4. 地面中央華麗魔導圓形地毯 (Magic Circle Rug)
     const rugTex = textureLoader.load('assets/textures/magic-circle-rug.jpg');
@@ -1574,9 +1602,10 @@ class World3D {
       this.flowerStone.rotation.z += delta * 0.6;
     }
 
-    // 粒子緩慢漂浮
+    // 粒子緩慢漂浮與微風浮動
     if (this.dustParticles) {
-      this.dustParticles.rotation.y = elapsedTime * 0.02;
+      this.dustParticles.rotation.y = elapsedTime * 0.025;
+      this.dustParticles.position.y = Math.sin(elapsedTime * 0.6) * 0.12;
     }
 
     this.updatePlayer(delta);
