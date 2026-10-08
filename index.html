@@ -204,6 +204,32 @@
       transition: all 0.2s ease !important;
       text-shadow: 0 1px 2px rgba(0,0,0,0.5) !important;
     }
+    .hud-btn.fps-quality-pill {
+      background: rgba(15, 23, 42, 0.8) !important;
+      border: 1.5px solid rgba(148, 163, 184, 0.45) !important;
+      color: #e2e8f0 !important;
+      font-weight: 700 !important;
+      font-size: 12px !important;
+      padding: 6px 12px !important;
+      border-radius: 20px !important;
+      backdrop-filter: blur(8px) !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      gap: 6px !important;
+      cursor: pointer !important;
+      transition: all 0.2s ease !important;
+      user-select: none !important;
+    }
+    .hud-btn.fps-quality-pill:hover {
+      border-color: #38bdf8 !important;
+      color: #ffffff !important;
+      box-shadow: 0 4px 16px rgba(56, 189, 248, 0.35) !important;
+    }
+    .hud-btn.fps-quality-pill .fps-good { color: #4ade80 !important; font-weight: 800; }
+    .hud-btn.fps-quality-pill .fps-med { color: #facc15 !important; font-weight: 800; }
+    .hud-btn.fps-quality-pill .fps-low { color: #f87171 !important; font-weight: 800; }
     .hud-btn:hover { transform: translateY(-2px); }
     .hud-btn:active { transform: scale(0.95); }
     @media (max-width: 768px) {
@@ -213,12 +239,14 @@
       .adventurer-avatar-icon { font-size: 16px !important; }
       .adventurer-name { font-size: 12px !important; max-width: 85px !important; }
       .mini-xp-bar-container { width: 50px !important; }
+      .hud-btn.fps-quality-pill { padding: 5px 8px !important; font-size: 11px !important; }
       .hud-btn.scavenger-btn-highlight, .hud-btn.passport-btn-highlight, .hud-btn.system-menu-btn { padding: 6px 10px !important; font-size: 12px !important; }
     }
     @media (max-width: 480px) {
       .adventurer-name { max-width: 70px !important; }
       .adventurer-lv-tag { max-width: 55px !important; overflow: hidden; text-overflow: ellipsis; }
       .mini-xp-bar-container { width: 40px !important; }
+      .hud-btn.fps-quality-pill { padding: 4px 6px !important; font-size: 10px !important; }
       .hud-btn.scavenger-btn-highlight, .hud-btn.passport-btn-highlight, .hud-btn.system-menu-btn { padding: 5px 8px !important; font-size: 11px !important; }
     }
 
@@ -1048,8 +1076,11 @@
       <div id="hudCurrentZoneTag" style="display: none;"><span id="hudCurrentZoneLabel">🏰 見習學徒書齋</span></div>
     </div>
 
-    <!-- 右側：核心快捷鈕 (🧭 聽力尋寶 + 📘 魔法護照 + ⚙️ 系統選單) -->
+    <!-- 右側：核心快捷鈕 (⚡ FPS/畫質切換 + 🧭 聽力尋寶 + 📘 魔法護照 + ⚙️ 系統選單) -->
     <div class="hud-quick-actions">
+      <button id="fpsQualityPill" class="hud-btn fps-quality-pill" onclick="if(window.world3D) window.world3D.cycleQuality();" type="button" title="點擊循環切換畫質 (高 / 中 / 低)">
+        <span id="fpsPillText" class="fps-good">⚡ FPS: 60</span> <span style="opacity: 0.35;">|</span> <span id="qualityPillText">高畫質</span>
+      </button>
       <button id="scavengerHuntBtn" class="hud-btn scavenger-btn-highlight" onclick="openScavengerModal();" type="button" title="開啟情境聽力尋寶任務 (快捷鍵 H)">
         <span>🧭</span> <span class="btn-text">聽力尋寶</span> <span class="btn-badge" style="background: #f59e0b; color: #fff; font-size: 9px; font-weight: 900; border-radius: 8px; padding: 1px 5px; margin-left: 2px;">NEW</span>
       </button>

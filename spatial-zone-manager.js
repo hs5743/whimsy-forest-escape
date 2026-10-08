@@ -1100,8 +1100,68 @@ class SpatialZoneManager {
     return true;
   }
 
+  // 取得或生成程序化柔邊圓形微粒貼圖 (全面去除方形微粒像素邊緣)
+  getSoftParticleTexture() {
+    if (this._softParticleTexture) return this._softParticleTexture;
+    if (this.world && typeof this.world.createSoftCircleParticleTexture === 'function') {
+      this._softParticleTexture = this.world.createSoftCircleParticleTexture();
+      return this._softParticleTexture;
+    }
+    if (typeof document === 'undefined' || !document.createElement) return null;
+    try {
+      const size = 64;
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return null;
+      const center = size / 2;
+      const gradient = ctx.createRadialGradient(center, center, 0, center, center, center);
+      gradient.addColorStop(0.0, 'rgba(255, 255, 255, 1.0)');
+      gradient.addColorStop(0.25, 'rgba(255, 255, 255, 0.85)');
+      gradient.addColorStop(0.55, 'rgba(255, 255, 255, 0.35)');
+      gradient.addColorStop(1.0, 'rgba(255, 255, 255, 0.0)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, size, size);
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.needsUpdate = true;
+      this._softParticleTexture = tex;
+      return tex;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // 設定空間專屬環境反射貼圖 (PMREM IBL)
+  setupZoneEnvironment(zoneId) {
+    if (!this.world || typeof this.world.updateEnvironmentFromTexture !== 'function') return;
+    const zonePanoramaMap = {
+      zone1: (this.tex && this.tex.woodFloor) || null,
+      zone2: this.tex.sunbreezeMarketPanorama,
+      zone3: this.tex.enchantedForestPanorama,
+      zone4: this.tex.athleticParkPanorama,
+      zone5: this.tex.steamStationPanorama,
+      zone6: this.tex.azureHarborPanorama,
+      zone7: this.tex.starlitObservatoryPanorama,
+      zone8: this.tex.auroraGlacierPanorama,
+      zone9: this.tex.astralPantheonPanorama,
+      zone10: this.tex.skyIslandPanorama
+    };
+    const tex = zonePanoramaMap[zoneId];
+    if (tex) {
+      this.world.updateEnvironmentFromTexture(tex, zoneId);
+    }
+  }
+
+  refreshZoneEnvironment() {
+    this.setupZoneEnvironment(this.currentZoneId || 'zone1');
+  }
+
   // 設定空間專屬 3D 天空穹頂與大氣效果 (徹底消除天空變成地板的錯誤！)
   setupZoneSkyAndAtmosphere(group, zoneId) {
+    // 同步生成/套用空間專屬全景 PMREM 環境反射貼圖
+    this.setupZoneEnvironment(zoneId);
+
     if (zoneId === 'zone1') {
       this.world.scene.background = new THREE.Color(0xdce8f5);
       this.world.scene.fog = new THREE.FogExp2(0xf0e6d6, 0.025);
@@ -1178,9 +1238,18 @@ class SpatialZoneManager {
         starPos[i + 2] = Math.sin(phi) * Math.sin(theta) * 58;
       }
       starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+      const particleTex = this.getSoftParticleTexture();
       const stars = new THREE.Points(
         starGeo,
-        new THREE.PointsMaterial({ color: 0xffffff, size: 0.16, transparent: true, opacity: 0.9 })
+        new THREE.PointsMaterial({
+          color: 0xffffff,
+          size: 0.16,
+          transparent: true,
+          opacity: 0.9,
+          map: particleTex || null,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending
+        })
       );
       group.add(stars);
     }
@@ -2560,8 +2629,19 @@ class SpatialZoneManager {
       sprayPos[i + 1] = 2.2 + Math.random() * 0.8;
       sprayPos[i + 2] = (Math.random() - 0.5) * 0.4;
     }
-    sprayGeo.setAttribute('position', new THREE.BufferAttribute(sprayPos, 3));
-    const sprayPoints = new THREE.Points(sprayGeo, new THREE.PointsMaterial({ color: 0xe0f2fe, size: 0.06, transparent: true, opacity: 0.85 }));
+    const sprayTex = this.getSoftParticleTexture();
+    const sprayPoints = new THREE.Points(
+      sprayGeo,
+      new THREE.PointsMaterial({
+        color: 0xe0f2fe,
+        size: 0.08,
+        transparent: true,
+        opacity: 0.85,
+        map: sprayTex || null,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending
+      })
+    );
     fountain.add(sprayPoints);
 
     this.world.animators.push((time) => {
@@ -3244,8 +3324,19 @@ class SpatialZoneManager {
       steamPos[i + 1] = 3.3 + Math.random() * 1.5;
       steamPos[i + 2] = 1.6 + (Math.random() - 0.5) * 0.4;
     }
-    steamGeo.setAttribute('position', new THREE.BufferAttribute(steamPos, 3));
-    const steamPoints = new THREE.Points(steamGeo, new THREE.PointsMaterial({ color: 0xf1f5f9, size: 0.22, transparent: true, opacity: 0.65 }));
+    const steamTex = this.getSoftParticleTexture();
+    const steamPoints = new THREE.Points(
+      steamGeo,
+      new THREE.PointsMaterial({
+        color: 0xf1f5f9,
+        size: 0.28,
+        transparent: true,
+        opacity: 0.65,
+        map: steamTex || null,
+        depthWrite: false,
+        blending: THREE.NormalBlending
+      })
+    );
     train.add(steamPoints);
 
     [-1.15, 1.15].forEach(wx => {
@@ -3375,7 +3466,7 @@ class SpatialZoneManager {
     group.add(portal);
   }
 
-  // [通用] 發光浮游粒子
+  // [通用] 發光浮游粒子 (升級柔邊圓形發光光斑)
   addFloatingParticles(group, colorHex, count, range, maxHeight) {
     const geo = new THREE.BufferGeometry();
     const pos = new Float32Array(count * 3);
@@ -3385,11 +3476,14 @@ class SpatialZoneManager {
       pos[i + 2] = (Math.random() - 0.5) * range;
     }
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const particleTex = this.getSoftParticleTexture();
     const mat = new THREE.PointsMaterial({
       color: colorHex,
-      size: 0.09,
+      size: 0.14,
       transparent: true,
-      opacity: 0.7,
+      opacity: 0.75,
+      map: particleTex || null,
+      depthWrite: false,
       blending: THREE.AdditiveBlending
     });
     const points = new THREE.Points(geo, mat);
@@ -5104,12 +5198,15 @@ class SpatialZoneManager {
       starPos[i * 3 + 1] = Math.max(5, r * Math.cos(phi));
       starPos[i * 3 + 2] = r * sinPhi * Math.sin(theta);
     }
-    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+    const starTex = this.getSoftParticleTexture();
     const starPointsMat = new THREE.PointsMaterial({
       color: 0xffffff,
       size: 1.4,
       transparent: true,
-      opacity: 0.92
+      opacity: 0.92,
+      map: starTex || null,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending
     });
     const starPoints = new THREE.Points(starGeo, starPointsMat);
     skyGroup.add(starPoints);
@@ -6503,12 +6600,15 @@ class SpatialZoneManager {
       starCoords[i * 3 + 1] = Math.max(8, r * Math.cos(phi));
       starCoords[i * 3 + 2] = r * Math.sin(theta) * Math.sin(phi);
     }
-    starGeo.setAttribute('position', new THREE.BufferAttribute(starCoords, 3));
+    const starTex = this.getSoftParticleTexture();
     const starMat = new THREE.PointsMaterial({
       color: 0xe0f2fe,
-      size: 0.18,
+      size: 0.22,
       transparent: true,
-      opacity: 0.85
+      opacity: 0.85,
+      map: starTex || null,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending
     });
     const starField = new THREE.Points(starGeo, starMat);
     skyGroup.add(starField);
@@ -6687,12 +6787,14 @@ class SpatialZoneManager {
       });
     }
 
-    flakeGeo.setAttribute('position', new THREE.BufferAttribute(flakePos, 3));
+    const flakeTex = this.getSoftParticleTexture();
     const flakeMat = new THREE.PointsMaterial({
       color: 0xffffff,
       size: 0.18,
       transparent: true,
       opacity: 0.85,
+      map: flakeTex || null,
+      depthWrite: false,
       blending: THREE.AdditiveBlending
     });
 

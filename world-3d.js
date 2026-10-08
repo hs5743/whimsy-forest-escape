@@ -109,6 +109,28 @@ class World3D {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
+    // 畫質分級與效能監測系統 (高 / 中 / 低 + 自動降級)
+    this.graphicQuality = 'high'; // 'high' | 'medium' | 'low'
+    this.rollingFps = 60;
+    this.lastFrameTimestamp = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+    this.lastFpsUiUpdateTime = 0;
+    this.lowFpsDuration = 0;
+    this.envMapCache = {};
+
+    // PMREMGenerator 環境反射貼圖編譯器 (Three.js IBL 空間反射)
+    this.pmremGenerator = null;
+    if (typeof THREE.PMREMGenerator === 'function') {
+      try {
+        this.pmremGenerator = new THREE.PMREMGenerator(this.renderer);
+        if (typeof this.pmremGenerator.compileEquirectangularShader === 'function') {
+          this.pmremGenerator.compileEquirectangularShader();
+        }
+      } catch (e) {
+        console.warn('PMREMGenerator initialization skipped:', e);
+        this.pmremGenerator = null;
+      }
+    }
+
     // 溫暖陽光與環境光
     const hemiLight = new THREE.HemisphereLight(0xfff6e8, 0x8f7259, 0.95);
     this.scene.add(hemiLight);
@@ -125,9 +147,10 @@ class World3D {
     sunLight.shadow.camera.top = 14;
     sunLight.shadow.camera.bottom = -14;
     sunLight.shadow.bias = -0.0004;
+    this.sunLight = sunLight;
     this.scene.add(sunLight);
 
-    // 漂浮魔力塵埃粒子 (Frieren 暖光微塵)
+    // 漂浮魔力塵埃粒子 (Frieren 暖光微塵 - 升級柔邊圓形發光粒子)
     const dustCount = 220;
     const dustGeo = new THREE.BufferGeometry();
     const dustPos = new Float32Array(dustCount * 3);
@@ -137,11 +160,14 @@ class World3D {
       dustPos[i + 2] = (Math.random() - 0.5) * 14;
     }
     dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+    const dustTex = this.createSoftCircleParticleTexture();
     const dustMat = new THREE.PointsMaterial({
       color: 0xffe89e,
-      size: 0.09,
+      size: 0.12,
       transparent: true,
       opacity: 0.75,
+      map: dustTex || null,
+      depthWrite: false,
       blending: THREE.AdditiveBlending
     });
     this.dustParticles = new THREE.Points(dustGeo, dustMat);
@@ -1566,11 +1592,202 @@ class World3D {
     }, 2200);
   }
 
+  // 生成程序化柔和圓形漸層微粒貼圖 (徹底消除方形像素微粒，實現電影級夢幻光斑)
+  createSoftCircleParticleTexture() {
+    if (this._softCircleParticleTexture) {
+      return this._softCircleParticleTexture;
+    }
+    if (typeof document === 'undefined' || !document.createElement) {
+      return null;
+    }
+    try {
+      const size = 64;
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return null;
+
+      const center = size / 2;
+      const gradient = ctx.createRadialGradient(center, center, 0, center, center, center);
+      gradient.addColorStop(0.0, 'rgba(255, 255, 255, 1.0)');
+      gradient.addColorStop(0.25, 'rgba(255, 255, 255, 0.85)');
+      gradient.addColorStop(0.55, 'rgba(255, 255, 255, 0.35)');
+      gradient.addColorStop(1.0, 'rgba(255, 255, 255, 0.0)');
+
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, size, size);
+
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.needsUpdate = true;
+      this._softCircleParticleTexture = texture;
+      return texture;
+    } catch (e) {
+      console.warn('Could not generate soft particle texture:', e);
+      return null;
+    }
+  }
+
+  // 透過 PMREMGenerator 由全景圖動態生成次世代 Image-Based Lighting (IBL) 環境反射光
+  updateEnvironmentFromTexture(texture, zoneId) {
+    if (!texture || !this.scene) return;
+    if (this.graphicQuality === 'low') {
+      this.scene.environment = null;
+      return;
+    }
+    if (zoneId && this.envMapCache[zoneId]) {
+      this.scene.environment = this.envMapCache[zoneId];
+      return;
+    }
+    if (!this.pmremGenerator) return;
+
+    try {
+      const envRenderTarget = this.pmremGenerator.fromEquirectangular(texture);
+      if (envRenderTarget && envRenderTarget.texture) {
+        if (zoneId) {
+          this.envMapCache[zoneId] = envRenderTarget.texture;
+        }
+        this.scene.environment = envRenderTarget.texture;
+      }
+    } catch (err) {
+      console.warn('Failed to compile PMREM environment reflection:', err);
+    }
+  }
+
+  // 畫質分級控制系統 (高 / 中 / 低)
+  setGraphicQuality(quality, isAuto = false) {
+    if (!['high', 'medium', 'low'].includes(quality)) return;
+    this.graphicQuality = quality;
+
+    const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) ? window.devicePixelRatio : 1;
+
+    if (this.renderer) {
+      if (quality === 'high') {
+        this.renderer.setPixelRatio(Math.min(dpr, 2.0));
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      } else if (quality === 'medium') {
+        this.renderer.setPixelRatio(Math.min(dpr, 1.5));
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFShadowMap || THREE.PCFSoftShadowMap;
+      } else {
+        this.renderer.setPixelRatio(1.0);
+        this.renderer.shadowMap.enabled = false;
+      }
+      if (typeof window !== 'undefined' && window.innerWidth) {
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+    }
+
+    // 陰影貼圖解析度階層調整
+    if (this.sunLight && this.sunLight.shadow) {
+      const mapSize = quality === 'high' ? 2048 : (quality === 'medium' ? 1024 : 512);
+      this.sunLight.shadow.mapSize.width = mapSize;
+      this.sunLight.shadow.mapSize.height = mapSize;
+      if (this.sunLight.shadow.map) {
+        this.sunLight.shadow.map.dispose();
+        this.sunLight.shadow.map = null;
+      }
+    }
+
+    // 塵埃微粒透明度調整
+    if (this.dustParticles && this.dustParticles.material) {
+      this.dustParticles.material.opacity = quality === 'high' ? 0.75 : (quality === 'medium' ? 0.5 : 0.25);
+    }
+
+    // PMREM 環境光反射切換
+    if (quality === 'low') {
+      if (this.scene) this.scene.environment = null;
+    } else {
+      const curZone = (this.zoneManager && this.zoneManager.currentZoneId) ? this.zoneManager.currentZoneId : 'zone1';
+      if (this.envMapCache && this.envMapCache[curZone]) {
+        this.scene.environment = this.envMapCache[curZone];
+      } else if (this.zoneManager && typeof this.zoneManager.refreshZoneEnvironment === 'function') {
+        this.zoneManager.refreshZoneEnvironment();
+      }
+    }
+
+    this.updateFpsPillUI();
+
+    const names = {
+      high: '高畫質 (High - 2048px柔和陰影+次世代環境反射)',
+      medium: '中畫質 (Balanced - 1024px陰影+全景反射)',
+      low: '流暢低畫質 (Performance - 關閉陰影，極致流暢)'
+    };
+    if (isAuto) {
+      if (typeof this.showToast === 'function') {
+        this.showToast(`⚡ 系統偵測到幀率偏低，已自動調降為【${names[quality]}】以保持遊戲流暢！`);
+      }
+    }
+  }
+
+  // 循環切換畫質
+  cycleQuality() {
+    const cycle = { high: 'medium', medium: 'low', low: 'high' };
+    const next = cycle[this.graphicQuality] || 'high';
+    this.setGraphicQuality(next, false);
+    const shortNames = { high: '高畫質 (2K陰影+環境反射)', medium: '中畫質 (均衡模式)', low: '流暢低畫質 (極致順暢)' };
+    if (typeof this.showToast === 'function') {
+      this.showToast(`🎨 畫質模式已切換為：【${shortNames[next]}】`);
+    }
+  }
+
+  getGraphicQuality() {
+    return this.graphicQuality;
+  }
+
+  // 更新 HUD 頂部 FPS 與畫質膠囊面板
+  updateFpsPillUI() {
+    if (typeof document === 'undefined') return;
+    const pill = document.getElementById('fpsQualityPill');
+    if (!pill) return;
+    const fpsVal = Math.round(this.rollingFps || 60);
+    const fpsEl = document.getElementById('fpsPillText');
+    const qualEl = document.getElementById('qualityPillText');
+    const qualLabels = { high: '高畫質', medium: '中畫質', low: '低畫質' };
+
+    if (fpsEl) {
+      fpsEl.textContent = `⚡ FPS: ${fpsVal}`;
+      fpsEl.className = fpsVal >= 45 ? 'fps-good' : (fpsVal >= 28 ? 'fps-med' : 'fps-low');
+    }
+    if (qualEl) {
+      qualEl.textContent = qualLabels[this.graphicQuality] || '高畫質';
+    }
+  }
+
   animate() {
     requestAnimationFrame(() => this.animate());
 
     const delta = this.clock.getDelta();
     const elapsedTime = this.clock.getElapsedTime();
+
+    // 計算即時滾動 FPS
+    const nowTime = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+    const frameDt = (nowTime - this.lastFrameTimestamp) / 1000;
+    this.lastFrameTimestamp = nowTime;
+
+    if (frameDt > 0 && frameDt < 1.0) {
+      const currentFps = 1 / frameDt;
+      this.rollingFps = this.rollingFps * 0.92 + currentFps * 0.08;
+    }
+
+    // 每 450ms 刷新一次頂部 HUD 顯示
+    if (nowTime - this.lastFpsUiUpdateTime > 450) {
+      this.lastFpsUiUpdateTime = nowTime;
+      this.updateFpsPillUI();
+    }
+
+    // 當幀率連續低於 28 FPS 逾 4 秒且高於低畫質時，自動降級以維護流暢度
+    if (this.rollingFps < 28 && this.graphicQuality !== 'low') {
+      this.lowFpsDuration += delta;
+      if (this.lowFpsDuration > 4.0) {
+        this.lowFpsDuration = 0;
+        const nextQuality = this.graphicQuality === 'high' ? 'medium' : 'low';
+        this.setGraphicQuality(nextQuality, true);
+      }
+    } else {
+      this.lowFpsDuration = 0;
+    }
 
     // 更新動畫 (支援持續函數 anim(time, dt) 與單次物件 anim.update(dt))
     for (let i = this.animators.length - 1; i >= 0; i--) {
