@@ -4,7 +4,8 @@
 > 整體風格致敬《童趣森林英語》與《葬送的芙莉蓮》的溫馨恬淡奇幻世界觀。
 
 👉 **線上直接遊玩網址**：[https://hs5743.github.io/whimsy-forest-escape/](https://hs5743.github.io/whimsy-forest-escape/)  
-🌿 **童趣森林英語首頁**：[https://hs5743.github.io/Whimsy_Forest_English/](https://hs5743.github.io/Whimsy_Forest_English/)
+🌿 **童趣森林英語首頁**：[https://hs5743.github.io/Whimsy_Forest_English/](https://hs5743.github.io/Whimsy_Forest_English/)  
+📘 **軟體工程師交接與作業說明書**：[docs/ENGINEERING_HANDOVER_MANUAL.md](docs/ENGINEERING_HANDOVER_MANUAL.md)
 
 ---
 
