@@ -364,9 +364,9 @@ class SpatialZoneManager {
       marketAwning: loader.load('assets/textures/tex-market-awning.jpg'),
       townFacade: loader.load('assets/textures/tex-town-facade.jpg'),
       gardenGrass: loader.load('assets/textures/natural-grass-v3.jpg'),
-      marbleFountain: loader.load('assets/textures/tex-marble-fountain.jpg'),
+      marbleFountain: loader.load('assets/textures/honed-marble-v5.jpg'),
       runningTrack: loader.load('assets/textures/tex-running-track.jpg'),
-      stationBrick: loader.load('assets/textures/tex-station-brick.jpg'),
+      stationBrick: loader.load('assets/textures/terracotta-brick-v5.jpg'),
       clockFace: loader.load('assets/textures/tex-clocktower-face.jpg'),
       locomotive: loader.load('assets/textures/tex-locomotive-train.jpg'),
       stoneWall: loader.load('assets/textures/tex-stone-wall.jpg'),
@@ -443,7 +443,7 @@ class SpatialZoneManager {
 
     this.tex.stationBrick.wrapS = THREE.RepeatWrapping;
     this.tex.stationBrick.wrapT = THREE.RepeatWrapping;
-    this.tex.stationBrick.repeat.set(8, 8);
+    this.tex.stationBrick.repeat.set(4, 4);
 
     this.tex.stoneWall.wrapS = THREE.RepeatWrapping;
     this.tex.stoneWall.wrapT = THREE.RepeatWrapping;
@@ -2073,10 +2073,10 @@ class SpatialZoneManager {
       mistY: -1.0
     });
 
-    // 月台復古紅磚地面 (64m x 64m)
+    // 月台石板地面 (64m x 64m)
     const platform = new THREE.Mesh(
       new THREE.PlaneGeometry(64, 64),
-      new THREE.MeshStandardMaterial({ map: this.tex.stationBrick, roughness: 0.8, metalness: 0.08 })
+      new THREE.MeshStandardMaterial({ map: this.tex.marketCobble, roughness: 0.88, metalness: 0.0 })
     );
     platform.rotation.x = -Math.PI / 2;
     platform.receiveShadow = true;
@@ -2714,26 +2714,39 @@ class SpatialZoneManager {
     const fountain = new THREE.Group();
     fountain.position.set(x, y, z);
 
-    const marbleMat = new THREE.MeshStandardMaterial({ map: this.tex.marbleFountain, roughness: 0.35, metalness: 0.08 });
-    const baseBasin = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.6, 0.6, 16), marbleMat);
+    const marbleMat = new THREE.MeshStandardMaterial({ map: this.tex.marbleFountain, roughness: 0.62, metalness: 0.0 });
+    const baseBasin = new THREE.Mesh(new THREE.LatheGeometry([
+      [0, 0], [2.4, 0], [2.52, 0.08], [2.54, 0.22],
+      [2.48, 0.34], [2.42, 0.44], [2.43, 0.47], [2.3, 0.49],
+      [2.22, 0.44], [2.2, 0.19], [0, 0.19]
+    ].map(([r, h]) => new THREE.Vector2(r, h)), 48), marbleMat);
     baseBasin.position.y = 0.3;
     baseBasin.castShadow = true;
     fountain.add(baseBasin);
 
     const waterMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.08, metalness: 0.2, transparent: true, opacity: 0.8 });
-    const poolWater = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.2, 0.05, 16), waterMat);
+    const poolWater = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.2, 0.05, 48), waterMat);
     poolWater.position.y = 0.55;
     fountain.add(poolWater);
 
-    const centralPillar = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.5, 1.4, 12), marbleMat);
+    const centralPillar = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.5, 1.4, 32), marbleMat);
     centralPillar.position.y = 1.2;
     fountain.add(centralPillar);
 
-    const upperBasin = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 0.9, 0.3, 16), marbleMat);
+    const upperBasin = new THREE.Mesh(new THREE.LatheGeometry([
+      [0, -0.15], [0.65, -0.15], [0.84, -0.11], [1.03, -0.02],
+      [1.2, 0.12], [1.22, 0.17], [1.14, 0.19], [1.08, 0.12],
+      [0.88, 0.04], [0, 0.04]
+    ].map(([r, h]) => new THREE.Vector2(r, h)), 48), marbleMat);
     upperBasin.position.y = 1.9;
     fountain.add(upperBasin);
 
-    const finial = new THREE.Mesh(new THREE.SphereGeometry(0.22, 10, 10), marbleMat);
+    const upperWater = new THREE.Mesh(new THREE.CircleGeometry(1.06, 48), waterMat);
+    upperWater.rotation.x = -Math.PI / 2;
+    upperWater.position.y = 2.01;
+    fountain.add(upperWater);
+
+    const finial = new THREE.Mesh(new THREE.SphereGeometry(0.22, 24, 16), marbleMat);
     finial.position.y = 2.2;
     fountain.add(finial);
 

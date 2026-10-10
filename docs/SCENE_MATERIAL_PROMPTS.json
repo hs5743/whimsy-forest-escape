@@ -1,0 +1,11 @@
+{
+  "tool": "built-in image_gen",
+  "prompts": {
+    "marble": "Use case: stylized-concept. Asset type: seamless square game material albedo. Generate ONLY a flat orthographic ivory limestone marble surface filling entire image, subtle pale warm gray mineral veins and fine grain, restrained natural variation, matte honed stone suitable for a child-friendly fantasy garden fountain. Uniform diffuse illumination, no baked shadows or specular highlights. Seamless repeating borders. No carvings, patterns, ornaments, objects, architecture, perspective, frame, text or watermark.",
+    "brick": "Use case: stylized-concept. Asset type: seamless square game material albedo. Generate ONLY an orthographic front-facing wall surface filling entire square: warm russet terracotta bricks in horizontal staggered running bond, 8 equal-height rows, realistic fine porous clay texture, gently rounded worn edges, narrow pale warm gray mortar joints, controlled brick color variation. Uniform diffuse illumination, no cast shadows or specular highlights. Seamless repeating borders and consistent brick scale. Child-friendly polished fantasy game realism. No windows, doors, lamps, floors, benches, perspective, frames, text or watermark."
+  },
+  "outputs": {
+    "marble": "honed-marble-v5.jpg",
+    "brick": "terracotta-brick-v5.jpg"
+  }
+}
