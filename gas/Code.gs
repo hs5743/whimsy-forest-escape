@@ -1,11 +1,16 @@
 /**
- * 《童趣森林魔法書齋逃脫：英語冒險護照》
+ * 《英語魔法探險家：秘境逃脫任務》
  * Google Apps Script (GAS) 雲端資料庫後端 API (Code.gs)
  * 
- * 【部署說明】：
+ * 【更新既有服務】：將 Code.gs、AdventureSchema.gs、AdventureCheckpoints.gs
+ * 放入同一個既有 Apps Script 專案，再更新原部署的版本。
+ * 保留原 Web App URL、試算表與存取權限；不需重新初始化學生資料。
+ * AdventureCheckpoints 分頁會在第一份冒險存檔成功寫入時建立。
+ *
+ * 【全新服務的初始部署說明】：
  * 1. 建立一個全新的 Google 試算表（例如命名為「新港國小英語冒險護照後端」）。
  * 2. 點選試算表上方選單「擴充功能」->「Apps Script」。
- * 3. 將本檔案全部內容複製貼上至 Code.gs，並儲存。
+ * 3. 將本檔案與同資料夾的 AdventureSchema.gs、AdventureCheckpoints.gs 加入專案並儲存。
  * 4. 點擊「執行」-> 選擇「initSpreadsheet」進行試算表分頁與欄位自動初始化。
  * 5. 點擊右上角「部署」->「新增部署作業」：
  *    - 種類選擇「網頁應用程式 (Web App)」
@@ -303,6 +308,11 @@ function doPost(e) {
     // 安全性 Token 驗證：POST 請求必須附帶校本安全密鑰
     if (token !== APP_SECURITY_TOKEN) {
       return makeJsonResponse({ status: "error", message: "Unauthorized access: Invalid security token" });
+    }
+
+    // Separate puzzle checkpoint protocol. The existing script lock protects revisions.
+    if (["adventureCapabilities", "saveAdventure", "getAdventure"].includes(action)) {
+      return makeJsonResponse(adventureCheckpointAction(payload, ss));
     }
 
     // 1. 學生登入或建立帳號

@@ -103,12 +103,21 @@
       if(!force&&next===signature)return true;
       const saved=store.save(snapshot);if(saved)signature=next;paint();return saved;
     }
+    function importCloud(snapshot){
+      const record=validate(snapshot,store.owner,zones);if(!record)return false;
+      const before=validate(capture(world,store.owner),store.owner,zones);if(!before)return false;
+      try{root.localStorage.setItem(store.key+':before-cloud',JSON.stringify(before));}catch(error){return false;}
+      if(!store.save(record))return false;
+      restore(record,root.cloudSyncManager?.profile,true);signature=null;return save(true);
+    }
+    function cloudBackup(){try{return validate(JSON.parse(root.localStorage.getItem(store.key+':before-cloud')),store.owner,zones);}catch(error){return null;}}
+    function restoreCloudBackup(){const record=cloudBackup();if(!record||!store.save(record))return false;restore(record,root.cloudSyncManager?.profile,true);signature=null;return save(true);}
     selectProfile(root.cloudSyncManager?.profile);
     root.cloudSyncManager?.onProfileUpdated(selectProfile);
     $('adventureSaveNow').addEventListener('click',()=>{const saved=save(true);world.showToast(saved?'冒險進度已存於此裝置。':'無法存檔，請確認瀏覽器允許網站儲存資料。');});
     root.setInterval(()=>save(),1000);
     root.document.addEventListener('visibilitychange',()=>{if(root.document.hidden)save();});
     root.addEventListener('pagehide',()=>save());
-    world.adventureProgress={save,restore,store:()=>store};
+    world.adventureProgress={save,restore,store:()=>store,snapshot:()=>capture(world,store.owner),importCloud,restoreCloudBackup,hasCloudBackup:()=>!!cloudBackup()};
   });
 })(typeof window!=='undefined'?window:globalThis);

@@ -463,13 +463,13 @@ class CloudSyncManager {
       }
     } else {
       if (indicator) {
-        indicator.innerHTML = `<span>🟢</span> 雲端已同步`;
-        indicator.title = '已成功連線至 Google 試算表！';
+        indicator.innerHTML = `<span>🟢</span> 學習紀錄已同步`;
+        indicator.title = '英語學習紀錄服務已連接；冒險存檔請查看跨裝置續玩。';
         indicator.className = 'cloud-status-pill mode-online';
       }
       if (dot) {
         dot.className = 'status-dot dot-online';
-        dot.title = '雲端連線：Google 試算表已同步';
+        dot.title = '學習紀錄：Google 試算表已同步';
       }
     }
   }

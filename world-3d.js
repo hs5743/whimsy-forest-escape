@@ -901,6 +901,7 @@ class World3D {
       'instructionsModal',
       'hintModal',
       'realmQuestModal',
+      'cloudRestoreModal',
       'speechModal',
       'guardianTrialModal',
       'worldMapModal',

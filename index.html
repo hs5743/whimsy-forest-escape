@@ -827,6 +827,7 @@
   <link rel="stylesheet" href="learning-polish.css?v=20261010">
   <link rel="stylesheet" href="adventure-assist.css?v=20261010">
   <link rel="stylesheet" href="realm-quests.css?v=20261010">
+  <link rel="stylesheet" href="adventure-cloud.css?v=20261010">
 </head>
 <body>
   <!-- ========================================================= -->
@@ -1016,6 +1017,7 @@
   </div>
   <div id="adventureReward" hidden role="status" aria-live="polite"><strong id="adventureRewardTitle"></strong><span id="adventureRewardNext"></span></div>
   <div id="hintDirection" hidden><span id="hintDirectionCopy" role="status"></span><button id="hintStop" type="button" aria-label="關閉方向標示">✕</button></div>
+  <div id="cloudRestoreModal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="cloudRestoreTitle"><section class="cloud-restore-card"><h2 id="cloudRestoreTitle">接續哪一份冒險？</h2><p id="cloudRestoreCopy"></p><div class="cloud-checkpoint-actions"><button id="cloudRestoreConfirm" type="button">確認接續雲端存檔</button><button id="cloudRestoreCancel" type="button" aria-label="關閉">先保留這台進度</button></div></section></div>
   <div id="hintModal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="hintTitle">
     <section class="hint-card"><button id="hintClose" class="modal-close-btn" type="button" aria-label="關閉">✕</button>
       <div id="hintLevel" class="hint-label">提示 1 / 3</div><h2 id="hintTitle">小小線索，自己解開</h2>
@@ -1046,6 +1048,17 @@
       <fieldset class="adventure-save-panel"><legend>冒險續玩</legend>
         <output id="adventureSaveStatus" role="status">準備存檔資訊…</output><p id="adventureSaveScope"></p>
         <button id="adventureSaveNow" type="button">保存目前進度</button>
+      </fieldset>
+      <fieldset id="adventureCloudPanel" class="adventure-save-panel"><legend>跨裝置續玩</legend>
+        <output id="adventureCloudStatus" role="status">尚未連接冒險存檔服務。</output>
+        <div class="cloud-checkpoint-actions"><button id="adventureCloudCheck" type="button">檢查雲端服務</button><button id="adventureCloudEnable" type="button" disabled>啟用跨裝置續玩</button></div>
+        <label for="adventureCloudCode">這份冒險的續玩代碼</label><input id="adventureCloudCode" readonly autocomplete="off" spellcheck="false" placeholder="啟用並上傳後取得代碼">
+        <button id="adventureCloudCopy" type="button" disabled>複製續玩代碼</button>
+        <p>代碼可開啟這份冒險，請自行保存。登入學生換裝置時，需使用同一個學生身份。</p>
+        <label for="adventureCloudInput">從另一台裝置帶來的代碼</label><input id="adventureCloudInput" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="EME1.…">
+        <div class="cloud-checkpoint-actions"><button id="adventureCloudLoad" type="button" disabled>從雲端續玩</button><button id="adventureCloudUpload" type="button" disabled>保存這台進度至雲端</button></div>
+        <label class="cloud-auto-label"><input id="adventureCloudAuto" type="checkbox" disabled>自動同步冒險進度</label>
+        <button id="adventureCloudKeep" type="button" hidden>以這台進度取代較新的雲端版本</button><button id="adventureCloudUndo" type="button" disabled>回復上次本機備份</button>
       </fieldset>
       <button class="retry-textures-btn" type="button" onclick="window.world3D?.zoneManager.retryTextures()">重新載入缺少的素材</button>
       <div id="devZonePanel" hidden><label for="devZoneSelect">本機場景檢查（不記錄成績）</label><select id="devZoneSelect"></select><button id="devQuestReset" type="button">重置此關測試機關</button><output id="devDiagnostics"></output></div>
@@ -1875,7 +1888,8 @@
   <script src="game-polish.js?v=20261010c"></script>
   <script src="title-screen.js?v=20261010"></script>
   <script src="realm-quests.js?v=20261010"></script>
-  <script src="adventure-progress.js?v=20261010b"></script>
+  <script src="adventure-progress.js?v=20261010c"></script>
+  <script src="adventure-cloud.js?v=20261010"></script>
   <script src="adventure-assist.js?v=20261010b"></script>
   <script src="game-diagnostics.js?v=20261010"></script>
   <script src="realm-presentation.js?v=20261010b"></script>
@@ -1884,11 +1898,11 @@
   <script src="speech-manager.js?v=20261010"></script>
   <script src="audio-manager.js?v=20261010d"></script>
   <script src="touch-controls.js?v=20261010"></script>
-  <script src="cloud-sync-manager.js?v=20261010"></script>
+  <script src="cloud-sync-manager.js?v=20261010b"></script>
   <script src="spatial-zone-manager.js?v=20261010b"></script>
   <script src="minimap-manager.js?v=20260930_v16"></script>
   <script src="scavenger-hunt-manager.js?v=20260930_v16"></script>
-  <script src="world-3d.js?v=20261010f"></script>
+  <script src="world-3d.js?v=20261010g"></script>
 
   <script>
     let curLeaderboardTab = 'school';
@@ -2101,7 +2115,7 @@
       }
       if (cloudDisp && window.cloudSyncManager) {
         const isOnline = !!window.cloudSyncManager.gasUrl;
-        cloudDisp.innerHTML = isOnline ? '<span>🟢</span> 雲端已同步' : '<span>⚪</span> 單機模式';
+        cloudDisp.innerHTML = isOnline ? '<span>🟢</span> 學習紀錄已同步' : '<span>⚪</span> 單機模式';
         cloudDisp.className = isOnline ? 'cloud-status-pill mode-online' : 'cloud-status-pill mode-local';
       }
     }
