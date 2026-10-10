@@ -33,6 +33,10 @@
       if(!step) return {key:'zone1:done',word:null,targetId:'exit_portal_zone1',clues:['書齋已完成！找找通往下一個秘境的路標。','沿花田路標前往微風市集，展開下一個任務。']};
       return {key:'zone1:'+step[0],word:step[1],targetId:step[2],clues:[step[3],step[4]]};
     }
+    if(root.RealmQuests?.specs[zone.id]&&!root.RealmQuests.solved(zone.id,state.realmPuzzles?.[zone.id])) {
+      const quest=root.RealmQuests.specs[zone.id];
+      return {key:zone.id+':quest:'+JSON.stringify(state.realmPuzzles?.[zone.id]||{}),word:null,targetId:'quest_'+zone.id,clues:quest.clues};
+    }
     const passed=new Set(completed.map(w=>String(w).toUpperCase()));
     const word=zone.words.find(w=>!passed.has(w));
     return word ? {key:zone.id+':'+word,word,targetId:null,clues:[places[zone.id]||'看看附近能互動的魔法物件。','這次找與 '+word+' 有關的物件。靠近後互動，先聽示範再練習；不清楚可以重試。']} :

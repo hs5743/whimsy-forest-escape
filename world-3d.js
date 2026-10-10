@@ -87,9 +87,9 @@ class World3D {
     this.animate();
   }
 
-  switchZone(zoneId) {
+  switchZone(zoneId, options = {}) {
     if (this.zoneManager) {
-      return this.zoneManager.switchZone(zoneId);
+      return this.zoneManager.switchZone(zoneId, options);
     }
   }
 
@@ -900,6 +900,7 @@ class World3D {
       'storyPrologueModal',
       'instructionsModal',
       'hintModal',
+      'realmQuestModal',
       'speechModal',
       'guardianTrialModal',
       'worldMapModal',
@@ -1479,6 +1480,9 @@ class World3D {
     const completed=words[zone] || (words[zone]=[]);
     if(!completed.includes(wordKey)) completed.push(wordKey);
     this.hintController?.clear();
+    const zoneInfo=this.zoneManager?.zones?.[zone];
+    const next=window.AdventureAssist?.hintPlan(this.gameState,zoneInfo,completed);
+    if(zone===this.zoneManager?.currentZoneId) this.realmQuests?.reward('英語線索完成 · '+wordKey,next?.clues?.[0] || '看看下一個可以探索的魔法物件。');
   }
 
   restoreSpeechFocus() {
@@ -1793,10 +1797,19 @@ class World3D {
     const diagnostics = document.getElementById('devDiagnostics');
     if(this.devMode && diagnostics) {
       const frame = this.frameMetrics?.summary();
-      diagnostics.textContent = '幾何 ' + this.renderer.info.memory.geometries + ' · 貼圖 ' + this.renderer.info.memory.textures + ' · 繪製 ' + this.renderer.info.render.calls + (frame ? ' · P95 ' + frame.p95Ms + 'ms · 長幀 ' + frame.longFrames : '');
+      diagnostics.textContent = '幾何 ' + this.renderer.info.memory.geometries + ' · 貼圖 ' + this.renderer.info.memory.textures + ' · 繪製 ' + this.renderer.info.render.calls + (frame ? ' · P95 ' + frame.p95Ms + 'ms · 長幀 ' + frame.longFrames : '') + ' · 場景建立 ' + Math.round(this.sceneBuildMs||0) + 'ms';
     }
     const task = document.getElementById('currentObjective');
-    if (task) { const text = GamePolish.taskText(this.gameState, this.zoneManager?.currentZoneId || 'zone1'); if (task.textContent !== text) task.textContent = text; }
+    if (task) {
+      const id=this.zoneManager?.currentZoneId || 'zone1',quest=window.RealmQuests?.specs[id];
+      let text=GamePolish.taskText(this.gameState,id);
+      if(quest){
+        const done=window.RealmQuests.solved(id,this.gameState.realmPuzzles?.[id]);
+        const next=this.zoneManager.zones[id].words.find(word=>!this.gameState.practicedWordsByZone?.[id]?.includes(word));
+        text=!done?'秘境任務 · '+quest.title:next?'機關已解開 · 探索並練習 '+next:'任務與英語線索完成 · 探索守護者或下一個出口';
+      }
+      if(task.textContent!==text)task.textContent=text;
+    }
     const fpsVal = Math.round(this.rollingFps || 60);
     const fpsEl = document.getElementById('fpsPillText');
     const qualEl = document.getElementById('qualityPillText');

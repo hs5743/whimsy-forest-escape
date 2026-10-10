@@ -330,7 +330,7 @@ test('each later realm receives contextual hints and tracks its own unfinished w
  const c=context(),Manager=load(c,'spatial-zone-manager.js','SpatialZoneManager');
  Manager.prototype.initTextures=()=>{};const m=new Manager({});
  for(const zone of Object.values(m.zones).filter(z=>z.id!=='zone1')){
-  const plan=Assist.hintPlan({},zone,[]);assert.equal(plan.word,zone.words[0]);assert.ok(plan.clues[0].length>10);
+  const plan=Assist.hintPlan({realmPuzzles:questDoneStates},zone,[]);assert.equal(plan.word,zone.words[0]);assert.ok(plan.clues[0].length>10);
   assert.notEqual(plan.clues[0],Assist.hintPlan({},m.zones.zone1).clues[0]);
   assert.equal(Assist.hintPlan({},zone,zone.words).word,null);
  }
@@ -395,4 +395,91 @@ test('restored study stones remain collectible before pickup and disappear after
  w.candleFlame={material:{}};w.candleLight={};w.bookCoverHinge={rotation:{}};w.keyMesh={position:{}};w.starStone={};w.flowerStone={};w.mimicLid={rotation:{}};
  w.restoreStudyState();assert.equal(w.starStone.visible,true);assert.equal(w.flowerStone.visible,true);
  w.gameState.hasStarStone=true;w.gameState.hasFlowerStone=true;w.restoreStudyState();assert.equal(w.starStone.visible,false);assert.equal(w.flowerStone.visible,false);
+});
+
+const Q=require('../realm-quests.js');
+const questDoneStates={zone2:{cart:[2,1,0],paid:true},zone3:{tool:'WATER',care:[true,true,true]},zone4:{equipment:'BALL',stage:3},zone5:{hour:8,minute:30,platform:2,boarded:true},zone6:{x:3,y:0},zone7:{object:'MOON',angle:90,aligned:true},zone8:{gear:['COAT','GLOVES','BOOTS'],heat:2,ready:true},zone9:{order:['READ','THINK','WRITE'],sealed:true},zone10:{notes:['C','E','G','C'],played:true}};
+function solveQuest(id,actions){let s=Q.initial(id);for(const a of actions)s=Q.transition(id,s,a).state;return s;}
+test('market requires the exact shopping list, not just any four-coin basket',()=>{
+ let s=solveQuest('zone2',[{type:'quantity',index:2,value:2},{type:'pay'}]);assert.equal(Q.solved('zone2',s),false);
+ s=solveQuest('zone2',[{type:'quantity',index:0,value:2},{type:'quantity',index:1,value:1},{type:'pay'}]);assert.equal(Q.solved('zone2',s),true);
+});
+test('garden care accepts partners in any order but rejects the wrong tool',()=>{
+ let s=Q.transition('zone3',Q.initial('zone3'),{type:'care',index:1}).state;assert.equal(s.care[1],false);
+ s=solveQuest('zone3',[{type:'tool',value:'SEEDS'},{type:'care',index:2},{type:'tool',value:'LEAF'},{type:'care',index:1},{type:'tool',value:'WATER'},{type:'care',index:0}]);assert.equal(Q.solved('zone3',s),true);
+});
+test('sports relay needs the ball and ordered actions, with a retry after a mistake',()=>{
+ let s=solveQuest('zone4',[{type:'move',value:'RUN'}]);assert.equal(s.stage,0);
+ s=solveQuest('zone4',[{type:'equipment',value:'BALL'},{type:'move',value:'RUN'},{type:'move',value:'SOCCER'}]);assert.equal(s.stage,0);
+ for(const value of ['RUN','JUMP','SOCCER'])s=Q.transition('zone4',s,{type:'move',value}).state;assert.equal(Q.solved('zone4',s),true);
+});
+test('station validates both time and platform and preserves a partially adjusted clock',()=>{
+ let s=solveQuest('zone5',[{type:'set',key:'hour',value:8},{type:'set',key:'minute',value:30},{type:'board'}]);assert.equal(Q.solved('zone5',s),false);assert.equal(Q.validateState('zone5',s).minute,30);
+ s=Q.transition('zone5',s,{type:'set',key:'platform',value:2}).state;s=Q.transition('zone5',s,{type:'board'}).state;assert.equal(Q.solved('zone5',s),true);
+});
+test('harbor cannot sail through reefs or past shore and supports alternate valid routes',()=>{
+ let s=Q.initial('zone6');assert.deepEqual(Q.transition('zone6',s,{type:'sail',value:'south'}).state,s);
+ s=Q.transition('zone6',s,{type:'sail',value:'east'}).state;assert.deepEqual(Q.transition('zone6',s,{type:'sail',value:'north'}).state,s);
+ for(const value of ['west','north','north','east','east','east'])s=Q.transition('zone6',s,{type:'sail',value}).state;assert.equal(Q.solved('zone6',s),true);
+ const alternate=solveQuest('zone6',['north','north','east','east','south','east','north'].map(value=>({type:'sail',value})));assert.equal(Q.solved('zone6',alternate),true);
+});
+test('observatory requires moon plus east, not just a correct angle',()=>{
+ let s=solveQuest('zone7',[{type:'rotate'},{type:'align'}]);assert.equal(Q.solved('zone7',s),false);
+ s=Q.transition('zone7',s,{type:'object',value:'MOON'}).state;s=Q.transition('zone7',s,{type:'align'}).state;assert.equal(Q.solved('zone7',s),true);
+});
+test('ice preparation rejects extra summer gear and excessive heat',()=>{
+ let s=solveQuest('zone8',['COAT','GLOVES','BOOTS','SHORTS'].map(value=>({type:'gear',value})).concat([{type:'heat',value:1},{type:'heat',value:1},{type:'depart'}]));assert.equal(Q.solved('zone8',s),false);
+ s=Q.transition('zone8',s,{type:'gear',value:'SHORTS'}).state;s=Q.transition('zone8',s,{type:'heat',value:1}).state;s=Q.transition('zone8',s,{type:'depart'}).state;assert.equal(Q.solved('zone8',s),false);
+ s=Q.transition('zone8',s,{type:'heat',value:-1}).state;s=Q.transition('zone8',s,{type:'depart'}).state;assert.equal(Q.solved('zone8',s),true);
+});
+test('library seal checks first-next-last and allows cards to be retrieved',()=>{
+ let s=solveQuest('zone9',['WRITE','THINK','READ'].map(value=>({type:'card',value})).concat([{type:'seal'}]));assert.equal(Q.solved('zone9',s),false);
+ s=Q.transition('zone9',s,{type:'clear'}).state;for(const value of ['READ','THINK','WRITE'])s=Q.transition('zone9',s,{type:'card',value}).state;s=Q.transition('zone9',s,{type:'seal'}).state;assert.equal(Q.solved('zone9',s),true);
+});
+test('sky-island melody needs four ordered notes and supports clearing wrong notes',()=>{
+ let s=solveQuest('zone10',['C','G','E','C'].map(value=>({type:'note',value})).concat([{type:'play'}]));assert.equal(Q.solved('zone10',s),false);
+ s=Q.transition('zone10',s,{type:'clear'}).state;for(const value of ['C','E','G','C'])s=Q.transition('zone10',s,{type:'note',value}).state;s=Q.transition('zone10',s,{type:'play'}).state;assert.equal(Q.solved('zone10',s),true);
+});
+test('realm checkpoints sanitize unknown fields and reject malformed or impossible configurations',()=>{
+ for(const [id,state]of Object.entries(questDoneStates)){assert.equal(Q.solved(id,Q.validateState(id,state)),true);assert.equal(Q.transition(id,state,{type:'clear'}).state!==state,true);}
+ assert.equal(Q.validateState('zone6',{x:1,y:1}),null);assert.equal(Q.validateState('zone8',{gear:['COAT','COAT'],heat:2,ready:true}),null);
+ const sanitized=Q.sanitizeMap({zone99:{solved:true},zone2:{cart:[0,0,0],paid:true,unexpected:'secret'},zone5:{hour:Infinity,minute:0,platform:1,boarded:true}});
+ assert.equal(sanitized.zone2.paid,false);assert.equal(sanitized.zone2.unexpected,undefined);assert.equal(sanitized.zone99,undefined);assert.equal(sanitized.zone5,undefined);
+});
+test('forward travel is gated by the current realm puzzle, while return and restoration remain usable',()=>{
+ assert.equal(Q.canTravel('zone2','zone3',{}),false);assert.equal(Q.canTravel('zone2','zone8',{}),false);assert.equal(Q.canTravel('zone6','zone5',{}),true);
+ assert.equal(Q.canTravel('zone2','zone3',questDoneStates),true);assert.equal(Q.canTravel('zone2','zone6',{}, {restore:true}),true);assert.equal(Q.canTravel('zone2','zone6',{}, {dev:true}),true);
+});
+test('hints lead to an unfinished realm mechanism, then return to vocabulary after solving',()=>{
+ const z={id:'zone5',words:['TIME','TRAIN']};const unfinished=Assist.hintPlan({realmPuzzles:{zone5:Q.initial('zone5')}},z,[]);assert.equal(unfinished.targetId,'quest_zone5');assert.equal(unfinished.word,null);
+ const finished=Assist.hintPlan({realmPuzzles:questDoneStates},z,[]);assert.equal(finished.word,'TIME');
+});
+test('checkpoint roundtrip preserves all nine realm solutions and isolated partial progress',()=>{
+ const f=checkpointFixture();f.world.gameState.realmPuzzles=structuredClone(questDoneStates);f.world.gameState.realmPuzzles.zone5={hour:8,minute:30,platform:1,boarded:false};
+ const snapshot=Progress.capture(f.world,'guest',2000),store=new Progress.CheckpointStore(f.storage,'guest',f.zones);assert.equal(store.save(snapshot),true);const restored=store.load();assert.equal(restored.state.realmPuzzles.zone5.platform,1);assert.equal(Q.solved('zone5',restored.state.realmPuzzles.zone5),false);assert.equal(Q.solved('zone2',restored.state.realmPuzzles.zone2),true);
+ f.world.gameState.realmPuzzles.zone2.cart[0]=0;assert.equal(restored.state.realmPuzzles.zone2.cart[0],2);
+});
+
+test('the scene manager refuses an unsolved forward exit before replacing the current scene',()=>{
+ const c=context();c.window.RealmQuests=Q;const M=load(c,'spatial-zone-manager.js','SpatialZoneManager');let notice='';const group={old:true},m={zones:{zone2:{},zone3:{}},currentZoneId:'zone2',world:{devMode:false,gameState:{realmPuzzles:{}},activeZoneGroup:group,showToast:t=>notice=t}};
+ assert.equal(M.prototype.switchZone.call(m,'zone3'),false);assert.equal(m.currentZoneId,'zone2');assert.equal(m.world.activeZoneGroup,group);assert.match(notice,/秘境任務/);
+});
+
+test('study completion feedback names the practiced word and the next live mechanism',()=>{
+ const c=context();c.window.AdventureAssist=Assist;const World=load(c,'world-3d.js','World3D'),w=Object.create(World.prototype);let result=null;w.gameState={candleLit:true};w.zoneManager={currentZoneId:'zone1',zones:{zone1:{id:'zone1',words:['LIGHT','BOOK']}}};w.realmQuests={reward:(title,next)=>result={title,next}};
+ w.notePracticeCompletion('LIGHT','zone1');assert.match(result.title,/LIGHT/);assert.match(result.next,/閱讀/);assert.deepEqual(Array.from(w.gameState.practicedWordsByZone.zone1),['LIGHT']);
+});
+
+test('legacy checkpoints remain valid without new realm mechanism fields',()=>{
+ const f=checkpointFixture();delete f.record.state.realmPuzzles;const r=Progress.validate(f.record,'guest',f.zones);assert.ok(r);assert.deepEqual(r.state.realmPuzzles,{});assert.equal(r.state.candleLit,true);
+});
+test('the actual seven rainbow arc materials brighten only after the melody is solved',()=>{
+ const c=context();c.window.RealmQuests=Q;const M=load(c,'spatial-zone-manager.js','SpatialZoneManager'),group=new THREE.Group(),texture=new THREE.Texture();const m={tex:{astrolabeBrass:texture,celestialMarble:texture},createParchmentSignTexture:()=>texture,world:{interactables:[],animators:[],gameState:{realmPuzzles:{}}}};
+ M.prototype.buildSkyIslesRainbowBridge.call(m,group,0,0,0);const arcs=[];group.traverse(o=>{if(o.userData.realmQuestRainbow)arcs.push(o);});assert.equal(arcs.length,7);m.world.animators[0](0);assert.ok(arcs.every(o=>o.material.opacity<.2));m.world.gameState.realmPuzzles.zone10=questDoneStates.zone10;m.world.animators[0](0);assert.ok(arcs.every(o=>o.material.opacity>.55));
+});
+
+test('scene replacement resets gameplay timing and clears the previous target prompt',()=>{
+ const c=context();c.ctx.GamePolish={...P,applySceneStyle:()=>{},applyQuality:()=>{},releaseGroup:()=>{}};const M=load(c,'spatial-zone-manager.js','SpatialZoneManager');let clock=0,cadence=0,focused=true,cleared=0;const scene=new THREE.Scene(),old=new THREE.Group();scene.add(old);c.elements.interactPrompt={style:{display:'block'},textContent:'OLD'};c.elements.crosshair={classList:{toggle:(key,value)=>focused=value}};
+ const w={devMode:true,gameState:{},scene,activeZoneGroup:old,zoneTimers:new Set(),closeSpeechCard:()=>{},player:{pos:new THREE.Vector3(),yaw:2,pitch:1},clock:{getDelta:()=>clock++},frameCadence:{reset:()=>cadence++},hintController:{clear:()=>cleared++},showToast:()=>{}};const m={world:w,zones:{zone2:{spawnPos:[0,1.6,3],spawnYaw:0,name:'Market'}},currentZoneId:'zone1',tex:{},textureSources:new Map(),setupZoneSkyAndAtmosphere:()=>{},buildZone2_Market:()=>{},loadSceneTextures:()=>{}};
+ assert.equal(M.prototype.switchZone.call(m,'zone2'),true);assert.equal(clock,1);assert.equal(cadence,1);assert.equal(cleared,1);assert.equal(focused,false);assert.equal(c.elements.interactPrompt.style.display,'none');assert.equal(c.elements.interactPrompt.textContent,'');assert.equal(w.sceneBuildMs,0);assert.equal(scene.children.includes(old),false);
 });

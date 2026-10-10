@@ -826,6 +826,7 @@
   <link rel="stylesheet" href="title-screen.css?v=20261010d">
   <link rel="stylesheet" href="learning-polish.css?v=20261010">
   <link rel="stylesheet" href="adventure-assist.css?v=20261010">
+  <link rel="stylesheet" href="realm-quests.css?v=20261010">
 </head>
 <body>
   <!-- ========================================================= -->
@@ -1001,6 +1002,18 @@
   </div>
 
   <button id="adventureHintBtn" type="button" class="adventure-hint-button" aria-haspopup="dialog" aria-controls="hintModal">需要一點提示？</button>
+  <button id="realmQuestBtn" type="button" hidden aria-haspopup="dialog" aria-controls="realmQuestModal">秘境任務</button>
+  <div id="realmQuestModal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="realmQuestTitle">
+    <section class="realm-quest-card">
+      <button id="realmQuestClose" class="modal-close-btn" type="button" aria-label="關閉">✕</button>
+      <p id="realmQuestKicker" class="quest-kicker"></p><h2 id="realmQuestTitle"></h2>
+      <p id="realmQuestEnglish" lang="en"></p><p id="realmQuestBrief"></p>
+      <button id="realmQuestListen" type="button">▶ 聽英語線索</button>
+      <div id="realmQuestControls"></div><p id="realmQuestResult" role="status" aria-live="polite"></p>
+      <div id="realmQuestWin" hidden><strong>秘境任務完成！</strong><p id="realmQuestNext"></p><button id="realmQuestExplore" type="button">回到秘境探索 →</button></div>
+    </section>
+  </div>
+  <div id="adventureReward" hidden role="status" aria-live="polite"><strong id="adventureRewardTitle"></strong><span id="adventureRewardNext"></span></div>
   <div id="hintDirection" hidden><span id="hintDirectionCopy" role="status"></span><button id="hintStop" type="button" aria-label="關閉方向標示">✕</button></div>
   <div id="hintModal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="hintTitle">
     <section class="hint-card"><button id="hintClose" class="modal-close-btn" type="button" aria-label="關閉">✕</button>
@@ -1034,7 +1047,7 @@
         <button id="adventureSaveNow" type="button">保存目前進度</button>
       </fieldset>
       <button class="retry-textures-btn" type="button" onclick="window.world3D?.zoneManager.retryTextures()">重新載入缺少的素材</button>
-      <div id="devZonePanel" hidden><label for="devZoneSelect">本機場景檢查（不記錄成績）</label><select id="devZoneSelect"></select><output id="devDiagnostics"></output></div>
+      <div id="devZonePanel" hidden><label for="devZoneSelect">本機場景檢查（不記錄成績）</label><select id="devZoneSelect"></select><button id="devQuestReset" type="button">重置此關測試機關</button><output id="devDiagnostics"></output></div>
       <div class="system-drawer-grid">
         <button id="bgmToggleBtn" class="drawer-action-btn" onclick="toggleMusic()" type="button">
           <span id="bgmIcon" class="drawer-btn-icon">🎵</span>
@@ -1860,8 +1873,9 @@
   <script src="three.min.js"></script>
   <script src="game-polish.js?v=20261010c"></script>
   <script src="title-screen.js?v=20261010"></script>
-  <script src="adventure-progress.js?v=20261010"></script>
-  <script src="adventure-assist.js?v=20261010"></script>
+  <script src="realm-quests.js?v=20261010"></script>
+  <script src="adventure-progress.js?v=20261010b"></script>
+  <script src="adventure-assist.js?v=20261010b"></script>
   <script src="game-diagnostics.js?v=20261010"></script>
   <script src="realm-presentation.js?v=20261010b"></script>
   <script src="vocab-data.js?v=20261010"></script>
@@ -1870,10 +1884,10 @@
   <script src="audio-manager.js?v=20261010d"></script>
   <script src="touch-controls.js?v=20261010"></script>
   <script src="cloud-sync-manager.js?v=20261010"></script>
-  <script src="spatial-zone-manager.js?v=20261010"></script>
+  <script src="spatial-zone-manager.js?v=20261010b"></script>
   <script src="minimap-manager.js?v=20260930_v16"></script>
   <script src="scavenger-hunt-manager.js?v=20260930_v16"></script>
-  <script src="world-3d.js?v=20261010e"></script>
+  <script src="world-3d.js?v=20261010f"></script>
 
   <script>
     let curLeaderboardTab = 'school';

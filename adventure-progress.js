@@ -9,7 +9,7 @@
     const s=raw.state,p=raw.player;
     if(!s||!p||!number(s.xp,0,1000000)||!Array.isArray(s.inventory)||s.inventory.length>128)return null;
     if(!number(p.x,-1000,1000)||!number(p.z,-1000,1000)||!number(p.y,0,100)||!number(p.yaw,-1e6,1e6)||!number(p.pitch,-1.6,1.6))return null;
-    const state={xp:Math.floor(s.xp),inventory:[],practicedWordsByZone:{}};
+    const state={xp:Math.floor(s.xp),inventory:[],practicedWordsByZone:{},realmPuzzles:root.RealmQuests?.sanitizeMap(s.realmPuzzles)||{}};
     for(const key of flags){if(typeof s[key]!=='boolean')return null;state[key]=s[key];}
     const ids=new Set();
     for(const item of s.inventory){
@@ -24,7 +24,7 @@
     return {version:1,owner,zone:raw.zone,savedAt:raw.savedAt,state,player:{x:p.x,y:p.y,z:p.z,yaw:p.yaw,pitch:p.pitch}};
   }
   function capture(world,owner,now=Date.now()) {
-    const state={xp:world.gameState.xp,inventory:world.gameState.inventory,practicedWordsByZone:world.gameState.practicedWordsByZone||{}};
+    const state={xp:world.gameState.xp,inventory:world.gameState.inventory,practicedWordsByZone:world.gameState.practicedWordsByZone||{},realmPuzzles:world.gameState.realmPuzzles||{}};
     for(const key of flags)state[key]=world.gameState[key]===true;
     return {version:1,owner,zone:world.zoneManager.currentZoneId,savedAt:now,state,player:{x:world.player.pos.x,y:world.player.pos.y,z:world.player.pos.z,yaw:world.player.yaw,pitch:world.player.pitch}};
   }
@@ -77,7 +77,7 @@
       if(!world.devMode&&profile){profile.xp=world.gameState.xp;profile.level=Math.max(Number(profile.level)||1,world.gameState.level);}
       world.hintController?.clear();root.speechManager?.stopListening();
       const wanted=record?.zone||'zone1';
-      if(resetScene||record||world.zoneManager.currentZoneId!==wanted){if(!world.switchZone(wanted))world.switchZone('zone1');}
+      if(resetScene||record||world.zoneManager.currentZoneId!==wanted){if(!world.switchZone(wanted,{restore:true}))world.switchZone('zone1',{restore:true});}
       else if(wanted==='zone1')world.restoreStudyState();
       if(record&&world.zoneManager.currentZoneId===wanted){
         const p=record.player;

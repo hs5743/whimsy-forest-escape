@@ -1095,8 +1095,12 @@ class SpatialZoneManager {
   }
 
   // 切換至指定空間
-  switchZone(zoneId) {
+  switchZone(zoneId, options = {}) {
     if (!this.zones[zoneId]) return false;
+    if (window.RealmQuests && !window.RealmQuests.canTravel(this.currentZoneId, zoneId, this.world.gameState.realmPuzzles, {restore:options.restore===true,dev:this.world.devMode})) {
+      this.world.showToast('出口還在等待秘境任務。點「秘境任務」閱讀線索、完成機關，再往下一關出發。');
+      return false;
+    }
     if (!this.world.devMode && !this.isZoneUnlocked(zoneId)) {
       if (this.world) {
         this.world.showToast(`🔒 冒險者等級未達 Lv.${this.zones[zoneId].reqLevel}，請先完成前序空間！`);
@@ -1104,6 +1108,7 @@ class SpatialZoneManager {
       return false;
     }
 
+    const sceneBuildStarted=performance.now();
     this.currentZoneId = zoneId;
     const zone = this.zones[zoneId];
 
@@ -1122,6 +1127,9 @@ class SpatialZoneManager {
     this.world.animators = [];
     this.world.hoveredObject = null;
     this.world.targetFocus?.select(null);
+    this.world.hintController?.clear();
+    const prompt=document.getElementById('interactPrompt');if(prompt){prompt.style.display='none';prompt.textContent='';}
+    document.getElementById('crosshair')?.classList.toggle('focused',false);
 
     // 建立新的空間群組
     const group = new THREE.Group();
@@ -1163,6 +1171,10 @@ class SpatialZoneManager {
     this.world.player.pos.set(...zone.spawnPos);
     this.world.player.yaw = zone.spawnYaw;
     this.world.player.pitch = 0;
+    this.world.clock?.getDelta();
+    this.world.frameCadence?.reset();
+    this.world.lastFrameTimestamp=performance.now();
+    this.world.sceneBuildMs=this.world.lastFrameTimestamp-sceneBuildStarted;
 
     // 播放音效與歡迎提示，並無縫切換專屬星界主題音樂
     if (window.audioManager) {
@@ -1178,6 +1190,7 @@ class SpatialZoneManager {
     // 更新 HUD 空間標籤
     const tag = document.getElementById('hudCurrentZoneLabel');
     if (tag) tag.textContent = `${zone.icon} ${zone.name}`;
+    this.world.realmQuests?.sync();
 
     return true;
   }
@@ -9238,6 +9251,7 @@ class SpatialZoneManager {
         side: THREE.DoubleSide
       });
       const rMesh = new THREE.Mesh(new THREE.TorusGeometry(3.6 + idx * 0.15, 0.07, 8, 36, Math.PI), rMat);
+      rMesh.userData.realmQuestRainbow = true;
       rMesh.rotation.z = 0;
       rMesh.position.set(0, 0.2, -0.4 + idx * 0.12);
       rainbowBridge.add(rMesh);
@@ -9271,7 +9285,8 @@ class SpatialZoneManager {
 
     this.world.animators.push((time) => {
       rainbowRings.forEach((r, idx) => {
-        r.material.opacity = 0.58 + Math.sin(time * 3.0 + idx * 0.5) * 0.22;
+        const complete=window.RealmQuests?.solved('zone10',this.world.gameState.realmPuzzles?.zone10);
+        r.material.opacity = complete ? 0.7 + Math.sin(time * 3.0 + idx * 0.5) * 0.15 : 0.14 + Math.sin(time * 3.0 + idx * 0.5) * 0.035;
       });
       signPlane.position.y = 3.8 + Math.sin(time * 2.0) * 0.08;
     });
@@ -9825,5 +9840,3 @@ class SpatialZoneManager {
 
 // 建立全域空間實例
 window.SpatialZoneManager = SpatialZoneManager;
-
-
