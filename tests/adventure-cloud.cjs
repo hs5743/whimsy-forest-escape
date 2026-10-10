@@ -104,13 +104,13 @@ test('an in-flight save cannot be replaced by a second request from the same cli
 
 function browserProgress(local=storage()){
  const elements=new Map(),events={},profiles=[];
- const element=id=>{if(!elements.has(id))elements.set(id,{style:{},inert:true,textContent:'',addEventListener(){},replaceChildren(){},appendChild(){},querySelector(){return {textContent:''};}});return elements.get(id);};
+ const element=id=>{if(!elements.has(id))elements.set(id,{style:{},inert:true,textContent:'',value:'',handlers:{},focus(){},addEventListener(name,cb){this.handlers[name]=cb;},replaceChildren(){},appendChild(){},querySelector(){return {textContent:''};}});return elements.get(id);};
  const vector=()=>({x:0,y:1.6,z:0,set(x,y,z){Object.assign(this,{x,y,z});},copy(p){Object.assign(this,{x:p.x,y:p.y,z:p.z});}});
  const world={devMode:false,gameState:{},zoneManager:{zones,currentZoneId:'zone1'},player:{pos:vector(),yaw:0,pitch:0,radius:.45},camera:{position:vector(),rotation:{set(){}}},clock:{getDelta(){}},frameCadence:{reset(){}},restoreStudyState(){},updateHUDFromProfile(){},isPositionBlocked(){return false;},showToast(){},switchZone(id){this.zoneManager.currentZoneId=id;this.player.pos.set(0,1.6,0);return true;}};
  const manager={profile:{isGuest:true,xp:10,level:1},calculateLevel:xp=>Math.floor(xp/100)+1,onProfileUpdated:cb=>profiles.push(cb)};
  const window={document:{getElementById:element,createElement:()=>({style:{}}),addEventListener(){}},localStorage:local,RealmQuests:globalThis.RealmQuests,world3D:world,cloudSyncManager:manager,addEventListener:(name,cb)=>events[name]=cb,setInterval(){}};
  vm.runInContext(fs.readFileSync(path.join(base,'adventure-progress.js'),'utf8'),vm.createContext({window,console}));events.load();
- return {world,local,manager,api:world.adventureProgress,changeProfile(profile){manager.profile=profile;for(const cb of profiles)cb(profile);}};
+ return {world,local,manager,window,element,events,api:world.adventureProgress,changeProfile(profile){manager.profile=profile;for(const cb of profiles)cb(profile);}};
 }
 test('cloud restoration backs up the live puzzle before applying it and can undo without rolling back learning XP',()=>{
  const f=browserProgress(),old=snapshot();old.zone='zone2';old.player.x=6;old.state.inventory=[{id:'FISH',name:'魚',color:'#abc'}];old.state.xp=40;
@@ -132,4 +132,29 @@ test('failed pre-restore backup leaves the live world and local checkpoint uncha
 test('the maximum backend revision cannot create a checkpoint the client cannot read',()=>{
  const server=backend(),p=packet();server.call(p);server.sheets.get('AdventureCheckpoints').rows[1][3]=100000000;const writes=server.writes();
  assert.equal(server.call({...p,requestId:'f'.repeat(32),expectedRevision:100000000}).code,'invalid');assert.equal(server.writes(),writes);
+});
+
+function browserCloud(server,send=payload=>Promise.resolve(server.call(payload))){
+ const f=browserProgress();f.manager.gasUrl='https://example.test/exec';f.manager.clientToken='test-auth';f.window.crypto=crypto.webcrypto;f.window.closeSystemMenu=()=>{};
+ const ctx=vm.createContext({window:f.window,console,AbortController,setTimeout,clearTimeout,fetch:async(_url,options)=>({ok:true,json:()=>send(JSON.parse(options.body))})});
+ vm.runInContext(fs.readFileSync(path.join(base,'adventure-cloud.js'),'utf8'),ctx);f.events.load();
+ return {...f,click:async id=>f.element(id).handlers.click(),client:()=>f.world.adventureCloud.client()};
+}
+test('cancelling a cloud preview keeps local gameplay and an existing version conflict unchanged',async()=>{
+ const server=backend(),f=browserCloud(server);await f.click('adventureCloudCheck');await f.click('adventureCloudEnable');const c=f.client(),p=packet(snapshot());Object.assign(p,Cloud.parseCode(c.link.code));p.expectedRevision=1;p.requestId='d'.repeat(32);server.call(p);
+ await f.click('adventureCloudUpload');assert.equal(c.state,'conflict');const writes=server.writes(),before=JSON.stringify(f.api.snapshot().state);
+ await f.click('adventureCloudLoad');assert.equal(f.element('cloudRestoreModal').style.display,'flex');assert.equal(f.api.hasCloudBackup(),false);
+ await f.click('cloudRestoreCancel');assert.equal(f.element('cloudRestoreModal').style.display,'none');assert.equal(c.state,'conflict');assert.equal(c.conflictRevision,2);assert.equal(JSON.stringify(f.api.snapshot().state),before);assert.equal(server.writes(),writes);assert.equal(f.api.hasCloudBackup(),false);
+});
+test('switching students during a cloud read cannot present or apply the previous student checkpoint',async()=>{
+ const server=backend();let release;const f=browserCloud(server,payload=>payload.action==='getAdventure'?new Promise(resolve=>release=()=>resolve(server.call(payload))):Promise.resolve(server.call(payload)));
+ await f.click('adventureCloudCheck');await f.click('adventureCloudEnable');const pending=f.click('adventureCloudLoad');await new Promise(resolve=>setImmediate(resolve));assert.equal(typeof release,'function');
+ f.changeProfile({isGuest:false,studentId:'50101',xp:0,level:1});release();await pending;
+ assert.equal(f.client().owner,'student:50101');assert.equal(f.element('cloudRestoreModal').style.display,'none');assert.equal(f.world.zoneManager.currentZoneId,'zone1');assert.equal(f.api.hasCloudBackup(),false);assert.equal(f.client().link,null);
+});
+test('confirming a cloud preview restores gameplay only after preserving the local version',async()=>{
+ const server=backend(),p=packet();server.call(p);const f=browserCloud(server);await f.click('adventureCloudCheck');f.element('adventureCloudInput').value='EME1.'+p.checkpointId+'.'+p.secret;
+ await f.click('adventureCloudLoad');assert.equal(f.world.zoneManager.currentZoneId,'zone1');await f.click('cloudRestoreConfirm');
+ assert.equal(f.world.zoneManager.currentZoneId,'zone5');assert.equal(f.world.gameState.realmPuzzles.zone5.platform,1);assert.equal(f.api.hasCloudBackup(),true);assert.equal(f.client().state,'synced');
+ await f.click('adventureCloudUndo');assert.equal(f.world.zoneManager.currentZoneId,'zone1');assert.equal(f.client().link.autoUpload,false);assert.equal(f.client().state,'local_restored');assert.equal(server.call({...p,action:'getAdventure'}).snapshot.zone,'zone5');
 });

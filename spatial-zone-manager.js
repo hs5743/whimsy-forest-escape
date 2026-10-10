@@ -352,7 +352,12 @@ class SpatialZoneManager {
     }};
 
     this.tex = {
-      marketCobble: loader.load('assets/textures/tex-market-cobble.jpg'),
+      landscapeDaySky: loader.load('assets/textures/sky-day-v2.jpg'),
+      landscapeNightSky: loader.load('assets/textures/sky-night-v2.jpg'),
+      landscapeAuroraSky: loader.load('assets/textures/sky-aurora-v2.jpg'),
+      landscapeTree: loader.load('assets/textures/tree-oak-v2.webp'),
+      landscapeStone: loader.load('assets/textures/ground-limestone-v2.jpg'),
+      marketCobble: loader.load('assets/textures/ground-limestone-v2.jpg'),
       marketAwning: loader.load('assets/textures/tex-market-awning.jpg'),
       townFacade: loader.load('assets/textures/tex-town-facade.jpg'),
       gardenGrass: loader.load('assets/textures/tex-garden-grass.jpg'),
@@ -1242,7 +1247,8 @@ class SpatialZoneManager {
       zone9: this.tex.astralPantheonPanorama,
       zone10: this.tex.skyIslandPanorama
     };
-    const tex = zonePanoramaMap[zoneId];
+    const landscapeKey=window.RealmLandscape?.skyKey(zoneId);
+    const tex = (landscapeKey&&this.tex[landscapeKey])||zonePanoramaMap[zoneId];
     this.ensureTexture(tex);
     if(tex && this.textureStatus.get(tex) !== "ready") { this.world.scene.environment=null; return; }
     this.world.updateEnvironmentFromTexture(tex || null, zoneId);
@@ -1317,8 +1323,8 @@ class SpatialZoneManager {
     this.world.scene.background = new THREE.Color(skyColorTop);
     this.world.scene.fog = new THREE.FogExp2(fogColor, fogDensity);
 
-    // 注意：全戶外關卡 (Zone 2~10) 皆已採用 360 度圓柱全景天穹 (Panoramic Sky Cylinder, 半徑 85~96m)，
-    // 不再覆蓋舊版半徑 65m 的純色半球形天頂，確保遼闊自然地平線無任何遮蔽。
+    // 戶外關卡使用 RealmLandscape 的封閉天空與固定世界地形。
+    // 不加入內層天頂，以免遮住天空或產生可見上緣。
 
     // 星光車站加入星宿微光粒子
     if (zoneId === 'zone5') {
@@ -1355,6 +1361,7 @@ class SpatialZoneManager {
   // 為各戶外關卡構築無縫超寬全景地平線，結合微速大氣視差自轉與邊界過渡光環
   // =========================================================================
   buildZoneSkyPanorama(group, zoneId, texture, options = {}) {
+    if(window.RealmLandscape)return window.RealmLandscape.build(this,group,zoneId,this.tex[window.RealmLandscape.skyKey(zoneId)]);
     if (!texture) return null;
     const radius = options.radius || 92;
     const height = options.height || 75;
@@ -4083,7 +4090,7 @@ class SpatialZoneManager {
 
   // 1. 動態海洋水面
   buildHarborDynamicOcean(group) {
-    const oceanGeo = new THREE.PlaneGeometry(160, 160, 24, 24);
+    const oceanGeo = new THREE.PlaneGeometry(360, 360, 24, 24);
     const oceanMat = new THREE.MeshStandardMaterial({
       color: 0x0284c7,
       roughness: 0.15,
@@ -6586,6 +6593,8 @@ class SpatialZoneManager {
 
   // 2. 翡翠綠與紫羅蘭極光帷幕、雪峰天際線、600星芒
   buildGlacialAuroraSky(group) {
+    // The generated aurora sky replaces the old rectangular ribbons and polygon peaks.
+    if(window.RealmLandscape)return;
     const skyGroup = new THREE.Group();
 
     // 翡翠綠極光絲帶 1 (發光疊加模式 - 柔和通透氛圍)
@@ -8949,6 +8958,7 @@ class SpatialZoneManager {
 
   // 2. 蒼穹雲海天際與 360 度全景遠景穹頂 (Panoramic Sky Vista & Floating Clouds Horizon)
   buildSkyIslesAtmosphere(group) {
+    if(window.RealmLandscape)return window.RealmLandscape.build(this,group,'zone10',this.tex.landscapeDaySky);
     const skyGroup = new THREE.Group();
 
     // A. 巨型 360 度全景圓柱天穹 (半徑 96m, 高 85m, 內壁反向渲染)

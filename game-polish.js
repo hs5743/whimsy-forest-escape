@@ -175,6 +175,7 @@
         const radius=o.geometry.boundingSphere.radius*Math.max(Math.abs(o.scale.x),Math.abs(o.scale.y),Math.abs(o.scale.z));
         o.castShadow=radius>.06&&radius<18&&!['PlaneGeometry','CircleGeometry','RingGeometry'].includes(o.geometry.type)&&materials.some(m=>m&&!m.transparent);
       } else o.castShadow=false;
+      if(o.userData.landscape)o.castShadow=false;
       for(const m of materials) if(m?.isMeshStandardMaterial) m.envMapIntensity=zoneId==='zone1'?.35:.55;
     });
     const fill=localFill || world.hemiLight;
