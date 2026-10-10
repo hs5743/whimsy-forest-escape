@@ -74,6 +74,9 @@
     };
   }
   function trees(T,group,profile,rng,locations,manager){
+    if(profile.snow&&manager?.tex.snowNeedles){
+      return buildSnowPines(manager,group,locations.map(p=>({...p,height:4+rng()*6})));
+    }
     if(manager?.tex.landscapeTree&&!profile.snow){
       const placements=[],texture=manager.tex.landscapeTree;manager.ensureTexture(texture);
       for(const p of locations){const h=5+rng()*7,a=rng()*Math.PI*2;for(const offset of [0,Math.PI/2])placements.push({x:p.x,y:p.y+h*.5,z:p.z,sx:h*.83,sy:h,sz:1,ry:a+offset});}
@@ -129,6 +132,35 @@
     }
     trees(T,group,profile,rng,locations,manager);
   }
+  function buildSnowPines(manager,group,locations,includeTrunks=true){
+    const T=root.THREE,rng=random(63219),trunks=[],branches=[],needles=[],snow=[];
+    const object=new T.Object3D(),up=new T.Vector3(0,1,0);
+    for(const point of locations){
+      const h=point.height||6.2,w=point.width||h*.38;
+      if(includeTrunks)trunks.push({x:point.x,y:point.y+h*.48,z:point.z,sx:h*.06,sy:h*.96,sz:h*.06});
+      for(let tier=0;tier<4;tier++){
+        const radius=w*(1-tier*.21),y=point.y+h*(.36+tier*.175),count=8-tier;
+        for(let i=0;i<count;i++){
+          const a=i/count*Math.PI*2+tier*.61,reach=radius*(.73+rng()*.22),drop=h*(.025+rng()*.025);
+          const start=new T.Vector3(point.x,y+.2,point.z),end=new T.Vector3(point.x+Math.cos(a)*reach,y-drop,point.z+Math.sin(a)*reach),dir=end.clone().sub(start),mid=start.clone().add(end).multiplyScalar(.5);
+          object.quaternion.setFromUnitVectors(up,dir.clone().normalize());const e=new T.Euler().setFromQuaternion(object.quaternion);
+          branches.push({x:mid.x,y:mid.y,z:mid.z,sx:h*.012,sy:dir.length(),sz:h*.012,rx:e.x,ry:e.y,rz:e.z});
+          for(const facing of [0,.85])needles.push({x:point.x+Math.cos(a)*reach*.64,y:y-drop*.5,z:point.z+Math.sin(a)*reach*.64,sx:radius*1.12,sy:radius*.63,sz:1,ry:Math.PI/2-a+facing,rx:-.22});
+          snow.push({x:point.x+Math.cos(a)*reach*.73,y:y+.03,z:point.z+Math.sin(a)*reach*.73,sx:radius*.13,sy:h*.023*(.8+rng()*.5),sz:radius*.1,ry:-a});
+        }
+      }
+      for(const facing of [0,Math.PI/2])needles.push({x:point.x,y:point.y+h*.93,z:point.z,sx:w*.45,sy:w*.5,sz:1,ry:facing});
+    }
+    const bark=manager.tex.naturalBark||manager.tex.pineBark,leaf=manager.tex.snowNeedles;manager.ensureTexture?.(bark);manager.ensureTexture?.(leaf);
+    const batch=batches(T,group,rng),wood=new T.MeshStandardMaterial({map:bark||null,color:0xb6a28c,roughness:1});
+    const trunk=includeTrunks?batch('SnowPineTrunks',new T.CylinderGeometry(.06,1,1,12),wood,trunks):null;
+    const branch=batch('SnowPineBranches',new T.CylinderGeometry(.2,1,1,7),includeTrunks?wood.clone():wood,branches);
+    const foliage=batch('SnowPineNeedles',new T.PlaneGeometry(1,1),new T.MeshStandardMaterial({map:leaf||null,alphaTest:.42,side:T.DoubleSide,roughness:1,depthWrite:true}),needles);
+    const drifts=batch('SnowPineDrifts',new T.SphereGeometry(1,12,8),new T.MeshStandardMaterial({color:0xdce8eb,roughness:1}),snow);
+    if(foliage){foliage.visible=false;manager.world.animators.push(()=>{foliage.visible=manager.textureStatus?.get(leaf)==='ready';});}
+    for(const mesh of [trunk,branch,foliage,drifts])if(mesh){mesh.userData.nonBlocking=true;mesh.raycast=()=>{};}
+    return {trunk,branch,foliage,drifts};
+  }
   function buildNearTrees(manager,group,locations){
     const T=root.THREE,rng=random(28471),trunks=[],branches=[],leaves=[];
     const object=new T.Object3D(),up=new T.Vector3(0,1,0);
@@ -169,5 +201,5 @@
     }
     surroundings.traverse(o=>{if(o.isMesh){o.userData.landscape=true;o.userData.nonBlocking=true;o.raycast=()=>{};}});group.add(surroundings);return surroundings;
   }
-  root.RealmLandscape={profiles,skyKey,heightAt,seamWeight,random,build,buildNearTrees};if(typeof module!=='undefined')module.exports=root.RealmLandscape;
+  root.RealmLandscape={profiles,skyKey,heightAt,seamWeight,random,build,buildNearTrees,buildSnowPines};if(typeof module!=='undefined')module.exports=root.RealmLandscape;
 })(typeof window!=='undefined'?window:globalThis);

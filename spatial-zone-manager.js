@@ -358,6 +358,7 @@ class SpatialZoneManager {
       landscapeTree: loader.load('assets/textures/tree-oak-v2.webp'),
       naturalBark: loader.load('assets/textures/natural-bark-v3.jpg'),
       nearLeaves: loader.load('assets/textures/near-leaves-v3.webp'),
+      snowNeedles: loader.load('assets/textures/snow-needles-v4.webp'),
       landscapeStone: loader.load('assets/textures/ground-limestone-v2.jpg'),
       marketCobble: loader.load('assets/textures/ground-limestone-v2.jpg'),
       marketAwning: loader.load('assets/textures/tex-market-awning.jpg'),
@@ -510,7 +511,7 @@ class SpatialZoneManager {
     if (!this.tex.astrolabeDial) this.tex.astrolabeDial = this.createAstrolabeDialTexture();
     if (!this.tex.frostRune) this.tex.frostRune = this.createFrostRuneTexture();
     if (!this.tex.knittedWool) this.tex.knittedWool = this.createKnittedWoolTexture();
-    if (!this.tex.pineBark) this.tex.pineBark = this.createPineBarkTexture();
+    if (!this.tex.pineBark) this.tex.pineBark = this.tex.naturalBark;
     if (!this.tex.emberBed) this.tex.emberBed = this.createEmberBedTexture();
     if (!this.tex.pantheonMosaic) this.tex.pantheonMosaic = this.createPantheonMosaicTexture();
 
@@ -7187,8 +7188,8 @@ class SpatialZoneManager {
     });
 
     // 蒼勁虯曲樹幹與延伸樹根 (Gnarled Trunk & Snow Roots)
-    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.58, 6.2, 10), trunkMat);
-    trunk.position.y = 3.1;
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.58, 5.8, 14), trunkMat);
+    trunk.position.y = 2.9;
     trunk.castShadow = true;
     pine.add(trunk);
 
@@ -7210,7 +7211,10 @@ class SpatialZoneManager {
       { y: 5.6, r: 1.0, h: 1.4 }
     ];
 
+    const naturalBoughs=!!window.RealmLandscape?.buildSnowPines;
+    if(naturalBoughs)window.RealmLandscape.buildSnowPines(this,pine,[{x:0,y:0,z:0,height:6.2,width:2.5}],false);
     tiers.forEach((t, idx) => {
+      if(!naturalBoughs){
       // 綠意松針錐體
       const foliage = new THREE.Mesh(new THREE.ConeGeometry(t.r, t.h, 10), foliageMat);
       foliage.position.y = t.y;
@@ -7222,6 +7226,7 @@ class SpatialZoneManager {
       snow.position.y = t.y + t.h * 0.18;
       pine.add(snow);
 
+      }
       // 垂掛晶瑩冰錐 (Icicles)
       for (let i = 0; i < 5; i++) {
         const angle = (i / 5) * Math.PI * 2 + idx * 0.5;
