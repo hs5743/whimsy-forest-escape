@@ -1,7 +1,7 @@
 // 高階音效與多軌交響/八音盒背景音樂管理器 (AudioManager)
 // 基於 Web Audio API 純程序化即時音訊合成，具備程序化空間殘響 (Convolution Reverb)、
 // 溫暖弦樂和弦墊 (Atmospheric Warm Pad)、多音色鈴蘭主旋律與十界場景專屬主題音樂 (Zone-Themed Soundtracks)
-// 100% 零外部音效檔依賴，無延遲、離線可用、跨平台相容
+// 使用瀏覽器 Web Audio 合成原創音樂，不需要下載外部曲目。
 
 class AudioManager {
   constructor() {
@@ -20,126 +20,24 @@ class AudioManager {
     this.volumeSettings = GamePolish.loadSettings(window.localStorage);
     this.normalBgmVolume = 0.22 * this.volumeSettings.music;
     this.bgmTimeout = null;
-    this.currentNoteIndex = 0;
-    this.currentChordIndex = 0;
-    this.currentThemeKey = 'study';
 
-    // 十大奇幻星界專屬主題曲庫 (Zone-Themed Musical Themes)
-    this.zoneThemes = {
-      // Zone 1: 見習學徒書齋 (悠閒溫暖、八音盒與大提琴和弦墊)
-      'study': {
-        name: '魔法書屋 • 英語探險啟程 (C Major / Lydian)',
-        tempoMs: 760,
-        chords: [
-          { root: 65.41, notes: [261.63, 329.63, 392.00, 493.88] }, // Cmaj7
-          { root: 55.00, notes: [220.00, 261.63, 329.63, 392.00] }, // Am7
-          { root: 43.65, notes: [174.61, 261.63, 329.63, 349.23] }, // Fmaj7
-          { root: 49.00, notes: [196.00, 261.63, 293.66, 392.00] }  // Gsus4
-        ],
-        melody: [
-          { f: 523.25, d: 1 }, { f: 659.25, d: 1 }, { f: 783.99, d: 1.5 }, { f: 659.25, d: 0.8 },
-          { f: 587.33, d: 1 }, { f: 440.00, d: 1 }, { f: 523.25, d: 2 },
-          { f: 392.00, d: 1 }, { f: 440.00, d: 1 }, { f: 523.25, d: 1 }, { f: 659.25, d: 1 },
-          { f: 587.33, d: 2.4 },
-          { f: 523.25, d: 1 }, { f: 659.25, d: 1 }, { f: 783.99, d: 1.5 }, { f: 880.00, d: 0.8 },
-          { f: 783.99, d: 1 }, { f: 659.25, d: 1 }, { f: 523.25, d: 2 },
-          { f: 440.00, d: 1 }, { f: 523.25, d: 1 }, { f: 587.33, d: 1 }, { f: 493.88, d: 1 },
-          { f: 523.25, d: 3 }
-        ]
-      },
-      // Zone 2 & 4: 陽光市集與冒險操場 (輕快跳躍、活力短音符、溫暖民謠風)
-      'pastoral': {
-        name: '陽光市集與操場 • 綠茵躍動 (G Major)',
-        tempoMs: 640,
-        chords: [
-          { root: 49.00, notes: [196.00, 246.94, 293.66, 392.00] }, // G
-          { root: 46.25, notes: [185.00, 220.00, 293.66, 370.00] }, // D/F#
-          { root: 41.20, notes: [164.81, 246.94, 293.66, 329.63] }, // Em7
-          { root: 65.41, notes: [261.63, 329.63, 392.00, 523.25] }  // C
-        ],
-        melody: [
-          { f: 587.33, d: 0.8 }, { f: 783.99, d: 0.8 }, { f: 880.00, d: 1.2 }, { f: 987.77, d: 1.2 },
-          { f: 880.00, d: 0.8 }, { f: 783.99, d: 0.8 }, { f: 587.33, d: 1.6 },
-          { f: 659.25, d: 0.8 }, { f: 783.99, d: 0.8 }, { f: 880.00, d: 0.8 }, { f: 659.25, d: 0.8 },
-          { f: 783.99, d: 2.2 },
-          { f: 880.00, d: 0.8 }, { f: 987.77, d: 0.8 }, { f: 1174.66, d: 1.5 }, { f: 987.77, d: 0.8 },
-          { f: 783.99, d: 1.0 }, { f: 659.25, d: 1.0 }, { f: 783.99, d: 2.5 }
-        ]
-      },
-      // Zone 3: 守護獸之森花園 (空靈晨曦、清澈泉水、精靈風鈴與豎琴)
-      'sanctuary': {
-        name: '守護獸森林 • 晨曦空靈 (F Major Pentatonic)',
-        tempoMs: 820,
-        chords: [
-          { root: 43.65, notes: [174.61, 220.00, 261.63, 349.23] }, // Fmaj7
-          { root: 36.71, notes: [146.83, 220.00, 261.63, 329.63] }, // Dm7
-          { root: 58.27, notes: [233.08, 293.66, 349.23, 440.00] }, // Bbmaj7
-          { root: 65.41, notes: [261.63, 329.63, 392.00, 523.25] }  // C
-        ],
-        melody: [
-          { f: 698.46, d: 1.2 }, { f: 783.99, d: 0.8 }, { f: 880.00, d: 1.6 },
-          { f: 1046.50, d: 1.2 }, { f: 880.00, d: 0.8 }, { f: 698.46, d: 2.0 },
-          { f: 587.33, d: 1.0 }, { f: 698.46, d: 1.0 }, { f: 880.00, d: 1.5 }, { f: 783.99, d: 0.8 },
-          { f: 698.46, d: 2.8 }
-        ]
-      },
-      // Zone 5 & 6: 星光車站與蔚藍海港 (汽笛與海風、浪漫遠航、波浪起伏)
-      'voyage': {
-        name: '星光鐵道與海港 • 遠航華爾滋 (D Major 3/4 Waltz)',
-        tempoMs: 740,
-        chords: [
-          { root: 73.42, notes: [293.66, 369.99, 440.00, 587.33] }, // D
-          { root: 61.74, notes: [246.94, 293.66, 369.99, 440.00] }, // Bm
-          { root: 49.00, notes: [196.00, 246.94, 293.66, 392.00] }, // G
-          { root: 55.00, notes: [220.00, 277.18, 329.63, 440.00] }  // A
-        ],
-        melody: [
-          { f: 587.33, d: 1.5 }, { f: 739.99, d: 0.75 }, { f: 880.00, d: 0.75 },
-          { f: 1174.66, d: 2.0 }, { f: 987.77, d: 1.0 },
-          { f: 880.00, d: 1.5 }, { f: 739.99, d: 0.75 }, { f: 587.33, d: 0.75 },
-          { f: 739.99, d: 2.8 }
-        ]
-      },
-      // Zone 7 & 9: 觀測站與萬神殿堂 (浩瀚星海、宏偉宇宙神殿、水晶鐘鳴)
-      'celestial': {
-        name: '觀測站與萬神殿堂 • 宇宙星穹 (A Dorian / E Aeolian)',
-        tempoMs: 880,
-        chords: [
-          { root: 55.00, notes: [220.00, 261.63, 329.63, 392.00, 493.88] }, // Am9
-          { root: 46.25, notes: [185.00, 220.00, 261.63, 329.63] },         // F#m7b5
-          { root: 41.20, notes: [164.81, 246.94, 329.63, 392.00, 493.88] }, // Em9
-          { root: 73.42, notes: [293.66, 369.99, 440.00, 587.33] }          // Dmaj7
-        ],
-        melody: [
-          { f: 880.00, d: 1.5 }, { f: 987.77, d: 1.0 }, { f: 1046.50, d: 2.0 },
-          { f: 1318.51, d: 1.5 }, { f: 1174.66, d: 1.0 }, { f: 880.00, d: 2.5 },
-          { f: 987.77, d: 1.0 }, { f: 783.99, d: 1.0 }, { f: 659.25, d: 1.5 }, { f: 587.33, d: 1.0 },
-          { f: 880.00, d: 3.5 }
-        ]
-      },
-      // Zone 8 & 10: 極光冰雪與蒼穹空島 (極光晶瑩、天界虹彩、冰晶八音琴)
-      'aurora': {
-        name: '極光冰雪與蒼穹空島 • 晶瑩天籟 (E Lydian)',
-        tempoMs: 800,
-        chords: [
-          { root: 41.20, notes: [164.81, 246.94, 329.63, 392.00, 493.88] }, // Emaj7
-          { root: 34.65, notes: [138.59, 207.65, 277.18, 329.63] },         // C#m7
-          { root: 55.00, notes: [220.00, 277.18, 329.63, 440.00] },         // Amaj7
-          { root: 61.74, notes: [246.94, 311.13, 369.99, 493.88] }          // B7
-        ],
-        melody: [
-          { f: 1318.51, d: 1.2 }, { f: 1479.98, d: 0.8 }, { f: 1661.22, d: 1.5 },
-          { f: 1975.53, d: 1.5 }, { f: 1661.22, d: 1.0 }, { f: 1318.51, d: 2.0 },
-          { f: 1108.73, d: 1.0 }, { f: 1244.51, d: 1.0 }, { f: 1318.51, d: 1.5 }, { f: 987.77, d: 0.8 },
-          { f: 1318.51, d: 3.0 }
-        ]
-      }
-    };
-
-    this.currentTheme = this.zoneThemes['study'];
-
-    // 向下相容既有自定義旋律陣列引用
-    this.lullabyMelody = this.zoneThemes['study'].melody;
+    this.zoneThemes = window.SceneMusic.themes;
+    this.currentThemeKey = 'zone1';
+    this.currentTheme = this.zoneThemes.zone1;
+    this.musicBus = null;
+    this.retiringMusicBuses = [];
+    this.musicStep = 0;
+    this.nextMusicTime = 0;
+    this.manualBgmChoice = false;
+    try { this.manualBgmChoice = window.localStorage?.getItem('eme.musicEnabled') === 'off'; } catch (_) {}
+    this.duckFactor = 1;
+    window.document?.addEventListener('visibilitychange', () => {
+      if (!this.isBgmPlaying) return;
+      this.clearMusicTimer();
+      this.retireMusicBus(this.musicBus, .3);
+      this.musicBus = null;
+      if (!window.document.hidden) this.beginMusicPhrase();
+    });
   }
 
   // 初始化音訊圖 (Audio Graph) 與程序化殘響節點
@@ -151,7 +49,7 @@ class AudioManager {
       this.buildAudioGraph();
     }
     if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume();
+      this.ctx.resume()?.catch(() => { this.stopBgm(); });
     }
   }
 
@@ -189,7 +87,7 @@ class AudioManager {
 
       // 4. 背景音樂子混音器 (BGM Sub-Mixer)
       this.bgmGain = this.ctx.createGain();
-      this.bgmGain.gain.setValueAtTime(this.normalBgmVolume, this.ctx.currentTime);
+      this.bgmGain.gain.setValueAtTime(this.normalBgmVolume * this.duckFactor, this.ctx.currentTime);
       this.bgmGain.connect(this.dryGain);
       if (this.reverbNode) {
         const bgmReverbSend = this.ctx.createGain();
@@ -236,27 +134,20 @@ class AudioManager {
     return convolver;
   }
 
-  // 空間場景切換：平滑切換專屬主題曲
+  // Each scene has its own score; crossfade buses isolate old notes from new notes.
   setZone(zoneId) {
-    const mapping = {
-      'zone1': 'study',
-      'zone2': 'pastoral',
-      'zone3': 'sanctuary',
-      'zone4': 'pastoral',
-      'zone5': 'voyage',
-      'zone6': 'voyage',
-      'zone7': 'celestial',
-      'zone8': 'aurora',
-      'zone9': 'celestial',
-      'zone10': 'aurora'
-    };
-    const themeKey = mapping[zoneId] || 'study';
-    if (this.currentThemeKey === themeKey) return;
-
-    this.currentThemeKey = themeKey;
-    this.currentTheme = this.zoneThemes[themeKey] || this.zoneThemes['study'];
-    this.currentNoteIndex = 0;
-    this.currentChordIndex = 0;
+    const key = this.zoneThemes[zoneId] ? zoneId : 'zone1';
+    if (this.currentThemeKey === key) return;
+    this.currentThemeKey = key;
+    this.currentTheme = this.zoneThemes[key];
+    this.musicStep = 0;
+    this.syncMusicLabel();
+    if (this.isBgmPlaying) {
+      this.clearMusicTimer();
+      this.retireMusicBus(this.musicBus, 1.1);
+      this.musicBus = null;
+      this.beginMusicPhrase();
+    }
   }
 
   // 智慧教學音訊避讓 (Smart Audio Ducking)
@@ -265,217 +156,147 @@ class AudioManager {
     this.volumeSettings = settings; this.normalBgmVolume = .22 * settings.music;
     if(!this.ctx) return;
     const now=this.ctx.currentTime;
-    for(const [node, value] of [[this.masterGain,.85*settings.master],[this.sfxGain,.35*settings.effects],[this.bgmGain,this.normalBgmVolume*(this.isDucked?.25:1)]]) {
+    for(const [node, value] of [[this.masterGain,.85*settings.master],[this.sfxGain,.35*settings.effects],[this.bgmGain,this.normalBgmVolume*this.duckFactor]]) {
       if(node) {node.gain.cancelScheduledValues(now);node.gain.setTargetAtTime(value,now,.04);}
     }
   }
 
   duckBgm(factor = 0.3, duration = 0.25) {
-    if (!this.ctx || !this.bgmGain || this.isMuted) return;
     this.isDucked = true;
+    this.duckFactor = factor;
+    if (!this.ctx || !this.bgmGain || this.isMuted) return;
     const now = this.ctx.currentTime;
     this.bgmGain.gain.cancelScheduledValues(now);
     this.bgmGain.gain.linearRampToValueAtTime(this.normalBgmVolume * factor, now + duration);
   }
 
   unduckBgm(duration = 0.6) {
-    if (!this.ctx || !this.bgmGain || this.isMuted) return;
     this.isDucked = false;
+    this.duckFactor = 1;
+    if (!this.ctx || !this.bgmGain || this.isMuted) return;
     const now = this.ctx.currentTime;
     this.bgmGain.gain.cancelScheduledValues(now);
     this.bgmGain.gain.linearRampToValueAtTime(this.normalBgmVolume, now + duration);
   }
 
-  // 演奏主旋律八音盒/豎琴複音 (Lead Celesta & Bell Pluck)
-  playMelodyNote(freq, duration = 1.0, isBass = false) {
-    if (!this.ctx || this.isMuted || !this.bgmGain) return;
-
-    const now = this.ctx.currentTime;
-    const osc1 = this.ctx.createOscillator();
-    const osc2 = this.ctx.createOscillator();
-    const noteGain = this.ctx.createGain();
-    const filter = this.ctx.createBiquadFilter();
-
-    // 基礎正弦音 (基音)
-    osc1.type = isBass ? 'triangle' : 'sine';
-    osc1.frequency.setValueAtTime(freq, now);
-
-    // 泛音八度微音程 (豐富晶瑩金屬音箱共鳴)
-    osc2.type = 'triangle';
-    osc2.frequency.setValueAtTime(freq * (isBass ? 0.5 : 2.002), now);
-
-    // 低通濾波器消除刺耳高頻噪點
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(isBass ? 800 : Math.min(freq * 3.5, 6000), now);
-
-    const peakVolume = isBass ? 0.09 : 0.16;
-    noteGain.gain.setValueAtTime(0.0001, now);
-    noteGain.gain.linearRampToValueAtTime(peakVolume, now + 0.015);
-    noteGain.gain.exponentialRampToValueAtTime(0.0001, now + Math.max(0.1, duration));
-
-    osc1.connect(filter);
-    osc2.connect(filter);
-    filter.connect(noteGain);
-    noteGain.connect(this.bgmGain);
-
-    osc1.start(now);
-    osc2.start(now);
-    osc1.stop(now + duration);
-    osc2.stop(now + duration);
+  syncMusicLabel() {
+    const doc = window.document;
+    const label = doc?.getElementById('bgmThemeLabel');
+    if (label) label.textContent = this.currentTheme.name + ' · ' + this.currentTheme.style;
+    const status = doc?.getElementById('bgmStatusLabel');
+    if (status) status.textContent = this.isBgmPlaying ? '播放中（點擊關閉）' : '已關閉（點擊播放）';
+    const icon = doc?.getElementById('bgmIcon');
+    if (icon) icon.textContent = this.isBgmPlaying ? '🔊' : '🔇';
   }
 
-  // 演奏溫暖弦樂氛圍和弦墊 (Atmospheric Warm Pad)
-  playChordPad(chordNotes, duration = 3.5) {
-    if (!this.ctx || this.isMuted || !this.bgmGain || !chordNotes || chordNotes.length === 0) return;
-
-    const now = this.ctx.currentTime;
-    const padGain = this.ctx.createGain();
-    const padFilter = this.ctx.createBiquadFilter();
-
-    padFilter.type = 'lowpass';
-    padFilter.frequency.setValueAtTime(680, now);
-    padFilter.frequency.linearRampToValueAtTime(850, now + duration * 0.4);
-    padFilter.frequency.linearRampToValueAtTime(550, now + duration);
-
-    // 慢啟動 (1.0s) 與長釋放 (1.6s) 帶來如交響樂團般的氣勢與流暢銜接
-    padGain.gain.setValueAtTime(0.0001, now);
-    padGain.gain.linearRampToValueAtTime(0.08, now + 1.0);
-    padGain.gain.linearRampToValueAtTime(0.0001, now + duration);
-
-    padFilter.connect(padGain);
-    padGain.connect(this.bgmGain);
-
-    chordNotes.forEach((freq, idx) => {
-      const osc = this.ctx.createOscillator();
-      osc.type = (idx % 2 === 0) ? 'triangle' : 'sine';
-      osc.frequency.setValueAtTime(freq, now);
-      // 微小立體聲失諧 (Detune $\pm 4$ cents)，創造溫暖厚度
-      osc.detune.setValueAtTime((idx % 2 === 0) ? 4 : -4, now);
-      osc.connect(padFilter);
-      osc.start(now);
-      osc.stop(now + duration);
-    });
+  clearMusicTimer() {
+    if (this.bgmTimeout !== null) clearTimeout(this.bgmTimeout);
+    this.bgmTimeout = null;
   }
 
-  // 演奏低音大提琴深沉基底 (Warm Sub Bass)
-  playBassNote(rootFreq, duration = 3.0) {
-    if (!this.ctx || this.isMuted || !this.bgmGain || !rootFreq) return;
-
+  retireMusicBus(bus, seconds) {
+    if (!bus || bus.retired) return;
+    bus.retired = true;
     const now = this.ctx.currentTime;
-    const osc = this.ctx.createOscillator();
+    bus.gain.gain.cancelScheduledValues(now);
+    bus.gain.gain.setValueAtTime(bus.gain.gain.value, now);
+    bus.gain.gain.linearRampToValueAtTime(0, now + seconds);
+    for (const osc of bus.voices) osc.stop(now + seconds + .04);
+    if (!bus.voices.size) bus.gain.disconnect();
+    this.retiringMusicBuses = this.retiringMusicBuses.filter(b => b.voices.size);
+    this.retiringMusicBuses.push(bus);
+    // Rapid scene changes may retain at most two fading phrases.
+    while (this.retiringMusicBuses.length > 2) {
+      const oldest = this.retiringMusicBuses.shift();
+      oldest.gain.disconnect();
+      for (const osc of oldest.voices) osc.stop(now);
+    }
+  }
+
+  beginMusicPhrase() {
+    if (!this.ctx || !this.bgmGain || !this.isBgmPlaying || window.document?.hidden) return;
+    const gain = this.ctx.createGain();
+    const now = this.ctx.currentTime;
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(1, now + 1.1);
+    gain.connect(this.bgmGain);
+    this.musicBus = {gain, voices:new Set(), retired:false};
+    this.nextMusicTime = now + .04;
+    this.scheduleNextBgmStep();
+  }
+
+  playScoreTone(event, when, bus) {
+    if (!bus || bus.retired || (!bus.offline && bus.voices.size >= 96)) return;
+    const voice = window.SceneMusic.voices[event.voice];
     const gain = this.ctx.createGain();
     const filter = this.ctx.createBiquadFilter();
-
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(rootFreq, now);
-
+    const blend = this.ctx.createGain();
+    const first = this.ctx.createOscillator();
+    const second = this.ctx.createOscillator();
+    const duration = event.duration + voice.release;
     filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(420, now);
-
-    gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.linearRampToValueAtTime(0.11, now + 0.3);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-
-    osc.connect(filter);
-    filter.connect(gain);
-    gain.connect(this.bgmGain);
-
-    osc.start(now);
-    osc.stop(now + duration);
+    filter.frequency.setValueAtTime(voice.cutoff, when);
+    blend.gain.setValueAtTime(voice.blend, when);
+    first.type = voice.wave; second.type = voice.overtone;
+    first.frequency.setValueAtTime(event.frequency, when);
+    second.frequency.setValueAtTime(event.frequency * voice.ratio, when);
+    gain.gain.setValueAtTime(.0001, when);
+    gain.gain.linearRampToValueAtTime(event.level, when + voice.attack);
+    gain.gain.exponentialRampToValueAtTime(.0001, when + Math.max(duration,voice.attack+.05));
+    first.connect(filter); second.connect(blend); blend.connect(filter); filter.connect(gain);
+    const pan = this.ctx.createStereoPanner?.();
+    if (pan) {pan.pan.setValueAtTime(event.pan,when);gain.connect(pan);pan.connect(bus.gain);} else gain.connect(bus.gain);
+    let ended = 0;
+    for (const osc of [first,second]) {
+      bus.voices.add(osc);
+      osc.onended = () => {
+        bus.voices.delete(osc); osc.disconnect();
+        if (++ended === 2) {gain.disconnect();filter.disconnect();blend.disconnect();pan?.disconnect();}
+        if (bus.retired && !bus.voices.size) bus.gain.disconnect();
+      };
+      osc.start(when);osc.stop(when + duration + .02);
+    }
   }
 
-  // 演奏晶瑩星塵風鈴琶音 (Sparkling Wind Chimes)
-  playSparkleArpeggio(notes, delayMs = 90) {
-    if (!this.ctx || this.isMuted || !this.bgmGain || !notes) return;
-
+  // Short lookahead uses the audio clock, avoiding browser timer rhythm drift.
+  scheduleNextBgmStep() {
+    if (!this.isBgmPlaying || !this.musicBus || window.document?.hidden) return;
     const now = this.ctx.currentTime;
-    notes.forEach((freq, i) => {
-      const startTime = now + (i * delayMs) / 1000;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, startTime);
-
-      gain.gain.setValueAtTime(0.0001, startTime);
-      gain.gain.linearRampToValueAtTime(0.06, startTime + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 1.2);
-
-      osc.connect(gain);
-      gain.connect(this.bgmGain);
-
-      osc.start(startTime);
-      osc.stop(startTime + 1.2);
-    });
+    if (this.nextMusicTime < now - .15) this.nextMusicTime = now + .04;
+    while (this.nextMusicTime < now + .12) {
+      const plan = window.SceneMusic.events(this.currentTheme, this.musicStep++);
+      if (!this.isMuted) for (const event of plan.events) this.playScoreTone(event,this.nextMusicTime,this.musicBus);
+      this.nextMusicTime += plan.stepSeconds;
+    }
+    this.bgmTimeout = setTimeout(() => {this.bgmTimeout=null;this.scheduleNextBgmStep();},25);
   }
 
-  // 向下相容既有單音播放介面
-  playMusicBoxNote(freq, duration = 1.0, isBass = false) {
-    this.playMelodyNote(freq, duration, isBass);
+  playMusicBoxNote(freq, duration = 1, isBass = false) {
+    if(this.musicBus && !this.isMuted) this.playScoreTone({frequency:freq,voice:isBass?'bass':'bell',duration,level:.1,pan:0},this.ctx.currentTime,this.musicBus);
   }
 
   startBgm() {
     this.init();
-    if (this.isBgmPlaying) return;
+    if (!this.ctx || !this.bgmGain || this.isBgmPlaying) return false;
     this.isBgmPlaying = true;
-    this.scheduleNextBgmStep();
+    this.beginMusicPhrase();
+    this.syncMusicLabel();
+    return true;
   }
 
   stopBgm() {
     this.isBgmPlaying = false;
-    if (this.bgmTimeout) {
-      clearTimeout(this.bgmTimeout);
-      this.bgmTimeout = null;
-    }
+    this.clearMusicTimer();
+    this.retireMusicBus(this.musicBus,.3);
+    this.musicBus = null;
+    this.syncMusicLabel();
   }
 
   toggleBgm() {
-    this.init();
-    if (this.isBgmPlaying) {
-      this.stopBgm();
-      return false;
-    } else {
-      this.startBgm();
-      return true;
-    }
-  }
-
-  // 多軌音樂節奏調度器 (Multi-Track Musical Beat Scheduler)
-  scheduleNextBgmStep() {
-    if (!this.isBgmPlaying) return;
-
-    const theme = this.currentTheme || this.zoneThemes['study'];
-    const melody = theme.melody;
-    const chords = theme.chords;
-    const tempoMs = theme.tempoMs || 760;
-
-    const note = melody[this.currentNoteIndex];
-    const noteDuration = note.d * (tempoMs / 1000) * 1.5;
-
-    // 1. 播放主旋律音符
-    this.playMelodyNote(note.f, noteDuration, false);
-
-    // 2. 每 4 個音符或小節頭觸發溫暖和弦墊與低音
-    if (this.currentNoteIndex % 4 === 0 && chords.length > 0) {
-      const chord = chords[this.currentChordIndex];
-      const chordDuration = (tempoMs * 4 * 1.25) / 1000;
-      this.playChordPad(chord.notes, chordDuration);
-      this.playBassNote(chord.root, chordDuration);
-      this.currentChordIndex = (this.currentChordIndex + 1) % chords.length;
-    }
-
-    // 3. 每 8 個音符或特定樂句段落飄落精靈星塵風鈴
-    if (this.currentNoteIndex % 8 === 0) {
-      const sparkleNotes = [note.f * 2, note.f * 2.5, note.f * 3, note.f * 4];
-      this.playSparkleArpeggio(sparkleNotes, 85);
-    }
-
-    this.currentNoteIndex = (this.currentNoteIndex + 1) % melody.length;
-
-    const delayMs = note.d * tempoMs;
-    this.bgmTimeout = setTimeout(() => {
-      this.scheduleNextBgmStep();
-    }, delayMs);
+    this.manualBgmChoice = true;
+    if (this.isBgmPlaying) this.stopBgm(); else this.startBgm();
+    try { window.localStorage?.setItem('eme.musicEnabled',this.isBgmPlaying ? 'on' : 'off'); } catch (_) {}
+    return this.isBgmPlaying;
   }
 
   // 重構極致高質感遊戲音效 (Remastered High-Fidelity SFX)

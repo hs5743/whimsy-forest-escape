@@ -1068,6 +1068,7 @@
           <div class="drawer-btn-info">
             <span class="drawer-btn-title">背景音樂</span>
             <span id="bgmStatusLabel" class="drawer-btn-sub">點擊開關旋律</span>
+            <span id="bgmThemeLabel" class="drawer-btn-sub" aria-live="polite"></span>
           </div>
         </button>
 
@@ -1897,7 +1898,8 @@
   <script src="vocab-data.js?v=20261010"></script>
   <script src="vocab-passport-bank.js?v=20260930_v16"></script>
   <script src="speech-manager.js?v=20261010"></script>
-  <script src="audio-manager.js?v=20261010d"></script>
+  <script src="scene-music.js?v=20261010a"></script>
+  <script src="audio-manager.js?v=20261010e"></script>
   <script src="touch-controls.js?v=20261010"></script>
   <script src="cloud-sync-manager.js?v=20261010b"></script>
   <script src="spatial-zone-manager.js?v=20261010f"></script>
@@ -2062,13 +2064,8 @@
     }
 
     function toggleMusic() {
-      if (window.audioManager) {
-        const isPlaying = window.audioManager.toggleBgm();
-        const icon = document.getElementById('bgmIcon');
-        if (icon) icon.textContent = isPlaying ? '🔊' : '🔇';
-        const label = document.getElementById('bgmStatusLabel');
-        if (label) label.textContent = isPlaying ? '播放中 (點擊靜音)' : '已靜音 (點擊播放)';
-      }
+      window.audioManager?.toggleBgm();
+      window.audioManager?.syncMusicLabel();
     }
 
     function toggleSystemMenu() {
@@ -2080,13 +2077,7 @@
         if (window.cloudSyncManager) {
           window.cloudSyncManager.updateCloudStatusIndicator();
         }
-        if (window.audioManager) {
-          const isPlaying = !window.audioManager.isMuted && window.audioManager.bgmPlaying;
-          const label = document.getElementById('bgmStatusLabel');
-          if (label) label.textContent = isPlaying ? '播放中 (點擊靜音)' : '已靜音 (點擊播放)';
-          const icon = document.getElementById('bgmIcon');
-          if (icon) icon.textContent = isPlaying ? '🔊' : '🔇';
-        }
+        window.audioManager?.syncMusicLabel();
       }
       if (window.audioManager) window.audioManager.playSfx('click');
     }
@@ -2242,10 +2233,8 @@
 
       // 順暢解鎖背景音樂播放 (符合瀏覽器 Autoplay 規範)
       if (window.audioManager) {
-        if (!window.audioManager.isBgmPlaying) {
+        if (!window.audioManager.isBgmPlaying && !window.audioManager.manualBgmChoice) {
           window.audioManager.startBgm();
-          const bgmIcon = document.getElementById('bgmIcon');
-          if (bgmIcon) bgmIcon.textContent = '🔊';
         }
         window.audioManager.playSfx('magicSuccess');
       }
@@ -3027,9 +3016,8 @@
 
     // 第一次點擊畫面啟動背景音樂 (符合瀏覽器 Autoplay 政策)
     window.addEventListener('click', function startAudioOnce() {
-      if (window.audioManager && !window.audioManager.isBgmPlaying) {
+      if (window.audioManager && !window.audioManager.isBgmPlaying && !window.audioManager.manualBgmChoice) {
         window.audioManager.startBgm();
-        document.getElementById('bgmIcon').textContent = '🔊';
       }
       window.removeEventListener('click', startAudioOnce);
     }, { once: true });
