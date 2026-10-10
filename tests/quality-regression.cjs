@@ -319,3 +319,80 @@ test('context loss clears pending controls and restoration starts a fresh frame'
  handlers.webglcontextrestored();assert.equal(w.contextLost,false);assert.equal(resets,2);assert.equal(qualities,1);assert.equal(prevented,1);
  w.frameCadence.shouldRender(100,false,false,false);assert.equal(w.frameCadence.resumed,true);assert.equal(w.frameCadence.sample,false);
 });
+
+const Assist=require('../adventure-assist.js');
+test('study hint sequence follows all twelve live puzzle steps without skipping retries',()=>{
+ const s={},zone={id:'zone1',words:['LIGHT']};const seen=[];
+ for(const row of Assist.studySteps){const plan=Assist.hintPlan(s,zone);assert.equal(plan.word,row[1]);assert.equal(plan.targetId,row[2]);seen.push(plan.word);s[row[0]]=true;}
+ assert.equal(new Set(seen).size,12);assert.equal(Assist.hintPlan(s,zone).key,'zone1:done');
+});
+test('each later realm receives contextual hints and tracks its own unfinished word',()=>{
+ const c=context(),Manager=load(c,'spatial-zone-manager.js','SpatialZoneManager');
+ Manager.prototype.initTextures=()=>{};const m=new Manager({});
+ for(const zone of Object.values(m.zones).filter(z=>z.id!=='zone1')){
+  const plan=Assist.hintPlan({},zone,[]);assert.equal(plan.word,zone.words[0]);assert.ok(plan.clues[0].length>10);
+  assert.notEqual(plan.clues[0],Assist.hintPlan({},m.zones.zone1).clues[0]);
+  assert.equal(Assist.hintPlan({},zone,zone.words).word,null);
+ }
+});
+test('hint targets exclude hidden scene objects and use actual portal fallback',()=>{
+ const w=fixture(),o=target(w);o.userData.id='stall_apple';o.userData.label='Apple (APPLE)';
+ assert.equal(Assist.findHintTarget(w,{word:'APPLE'}),o);o.visible=false;assert.equal(Assist.findHintTarget(w,{word:'APPLE'}),null);
+ o.visible=true;o.userData.id='OPEN';assert.equal(Assist.findHintTarget(w,{word:null,targetId:'guardian_zone2'}),o);
+});
+test('hint directions match player yaw without moving or grading',()=>{
+ const player={pos:{x:0,z:0},yaw:0};assert.match(Assist.directionText(player,{x:0,z:-3}),/前方/);
+ assert.match(Assist.directionText(player,{x:3,z:0}),/右側/);assert.match(Assist.directionText(player,{x:0,z:3}),/後方/);
+ player.yaw=Math.PI/2;assert.match(Assist.directionText(player,{x:-3,z:0}),/前方/);assert.deepEqual(player.pos,{x:0,z:0});
+});
+test('practice completion belongs to the originating realm even after a portal switches zone',()=>{
+ const c=context(),World=load(c,'world-3d.js','World3D'),w=Object.create(World.prototype);w.gameState={};w.zoneManager={currentZoneId:'zone3'};
+ w.notePracticeCompletion('OPEN','zone2');w.notePracticeCompletion('OPEN','zone2');
+ assert.deepEqual(Array.from(w.gameState.practicedWordsByZone.zone2),['OPEN']);assert.equal(w.gameState.practicedWordsByZone.zone3,undefined);
+});
+
+const Progress=require('../adventure-progress.js');
+function checkpointFixture(){
+ const zones={zone1:{id:'zone1',words:['LIGHT','BOOK']},zone2:{id:'zone2',words:['APPLE']}};
+ const world={gameState:{xp:50,inventory:[{id:'KEY',name:'Key',color:'#abc'}],practicedWordsByZone:{zone1:['LIGHT']}},zoneManager:{currentZoneId:'zone1'},player:{pos:new THREE.Vector3(1,1.6,2),yaw:.5,pitch:.1}};
+ Progress.flags.forEach(key=>world.gameState[key]=key==='candleLit');
+ const map=new Map(),storage={getItem:key=>map.get(key)||null,setItem:(key,value)=>map.set(key,value)};
+ return {zones,world,map,storage,record:Progress.capture(world,'guest',1000)};
+}
+test('checkpoint captures puzzle state, inventory, per-realm words and exact position',()=>{
+ const f=checkpointFixture(),s=Progress.validate(f.record,'guest',f.zones);assert.equal(s.state.candleLit,true);assert.equal(s.state.bookOpened,false);assert.equal(s.player.yaw,.5);assert.equal(s.player.x,1);assert.deepEqual(s.state.practicedWordsByZone.zone1,['LIGHT']);
+ f.world.gameState.inventory[0].name='changed';assert.equal(s.state.inventory[0].name,'Key');
+});
+test('checkpoint slots isolate guests, preview and each student',()=>{
+ const f=checkpointFixture(),a=new Progress.CheckpointStore(f.storage,'guest',f.zones),b=new Progress.CheckpointStore(f.storage,'student:50101',f.zones);
+ assert.equal(a.save(f.record),true);assert.equal(b.load(),null);assert.equal(Progress.validate(f.record,'student:50101',f.zones),null);
+ assert.notEqual(Progress.ownerKey({isGuest:false,studentId:'50101'}),Progress.ownerKey({isGuest:false,studentId:'50102'}));assert.equal(Progress.ownerKey(null,true),'preview');assert.equal(Progress.ownerKey({isGuest:true,studentId:'random'}),'guest');
+});
+test('malformed checkpoints never restore unsupported zones or invalid state values',()=>{
+ const f=checkpointFixture();for(const mutate of [r=>r.version=999,r=>r.zone='zone99',r=>r.state.xp=NaN,r=>r.player.x=Infinity,r=>r.state.candleLit='true',r=>r.state.inventory[0].id='bad<script>']){
+  const r=structuredClone(f.record);mutate(r);assert.equal(Progress.validate(r,'guest',f.zones),null);
+ }
+});
+test('corrupt stored JSON is preserved before a replacement checkpoint is saved',()=>{
+ const f=checkpointFixture(),store=new Progress.CheckpointStore(f.storage,'guest',f.zones);f.map.set(store.key,'{broken');assert.equal(store.load(),null);assert.equal(store.status,'invalid');
+ assert.equal(store.save(f.record),true);assert.equal(f.map.get(store.key+':unreadable'),'{broken');assert.equal(store.load().state.candleLit,true);
+});
+test('blocked browser storage never reports a successful save',()=>{
+ const f=checkpointFixture(),store=new Progress.CheckpointStore({getItem:()=>{throw Error('blocked');},setItem:()=>{throw Error('quota');}},'guest',f.zones);
+ assert.equal(store.load(),null);assert.equal(store.status,'unavailable');assert.equal(store.save(f.record),false);assert.equal(store.savedAt,null);
+});
+test('checkpoint validation removes duplicates and unknown completed words',()=>{
+ const f=checkpointFixture();f.record.state.inventory.push({...f.record.state.inventory[0]});f.record.state.practicedWordsByZone.zone1=['LIGHT','LIGHT','IMPOSSIBLE'];
+ const s=Progress.validate(f.record,'guest',f.zones);assert.equal(s.state.inventory.length,1);assert.deepEqual(s.state.practicedWordsByZone.zone1,['LIGHT']);
+});
+test('unsafe saved positions keep the safe scene spawn and do not move through walls',()=>{
+ const f=checkpointFixture();f.world.player.pos.set(0,1.6,3);assert.equal(Progress.applySavedPosition(f.world.player,f.record.player,()=>true),false);assert.equal(f.world.player.pos.z,3);
+ assert.equal(Progress.applySavedPosition(f.world.player,{...f.record.player,x:NaN},()=>false),false);
+ assert.equal(Progress.applySavedPosition(f.world.player,f.record.player,()=>false),true);assert.equal(f.world.player.pos.z,2);assert.equal(f.world.player.pos.y,1.6);
+});
+test('restored study stones remain collectible before pickup and disappear after pickup',()=>{
+ const c=context(),World=load(c,'world-3d.js','World3D'),w=Object.create(World.prototype);w.gameState={alchemyMixed:true,mimicFed:true};
+ w.candleFlame={material:{}};w.candleLight={};w.bookCoverHinge={rotation:{}};w.keyMesh={position:{}};w.starStone={};w.flowerStone={};w.mimicLid={rotation:{}};
+ w.restoreStudyState();assert.equal(w.starStone.visible,true);assert.equal(w.flowerStone.visible,true);
+ w.gameState.hasStarStone=true;w.gameState.hasFlowerStone=true;w.restoreStudyState();assert.equal(w.starStone.visible,false);assert.equal(w.flowerStone.visible,false);
+});

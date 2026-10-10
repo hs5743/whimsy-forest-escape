@@ -899,6 +899,7 @@ class World3D {
     const modalIds = [
       'storyPrologueModal',
       'instructionsModal',
+      'hintModal',
       'speechModal',
       'guardianTrialModal',
       'worldMapModal',
@@ -1293,9 +1294,10 @@ class World3D {
     this.teacherPassPending = false;
     const cardToken = Symbol(wordKey); this.speechCardToken = cardToken;
     const activeGroup = this.activeZoneGroup;
+    const practiceZoneId = this.zoneManager?.currentZoneId || 'zone1';
     const isCurrent = () => this.speechCardToken === cardToken && this.activeZoneGroup === activeGroup;
     const complete = onComplete; let completed=false;
-    onComplete = () => { if (!isCurrent() || completed) return; completed=true; if(complete) complete(); };
+    onComplete = () => { if (!isCurrent() || completed) return; completed=true; if(complete) complete(); this.notePracticeCompletion(wordKey,practiceZoneId); };
     const modal = document.getElementById('speechModal');
     let data = VOCAB_DATA[wordKey];
 
@@ -1469,6 +1471,14 @@ class World3D {
         }, 300);
       }
     };
+  }
+
+  notePracticeCompletion(wordKey,practiceZoneId) {
+    const zone=practiceZoneId || this.zoneManager?.currentZoneId || 'zone1';
+    const words=this.gameState.practicedWordsByZone || (this.gameState.practicedWordsByZone={});
+    const completed=words[zone] || (words[zone]=[]);
+    if(!completed.includes(wordKey)) completed.push(wordKey);
+    this.hintController?.clear();
   }
 
   restoreSpeechFocus() {
@@ -1763,7 +1773,7 @@ class World3D {
     this.bookCoverHinge.rotation.z = s.bookOpened ? 2.35 : 0;
     this.keyMesh.position.y = s.bookOpened ? 1.5 : 1.15;
     this.keyMesh.visible = s.bookOpened && !s.hasKey;
-    this.starStone.visible = s.hasStarStone; this.flowerStone.visible = s.mimicFed;
+    this.starStone.visible = s.alchemyMixed && !s.hasStarStone; this.flowerStone.visible = s.mimicFed && !s.hasFlowerStone;
     if (s.drawerOpened) this.drawerMesh.position.z = -3.3;
     if (s.hasBluePotion) this.flaskLiquid.material.color.setHex(0x9955ff);
     if (s.mimicFed) this.mimicLid.rotation.x = -Math.PI / 3;
