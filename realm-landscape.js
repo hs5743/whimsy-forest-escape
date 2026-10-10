@@ -129,6 +129,30 @@
     }
     trees(T,group,profile,rng,locations,manager);
   }
+  function buildNearTrees(manager,group,locations){
+    const T=root.THREE,rng=random(28471),trunks=[],branches=[],leaves=[];
+    const object=new T.Object3D(),up=new T.Vector3(0,1,0);
+    for(const point of locations){
+      const h=point.height||6,w=point.width||h*.29,phase=rng()*Math.PI*2;
+      trunks.push({x:point.x,y:point.y+h*.27,z:point.z,sx:h*.035,sy:h*.54,sz:h*.035});
+      for(let i=0;i<16;i++){
+        const a=phase+i*2.39996,r=w*Math.sqrt((i+.5)/16),cy=h*(.55+.29*Math.sin(i*1.71)*.5+.12),cx=Math.cos(a)*r,cz=Math.sin(a)*r;
+        const start=new T.Vector3(point.x,point.y+h*(.28+(i%4)*.07),point.z),end=new T.Vector3(point.x+cx,point.y+cy,point.z+cz),direction=end.clone().sub(start);
+        object.quaternion.setFromUnitVectors(up,direction.clone().normalize());
+        const euler=new T.Euler().setFromQuaternion(object.quaternion),mid=start.clone().add(end).multiplyScalar(.5);
+        branches.push({x:mid.x,y:mid.y,z:mid.z,sx:h*.009,sy:direction.length(),sz:h*.009,rx:euler.x,ry:euler.y,rz:euler.z});
+        for(let face=0;face<3;face++)leaves.push({x:end.x,y:end.y,z:end.z,sx:w*.92,sy:w*.82,sz:1,ry:a+face*Math.PI/3,rx:(face-1)*.42,color:[0x8a9c69,0x9bac7a,0x789257][i%3]});
+      }
+    }
+    const bark=manager.tex.naturalBark,leaf=manager.tex.nearLeaves;manager.ensureTexture?.(bark);manager.ensureTexture?.(leaf);
+    const batch=batches(T,group,rng),wood=new T.MeshStandardMaterial({map:bark||null,color:0xb6a28c,roughness:1});
+    const trunk=batch('NaturalTreeTrunks',new T.CylinderGeometry(.72,1,1,12),wood,trunks);
+    const branch=batch('NaturalTreeBranches',new T.CylinderGeometry(.25,1,1,8),wood.clone(),branches);
+    const foliage=batch('NaturalLeafClusters',new T.PlaneGeometry(1,1),new T.MeshStandardMaterial({map:leaf||null,alphaTest:.42,side:T.DoubleSide,roughness:1,depthWrite:true}),leaves);
+    if(foliage){foliage.visible=false;manager.world.animators.push(()=>{foliage.visible=manager.textureStatus?.get(leaf)==='ready';});}
+    for(const mesh of [trunk,branch,foliage])if(mesh){mesh.userData.nonBlocking=true;mesh.raycast=()=>{};}
+    return {trunk,branch,foliage};
+  }
   function build(manager,group,zoneId,texture){
     const profile=profiles[zoneId];if(!profile)return null;
     const T=root.THREE,world=manager.world,rng=random(9371+Number(zoneId.slice(4))*131);
@@ -145,5 +169,5 @@
     }
     surroundings.traverse(o=>{if(o.isMesh){o.userData.landscape=true;o.userData.nonBlocking=true;o.raycast=()=>{};}});group.add(surroundings);return surroundings;
   }
-  root.RealmLandscape={profiles,skyKey,heightAt,seamWeight,random,build};if(typeof module!=='undefined')module.exports=root.RealmLandscape;
+  root.RealmLandscape={profiles,skyKey,heightAt,seamWeight,random,build,buildNearTrees};if(typeof module!=='undefined')module.exports=root.RealmLandscape;
 })(typeof window!=='undefined'?window:globalThis);

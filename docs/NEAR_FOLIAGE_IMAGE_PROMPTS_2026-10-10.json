@@ -1,0 +1,17 @@
+[
+  {
+    "key": "bark",
+    "prompt": "Create one square seamless game albedo material texture, orthographic flat close view of natural mature oak bark. Fine vertical fissures, muted brown grey, believable small ridges, evenly diffuse neutral lighting. Surface fills every pixel. Tileable left right top bottom. No tree silhouette, no foliage, no furniture, no ornament, no writing, no perspective, no directional highlights, no cast shadows. Realistic friendly fantasy adventure game material, crisp texture detail.",
+    "transparent_background": false
+  },
+  {
+    "key": "grass",
+    "prompt": "Create one square seamless game ground albedo material texture. Strictly orthographic top down natural short meadow grass, fine individual narrow grass blades and tiny sparse soil glimpses, restrained olive and fresh green variation. Dense, physically plausible subtle detail, equal scale throughout, diffuse neutral overcast light. Tileable all four edges, fills every pixel. No flowers, no decorative patterns, no objects, no paths, no horizon, no perspective, no directional shadow or lighting. Realistic material for a children's fantasy adventure game.",
+    "transparent_background": false
+  },
+  {
+    "key": "leaves",
+    "prompt": "Isolated compact loose spray of oak leaves for a game foliage alpha card. A few small natural oval lobed oak leaves on fine twigs, overlapping with irregular open gaps, airy natural silhouette. Entire spray centered and fully within square canvas with generous transparent border. Muted olive and forest green natural veins, soft even diffuse light, detailed readable individual leaves. True transparent background including gaps. No pot, no ground, no full tree, no text, no drop shadow. View straight on, realistic game foliage texture.",
+    "transparent_background": true
+  }
+]

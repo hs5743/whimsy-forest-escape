@@ -34,3 +34,16 @@ test('the actual scene manager delegates every panorama path including the sky i
  let calls=[];const window={RealmLandscape:{skyKey:L.skyKey,build:(...args)=>{calls.push(args);return 'landscape';}},addEventListener(){}};const c=vm.createContext({window,console,THREE:T});vm.runInContext(fs.readFileSync(path.join(base,'spatial-zone-manager.js'),'utf8')+';window.Manager=SpatialZoneManager;',c);const m=Object.create(window.Manager.prototype);m.tex={landscapeDaySky:new T.Texture(),landscapeNightSky:new T.Texture(),landscapeAuroraSky:new T.Texture()};
  for(let i=2;i<=9;i++)assert.equal(m.buildZoneSkyPanorama({},'zone'+i,new T.Texture()),'landscape');assert.equal(m.buildSkyIslesAtmosphere({}),'landscape');assert.equal(calls.length,9);for(const call of calls)assert.equal(call[3],m.tex[L.skyKey(call[2])]);
 });
+
+test('near foliage has real branch volume, cutout depth and no decorative interaction occlusion',()=>{
+ const f=fixture('zone3');f.manager.tex.naturalBark=new T.Texture();f.manager.tex.nearLeaves=new T.Texture();f.manager.textureStatus.set(f.manager.tex.nearLeaves,'ready');
+ const result=L.buildNearTrees(f.manager,f.group,[{x:4,y:0,z:-3,height:6,width:2}]);assert.equal(result.trunk.count,1);assert.equal(result.branch.count,16);assert.equal(result.foliage.count,48);assert.equal(result.foliage.material.transparent,false);assert.equal(result.foliage.material.depthWrite,true);assert.equal(result.foliage.visible,false);f.world.animators.forEach(fn=>fn());assert.equal(result.foliage.visible,true);
+ for(const mesh of Object.values(result)){const hits=[];mesh.raycast({},hits);assert.equal(hits.length,0);assert.equal(mesh.userData.nonBlocking,true);}const matrix=new T.Matrix4();result.branch.getMatrixAt(1,matrix);assert.ok(matrix.elements.every(Number.isFinite));
+});
+test('near foliage stays invisible when its alpha texture fails',()=>{
+ const f=fixture('zone3');f.manager.tex.nearLeaves=new T.Texture();f.manager.textureStatus.set(f.manager.tex.nearLeaves,'failed');const result=L.buildNearTrees(f.manager,f.group,[{x:0,y:0,z:0,height:6}]);f.world.animators.forEach(fn=>fn());assert.equal(result.foliage.visible,false);
+});
+test('the actual ancient tree retains its original TREE hitbox, callbacks and four lanterns',()=>{
+ const window={RealmLandscape:L,addEventListener(){}};const c=vm.createContext({window,console,THREE:T});vm.runInContext(fs.readFileSync(path.join(base,'spatial-zone-manager.js'),'utf8')+';window.Manager=SpatialZoneManager;',c);const m=Object.create(window.Manager.prototype);m.tex={naturalBark:new T.Texture(),nearLeaves:new T.Texture()};m.textureStatus=new Map();m.ensureTexture=()=>{};m.world={animators:[],interactables:[]};const group=new T.Group();let invoked=0;const callback=()=>invoked++;m.buildAncientWorldTree(group,4.8,0,-4.5,'TREE label','TREE',callback);
+ assert.equal(m.world.interactables.length,1);const hit=m.world.interactables[0];assert.equal(hit.userData.id,'TREE');assert.equal(hit.userData.onClick,callback);assert.equal(hit.position.y,2.4);assert.equal(hit.geometry.parameters.radiusTop,2.2);assert.equal(group.children[0].position.x,4.8);assert.equal(group.children[0].position.z,-4.5);hit.userData.onClick();assert.equal(invoked,1);let lights=0;group.traverse(o=>{if(o.isPointLight)lights++;});assert.equal(lights,4);assert.ok(group.getObjectByName('NaturalLeafClusters'));
+});

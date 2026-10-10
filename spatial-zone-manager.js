@@ -356,11 +356,13 @@ class SpatialZoneManager {
       landscapeNightSky: loader.load('assets/textures/sky-night-v2.jpg'),
       landscapeAuroraSky: loader.load('assets/textures/sky-aurora-v2.jpg'),
       landscapeTree: loader.load('assets/textures/tree-oak-v2.webp'),
+      naturalBark: loader.load('assets/textures/natural-bark-v3.jpg'),
+      nearLeaves: loader.load('assets/textures/near-leaves-v3.webp'),
       landscapeStone: loader.load('assets/textures/ground-limestone-v2.jpg'),
       marketCobble: loader.load('assets/textures/ground-limestone-v2.jpg'),
       marketAwning: loader.load('assets/textures/tex-market-awning.jpg'),
       townFacade: loader.load('assets/textures/tex-town-facade.jpg'),
-      gardenGrass: loader.load('assets/textures/tex-garden-grass.jpg'),
+      gardenGrass: loader.load('assets/textures/natural-grass-v3.jpg'),
       marbleFountain: loader.load('assets/textures/tex-marble-fountain.jpg'),
       runningTrack: loader.load('assets/textures/tex-running-track.jpg'),
       stationBrick: loader.load('assets/textures/tex-station-brick.jpg'),
@@ -396,6 +398,10 @@ class SpatialZoneManager {
       enchantedForestPanorama: loader.load('assets/textures/enchanted_forest_panorama.jpg'),
       sunbreezeMarketPanorama: loader.load('assets/textures/sunbreeze_market_panorama.jpg')
     };
+
+    this.tex.naturalBark.wrapS=THREE.RepeatWrapping;
+    this.tex.naturalBark.wrapT=THREE.RepeatWrapping;
+    this.tex.naturalBark.repeat.set(1,2);
 
     const panoramaKeys = [
       'skyIslandPanorama',
@@ -1678,6 +1684,7 @@ class SpatialZoneManager {
     const oakLeafMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.75 });
     const rockMat = new THREE.MeshStandardMaterial({ map: this.tex.stoneWall, roughness: 0.9 });
 
+    const nearForestTrees=[];
     for (let i = 0; i < 26; i++) {
       const angle = (i / 26) * Math.PI * 2;
       const radius = 13.0 + Math.sin(i * 1.8) * 2.2;
@@ -1687,6 +1694,7 @@ class SpatialZoneManager {
       if (tx < -4.5 && tz < -6.5) continue; // 留出西北出徑
       if (Math.abs(tx) < 2.5 && tz > 9.5) continue; // 留出南方出徑 (往市集)
 
+      if(window.RealmLandscape?.buildNearTrees){nearForestTrees.push({x:tx,y:0,z:tz,height:5.4+(i%5)*.55});continue;}
       const treeGroup = new THREE.Group();
       treeGroup.position.set(tx, 0, tz);
 
@@ -1708,6 +1716,8 @@ class SpatialZoneManager {
       }
       group.add(treeGroup);
     }
+
+    if(nearForestTrees.length)window.RealmLandscape.buildNearTrees(this,group,nearForestTrees);
 
     // 苔蘚巨石
     [[-9.0, -3.5], [8.5, 6.0], [7.0, -9.0]].forEach(([rx, rz]) => {
@@ -2344,8 +2354,10 @@ class SpatialZoneManager {
       pWall.position.set(0, 0.7, wz);
       group.add(pWall);
 
-      // 種植校園柏樹
+      // 校園樹木使用與花園相同的自然枝葉模型。
+      const campusTrees=[];
       for (let tx = -14; tx <= 14; tx += 4.5) {
+        if(window.RealmLandscape?.buildNearTrees){campusTrees.push({x:tx,y:0,z:wz+(wz>0?1.5:-1.5),height:5.6,width:1.5});continue;}
         const tree = new THREE.Group();
         tree.position.set(tx, 0, wz + (wz > 0 ? 1.5 : -1.5));
         const tTrunk = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.25, 2.0, 6), trunkMat);
@@ -2356,6 +2368,7 @@ class SpatialZoneManager {
         tree.add(tCrown);
         group.add(tree);
       }
+      if(campusTrees.length)window.RealmLandscape.buildNearTrees(this,group,campusTrees);
     });
   }
 
@@ -2876,6 +2889,9 @@ class SpatialZoneManager {
     const tree = new THREE.Group();
     tree.position.set(x, y, z);
 
+    if(window.RealmLandscape?.buildNearTrees){
+      window.RealmLandscape.buildNearTrees(this,tree,[{x:0,y:0,z:0,height:6.3,width:2.35}]);
+    }else{
     const woodMat = new THREE.MeshStandardMaterial({ map: this.tex.woodDesk, roughness: 0.85 });
     const leafMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.75 });
 
@@ -2887,6 +2903,8 @@ class SpatialZoneManager {
     const canopy1 = new THREE.Mesh(new THREE.DodecahedronGeometry(2.4), leafMat);
     canopy1.position.set(0, 4.0, 0);
     tree.add(canopy1);
+
+    }
 
     // 枝頭懸掛 4 盞發光精靈水晶提燈 (Fairy Crystal Lanterns)
     const lanternColors = [0x38bdf8, 0xfde047, 0xf472b6, 0x4ade80];
