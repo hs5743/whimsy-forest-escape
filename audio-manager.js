@@ -28,7 +28,7 @@ class AudioManager {
     this.zoneThemes = {
       // Zone 1: 見習學徒書齋 (悠閒溫暖、八音盒與大提琴和弦墊)
       'study': {
-        name: '見習書齋 • 蒼月之約 (C Major / Lydian)',
+        name: '魔法書屋 • 英語探險啟程 (C Major / Lydian)',
         tempoMs: 760,
         chords: [
           { root: 65.41, notes: [261.63, 329.63, 392.00, 493.88] }, // Cmaj7

@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>童趣森林魔法書齋逃脫：蒼月之約 (Whimsy Forest 3D Escape)</title>
+  <meta name="description" content="專為國小學生設計的 3D 英語解謎逃脫遊戲。聽示範、開口說英語、找線索，從魔法書屋出發探索市集、海港與奇幻秘境。">
+  <title>英語魔法探險家：秘境逃脫任務 (English Magic Explorers)</title>
   <link rel="stylesheet" href="style.css?v=20260913_v11">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%20%22100%22><text y=%22.9em%22 font-size=%2290%22>🗝️</text></svg>">
   <style>
@@ -270,7 +271,7 @@
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
-      background: #090d16 url('assets/textures/bg-home-forest.png') center/cover no-repeat !important;
+      background: #090d16 url('assets/textures/bg-english-escape.jpg') center/cover no-repeat !important;
       padding: 16px !important;
       overflow-y: auto !important;
       overflow-x: hidden !important;
@@ -822,7 +823,7 @@
     }
   </style>
   <link rel="stylesheet" href="game-polish.css?v=20261010">
-  <link rel="stylesheet" href="title-screen.css?v=20261010">
+  <link rel="stylesheet" href="title-screen.css?v=20261010d">
   <link rel="stylesheet" href="learning-polish.css?v=20261010">
 </head>
 <body>
@@ -832,12 +833,12 @@
   <div id="gameCoverScreen" class="game-cover-screen">
     <div class="cover-vignette-overlay"></div>
     <div class="cover-container">
-      <div class="title-seal" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46"/><path d="M61 16a24 24 0 1 0 23 32A27 27 0 0 1 61 16ZM25 65q13-7 25 0q12-7 25 0v18q-13-7-25 0q-12-7-25 0ZM50 65v18"/><path d="m23 28 2-6 2 6 6 2-6 2-2 6-2-6-6-2ZM75 60v8m-4-4h8"/></svg></div>
-      <p class="title-eyebrow">童趣森林 · 魔法書齋逃脫</p>
-      <h1 class="cover-title-main">蒼月之約</h1>
-      <p class="title-english" lang="en">THE MOONLIT PROMISE</p>
-      <div class="title-rule" aria-hidden="true"><span>✦</span></div>
-      <p class="cover-tagline">森林深處，一本魔法書正等著你。<br>跟隨星光，用英語喚醒沉睡的世界。</p>
+      <div class="title-seal" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46"/><path d="M22 35q14-7 28 0q14-7 28 0v34q-14-7-28 0q-14-7-28 0ZM50 35v34M30 45h12m-12 9h12m17-9h11m-11 9h11"/><path d="m72 16 2-6 2 6 6 2-6 2-2 6-2-6-6-2M32 79h24m-24 0 5-5m-5 5 5 5"/></svg></div>
+      <p class="title-eyebrow">給小小探險家的英語解謎冒險</p>
+      <h1 class="cover-title-main"><span class="title-name">英語魔法探險家</span><span class="title-subtitle">秘境逃脫任務</span></h1>
+      <p class="title-english" lang="en">ENGLISH MAGIC EXPLORERS</p>
+      <div class="title-topics" aria-label="遊戲特色"><span>國小英語</span><span>3D 解謎</span><span>密室逃脫</span></div>
+      <p class="cover-tagline">聽一聽、說英語，找到打開密室的線索！<br>從魔法書屋出發，探索每一個奇幻秘境。</p>
       <div class="cover-cta-row">
         <button id="btnCoverStartJourney" disabled class="btn-cover-primary" onclick="openGameInstructions()" type="button"><span>開始冒險</span><span aria-hidden="true">→</span></button>
         <button id="btnCoverInstructions" class="btn-cover-secondary" onclick="openGameInstructions()" type="button">操作說明</button>
@@ -850,7 +851,7 @@
       <button id="btnBootRetry" class="cover-skip-link" type="button" hidden onclick="location.reload()">重新準備魔法世界 ↻</button>
       <div class="cover-skip-row"><button id="btnCoverDirectPlay" disabled class="cover-skip-link" onclick="completeOnboardingAndEnterGame()" type="button">我會操作，直接探索 ↗</button></div>
     </div>
-    <div class="title-world-note" aria-hidden="true"><span>✦</span> 十個星界，一段屬於你的冒險</div>
+    <div class="title-world-note" aria-hidden="true"><span>✦</span> 說出英語，解開線索，開啟下一段冒險</div>
   </div>
   <!-- ========================================================= -->
   <!-- 2. 劇情前言繪本彈窗 (Storyline Prologue Modal)           -->
@@ -860,7 +861,7 @@
       <div class="story-header">
         <button class="modal-close-btn" type="button" onclick="closeStoryPrologue()" aria-label="關閉">✕</button>
         <div class="story-badge">📜 傳奇冒險序幕</div>
-        <h2 id="storyActTitle" class="story-title">第一章：蒼月之約與書齋覺醒</h2>
+        <h2 id="storyActTitle" class="story-title">第一章：魔法書屋的秘密</h2>
         <div class="story-stepper-row">
           <span id="storyStepDot1" class="story-step-dot active" onclick="openStoryPrologue(1)">1</span>
           <span id="storyStepDot2" class="story-step-dot" onclick="openStoryPrologue(2)">2</span>
@@ -871,19 +872,19 @@
       <!-- 第一章 -->
       <div id="storyAct1" class="story-act-panel active">
         <div class="story-act-illustration">
-          <img src="assets/textures/bg-home-forest.png" alt="童趣森林魔法書齋" class="story-img" onerror="this.src='assets/textures/bg-home-forest.png'">
-          <div class="story-icon-badge">🌲</div>
+          <img src="assets/textures/bg-english-escape.jpg" alt="明亮的魔法書屋，貓頭鷹導師、ABC 字母積木、鑰匙與出口門" class="story-img" onerror="this.onerror=null;this.src='assets/textures/bg-english-escape.jpg'">
+          <div class="story-icon-badge">📚</div>
         </div>
         <div class="story-act-text">
-          <p>在精靈守護的<strong>童趣森林</strong>深處，靜靜佇立著一座傳承千年的<strong>「魔法學徒書齋」</strong>。相傳每當天際浮現溫柔的蒼月光芒時，被星辰選中的年輕冒險者便會自沉睡中甦醒。</p>
-          <p>書齋中的古老燭台、魔導石碑與神秘寶箱，皆被古代精靈設下了<strong>「聲音密鎖」</strong>。唯有掌握純淨英語讀音與智慧的見習魔法使，才能藉由詠唱解開重重考驗，開啟通往世界的大門！</p>
+          <p>歡迎來到<strong>魔法書屋</strong>！你將成為一名小小英語探險家，尋找藏在燭台、書本和寶箱裡的線索。這裡是第一個逃脫任務的起點，門外還有市集、海港與更多秘境等著你。</p>
+          <p>仔細觀察物件，先聽英語示範，再試著<strong>開口說出單字或句子</strong>。解開線索、收集鑰匙，就能一步步打開出口。沒聽清楚可以再聽，沒說成功也能重試！</p>
         </div>
       </div>
 
       <!-- 第二章 -->
       <div id="storyAct2" class="story-act-panel" style="display: none;">
         <div class="story-act-illustration">
-          <img src="assets/textures/bg-story-map.png" alt="十大奇幻星界星圖" class="story-img" onerror="this.src='assets/textures/bg-home-forest.png'">
+          <img src="assets/textures/bg-story-map.png" alt="十大奇幻星界星圖" class="story-img" onerror="this.onerror=null;this.src='assets/textures/bg-english-escape.jpg'">
           <div class="story-icon-badge">🗺️</div>
         </div>
         <div class="story-act-text">
@@ -895,7 +896,7 @@
       <!-- 第三章 -->
       <div id="storyAct3" class="story-act-panel" style="display: none;">
         <div class="story-act-illustration">
-          <img src="assets/textures/enchanted_forest_panorama.jpg" alt="守護者試煉" class="story-img" onerror="this.src='assets/textures/bg-home-forest.png'">
+          <img src="assets/textures/enchanted_forest_panorama.jpg" alt="守護者試煉" class="story-img" onerror="this.onerror=null;this.src='assets/textures/bg-english-escape.jpg'">
           <div class="story-icon-badge">⚔️</div>
         </div>
         <div class="story-act-text">
@@ -1057,7 +1058,7 @@
           <span class="drawer-btn-icon">📜</span>
           <div class="drawer-btn-info">
             <span class="drawer-btn-title">冒險前言</span>
-            <span class="drawer-btn-sub">蒼月之約與十界劇情</span>
+            <span class="drawer-btn-sub">英語魔法探險家的旅程</span>
           </div>
         </button>
 
@@ -1344,7 +1345,7 @@
           🔄 重新遊玩
         </button>
         <a href="https://hs5743.github.io/Whimsy_Forest_English/" target="_blank" class="btn-website">
-          🌲 探索更多童趣森林英語
+          🌲 探索更多英語秘境
         </a>
       </div>
     </div>
@@ -1850,7 +1851,7 @@
   <script src="vocab-data.js?v=20261010"></script>
   <script src="vocab-passport-bank.js?v=20260930_v16"></script>
   <script src="speech-manager.js?v=20261010"></script>
-  <script src="audio-manager.js?v=20261010"></script>
+  <script src="audio-manager.js?v=20261010d"></script>
   <script src="touch-controls.js?v=20261010"></script>
   <script src="cloud-sync-manager.js?v=20261010"></script>
   <script src="spatial-zone-manager.js?v=20261010"></script>
@@ -2103,7 +2104,7 @@
 
     function updateStoryActView() {
       const actTitles = [
-        "第一章：蒼月之約與書齋覺醒",
+        "第一章：魔法書屋的秘密",
         "第二章：十界星界與魔導印記",
         "第三章：聲音的力量與守護者試煉"
       ];
@@ -2203,7 +2204,7 @@
         window.audioManager.playSfx('magicSuccess');
       }
 
-      window.world3D?.showToast('歡迎踏入童趣森林！拖曳環視，對準物件後按 E 或互動。');
+      window.world3D?.showToast('歡迎，小小英語探險家！拖曳環視，對準物件後按 E 或互動。');
     }
     window.completeOnboardingAndEnterGame = completeOnboardingAndEnterGame;
     window.directEnterGame = completeOnboardingAndEnterGame;

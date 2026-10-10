@@ -1,4 +1,4 @@
-/* Moonlit title and illustrated guide; isolated from the in-game HUD. */
+/* English adventure title and illustrated guide; isolated from the in-game HUD. */
 #gameCoverScreen { background-position: center 55% !important; box-sizing:border-box !important;padding: 24px clamp(24px,6vw,88px) !important; justify-content: flex-start !important; }
 #gameCoverScreen .cover-vignette-overlay { position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,27,28,.97) 0%,rgba(7,35,34,.87) 35%,rgba(7,35,34,.3) 70%,rgba(9,28,28,.18)),linear-gradient(0deg,rgba(4,23,24,.7),transparent 45%) !important;pointer-events:none;opacity:1 !important; }
 #gameCoverScreen .cover-container { position:relative;width:min(580px,55%) !important;max-width:580px !important;margin:0 !important;padding:24px 0 !important;text-align:left !important;display:flex;flex-direction:column;align-items:flex-start !important;gap:0 !important;background:transparent !important;border:0 !important;border-radius:0 !important;box-shadow:none !important;backdrop-filter:none !important;animation:none !important; }
@@ -91,3 +91,45 @@
 #instructionsModal .instructions-sub { color:#677262 !important; }
 #studentLoginModal { z-index:10060 !important; }
 #cloudConfigModal { z-index:10070 !important; }
+
+/* Elementary English adventure identity: bright book-room, readable title. */
+#gameCoverScreen { background-color:#f8f4e7 !important;background-image:url('assets/textures/bg-english-escape.jpg') !important;background-position:center !important; }
+#gameCoverScreen .cover-vignette-overlay { background:linear-gradient(90deg,#f7f8eaf5 0%,#f7f8eae6 29%,#f7f8ea92 44%,#f7f8ea00 65%) !important; }
+#gameCoverScreen .cover-container { width:min(580px,55%) !important; }
+#gameCoverScreen .title-seal { width:52px;height:52px;color:#28736d;margin-bottom:12px; }
+#gameCoverScreen .title-eyebrow { color:#386960;font-size:14px;letter-spacing:.1em;margin-bottom:10px; }
+#gameCoverScreen .cover-title-main { font-family:'Noto Sans TC',system-ui,sans-serif;font-weight:850 !important;font-size:clamp(38px,4vw,55px) !important;letter-spacing:.025em !important;line-height:1.2 !important;color:#164c50 !important;-webkit-text-fill-color:#164c50 !important;text-shadow:none !important; }
+.title-name { display:block;white-space:nowrap; }
+.title-subtitle { display:block;font-size:.6em;letter-spacing:.12em;color:#8a5824 !important;-webkit-text-fill-color:#8a5824 !important;margin-top:10px; }
+#gameCoverScreen .title-english { font-family:system-ui,sans-serif;color:#396b65;font-size:11px;letter-spacing:.16em;margin-top:12px; }
+.title-topics { display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 16px; }
+.title-topics span { background:#fffdf2;border:1px solid #b8cbb0;border-radius:30px;padding:6px 11px;color:#315951;font-size:12px;font-weight:600; }
+#gameCoverScreen .cover-tagline { color:#35594f !important;font-size:15px !important;line-height:1.8 !important;margin-bottom:22px !important; }
+#gameCoverScreen .btn-cover-primary { border-radius:12px !important;background:#247768 !important;color:#fffef2 !important;border-color:#185b51 !important;box-shadow:0 5px 18px #32665b22 !important; }
+#gameCoverScreen .btn-cover-secondary { border-radius:12px !important;background:#fffdf2de !important;color:#2f6258 !important;border-color:#99b8a4 !important; }
+#gameCoverScreen .btn-cover-secondary:hover { background:#e6f1db !important; }
+#gameCoverScreen .title-links { color:#597b65;gap:12px;margin-top:12px; }
+#gameCoverScreen .title-links button { color:#315b50; }
+#gameCoverScreen .asset-status,#gameCoverScreen .cover-skip-link { color:#3b6558 !important; }
+#gameCoverScreen .title-world-note { padding:10px 14px;border-radius:20px;background:#174e45cf;color:#fff6dc;font-size:12px;letter-spacing:.04em;text-shadow:none; }
+@media(max-width:700px) {
+ #gameCoverScreen { padding:22px 24px !important;justify-content:flex-end !important;align-items:flex-start !important;background-size:auto 330px !important;background-position:63% top !important;overflow-y:auto !important; }
+ #gameCoverScreen .cover-vignette-overlay { position:fixed;background:linear-gradient(0deg,#f8f4e7 0%,#f8f4e7 58%,#f8f4e7b8 66%,#f8f4e700 82%) !important; }
+ #gameCoverScreen .cover-container { width:100% !important;max-width:480px !important;margin-top:270px !important;flex-shrink:0; }
+ #gameCoverScreen .title-seal { display:none; }
+ #gameCoverScreen .cover-title-main { font-size:clamp(28px,8.4vw,40px) !important; }
+ #gameCoverScreen .title-subtitle { font-size:22px;letter-spacing:.1em;margin-top:7px; }
+ #gameCoverScreen .title-eyebrow { font-size:12px; }
+ #gameCoverScreen .title-english { font-size:10px;letter-spacing:.1em;margin-top:10px; }
+ .title-topics { margin:13px 0 12px;gap:6px; }.title-topics span { padding:5px 9px;font-size:11px; }
+ #gameCoverScreen .cover-tagline { font-size:13px !important;margin-bottom:18px !important; }
+ #gameCoverScreen .cover-cta-row { width:100%;gap:9px !important; }
+ #gameCoverScreen .btn-cover-primary,#gameCoverScreen .btn-cover-secondary { min-height:48px;padding:11px 18px !important;font-size:15px !important; }
+ #gameCoverScreen .title-links { margin-top:8px; }
+ #gameCoverScreen .asset-status { margin-top:7px !important; }
+ #gameCoverScreen .cover-skip-link { padding:7px 0 !important; }
+}
+@media(max-height:650px) and (min-width:701px) { #gameCoverScreen .title-seal { display:none; } .title-topics { margin:12px 0; } }
+
+#gameCoverScreen { overflow-y:auto !important; }
+@media(max-height:500px) and (min-width:701px) { #gameCoverScreen { align-items:flex-start !important; } }
