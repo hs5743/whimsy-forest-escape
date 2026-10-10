@@ -33,32 +33,64 @@
     const m=Array.isArray(o.material) ? o.material[hit.face ? hit.face.materialIndex : 0] : o.material;
     return m && m.visible && (!m.transparent || m.opacity > .25);
   }
+  // Each world owns its scratch state; no retained targets after a scene switch.
+  const targetScratch = new WeakMap();
   function resolveTarget(world, maxDistance=4) {
-    const T=root.THREE, targets=world.interactables.filter(o=>visible(o));
+    if (!Number.isFinite(maxDistance) || maxDistance<=0) return null;
+    const T=root.THREE;
+    let s=targetScratch.get(world);
+    if(!s) {s={targets:[],hits:[],blockers:[],forward:new T.Vector3(),box:new T.Box3(),center:new T.Vector3(),direction:new T.Vector3()};targetScratch.set(world,s);}
+    const {targets,hits,blockers,forward,box,center,direction}=s;
+    targets.length=hits.length=blockers.length=0;
+    for(const o of world.interactables) if(visible(o)) targets.push(o);
+    if(!targets.length) return null;
     world.scene.updateMatrixWorld(true); world.camera.updateMatrixWorld(true);
-    const ray=world.raycaster; ray.setFromCamera(world.mouseCoord,world.camera);
-    const hits=ray.intersectObjects(targets,true).filter(h=>h.distance<=maxDistance && visible(h.object));
-    const blockers=ray.intersectObject(world.activeZoneGroup,true).filter(solid);
-    const first=hits[0];
-    if(first && (!blockers[0] || blockers[0].distance>=first.distance-.03 || owner(blockers[0].object,targets)===owner(first.object,targets))) return owner(first.object,targets);
-    const forward=world.camera.getWorldDirection(new T.Vector3()), origin=world.camera.position;
-    let best=null, bestScore=Infinity;
-    const box=new T.Box3(), center=new T.Vector3(), direction=new T.Vector3();
-    for(const target of targets) {
-      box.setFromObject(target); if(box.isEmpty()) continue; box.getCenter(center);
-      direction.copy(center).sub(origin); const distance=direction.length();
-      if(distance>.0 && distance<=maxDistance) {
-        direction.normalize(); const alignment=direction.dot(forward);
-        // Small aim assistance, never selects an object behind the player.
-        if(alignment<Math.cos(12*Math.PI/180)) continue;
-        ray.set(origin,direction);
-        const obstruction=ray.intersectObject(world.activeZoneGroup,true).find(solid);
-        if(obstruction && obstruction.distance<distance-.03 && owner(obstruction.object,targets)!==target) continue;
-        const score=(1-alignment)*20+distance*.06;
-        if(score<bestScore) { bestScore=score; best=target; }
+    const ray=world.raycaster,previousFar=ray.far;
+    ray.far=maxDistance;
+    try {
+      ray.setFromCamera(world.mouseCoord,world.camera);
+      ray.intersectObjects(targets,true,hits);
+      ray.intersectObject(world.activeZoneGroup,true,blockers);
+      const first=hits.find(h=>visible(h.object)),blocker=blockers.find(solid);
+      if(first && (!blocker || blocker.distance>=first.distance-.03 || owner(blocker.object,targets)===owner(first.object,targets))) return owner(first.object,targets);
+      world.camera.getWorldDirection(forward);
+      const origin=world.camera.position;
+      let best=null,bestScore=Infinity;
+      for(const target of targets) {
+        box.setFromObject(target); if(box.isEmpty()) continue; box.getCenter(center);
+        direction.copy(center).sub(origin); const distance=direction.length();
+        if(distance>0 && distance<=maxDistance) {
+          direction.normalize(); const alignment=direction.dot(forward);
+          if(alignment<Math.cos(12*Math.PI/180)) continue;
+          ray.set(origin,direction); blockers.length=0;
+          ray.intersectObject(world.activeZoneGroup,true,blockers);
+          const obstruction=blockers.find(solid);
+          if(obstruction && obstruction.distance<distance-.03 && owner(obstruction.object,targets)!==target) continue;
+          const score=(1-alignment)*20+distance*.06;
+          if(score<bestScore) {bestScore=score;best=target;}
+        }
       }
+      return best;
+    } finally {
+      ray.far=previousFar;
+      targets.length=hits.length=blockers.length=0;
     }
-    return best;
+  }
+  class FrameCadence {
+    constructor() {this.mode=null;this.lastRender=null;this.sample=false;this.resumed=false;}
+    reset() {this.mode=null;this.lastRender=null;this.sample=false;this.resumed=false;}
+    shouldRender(now,hidden,contextLost,modalOpen) {
+      this.sample=false;this.resumed=false;
+      const mode=hidden||contextLost?'paused':modalOpen?'reading':'playing';
+      const changed=mode!==this.mode;
+      this.mode=mode;
+      if(mode==='paused' || !Number.isFinite(now)) {this.lastRender=null;return false;}
+      if(mode==='reading' && !changed && this.lastRender!==null && now>=this.lastRender && now-this.lastRender<50) return false;
+      this.resumed=changed;
+      this.sample=mode==='playing'&&!changed;
+      this.lastRender=now;
+      return true;
+    }
   }
   function releaseGroup(group, sharedTextures) {
     const geometries=new Set(), materials=new Set(), textures=new Set();
@@ -172,7 +204,7 @@
     }
     dispose() {this.scene.remove(this.ring);this.ring.geometry.dispose();this.ring.material.dispose();this.target=null;}
   }
-  const api={applySceneStyle,sceneProfiles,TargetFocus,isLocalPreview,loadSettings,frameDelta,movePlayer,resolveTarget,releaseGroup,applyQuality,actionText,taskText};
+  const api={FrameCadence,applySceneStyle,sceneProfiles,TargetFocus,isLocalPreview,loadSettings,frameDelta,movePlayer,resolveTarget,releaseGroup,applyQuality,actionText,taskText};
   root.GamePolish=api; if(typeof module!=='undefined') module.exports=api;
   if(root.document) root.addEventListener('load',()=>{
     const world=root.world3D; if(!world) return;

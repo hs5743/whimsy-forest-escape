@@ -266,3 +266,56 @@ test('teacher sentence verification is not presented as a fabricated recognition
  assert.equal(result.passed,true);assert.equal(result.teacherVerified,true);
  assert.equal(result.accuracy,null);assert.equal(result.userTranscript,'');
 });
+
+
+test('reading backgrounds render at most twenty times a second without gameplay samples',()=>{
+ const gate=new P.FrameCadence();let rendered=0;
+ for(let now=0;now<1000;now+=10) {if(gate.shouldRender(now,false,false,true)) rendered++;assert.equal(gate.sample,false);}
+ assert.equal(rendered,20);
+ assert.equal(gate.shouldRender(1001,false,false,false),true);assert.equal(gate.resumed,true);assert.equal(gate.sample,false);
+ assert.equal(gate.shouldRender(1017,false,false,false),true);assert.equal(gate.sample,true);
+});
+test('hidden and lost-context frames cannot pollute resumed gameplay',()=>{
+ for(const reason of ['hidden','context']) {
+  const gate=new P.FrameCadence();gate.shouldRender(0,false,false,false);gate.shouldRender(16,false,false,false);
+  assert.equal(gate.shouldRender(100,reason==='hidden',reason==='context',false),false);
+  assert.equal(gate.shouldRender(30100,false,false,false),true);assert.equal(gate.resumed,true);assert.equal(gate.sample,false);
+  gate.shouldRender(30116,false,false,false);assert.equal(gate.sample,true);
+ }
+});
+test('target selection reuses scratch arrays and releases scene references',()=>{
+ const w=fixture(),o=target(w);const arrays=[];const original=w.raycaster.intersectObjects.bind(w.raycaster);
+ w.raycaster.intersectObjects=(objects,recursive,out)=>{arrays.push(out);return original(objects,recursive,out);};
+ w.raycaster.far=20;assert.equal(P.resolveTarget(w),o);assert.equal(P.resolveTarget(w),o);
+ assert.equal(arrays[0],arrays[1]);assert.equal(arrays[0].length,0);assert.equal(w.raycaster.far,20);
+ w.activeZoneGroup.remove(o);w.interactables=[];assert.equal(P.resolveTarget(w),null);
+});
+test('target selection restores ray range if geometry processing fails',()=>{
+ const w=fixture();target(w);w.raycaster.far=8;w.raycaster.intersectObjects=()=>{throw Error('bad geometry');};
+ assert.throws(()=>P.resolveTarget(w),/bad geometry/);assert.equal(w.raycaster.far,8);
+ assert.equal(P.resolveTarget(w,NaN),null);assert.equal(P.resolveTarget(w,-1),null);
+});
+test('animation resume does not jump or include paused time in performance metrics',()=>{
+ const c=context(),World=load(c,'world-3d.js','World3D'),w=Object.create(World.prototype);
+ c.ctx.requestAnimationFrame=()=>{};let now=100;c.ctx.performance={now:()=>now};c.document.hidden=false;
+ let modal=true,moves=[],samples=[];w.frameCadence=new P.FrameCadence();w.isAnyModalOpen=()=>modal;
+ w.clock={getDelta:()=>30,elapsedTime:30};w.settings={quality:'auto',reducedMotion:true};w.animators=[];w.gameState={};
+ w.rollingFps=60;w.lastFrameTimestamp=0;w.lastFpsUiUpdateTime=100;w.lowFpsDuration=0;w.graphicQuality='high';
+ w.updatePlayer=dt=>moves.push(dt);w.updateRaycast=()=>{};w.updateFpsPillUI=()=>{};w.renderer={render:()=>{}};w.frameMetrics={record:dt=>samples.push(dt)};
+ w.dustParticles={rotation:{y:7},position:{y:8}};
+ w.animate();now=120;w.animate();assert.equal(moves.length,1);assert.equal(w.rollingFps,60);assert.equal(samples.length,0);
+ modal=false;now=121;w.animate();assert.equal(moves[1],0);assert.equal(samples.length,0);
+ assert.equal(w.dustParticles.rotation.y,7);assert.equal(w.dustParticles.position.y,8);
+});
+
+test('context loss clears pending controls and restoration starts a fresh frame',()=>{
+ const c=context(),World=load(c,'world-3d.js','World3D'),w=Object.create(World.prototype),handlers={};
+ let resets=0,stops=0,qualities=0,prevented=0;
+ c.window.touchControls={reset:()=>resets++};c.window.speechManager={stopListening:()=>stops++};
+ w.renderer={domElement:{addEventListener:(name,fn)=>handlers[name]=fn}};w.clock={getDelta:()=>0};w.frameCadence=new P.FrameCadence();
+ w.frameCadence.shouldRender(0,false,false,false);w.graphicQuality='medium';w.showToast=()=>{};
+ w.setGraphicQuality=(q,automatic)=>{assert.equal(q,'medium');assert.equal(automatic,true);qualities++;};w.setupEvents();
+ handlers.webglcontextlost({preventDefault:()=>prevented++});assert.equal(w.contextLost,true);assert.equal(stops,1);assert.equal(resets,1);
+ handlers.webglcontextrestored();assert.equal(w.contextLost,false);assert.equal(resets,2);assert.equal(qualities,1);assert.equal(prevented,1);
+ w.frameCadence.shouldRender(100,false,false,false);assert.equal(w.frameCadence.resumed,true);assert.equal(w.frameCadence.sample,false);
+});

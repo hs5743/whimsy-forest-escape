@@ -6,6 +6,7 @@ class World3D {
     this.settings = GamePolish.loadSettings(window.localStorage);
     this.devMode = ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname) && new URLSearchParams(location.search).get("dev") === "1";
     this.zoneTimers = new Set();
+    this.frameCadence = new GamePolish.FrameCadence();
     this.scene = null;
     this.camera = null;
     this.renderer = null;
@@ -796,8 +797,8 @@ class World3D {
       this.clock.getDelta(); this.lastFrameTimestamp = performance.now(); this.lowFpsDuration = 0;
     });
     const canvas = this.renderer.domElement;
-    canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); this.contextLost = true; this.showToast('畫面暫時中斷，請等待顯示恢復。'); });
-    canvas.addEventListener('webglcontextrestored', () => { this.contextLost = false; this.clock.getDelta(); this.setGraphicQuality(this.graphicQuality, true); });
+    canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); this.contextLost = true; window.touchControls?.reset(); window.speechManager?.stopListening(); this.showToast('畫面暫時中斷，請等待顯示恢復。'); });
+    canvas.addEventListener('webglcontextrestored', () => { this.contextLost = false; window.touchControls?.reset(); this.frameCadence.reset(); this.clock.getDelta(); this.setGraphicQuality(this.graphicQuality, true); });
 
     // 鍵盤快速鍵與彈窗控制
     window.addEventListener('keydown', (e) => {
@@ -1792,7 +1793,7 @@ class World3D {
     const qualLabels = { high: '高畫質', medium: '中畫質', low: '低畫質' };
 
     if (fpsEl) {
-      fpsEl.textContent = `⚡ FPS: ${fpsVal}`;
+      fpsEl.textContent = this.frameCadence?.mode === 'reading' ? '閱讀中 · 背景省電' : `⚡ FPS: ${fpsVal}`;
       fpsEl.className = fpsVal >= 45 ? 'fps-good' : (fpsVal >= 28 ? 'fps-med' : 'fps-low');
     }
     if (qualEl) {
@@ -1803,19 +1804,19 @@ class World3D {
   animate() {
     requestAnimationFrame(() => this.animate());
 
-    const rawDelta = this.clock.getDelta();
+    const nowTime = performance.now();
+    const modalOpen = this.isAnyModalOpen();
+    if (!this.frameCadence.shouldRender(nowTime,document.hidden,this.contextLost,modalOpen)) return;
+    const clockDelta = this.clock.getDelta();
+    const rawDelta = this.frameCadence.resumed ? 0 : clockDelta;
     const delta = GamePolish.frameDelta(rawDelta);
     const elapsedTime = this.clock.elapsedTime;
-    if (document.hidden || this.contextLost) return;
-
-    // 計算即時滾動 FPS
-    const nowTime = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+    // Reading/cover frames and the first resumed frame never influence auto quality.
     const frameDt = (nowTime - this.lastFrameTimestamp) / 1000;
     this.lastFrameTimestamp = nowTime;
-
-    if (frameDt > 0 && frameDt < 1.0) {
-      const currentFps = 1 / frameDt;
-      this.rollingFps = this.rollingFps * 0.92 + currentFps * 0.08;
+    if (this.frameCadence.resumed) this.lowFpsDuration = 0;
+    if (this.frameCadence.sample && frameDt > 0 && frameDt < 1.0) {
+      this.rollingFps = this.rollingFps * 0.92 + (1 / frameDt) * 0.08;
     }
 
     // 每 450ms 刷新一次頂部 HUD 顯示
@@ -1825,7 +1826,7 @@ class World3D {
     }
 
     // 當幀率連續低於 28 FPS 逾 4 秒且高於低畫質時，自動降級以維護流暢度
-    if (this.settings.quality === 'auto' && !this.isAnyModalOpen() && this.rollingFps < 28 && this.graphicQuality !== 'low') {
+    if (this.settings.quality === 'auto' && this.frameCadence.sample && this.rollingFps < 28 && this.graphicQuality !== 'low') {
       this.lowFpsDuration += delta;
       if (this.lowFpsDuration > 4.0) {
         this.lowFpsDuration = 0;
@@ -1867,7 +1868,7 @@ class World3D {
     }
 
     // 粒子緩慢漂浮與微風浮動
-    if (this.dustParticles) {
+    if (this.dustParticles && !this.settings.reducedMotion) {
       this.dustParticles.rotation.y = elapsedTime * 0.025;
       this.dustParticles.position.y = Math.sin(elapsedTime * 0.6) * 0.12;
     }
@@ -1889,7 +1890,7 @@ class World3D {
 
     this.targetFocus?.update(elapsedTime,this.settings.reducedMotion);
     this.renderer.render(this.scene, this.camera);
-    if (this.frameMetrics && !this.isAnyModalOpen()) this.frameMetrics.record(rawDelta * 1000);
+    if (this.frameMetrics && this.frameCadence.sample) this.frameMetrics.record(rawDelta * 1000);
   }
 }
 
