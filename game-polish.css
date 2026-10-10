@@ -1,0 +1,122 @@
+/* Quality pass: loaded after the legacy inline styles. */
+:root { --ink:#302a27; --parchment:#faf2db; --moon:#9bd9ef; --gold:#e8c780; }
+button, select, input { font:inherit; }
+button { touch-action:manipulation; }
+button:focus-visible, [role=button]:focus-visible, select:focus-visible, input:focus-visible { outline:3px solid #57b8e5 !important; outline-offset:4px; }
+.game-cover-screen { overflow-y:auto !important; padding:clamp(18px,4vh,40px) 20px !important; box-sizing:border-box; }
+.cover-container { margin:auto; width:min(860px,100%); padding:24px 0 !important; }
+.cover-brand-pill { color:#f5deb0; background:rgba(17,31,29,.88); border:1px solid #af9361; border-radius:24px; padding:8px 18px; font-size:12px; letter-spacing:.08em; }
+.cover-highlights-grid { width:100%; gap:12px !important; margin:24px 0 !important; }
+.cover-highlight-card { display:grid !important; grid-template-columns:1fr; justify-items:center; align-content:start; text-align:center; gap:8px; padding:20px 12px !important; background:rgba(16,30,31,.9) !important; border:1px solid rgba(232,199,128,.4) !important; border-radius:16px !important; }
+.hl-title { color:#ffe1a4; font-weight:700; font-size:14px; line-height:1.5; }
+.hl-desc { color:#d3e0db; font-size:12px; line-height:1.7; }
+.hl-icon { font-size:28px !important; }
+.cover-cta-row { display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:center; width:100%; }
+.cover-cta-row button { min-height:48px; padding:12px 24px; border-radius:14px; font-size:15px; }
+.cover-skip-row { margin-top:18px; }
+.cover-skip-link { border:0; border-bottom:1px solid #b9cfcb; color:#e5efdf; background:transparent; padding:10px 16px; min-height:44px; cursor:pointer; }
+#hudBar { box-sizing:border-box; align-items:center; }
+.hud-adventurer-card { min-width:0; flex:1 1 260px; }
+.adventurer-meta { min-width:0; }
+.adventurer-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.hud-quick-actions { gap:8px; }
+.hud-btn { min-height:44px; }
+.objective-chip { position:fixed; top:76px; left:16px; z-index:20; max-width:min(440px,calc(100vw - 32px)); box-sizing:border-box; padding:10px 16px; border-left:3px solid var(--gold); border-radius:0 12px 12px 0; background:rgba(17,29,33,.88); color:#f3e6c7; font-size:13px; line-height:1.6; pointer-events:none; box-shadow:0 3px 12px #0003; }
+#interactPrompt { max-width:calc(100vw - 32px); box-sizing:border-box; text-align:center; color:#fff4dc !important; background:rgba(17,29,33,.92) !important; border:1px solid #e8c78080; padding:10px 18px !important; border-radius:12px; font-size:14px !important; text-shadow:none !important; }
+#toastNotice { background:rgba(17,29,33,.96) !important; color:#fff4dc !important; border:1px solid #e8c78080 !important; font-size:14px !important; line-height:1.6; max-width:calc(100vw - 36px); box-sizing:border-box; }
+.game-settings { border:1px solid #c9b994; border-radius:12px; color:var(--ink); display:grid; grid-template-columns:1fr 1fr; align-items:center; gap:12px; padding:14px; margin:12px 0 18px; }
+.game-settings legend { font-weight:700; }
+.game-settings select { min-height:44px; color:var(--ink); background:#fffaf0; border:1px solid #b8a783; border-radius:8px; padding:6px; width:100%; }
+.game-settings input[type=range] { width:100%; min-height:40px; }
+.motion-setting { grid-column:1/-1; display:flex; align-items:center; gap:10px; min-height:44px; }
+.motion-setting input { width:20px; height:20px; }
+#devZonePanel { color:var(--ink); padding:12px; border:1px dashed #997b4a; margin-bottom:16px; }
+#devZonePanel select { width:100%; min-height:44px; }
+.system-drawer-content { overflow-y:auto !important; max-height:calc(100dvh - 32px) !important; }
+@media (max-width:900px) { #hudBar {gap:8px !important;} .hud-quick-actions .btn-text,.hud-quick-actions .btn-badge { display:none !important; } .hud-quick-actions .hud-btn { min-width:44px; padding:8px 10px !important; } #fpsPillText { display:none !important; } #fpsQualityPill > span:nth-child(2) {display:none;} .hud-adventurer-card { max-width:300px; } }
+@media (max-width:600px) {
+  .cover-highlights-grid { grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:8px !important; }
+  .cover-highlight-card { padding:12px 8px !important; gap:4px; }
+  .hl-title { font-size:12px; } .hl-desc { font-size:11px; }
+  .cover-title-main { font-size:clamp(28px,7vw,40px) !important; }
+  .cover-title-sub { font-size:clamp(20px,5vw,28px) !important; }
+  .cover-container { gap:6px !important; padding:8px 0 !important; }
+  .cover-cta-row {gap:8px;} .cover-cta-row button { flex:1 1 42%; padding:10px 8px; font-size:13px; }
+  #btnCoverStartJourney {flex-basis:100%;}
+  #hudBar { top:max(8px,env(safe-area-inset-top)) !important; left:8px !important; right:8px !important; gap:6px !important; height:auto !important; }
+  .hud-adventurer-card { flex:1; padding:6px 8px !important; gap:6px !important; }
+  .adventurer-avatar-box { display:none !important; }
+  .adventurer-top-row {gap:4px !important; flex-wrap:wrap;}
+  .adventurer-name {max-width:98px; font-size:11px !important;}
+  .adventurer-lv-tag {font-size:9px !important;}
+  .hud-quick-actions {gap:4px !important;}
+  #fpsQualityPill {display:none !important;}
+  .hud-quick-actions .hud-btn {padding:8px !important; min-width:44px !important;}
+  .objective-chip {top:72px;left:8px;max-width:calc(100vw - 16px);font-size:11px;padding:7px 10px;}
+  #minimapContainer {top:118px !important;right:8px !important;transform:scale(.8);transform-origin:top right;}
+  #speechModal .parchment-card { max-height:calc(100dvh - 24px) !important; overflow-y:auto !important; }
+  .system-drawer-content {width:calc(100vw - 24px) !important;box-sizing:border-box;}
+}
+@media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; } }
+
+.asset-status {color:#ccded8;font-size:12px;margin-top:10px;} .retry-textures-btn {min-height:44px;width:100%;color:#473522;border:1px solid #c9b994;background:#fff8e8;border-radius:10px;margin-bottom:12px;}
+
+#fpsPillText, #fpsQualityPill > span:nth-child(2), .minimap-coord-bar {display:none !important;} .dev-preview #fpsPillText,.dev-preview .minimap-coord-bar {display:block !important;} .hud-quick-actions .hud-btn {background:rgba(18,35,43,.94) !important;color:#f8e6b3 !important;border:1px solid #c5a66c !important;box-shadow:0 3px 12px #0003 !important;}
+
+.hud-btn svg {flex-shrink:0;vertical-align:middle;}
+
+/* Second pass: world atlas and recoverable loading. */
+.scene-load-notice[hidden],.scene-load-notice button[hidden] {display:none !important;}
+.scene-load-notice {position:fixed;bottom:max(90px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:26;max-width:calc(100vw - 130px);padding:9px 14px;display:flex;align-items:center;gap:12px;border:1px solid #c5a66c80;border-radius:12px;background:#12232bee;color:#f8e6b3;font-size:12px;box-shadow:0 4px 18px #0003;}
+.scene-load-notice button {border:1px solid #e8c780;border-radius:8px;background:#e8c780;color:#263638;min-height:44px;padding:5px 12px;white-space:nowrap;cursor:pointer;}
+.world-map-dialog {width:min(960px,calc(100vw - 24px)) !important;max-height:calc(100dvh - 24px) !important;box-sizing:border-box;overflow-y:auto;}
+.world-map-title {font-size:clamp(20px,3vw,28px) !important;}
+.world-map-subtitle {font-size:13px !important;line-height:1.7;}
+.overworld-map-nav {display:flex;gap:8px;}
+.overworld-map-tab-btn {flex:1;min-height:44px;font-size:13px !important;}
+.realm-atlas {display:block;}
+.atlas-summary {display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:12px 0;color:#4c4438;font-size:13px;font-weight:700;}
+.atlas-next {padding:8px 12px;min-height:44px;border-radius:12px;background:#e5ebdd;border:1px solid #a1b69a;color:#354c40;cursor:pointer;}
+.atlas-land {height:450px;position:relative;border-radius:18px;border:1px solid #c5a66c;isolation:isolate;box-shadow:inset 0 0 30px #0004;}
+.atlas-landscape {position:absolute;inset:0;width:100%;height:100%;border-radius:18px;pointer-events:none;}
+.atlas-node {position:absolute;transform:translate(-50%,-50%);width:112px;min-height:70px;padding:6px;border:1px solid #b4cbbda0;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:3px;background:#19323eeb;color:#f2e5c7;cursor:pointer;box-shadow:0 3px 10px #0004;font-size:12px;line-height:1.4;}
+.atlas-node svg {width:26px;height:26px;color:#edcd85;}
+.atlas-node small {font-size:10px;color:#becdc7;}
+.atlas-node.is-locked {background:#21313cee;color:#c1cbd1;border-style:dashed;}
+.atlas-node.is-locked svg {color:#a3b5bd;}
+.atlas-node.is-current {border:2px solid #e8c780;box-shadow:0 0 0 3px #e8c78020,0 4px 12px #0004;}
+.atlas-node[aria-pressed=true] {background:#2c4e51;border-color:#f4dd9d;}
+.atlas-node:hover {background:#325461;}
+.atlas-detail {display:flex;align-items:center;gap:18px;padding:16px;background:#fff8e8;border:1px solid #cfbf9e;border-radius:14px;margin-top:12px;}
+.atlas-detail-copy {flex:1;min-width:0;}
+.atlas-detail h3 {margin:0 0 6px;color:#3a443a;font-size:15px;line-height:1.5;}
+.atlas-detail p {margin:0 0 8px;color:#655d50;font-size:12px;line-height:1.7;}
+.atlas-progress {color:#406257;font-size:12px;}
+.atlas-travel {min-height:44px;min-width:120px;background:#244b4a;color:#fff0cf;border:1px solid #244b4a;border-radius:10px;padding:10px 16px;cursor:pointer;}
+.atlas-travel:disabled {cursor:default;background:#ede5d5;color:#746b5d;border-color:#d8cdb8;}
+@media(max-width:600px) {
+ .world-map-dialog {padding:16px 12px !important;}
+ .world-map-title {padding-right:20px;}
+ .atlas-land {height:520px;}
+ .atlas-node {width:78px;min-height:65px;font-size:10px;padding:4px;gap:2px;}
+ .atlas-node svg {width:22px;height:22px;}
+ .atlas-detail {flex-direction:column;align-items:stretch;padding:12px;gap:12px;}
+ .atlas-travel {width:100%;}
+ .scene-load-notice {max-width:calc(100vw - 32px);bottom:110px;flex-wrap:wrap;justify-content:center;text-align:center;}
+}
+
+#worldMapRouteView {width:100% !important;padding:0 !important;border:0 !important;background:transparent !important;box-sizing:border-box;}
+.realm-atlas {width:100%;}
+.atlas-node {left:var(--atlas-x);top:var(--atlas-y);}
+.atlas-compact-trail {display:none;}
+@media(max-width:600px) {
+ .atlas-land {height:500px;}
+ .atlas-node {left:var(--compact-x);top:var(--compact-y);width:112px;min-height:70px;font-size:11px;}
+ .atlas-desktop-trail {display:none;}
+ .atlas-compact-trail {display:block;}
+}
+
+.world-map-header {margin-bottom:12px !important;padding-bottom:12px !important;}
+.overworld-map-nav {margin-bottom:10px !important;}
+
+#toastNotice {z-index:40 !important;pointer-events:none;}

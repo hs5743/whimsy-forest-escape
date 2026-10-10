@@ -1,0 +1,39 @@
+/* Shared practice presentation and local acceptance controls. */
+#speechModal .parchment-card { width:min(540px,calc(100vw - 32px));background:#f8f4e9;border:1px solid #cfc4a6;border-radius:16px;padding:28px;max-height:calc(100dvh - 32px);overflow-y:auto; }
+.practice-eyebrow { margin:0;color:#677a62;font-size:11px;letter-spacing:.15em; }
+.practice-flow { display:flex;gap:8px;list-style:none;padding:0;margin:16px 0 20px; }.practice-flow li { flex:1;text-align:center;font-size:12px;color:#5f7258;background:#e8eddf;border-radius:6px;padding:8px 4px; }
+#speechModal .word-display-box { border:1px solid #dedbc6;background:#fffdf5;padding:22px 16px;border-radius:12px; }
+#speechModal .target-word { color:#345b40;text-shadow:none;font-size:clamp(34px,7vw,48px); }
+#speechModal .target-zh { color:#647358;font-size:17px; }
+#speechModal .instruction-box { color:#59674f;background:transparent;border:0;font-size:13px;line-height:1.7;padding:12px 0;margin:8px 0; }
+#speechModal .action-buttons-row { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+#speechModal .btn-voice,#speechModal .btn-mic { min-height:48px;border-radius:8px;font-size:14px;padding:12px 8px;box-shadow:none; }
+#speechModal .btn-voice { background:#e7eddf;color:#3d6348;border:1px solid #b7c9ac; }
+#speechModal .btn-mic { background:#355d43;color:#fff8e6;border:1px solid #355d43; }
+#speechModal .speech-status { font-size:13px;line-height:1.7;padding:13px 14px;border-radius:8px; }
+.practice-details { margin-top:18px;font-size:12px;line-height:1.7;color:#62735a; }.practice-details summary { cursor:pointer;padding:6px 0; }
+#speechModal .practice-details .modal-header { margin:12px 0 0;gap:12px;border:0; }.practice-details .mascot-avatar { width:48px;height:48px; }.practice-details .mascot-dialogue { font-size:13px; }
+#speechModal .fallback-pass-container { margin-top:14px;border-top:1px solid #ddd6be;padding-top:12px;text-align:left; }.practice-help { font-size:11px;color:#78806d;line-height:1.7;margin:0 0 8px; }
+#speechModal .btn-teacher-pass { font-size:12px;min-height:44px;color:#596c53;background:#efefe3;border:1px solid #ced4bd;border-radius:7px;padding:8px 16px; }
+#speechModal button:focus-visible,.practice-details summary:focus-visible { outline:3px solid #b79b4c;outline-offset:3px; }
+.acceptance-tools { padding:14px 0;border-top:1px solid #c7b98f; }.acceptance-tools h3 { font-size:14px;margin:0 0 6px; }.acceptance-tools p,.acceptance-tools output { font-size:12px;line-height:1.7;display:block; }.acceptance-tools>div { display:flex;gap:8px;flex-wrap:wrap;margin-top:8px; }.acceptance-tools button { min-height:44px;padding:8px 12px;border:1px solid #9fb09a;border-radius:7px;background:#e4eddf;color:#36543c;cursor:pointer; }.acceptance-tools button:disabled { opacity:.5;cursor:wait; }.acceptance-tools button[hidden] { display:none; }
+@media(max-width:600px) { #speechModal .parchment-card { padding:22px 18px; }.practice-flow { gap:5px; }.practice-flow li { font-size:11px; } }
+
+#gameCoverScreen button:disabled,#instructionsModal .btn-enter-game:disabled { opacity:.55;cursor:wait;filter:none;transform:none; }
+#gameCoverScreen #btnBootRetry[hidden] { display:none !important; }
+
+#speechModal .word-display-box { margin:0;padding:16px; }
+#speechModal .target-word { margin:0;line-height:1.2; }
+#speechModal .target-phonics { font-size:14px;margin:7px 0; }
+#speechModal .chunk-phonics-hint { font-size:11px;margin:5px 0; }
+#speechModal .chunks-container { margin:7px 0;gap:6px; }
+#speechModal .chunk-btn { min-height:38px;padding:7px 14px;font-size:15px; }
+#speechModal .target-zh { margin:8px 0; }
+#speechModal .context-sentence-box { margin:10px 0 0;padding:10px 12px; }
+#speechModal .sentence-en { font-size:13px;line-height:1.6; }
+#speechModal .sentence-zh { font-size:11px;margin-top:3px; }
+#speechModal .action-buttons-row { margin:0; }
+#speechModal .speech-status { margin:12px 0 0; }
+#speechModal .practice-flow { margin:12px 0 14px; }
+#speechModal .instruction-box { padding:10px 0;margin:4px 0 8px; }
+#speechModal .practice-details { margin-top:10px; }

@@ -337,7 +337,19 @@ class SpatialZoneManager {
   // 初始化並快取 AI 寫實材質皮膚
   initTextures() {
     if (this.texturesLoaded) return;
-    const loader = new THREE.TextureLoader();
+    this.textureSources = new Map();
+    this.textureStatus = new Map();
+    this.textureManager = new THREE.LoadingManager();
+    this.textureManager.onLoad = () => this.refreshZoneEnvironment();
+    this.textureManager.onProgress = () => this.updateLoadStatus();
+    this.textureManager.onError = () => this.updateLoadStatus();
+    // Configure lightweight placeholders now; request only textures used by the active scene.
+    const loader = { load: url => {
+      const fallback=document.createElement('canvas'); fallback.width=fallback.height=2;
+      const context=fallback.getContext('2d'); context.fillStyle='#b8a080'; context.fillRect(0,0,2,2);
+      const texture=new THREE.CanvasTexture(fallback);
+      this.textureSources.set(texture,url); return texture;
+    }};
 
     this.tex = {
       marketCobble: loader.load('assets/textures/tex-market-cobble.jpg'),
@@ -1024,10 +1036,68 @@ class SpatialZoneManager {
     return userLevel >= zone.reqLevel;
   }
 
+  getTexture(url, variant = '') {
+    this.textureVariants ||= new Map();
+    const key = url + '|' + variant;
+    if(this.textureVariants.has(key)) return this.textureVariants.get(key);
+    let texture = !variant ? [...this.textureSources].find(([,source])=>source===url)?.[0] : null;
+    if(!texture) {
+      const canvas=document.createElement('canvas');canvas.width=canvas.height=2;
+      const ctx=canvas.getContext('2d');ctx.fillStyle='#b8a080';ctx.fillRect(0,0,2,2);
+      texture=new THREE.CanvasTexture(canvas);texture.encoding=THREE.sRGBEncoding;
+      texture.anisotropy=Math.min(4,this.world.renderer.capabilities.getMaxAnisotropy());
+      this.textureSources.set(texture,url);
+    }
+    this.textureVariants.set(key,texture);return texture;
+  }
+
+  ensureTexture(texture) {
+    if(!texture || !this.textureSources?.has(texture) || ['loading','ready'].includes(this.textureStatus.get(texture))) return;
+    this.textureRequests ||= new Map();
+    const token=Symbol('texture');this.textureRequests.set(texture,token);
+    this.textureStatus.set(texture,'loading');this.updateLoadStatus();
+    const finish=(image)=>{
+      if(this.textureRequests.get(texture)!==token) return;
+      this.textureRequests.delete(texture);clearTimeout(timeout);
+      if(image) {texture.image=image;texture.needsUpdate=true;this.textureStatus.set(texture,'ready');this.refreshZoneEnvironment();}
+      else this.textureStatus.set(texture,'failed');
+      this.updateLoadStatus();
+    };
+    const timeout=setTimeout(()=>finish(null),15000);
+    new THREE.ImageLoader(this.textureManager).load(this.textureSources.get(texture),image=>finish(image),undefined,()=>finish(null));
+  }
+  loadSceneTextures(group) {
+    const active=new Set();
+    group.traverse(object=>{
+      for(const material of (Array.isArray(object.material)?object.material:[object.material])) if(material) {
+        for(const value of Object.values(material)) if(value?.isTexture && this.textureSources.has(value)) active.add(value);
+        if(material.uniforms) for(const u of Object.values(material.uniforms)) if(u.value?.isTexture && this.textureSources.has(u.value)) active.add(u.value);
+      }
+    });
+    this.activeTextures=active;
+    for(const texture of active) this.ensureTexture(texture);
+    this.updateLoadStatus();
+  }
+  updateLoadStatus() {
+    const textures=[...(this.activeTextures || [])];
+    const ready=textures.filter(t=>this.textureStatus.get(t)==='ready').length;
+    const failed=textures.filter(t=>this.textureStatus.get(t)==='failed').length;
+    const loading=textures.length-ready-failed;
+    const message=failed?'部分素材暫缺，可重新載入':loading?'場景素材準備中 '+ready+' / '+textures.length:'場景素材已就緒';
+    const status=document.getElementById('assetLoadStatus');if(status) status.textContent=message;
+    const notice=document.getElementById('sceneLoadNotice');if(notice) notice.hidden=!loading&&!failed;
+    const label=document.getElementById('sceneLoadLabel');if(label) label.textContent=message;
+    const retry=document.getElementById('sceneLoadRetry');if(retry) retry.hidden=!failed;
+  }
+  retryTextures() {
+    for(const texture of this.activeTextures || []) if(this.textureStatus.get(texture)==='failed') this.ensureTexture(texture);
+    this.updateLoadStatus();
+  }
+
   // 切換至指定空間
   switchZone(zoneId) {
     if (!this.zones[zoneId]) return false;
-    if (!this.isZoneUnlocked(zoneId)) {
+    if (!this.world.devMode && !this.isZoneUnlocked(zoneId)) {
       if (this.world) {
         this.world.showToast(`🔒 冒險者等級未達 Lv.${this.zones[zoneId].reqLevel}，請先完成前序空間！`);
       }
@@ -1039,11 +1109,19 @@ class SpatialZoneManager {
 
     // 清空現有場景物件與互動清單
     if (this.world.activeZoneGroup) {
+      this.world.closeSpeechCard();
+      this.world.zoneTimers.forEach(timer => clearTimeout(timer)); this.world.zoneTimers.clear();
+      window.touchControls?.reset();
+      const shared = new Set([...Object.values(this.tex), ...this.textureSources.keys()]);
+      shared.add(this._softParticleTexture); shared.add(this.world._softCircleParticleTexture);
       this.world.scene.remove(this.world.activeZoneGroup);
+      GamePolish.releaseGroup(this.world.activeZoneGroup, shared);
+      for (const key of ['bookGroup','bookCoverHinge','starStone','flowerStone','candleFlame','candleLight','keyMesh','drawerMesh','mimicLid','mimicGroup','flaskLiquid','socketStar','socketFlower','doorLeft','doorRight']) this.world[key] = null;
     }
     this.world.interactables = [];
     this.world.animators = [];
     this.world.hoveredObject = null;
+    this.world.targetFocus?.select(null);
 
     // 建立新的空間群組
     const group = new THREE.Group();
@@ -1075,7 +1153,11 @@ class SpatialZoneManager {
       this.buildZone10_PrismaticSkyIsles(group);
     }
 
+    this.loadSceneTextures(group);
     this.world.scene.add(group);
+    GamePolish.applySceneStyle(this.world, zoneId);
+    if (zoneId === "zone1") this.world.restoreStudyState();
+    GamePolish.applyQuality(this.world);
 
     // 重設玩家生成點與朝向
     this.world.player.pos.set(...zone.spawnPos);
@@ -1136,7 +1218,7 @@ class SpatialZoneManager {
   setupZoneEnvironment(zoneId) {
     if (!this.world || typeof this.world.updateEnvironmentFromTexture !== 'function') return;
     const zonePanoramaMap = {
-      zone1: (this.tex && this.tex.woodFloor) || null,
+      zone1: null,
       zone2: this.tex.sunbreezeMarketPanorama,
       zone3: this.tex.enchantedForestPanorama,
       zone4: this.tex.athleticParkPanorama,
@@ -1148,9 +1230,9 @@ class SpatialZoneManager {
       zone10: this.tex.skyIslandPanorama
     };
     const tex = zonePanoramaMap[zoneId];
-    if (tex) {
-      this.world.updateEnvironmentFromTexture(tex, zoneId);
-    }
+    this.ensureTexture(tex);
+    if(tex && this.textureStatus.get(tex) !== "ready") { this.world.scene.environment=null; return; }
+    this.world.updateEnvironmentFromTexture(tex || null, zoneId);
   }
 
   refreshZoneEnvironment() {
@@ -2629,6 +2711,7 @@ class SpatialZoneManager {
       sprayPos[i + 1] = 2.2 + Math.random() * 0.8;
       sprayPos[i + 2] = (Math.random() - 0.5) * 0.4;
     }
+    sprayGeo.setAttribute('position', new THREE.BufferAttribute(sprayPos, 3));
     const sprayTex = this.getSoftParticleTexture();
     const sprayPoints = new THREE.Points(
       sprayGeo,
@@ -2644,10 +2727,11 @@ class SpatialZoneManager {
     );
     fountain.add(sprayPoints);
 
-    this.world.animators.push((time) => {
+    this.world.animators.push((time, delta) => {
+      if(!sprayPoints.visible) return;
       const pos = sprayGeo.attributes.position.array;
-      for (let i = 0; i < sprayCount * 3; i += 3) {
-        pos[i + 1] += 0.02;
+      for (let i = 0; i < Math.min(sprayCount, sprayGeo.drawRange.count) * 3; i += 3) {
+        pos[i + 1] += 1.2 * delta;
         if (pos[i + 1] > 3.1) pos[i + 1] = 2.2;
       }
       sprayGeo.attributes.position.needsUpdate = true;
@@ -3324,6 +3408,7 @@ class SpatialZoneManager {
       steamPos[i + 1] = 3.3 + Math.random() * 1.5;
       steamPos[i + 2] = 1.6 + (Math.random() - 0.5) * 0.4;
     }
+    steamGeo.setAttribute('position', new THREE.BufferAttribute(steamPos, 3));
     const steamTex = this.getSoftParticleTexture();
     const steamPoints = new THREE.Points(
       steamGeo,
@@ -3358,10 +3443,11 @@ class SpatialZoneManager {
     train.add(hitBox);
     this.world.interactables.push(hitBox);
 
-    this.world.animators.push((time) => {
+    this.world.animators.push((time, delta) => {
+      if(!steamPoints.visible) return;
       const pos = steamGeo.attributes.position.array;
-      for (let i = 0; i < steamCount * 3; i += 3) {
-        pos[i + 1] += 0.015;
+      for (let i = 0; i < Math.min(steamCount, steamGeo.drawRange.count) * 3; i += 3) {
+        pos[i + 1] += .9 * delta;
         if (pos[i + 1] > 4.8) pos[i + 1] = 3.3;
       }
       steamGeo.attributes.position.needsUpdate = true;
@@ -3489,10 +3575,11 @@ class SpatialZoneManager {
     const points = new THREE.Points(geo, mat);
     group.add(points);
 
-    this.world.animators.push((time) => {
+    this.world.animators.push((time, delta) => {
+      if(!points.visible) return;
       const p = geo.attributes.position.array;
-      for (let i = 0; i < count * 3; i += 3) {
-        p[i + 1] += Math.sin(time * 2 + i) * 0.005;
+      for (let i = 0; i < Math.min(count, geo.drawRange.count) * 3; i += 3) {
+        p[i + 1] += Math.sin(time * 2 + i) * .3 * delta;
       }
       geo.attributes.position.needsUpdate = true;
     });
@@ -5208,6 +5295,7 @@ class SpatialZoneManager {
       depthWrite: false,
       blending: THREE.AdditiveBlending
     });
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
     const starPoints = new THREE.Points(starGeo, starPointsMat);
     skyGroup.add(starPoints);
 
@@ -6610,6 +6698,7 @@ class SpatialZoneManager {
       depthWrite: false,
       blending: THREE.AdditiveBlending
     });
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starCoords, 3));
     const starField = new THREE.Points(starGeo, starMat);
     skyGroup.add(starField);
 
@@ -6798,16 +6887,18 @@ class SpatialZoneManager {
       blending: THREE.AdditiveBlending
     });
 
+    flakeGeo.setAttribute('position', new THREE.BufferAttribute(flakePos, 3));
     const snowfall = new THREE.Points(flakeGeo, flakeMat);
     group.add(snowfall);
 
     this.world.animators.push((time, delta) => {
+      if(!snowfall.visible) return;
       const dt = delta || 0.016;
       const positions = flakeGeo.attributes.position.array;
-      for (let i = 0; i < flakeCount; i++) {
+      for (let i = 0; i < Math.min(flakeCount, flakeGeo.drawRange.count); i++) {
         const v = flakeVel[i];
         positions[i * 3 + 1] -= v.fallSpeed * dt;
-        positions[i * 3] += Math.sin(time * v.driftSpeed + v.offset) * 0.03;
+        positions[i * 3] += Math.sin(time * v.driftSpeed + v.offset) * 1.8 * dt;
 
         // 當雪花飄落地表以下時循環重生回天頂
         if (positions[i * 3 + 1] < -0.5) {

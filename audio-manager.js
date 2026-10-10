@@ -17,7 +17,8 @@ class AudioManager {
     this.isBgmPlaying = false;
     this.isMuted = false;
     this.isDucked = false;
-    this.normalBgmVolume = 0.22;
+    this.volumeSettings = GamePolish.loadSettings(window.localStorage);
+    this.normalBgmVolume = 0.22 * this.volumeSettings.music;
     this.bgmTimeout = null;
     this.currentNoteIndex = 0;
     this.currentChordIndex = 0;
@@ -160,7 +161,7 @@ class AudioManager {
     try {
       // 1. 總輸出 Gain
       this.masterGain = this.ctx.createGain();
-      this.masterGain.gain.setValueAtTime(0.85, this.ctx.currentTime);
+      this.masterGain.gain.setValueAtTime(0.85 * this.volumeSettings.master, this.ctx.currentTime);
       this.masterGain.connect(this.ctx.destination);
 
       // 2. 乾音 Bus (Dry Bus)
@@ -199,7 +200,7 @@ class AudioManager {
 
       // 5. 特殊音效子混音器 (SFX Sub-Mixer)
       this.sfxGain = this.ctx.createGain();
-      this.sfxGain.gain.setValueAtTime(0.35, this.ctx.currentTime);
+      this.sfxGain.gain.setValueAtTime(0.35 * this.volumeSettings.effects, this.ctx.currentTime);
       this.sfxGain.connect(this.dryGain);
       if (this.reverbNode) {
         const sfxReverbSend = this.ctx.createGain();
@@ -260,6 +261,15 @@ class AudioManager {
 
   // 智慧教學音訊避讓 (Smart Audio Ducking)
   // 當外師朗讀或學生口說辨識啟動時，BGM 柔和自動降低至 30%，結束後自動平滑回升
+  applyVolumes(settings) {
+    this.volumeSettings = settings; this.normalBgmVolume = .22 * settings.music;
+    if(!this.ctx) return;
+    const now=this.ctx.currentTime;
+    for(const [node, value] of [[this.masterGain,.85*settings.master],[this.sfxGain,.35*settings.effects],[this.bgmGain,this.normalBgmVolume*(this.isDucked?.25:1)]]) {
+      if(node) {node.gain.cancelScheduledValues(now);node.gain.setTargetAtTime(value,now,.04);}
+    }
+  }
+
   duckBgm(factor = 0.3, duration = 0.25) {
     if (!this.ctx || !this.bgmGain || this.isMuted) return;
     this.isDucked = true;

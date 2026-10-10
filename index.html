@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>童趣森林魔法書齋逃脫：蒼月之約 (Whimsy Forest 3D Escape)</title>
   <link rel="stylesheet" href="style.css?v=20260913_v11">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%20%22100%22><text y=%22.9em%22 font-size=%2290%22>🗝️</text></svg>">
@@ -821,6 +821,9 @@
       .btn-cover-primary { padding: 10px 20px !important; font-size: 16px !important; }
     }
   </style>
+  <link rel="stylesheet" href="game-polish.css?v=20261010">
+  <link rel="stylesheet" href="title-screen.css?v=20261010">
+  <link rel="stylesheet" href="learning-polish.css?v=20261010">
 </head>
 <body>
   <!-- ========================================================= -->
@@ -829,58 +832,26 @@
   <div id="gameCoverScreen" class="game-cover-screen">
     <div class="cover-vignette-overlay"></div>
     <div class="cover-container">
-      <div class="cover-brand-pill">
-        <span>✨ 國小英語沈浸式 3D 魔法元宇宙 ✨</span>
-      </div>
-      <div class="cover-title-group">
-        <h1 class="cover-title-main">童趣森林魔法書齋逃脫</h1>
-        <div class="cover-title-sub">蒼月之約 • 十界星界大冒險</div>
-        <p class="cover-tagline">用聲音與勇氣喚醒遠古符文，解開全 10 大奇幻星界的智慧封印！</p>
-      </div>
-
-      <div class="cover-highlights-grid">
-        <div class="cover-highlight-card">
-          <div class="hl-icon">🗣️</div>
-          <div class="hl-title">AI 即時語音辨識</div>
-          <div class="hl-desc">開口大聲唸出英語咒語，即時獲得準確率回饋與魔法經驗值。</div>
-        </div>
-        <div class="cover-highlight-card">
-          <div class="hl-icon">🧭</div>
-          <div class="hl-title">生活情境聽力尋寶</div>
-          <div class="hl-desc">聆聽自然日常英文線索，搭配熱力雷達在 3D 場景中定位神祕寶藏。</div>
-        </div>
-        <div class="cover-highlight-card">
-          <div class="hl-icon">🌌</div>
-          <div class="hl-title">十大奇幻星界地圖</div>
-          <div class="hl-desc">從見習書齋、微風市集、湛藍海港，一路冒險至極光冰川與大魔導士殿堂！</div>
-        </div>
-        <div class="cover-highlight-card">
-          <div class="hl-icon">⚔️</div>
-          <div class="hl-title">守護者三大考驗</div>
-          <div class="hl-desc">與各關卡主進行情境閱讀、文法辨析與整句口說終極對決，贏得守護之星！</div>
-        </div>
-      </div>
-
+      <div class="title-seal" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46"/><path d="M61 16a24 24 0 1 0 23 32A27 27 0 0 1 61 16ZM25 65q13-7 25 0q12-7 25 0v18q-13-7-25 0q-12-7-25 0ZM50 65v18"/><path d="m23 28 2-6 2 6 6 2-6 2-2 6-2-6-6-2ZM75 60v8m-4-4h8"/></svg></div>
+      <p class="title-eyebrow">童趣森林 · 魔法書齋逃脫</p>
+      <h1 class="cover-title-main">蒼月之約</h1>
+      <p class="title-english" lang="en">THE MOONLIT PROMISE</p>
+      <div class="title-rule" aria-hidden="true"><span>✦</span></div>
+      <p class="cover-tagline">森林深處，一本魔法書正等著你。<br>跟隨星光，用英語喚醒沉睡的世界。</p>
       <div class="cover-cta-row">
-        <button id="btnCoverStartJourney" class="btn-cover-primary" onclick="openStoryPrologue(1)" type="button">
-          <span>🚀 踏上冒險旅程 (劇情與指南)</span>
-        </button>
-        <button id="btnCoverInstructions" class="btn-cover-secondary" onclick="openGameInstructions()" type="button">
-          <span>📖 冒險指南</span>
-        </button>
-        <button id="btnCoverLogin" class="btn-cover-secondary" onclick="toggleStudentModal()" type="button">
-          <span>🧙‍♂️ 冒險者登入</span>
-        </button>
+        <button id="btnCoverStartJourney" disabled class="btn-cover-primary" onclick="openGameInstructions()" type="button"><span>開始冒險</span><span aria-hidden="true">→</span></button>
+        <button id="btnCoverInstructions" class="btn-cover-secondary" onclick="openGameInstructions()" type="button">操作說明</button>
       </div>
-
-      <div class="cover-skip-row">
-        <button id="btnCoverDirectPlay" class="cover-skip-link" onclick="completeOnboardingAndEnterGame()" type="button">
-          ⚡ 跳過引導，直接進入 3D 世界 ➔
-        </button>
+      <div class="title-links">
+        <button type="button" onclick="openStoryPrologue(1)">閱讀故事序章</button><span aria-hidden="true">·</span>
+        <button id="btnCoverLogin" type="button" onclick="toggleStudentModal()">冒險者登入</button>
       </div>
+      <div id="assetLoadStatus" class="asset-status" role="status">正在準備魔法世界…</div>
+      <button id="btnBootRetry" class="cover-skip-link" type="button" hidden onclick="location.reload()">重新準備魔法世界 ↻</button>
+      <div class="cover-skip-row"><button id="btnCoverDirectPlay" disabled class="cover-skip-link" onclick="completeOnboardingAndEnterGame()" type="button">我會操作，直接探索 ↗</button></div>
     </div>
+    <div class="title-world-note" aria-hidden="true"><span>✦</span> 十個星界，一段屬於你的冒險</div>
   </div>
-
   <!-- ========================================================= -->
   <!-- 2. 劇情前言繪本彈窗 (Storyline Prologue Modal)           -->
   <!-- ========================================================= -->
@@ -950,105 +921,39 @@
   <!-- ========================================================= -->
   <!-- 3. 遊戲玩法與操作指南彈窗 (Game Instructions Modal)     -->
   <!-- ========================================================= -->
-  <div id="instructionsModal" class="story-prologue-modal" style="display: none;">
+  <div id="instructionsModal" class="story-prologue-modal" style="display:none;">
     <div class="parchment-card instructions-parchment-card">
       <div class="instructions-header">
-        <button class="modal-close-btn" type="button" onclick="closeInstructionsModal()" aria-label="關閉">✕</button>
-        <div class="instructions-badge">📖 冒險指南 • 操作與玩法詳解</div>
-        <h2 class="instructions-title">如何暢玩童趣森林元宇宙？</h2>
-        <p class="instructions-sub">掌握操控與冒險技巧，輕鬆成為最強英語大魔導士！</p>
+        <button class="modal-close-btn" type="button" onclick="closeInstructionsModal()" aria-label="關閉操作說明">✕</button>
+        <div class="instructions-badge">冒險者手冊 · 第一頁</div>
+        <h2 id="guideTitle" class="instructions-title">你的魔法旅程，從這裡開始</h2>
+        <p class="instructions-sub">移動、環視、互動。三個動作，就能探索整座書齋。</p>
+        <div class="guide-tabs" role="tablist" aria-label="選擇操作方式">
+          <button id="guideDesktopTab" role="tab" aria-selected="true" aria-controls="guideDesktop" type="button" onclick="selectGuidePlatform('desktop')">電腦操作</button>
+          <button id="guideTouchTab" role="tab" aria-selected="false" aria-controls="guideTouch" tabindex="-1" type="button" onclick="selectGuidePlatform('touch')">手機／平板</button>
+        </div>
       </div>
-
       <div class="instructions-content-scroll">
-        <!-- 區塊一：操控說明 -->
-        <div class="instruct-section">
-          <div class="instruct-sec-header">
-            <span class="instruct-sec-icon">🎮</span>
-            <h3>雙平台操控指南</h3>
-          </div>
-          <div class="instruct-sec-body">
-            <div class="control-box-grid">
-              <div class="control-card">
-                <div class="ctrl-platform">💻 電腦 (鍵盤與滑鼠)</div>
-                <ul class="ctrl-list">
-                  <li><strong>走位移動</strong>：按 <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> 鍵自由穿梭。</li>
-                  <li><strong>環視視角</strong>：滑鼠左鍵按住畫面並拖曳旋轉 360° 景觀。</li>
-                  <li><strong>調查解謎</strong>：靠近發光物件按 <kbd>E</kbd> 鍵或直接點擊物件。</li>
-                  <li><strong>尋寶捷徑</strong>：按 <kbd>H</kbd> 鍵可快速開啟情境聽力尋寶。</li>
-                </ul>
-              </div>
-              <div class="control-card">
-                <div class="ctrl-platform">📱 平板 / 手機 (觸控操作)</div>
-                <ul class="ctrl-list">
-                  <li><strong>虛擬搖桿</strong>：按住螢幕左半部滑動控制前進後退。</li>
-                  <li><strong>視角滑動</strong>：滑動螢幕右半部隨心環顧四周環境。</li>
-                  <li><strong>互動按鈕</strong>：靠近目標後點擊右下角「✋ 互動」圖示。</li>
-                  <li><strong>快捷選單</strong>：點擊畫面頂部按鈕隨時呼叫各項系統。</li>
-                </ul>
-              </div>
-            </div>
-          </div>
+        <div id="guideDesktop" class="guide-controls" role="tabpanel" aria-labelledby="guideDesktopTab">
+          <article class="guide-step"><span class="guide-number">01</span><div class="guide-visual keyboard-visual" aria-hidden="true"><kbd>W</kbd><div><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></div></div><h3>走進森林</h3><p>按 <strong>W A S D</strong> 前進、後退與左右移動。</p></article>
+          <article class="guide-step"><span class="guide-number">02</span><div class="guide-visual" aria-hidden="true"><svg viewBox="0 0 120 70"><rect x="45" y="8" width="30" height="50" rx="15"/><path d="M60 8v19M45 27h30M10 33h22m-7-7 7 7-7 7m85-7H88m7-7-7 7 7 7"/></svg></div><h3>看看四周</h3><p><strong>按住滑鼠左鍵拖曳</strong>畫面，轉動視角尋找線索。</p></article>
+          <article class="guide-step"><span class="guide-number">03</span><div class="guide-visual interact-visual" aria-hidden="true"><span>⌖</span><kbd>E</kbd></div><h3>喚醒魔法</h3><p>靠近並對準物件，按 <strong>E</strong>，或點擊物件來互動。</p></article>
         </div>
-
-        <!-- 區塊二：語音口說與 AI 辨識 -->
-        <div class="instruct-section">
-          <div class="instruct-sec-header">
-            <span class="instruct-sec-icon">🎙️</span>
-            <h3>魔法咒語朗讀 (AI 即時語音辨識)</h3>
-          </div>
-          <div class="instruct-sec-body">
-            <p>靠近發光目標物件（燭台、古書、抽屜、藥劑瓶、水晶）或守護者關卡主時，將觸發語音魔法陣：</p>
-            <div class="feature-pills-row">
-              <div class="feat-pill">✨ <strong>聆聽示範</strong>：點擊「🔊 聆聽發音」聆聽標準美式外師真人語音朗讀。</div>
-              <div class="feat-pill">🎙️ <strong>唸讀挑戰</strong>：點擊「🎙️ 朗讀」按鈕，靠近麥克風清晰大聲唸出英語單字或句型。</div>
-              <div class="feat-pill">💯 <strong>AI 評分</strong>：系統即時分析讀音正確率並給予評語與經驗值 (XP)，累計足夠經驗即可升級！</div>
-            </div>
-          </div>
+        <div id="guideTouch" class="guide-controls" role="tabpanel" aria-labelledby="guideTouchTab" hidden>
+          <article class="guide-step"><span class="guide-number">01</span><div class="guide-visual" aria-hidden="true"><svg viewBox="0 0 120 70"><circle cx="60" cy="35" r="27"/><circle cx="60" cy="35" r="12"/><path d="m60 1-5 7h10ZM60 69l-5-7h10M26 35l7-5v10M94 35l-7-5v10"/></svg></div><h3>左側移動</h3><p>按住畫面<strong>左半部</strong>並滑動，用虛擬搖桿控制方向。</p></article>
+          <article class="guide-step"><span class="guide-number">02</span><div class="guide-visual" aria-hidden="true"><svg viewBox="0 0 120 70"><rect x="38" y="4" width="44" height="62" rx="7"/><path d="M48 35h24m-6-6 6 6-6 6M51 57h18"/></svg></div><h3>右側環視</h3><p>滑動畫面<strong>右半部</strong>轉動視角。移動和環視可以一起操作。</p></article>
+          <article class="guide-step"><span class="guide-number">03</span><div class="guide-visual interact-visual" aria-hidden="true"><span>⌖</span><span class="touch-key">互動</span></div><h3>點一下互動</h3><p>靠近並對準物件，點擊<strong>右下角「互動」</strong>按鈕。</p></article>
         </div>
-
-        <!-- 區塊三：聽力尋寶任務與熱力雷達 -->
-        <div class="instruct-section">
-          <div class="instruct-sec-header">
-            <span class="instruct-sec-icon">🧭</span>
-            <h3>生活情境聽力尋寶 (熱力雷達 HOT & COLD)</h3>
-          </div>
-          <div class="instruct-sec-body">
-            <p>點擊頂部「🧭 聽力尋寶」按鈕開啟任務，外師將提出一段生活場景英語謎題。仔細聽出線索物品，並依照頂部雷達提示在 3D 空間中追蹤定位：</p>
-            <div class="radar-guide-box">
-              <span class="radar-tag radar-hot">🔥 HOT (超接近！就在附近 5 步內)</span>
-              <span class="radar-tag radar-warm">☀️ WARM (接近中，約 10~15 步)</span>
-              <span class="radar-tag radar-cold">❄️ COLD (距離尚遠，換個方向找找)</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 區塊四：十界星圖與守護者試煉 -->
-        <div class="instruct-section">
-          <div class="instruct-sec-header">
-            <span class="instruct-sec-icon">🌌</span>
-            <h3>十大星界傳送與守護者三階段試煉</h3>
-          </div>
-          <div class="instruct-sec-body">
-            <p>在遊戲中隨時點擊「⚙️ 冒險選單 ➔ 🗺️ 空間星圖」，可查看所有已解鎖的奇幻星界並使用傳送陣瞬間旅行！在每個主要關卡抵達傳送門前，必須向<strong>關卡守護者</strong>證明實力：</p>
-            <div class="feature-pills-row">
-              <div class="feat-pill">1️⃣ <strong>情境閱讀理解</strong>：根據對話場景選出最適切的英文回答。</div>
-              <div class="feat-pill">2️⃣ <strong>文法與語意解析</strong>：深入理解句構盲點與日常外師地道表達。</div>
-              <div class="feat-pill">3️⃣ <strong>全句口說對決</strong>：向守護者清晰完整朗讀指定英文句，正確率 80% 以上即可榮耀通關並加冕守護之星！</div>
-            </div>
-          </div>
-        </div>
+        <section class="guide-learning"><div class="guide-section-label">用聲音，解開森林的封印</div><div class="guide-learning-flow"><div><span>1</span><strong>先聽示範</strong><p>打開物件的練習，聆聽單字或句子。</p></div><div><span>2</span><strong>開口朗讀</strong><p>點擊朗讀，允許麥克風使用，再唸出英語。</p></div><div><span>3</span><strong>收下回饋</strong><p>查看辨識文字與通過結果，繼續探索。</p></div></div><p class="guide-note">沒聽清楚可以再聽一次；辨識失敗也能重試。回饋依辨識文字比對，不是發音評分。</p></section>
+        <section class="guide-first-quest"><span aria-hidden="true">✦</span><div><h3>你的第一個小任務</h3><p>在書齋找到燭台，靠近、對準並互動，試著唸出 <strong lang="en">LIGHT</strong>。讓第一道光，照亮你的旅程。</p></div></section>
+        <details class="guide-more"><summary>探索時還有哪些幫手？</summary><p><strong>聽力尋寶：</strong>從上方選單開啟，或電腦按 H。聽懂線索後尋找物品；HOT 越靠近，COLD 越遠。</p><p><strong>空間星圖：</strong>從冒險選單查看星界與探索進度。</p><p><strong>操作說明與設定：</strong>可從冒險選單隨時重看指南，調整音量、畫質與視角靈敏度。</p></details>
       </div>
-
-      <div class="instructions-footer">
-        <button id="btnEnterGameFinal" class="btn-enter-game" onclick="completeOnboardingAndEnterGame()" type="button">
-          <span>✨ 準備就緒，正式踏入魔法世界！ 🚀</span>
-        </button>
-      </div>
+      <div class="instructions-footer"><span class="guide-footer-note">準備好，就從魔法書齋出發。</span><button id="btnEnterGameFinal" disabled class="btn-enter-game" onclick="completeOnboardingAndEnterGame()" type="button">進入魔法書齋 <span aria-hidden="true">→</span></button></div>
     </div>
   </div>
 
   <!-- 3D 渲染畫布與電影級光學暗角 -->
-  <canvas id="renderCanvas"></canvas>
+  <canvas id="renderCanvas" tabindex="0" aria-label="魔法世界：WASD 移動，拖曳環視，E 互動"></canvas>
   <div id="canvasVignetteOverlay" class="canvas-vignette-overlay"></div>
 
   <!-- 頂部 HUD (RPG 簡約單行佈局：左側冒險者徽章卡，右側魔法護照與冒險選單) -->
@@ -1081,18 +986,19 @@
       <button id="fpsQualityPill" class="hud-btn fps-quality-pill" onclick="if(window.world3D) window.world3D.cycleQuality();" type="button" title="點擊循環切換畫質 (高 / 中 / 低)">
         <span id="fpsPillText" class="fps-good">⚡ FPS: 60</span> <span style="opacity: 0.35;">|</span> <span id="qualityPillText">高畫質</span>
       </button>
-      <button id="scavengerHuntBtn" class="hud-btn scavenger-btn-highlight" onclick="openScavengerModal();" type="button" title="開啟情境聽力尋寶任務 (快捷鍵 H)">
-        <span>🧭</span> <span class="btn-text">聽力尋寶</span> <span class="btn-badge" style="background: #f59e0b; color: #fff; font-size: 9px; font-weight: 900; border-radius: 8px; padding: 1px 5px; margin-left: 2px;">NEW</span>
+      <button id="scavengerHuntBtn" aria-label="聽力尋寶" class="hud-btn scavenger-btn-highlight" onclick="openScavengerModal();" type="button" title="開啟情境聽力尋寶任務 (快捷鍵 H)">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="m16 8-2.5 5.5L8 16l2.5-5.5Z"/></svg> <span class="btn-text">聽力尋寶</span> <span class="btn-badge" style="background: #f59e0b; color: #fff; font-size: 9px; font-weight: 900; border-radius: 8px; padding: 1px 5px; margin-left: 2px;">NEW</span>
       </button>
-      <button id="magicPassportBtn" class="hud-btn passport-btn-highlight" onclick="togglePassportModal()" type="button" title="翻開數位魔法護照手帳">
-        <span>📘</span> <span class="btn-text">魔法護照</span>
+      <button id="magicPassportBtn" aria-label="魔法護照" class="hud-btn passport-btn-highlight" onclick="togglePassportModal()" type="button" title="翻開數位魔法護照手帳">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 5v15M3 4c4-1 6 0 9 1 3-1 5-2 9-1v15c-4-1-6 0-9 1-3-1-5-2-9-1Z"/></svg> <span class="btn-text">魔法護照</span>
       </button>
-      <button id="systemMenuBtn" class="hud-btn system-menu-btn" onclick="toggleSystemMenu()" type="button" title="開啟系統選單 (音樂、榮譽榜、星圖、指南、雲端)">
+      <button id="systemMenuBtn" aria-label="開啟冒險選單" class="hud-btn system-menu-btn" onclick="toggleSystemMenu()" type="button" title="開啟系統選單 (音樂、榮譽榜、星圖、指南、雲端)">
         <span id="systemMenuBtnIcon">⚙️</span> <span class="btn-text">冒險選單</span>
       </button>
     </div>
   </div>
 
+  <div id="currentObjective" class="objective-chip" aria-live="polite">第一步 · 找到銅燭台，詠唱 LIGHT</div>
   <!-- 冒險系統快捷抽屜面板 (System Menu Drawer) -->
   <div id="systemMenuDrawer" class="system-drawer" style="display: none;">
     <div class="system-drawer-backdrop" onclick="closeSystemMenu()"></div>
@@ -1101,6 +1007,19 @@
         <div class="drawer-title">⚙️ 冒險使系統選單</div>
         <button class="modal-close-btn" type="button" onclick="closeSystemMenu()" aria-label="關閉">✕</button>
       </div>
+      <fieldset class="game-settings">
+        <legend>遊戲設定</legend>
+        <label for="qualityPreference">畫面品質</label>
+        <select id="qualityPreference"><option value="auto">自動調整</option><option value="high">精緻</option><option value="medium">均衡</option><option value="low">流暢</option></select>
+        <label for="lookSensitivity">視角靈敏度</label><input id="lookSensitivity" type="range" min="0.5" max="1.5" step="0.1" value="1">
+<label for="volume-master">總音量</label><input id="volume-master" type="range" min="0" max="1" step="0.05" value="1">
+        <label for="volume-music">背景音樂</label><input id="volume-music" type="range" min="0" max="1" step="0.05" value="1">
+        <label for="volume-effects">互動音效</label><input id="volume-effects" type="range" min="0" max="1" step="0.05" value="1">
+        <label for="volume-voice">示範語音</label><input id="volume-voice" type="range" min="0" max="1" step="0.05" value="1">
+        <label class="motion-setting"><input id="reduceMotion" type="checkbox"> 減少漂浮與微粒動畫</label>
+      </fieldset>
+      <button class="retry-textures-btn" type="button" onclick="window.world3D?.zoneManager.retryTextures()">重新載入缺少的素材</button>
+      <div id="devZonePanel" hidden><label for="devZoneSelect">本機場景檢查（不記錄成績）</label><select id="devZoneSelect"></select><output id="devDiagnostics"></output></div>
       <div class="system-drawer-grid">
         <button id="bgmToggleBtn" class="drawer-action-btn" onclick="toggleMusic()" type="button">
           <span id="bgmIcon" class="drawer-btn-icon">🎵</span>
@@ -1122,7 +1041,7 @@
           <span class="drawer-btn-icon">🗺️</span>
           <div class="drawer-btn-info">
             <span class="drawer-btn-title">空間星圖</span>
-            <span class="drawer-btn-sub">五大場景快速旅行</span>
+            <span class="drawer-btn-sub">十大場景快速旅行</span>
           </div>
         </button>
 
@@ -1329,15 +1248,8 @@
   <div id="speechModal">
     <div class="parchment-card">
       <button id="closeSpeechBtn" class="modal-close-btn" type="button" onclick="if(window.world3D) window.world3D.closeSpeechCard()" aria-label="關閉">✕</button>
-      <div class="modal-header">
-        <img id="modalMascotImg" src="assets/textures/fox-guide.png" alt="Mascot" class="mascot-avatar">
-        <div class="mascot-info">
-          <h3 id="modalMascotName">小狐狸 Foxy</h3>
-          <p id="modalDialogue" class="mascot-dialogue"></p>
-          <p id="modalDialogueZh" style="font-size: 13px; color: #8c7361;"></p>
-        </div>
-      </div>
-
+      <p class="practice-eyebrow">森林咒語練習</p>
+      <ol class="practice-flow" aria-label="練習步驟"><li>1 聽示範</li><li>2 開口朗讀</li><li>3 看回饋</li></ol>
       <div class="word-display-box">
         <div id="modalWord" class="target-word">LIGHT</div>
         <div id="modalPhonics" class="target-phonics">/laɪt/ • L-I-G-H-T</div>
@@ -1356,20 +1268,31 @@
 
       <div class="action-buttons-row">
         <button id="playVoiceBtn" class="btn-voice" type="button">
-          <span>🔊</span> 聽示範發音
+          <span aria-hidden="true">🔊</span> 聽示範
         </button>
         <button id="micButton" class="btn-mic" type="button">
-          <span>🎙️ 按下開始口說挑戰 (Speak)</span>
+          <span>開始朗讀</span>
         </button>
       </div>
 
-      <div id="speechStatus" class="speech-status">
+      <div id="speechStatus" class="speech-status" role="status" aria-live="polite">
         點擊上方「開始口說挑戰」，靠近麥克風唸出單字！
       </div>
 
-      <div class="fallback-pass-container">
+      <details class="practice-details"><summary>看看導師的情境例句</summary>
+      <div class="modal-header">
+        <img id="modalMascotImg" src="assets/textures/fox-guide.png" alt="Mascot" class="mascot-avatar">
+        <div class="mascot-info">
+          <h3 id="modalMascotName">小狐狸 Foxy</h3>
+          <p id="modalDialogue" class="mascot-dialogue"></p>
+          <p id="modalDialogueZh" style="font-size: 13px; color: #8c7361;"></p>
+        </div>
+      </div>
+
+      </details>
+      <div class="fallback-pass-container"><p class="practice-help">麥克風無法使用時，請老師確認口說後協助通過。</p>
         <button id="teacherPassBtn" class="btn-teacher-pass" type="button">
-          ✨ 教室環境吵雜或無麥克風？點此老師驗證通過 (Teacher Pass)
+          老師協助驗證
         </button>
       </div>
     </div>
@@ -1678,17 +1601,17 @@
     <div class="world-map-dialog">
       <button class="modal-close-btn" type="button" onclick="toggleWorldMapModal()" aria-label="關閉">✕</button>
       <div class="world-map-header">
-        <h2 class="world-map-title">🗺️ 新港魔法學院：冒險大陸世界地圖 (Overworld Realm Map)</h2>
-        <p class="world-map-subtitle">比照 RPG 開放世界！五大多元生活情境在大陸地理中彼此串聯，支援快速傳送與實體走動跨界</p>
+        <h2 class="world-map-title">冒險大陸 · 十界星圖</h2>
+        <p class="world-map-subtitle">選擇星界查看探索進度；已解鎖的區域可以傳送前往。</p>
       </div>
 
       <!-- 大地圖切換標籤 (大陸串聯路網 vs 空間圖冊) -->
       <div class="overworld-map-nav">
         <button id="btnWorldRouteTab" type="button" class="overworld-map-tab-btn active" onclick="switchWorldMapTab('route')">
-          🗺️ 奇幻大陸串聯路網 (Overworld Route)
+          十界路線
         </button>
         <button id="btnWorldCardsTab" type="button" class="overworld-map-tab-btn" onclick="switchWorldMapTab('cards')">
-          📜 空間詳細圖冊 (Realm Codex)
+          區域列表
         </button>
       </div>
 
@@ -1708,7 +1631,7 @@
 
       <div class="world-map-footer">
         <div class="world-map-tip">
-          💡 <strong>RPG 雙向串聯提示</strong>：除了在世界地圖點擊「🚀 施法傳送」外，各場景邊緣均設有真實路標與傳送門扉，可直接步行穿越或折返探索！
+          💡 <strong>RPG 雙向串聯提示</strong>：除了在世界地圖點擊「傳送前往」外，各場景邊緣均設有真實路標與傳送門扉，可直接步行穿越或折返探索！
         </div>
         <button type="button" class="btn-voice" onclick="toggleWorldMapModal()" style="min-width: 140px; padding: 10px 20px;">
           關閉地圖
@@ -1717,6 +1640,7 @@
     </div>
   </div>
 
+  <div id="sceneLoadNotice" class="scene-load-notice" hidden><span id="sceneLoadLabel" role="status" aria-live="polite"></span><button id="sceneLoadRetry" type="button" hidden onclick="window.world3D?.zoneManager.retryTextures()">重新載入</button></div>
   <!-- 關卡主英語問句三重試煉彈窗 (Guardian Question Trial Modal) -->
   <div id="guardianTrialModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 160; display: none; justify-content: center; align-items: center; padding: 12px;">
     <div class="guardian-dialog-container">
@@ -1872,7 +1796,7 @@
           </div>
 
           <!-- 語音狀態文字 -->
-          <div id="guardianSpeechStatus" class="guardian-speech-status status-idle">
+          <div id="guardianSpeechStatus" class="guardian-speech-status status-idle" role="status" aria-live="polite">
             🎙️ 請點擊下方按鈕，自信大聲朗讀出整句問句！
           </div>
 
@@ -1915,20 +1839,24 @@
   </div>
 
   <!-- 提示氣泡 (Toast Notice) -->
-  <div id="toastNotice"></div>
+  <div id="toastNotice" role="status" aria-live="polite"></div>
 
   <!-- 核心庫與遊戲腳本 -->
   <script src="three.min.js"></script>
-  <script src="vocab-data.js?v=20260930_v16"></script>
+  <script src="game-polish.js?v=20261010"></script>
+  <script src="title-screen.js?v=20261010"></script>
+  <script src="game-diagnostics.js?v=20261010"></script>
+  <script src="realm-presentation.js?v=20261010b"></script>
+  <script src="vocab-data.js?v=20261010"></script>
   <script src="vocab-passport-bank.js?v=20260930_v16"></script>
-  <script src="speech-manager.js?v=20260930_v16"></script>
-  <script src="audio-manager.js?v=20260930_v16"></script>
-  <script src="touch-controls.js?v=20260930_v16"></script>
-  <script src="cloud-sync-manager.js?v=20260930_v16"></script>
-  <script src="spatial-zone-manager.js?v=20260930_v16"></script>
+  <script src="speech-manager.js?v=20261010"></script>
+  <script src="audio-manager.js?v=20261010"></script>
+  <script src="touch-controls.js?v=20261010"></script>
+  <script src="cloud-sync-manager.js?v=20261010"></script>
+  <script src="spatial-zone-manager.js?v=20261010"></script>
   <script src="minimap-manager.js?v=20260930_v16"></script>
   <script src="scavenger-hunt-manager.js?v=20260930_v16"></script>
-  <script src="world-3d.js?v=20260930_v16"></script>
+  <script src="world-3d.js?v=20261010"></script>
 
   <script>
     let curLeaderboardTab = 'school';
@@ -2238,6 +2166,8 @@
       closeStoryPrologue();
       const modal = document.getElementById('instructionsModal');
       if (modal) modal.style.display = 'flex';
+      const entered = document.getElementById('gameCoverScreen')?.classList.contains('fade-out');
+      document.getElementById('btnEnterGameFinal').textContent = entered ? '返回冒險 →' : '進入魔法書齋 →';
       if (window.audioManager) window.audioManager.playSfx('click');
     }
     window.openGameInstructions = openGameInstructions;
@@ -2258,6 +2188,8 @@
         cover.classList.add('fade-out');
         setTimeout(() => {
           cover.style.display = 'none';
+          cover.inert = true;
+          document.querySelector('#worldCanvas, canvas')?.focus({ preventScroll: true });
         }, 700);
       }
 
@@ -2271,31 +2203,7 @@
         window.audioManager.playSfx('magicSuccess');
       }
 
-      // 觸發遊戲入場提示通知
-      const notification = document.createElement('div');
-      notification.className = 'toast-notification';
-      notification.innerHTML = '✨ <strong>歡迎踏入童趣森林！</strong>滑動畫面環視並展開探索吧！';
-      notification.style.position = 'fixed';
-      notification.style.bottom = '80px';
-      notification.style.left = '50%';
-      notification.style.transform = 'translateX(-50%)';
-      notification.style.background = 'rgba(15, 23, 42, 0.9)';
-      notification.style.color = '#fde047';
-      notification.style.border = '2px solid #eab308';
-      notification.style.borderRadius = '30px';
-      notification.style.padding = '12px 24px';
-      notification.style.fontSize = '15px';
-      notification.style.fontWeight = 'bold';
-      notification.style.boxShadow = '0 8px 30px rgba(0,0,0,0.5)';
-      notification.style.zIndex = '9000';
-      notification.style.pointerEvents = 'none';
-      notification.style.transition = 'all 0.5s ease';
-      document.body.appendChild(notification);
-      setTimeout(() => {
-        notification.style.opacity = '0';
-        notification.style.transform = 'translateX(-50%) translateY(20px)';
-        setTimeout(() => notification.remove(), 500);
-      }, 4000);
+      window.world3D?.showToast('歡迎踏入童趣森林！拖曳環視，對準物件後按 E 或互動。');
     }
     window.completeOnboardingAndEnterGame = completeOnboardingAndEnterGame;
     window.directEnterGame = completeOnboardingAndEnterGame;
@@ -2661,92 +2569,7 @@
       const zm = window.world3D.zoneManager;
       const curZone = zm.getCurrentZone();
 
-      // 取得使用者已通關詞彙清單
-      const p = (window.cloudSyncManager && window.cloudSyncManager.profile) ? window.cloudSyncManager.profile : { completedWords: [] };
-      const completedList = (p.completedWords || []).map(w => w.toUpperCase());
-
-      listEl.innerHTML = '';
-
-      const orderedZoneIds = ['zone1', 'zone2', 'zone3', 'zone4', 'zone5', 'zone6', 'zone7', 'zone8', 'zone9', 'zone10'];
-      const connectors = [
-        '🌾 陽光花海古徑 (走出書齋石門花田，邁入微風市集)',
-        '🌉 護城河古石橋 (降下市集要塞吊橋，前往精靈花園)',
-        '🌲 迷霧森林古道 (撥開花園古樹林蔭，通向運動園區)',
-        '🛤️ 凱旋星光鐵道 (穿過操場終點金拱門，抵達鐘樓車站)',
-        '⚓ 蔚藍航海專線鐵路 (從車站北月台出發，抵達蔚藍秘境海港)',
-        '🌟 雲霄星光空橋 (踏上燈塔指引光柱，躍升至雲頂星空觀測站)',
-        '💎 璀璨極光冰橋 (穿過觀測站星界傳送門，登上極光冰雪聖域)',
-        '✨ 星界萬神天梯 (極光之巔終極攀登，登上星界萬神殿堂)',
-        '🌈 蒼穹虹光天門 (萬神天台展翅凌空，飛升登上蒼穹虹光空島)'
-      ];
-
-      orderedZoneIds.forEach((zid, idx) => {
-        const z = zm.zones[zid];
-        if (!z) return;
-
-        const isUnlocked = zm.isZoneUnlocked(z.id);
-        const isCurrent = (z.id === curZone.id);
-
-        // 統計該空間單字收集率
-        const totalWords = z.words.length;
-        const doneWords = z.words.filter(w => completedList.includes(w.toUpperCase())).length;
-
-        const row = document.createElement('div');
-        row.className = `overworld-node-row ${isCurrent ? 'current-node' : ''} ${isUnlocked ? 'unlocked-node' : 'locked-node'}`;
-
-        row.innerHTML = `
-          <div class="node-left-cluster">
-            <div class="node-icon-avatar">${z.icon}</div>
-            <div class="node-content-info">
-              <div class="node-title-main">
-                <span>${z.name}</span>
-                <span style="font-size: 13px; color: #8c7361; font-weight: 500;">(${z.englishName})</span>
-              </div>
-              <div class="node-sub-detail">
-                <span>主題：<strong style="color: #b45309;">${z.topic}</strong></span> • 
-                <span style="color: #059669; font-weight: 700;">單字收集：${doneWords} / ${totalWords}</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="node-status-beacon">
-            ${isCurrent ? `
-              <span class="beacon-pulse"></span>
-              <span style="font-size: 13px; color: #2563eb; font-weight: 800;">📍 當前冒險中</span>
-            ` : isUnlocked ? `
-              <button type="button" class="realm-action-btn btn-teleport" onclick="travelToZone('${z.id}')">
-                🚀 施法傳送前往
-              </button>
-            ` : `
-              <span style="font-size: 12px; color: #9ca3af; font-weight: 700;">🔒 Lv.${z.reqLevel} 解鎖</span>
-            `}
-          </div>
-        `;
-
-        if (isUnlocked && !isCurrent) {
-          row.onclick = (e) => {
-            if (e.target.tagName !== 'BUTTON') {
-              travelToZone(z.id);
-            }
-          };
-        }
-
-        listEl.appendChild(row);
-
-        // 節點間繪製路徑串聯器
-        if (idx < connectors.length) {
-          const connector = document.createElement('div');
-          connector.className = 'node-trail-connector';
-          connector.innerHTML = `<span>${connectors[idx]}</span>`;
-          listEl.appendChild(connector);
-        }
-      });
-
-      // 終點：大魔導士殿堂終極傳送
-      const finalTrail = document.createElement('div');
-      finalTrail.className = 'node-trail-connector';
-      finalTrail.innerHTML = `<span>🏆 榮耀加冕大魔導士 ➔ 圓滿通關全 10 大奇幻空間 (Grand Master Legend)</span>`;
-      listEl.appendChild(finalTrail);
+      RealmPresentation.render(listEl,zm,window.cloudSyncManager?.profile,travelToZone);
     }
 
     function renderWorldMapCards() {

@@ -28,18 +28,48 @@ class TouchControls {
     this.isPointerLocked = false;
     this.lastMousePos = { x: 0, y: 0 };
 
+    this.initInteraction();
+    window.addEventListener('blur', () => this.reset());
+    document.addEventListener('visibilitychange', () => this.reset());
     this.initKeyboard();
     this.initMouse();
     this.initTouch();
   }
 
+  reset() {
+    Object.keys(this.keys).forEach(key => this.keys[key] = false);
+    this.moveVector.forward = this.moveVector.right = 0;
+    this.lookDelta.yaw = this.lookDelta.pitch = 0;
+    this.interactRequested = false; this.isMouseDown = false; this.pointerGesture = null;
+    this.joystickTouchId = this.lookTouchId = null;
+    this.joystickCurrent = { x:0, y:0 };
+    const base = document.getElementById('joystickBase'); if(base) base.style.display = 'none';
+  }
+
+  initInteraction() {
+    const surface = e => ['renderCanvas','touchLookArea'].includes(e.target.id);
+    window.addEventListener('pointerdown', e => {
+      if (!surface(e) || !e.isPrimary || e.button !== 0) return;
+      this.pointerGesture = {id:e.pointerId, x:e.clientX, y:e.clientY, time:performance.now(), moved:false};
+    });
+    window.addEventListener('pointermove', e => {
+      const g=this.pointerGesture; if(g && g.id===e.pointerId && Math.hypot(e.clientX-g.x,e.clientY-g.y)>8) g.moved=true;
+    });
+    window.addEventListener('pointerup', e => {
+      const g=this.pointerGesture; if(!g || g.id!==e.pointerId) return;
+      if(surface(e) && !g.moved && performance.now()-g.time<350) this.interactRequested=true;
+      this.pointerGesture=null;
+    });
+    window.addEventListener('pointercancel',()=>this.reset());
+  }
+
   initKeyboard() {
     window.addEventListener('keydown', (e) => {
-      if (['input', 'textarea'].includes(document.activeElement.tagName.toLowerCase())) return;
+      if (['input', 'textarea', 'select', 'button'].includes(document.activeElement.tagName.toLowerCase()) || document.activeElement.isContentEditable) return;
       if (this.keys.hasOwnProperty(e.code)) {
         this.keys[e.code] = true;
       }
-      if (e.code === 'KeyE' || e.key === 'e' || e.key === 'E') {
+      if (!e.repeat && (e.code === 'KeyE' || e.key === 'e' || e.key === 'E')) {
         this.interactRequested = true;
       }
     });
@@ -56,38 +86,13 @@ class TouchControls {
     let mouseDownStart = { x: 0, y: 0, time: 0 };
 
     window.addEventListener('mousedown', (e) => {
-      // 點擊UI元素或開啟中的彈窗時不觸發旋轉視角與點擊互動
-      if (
-        e.target.closest('#uiLayer') ||
-        e.target.closest('#speechModal') ||
-        e.target.closest('#guardianTrialModal') ||
-        e.target.closest('#worldMapModal') ||
-        e.target.closest('#magicPassportModal') ||
-        e.target.closest('#studentLoginModal') ||
-        e.target.closest('#leaderboardModal') ||
-        e.target.closest('#cloudConfigModal') ||
-        e.target.closest('#guideModal') ||
-        e.target.closest('#victoryModal') ||
-        e.target.closest('.touch-button')
-      ) return;
-
+      if (e.button !== 0 || !['renderCanvas','touchLookArea','touchLeftZone'].includes(e.target.id)) return;
       this.isMouseDown = true;
       this.lastMousePos = { x: e.clientX, y: e.clientY };
       mouseDownStart = { x: e.clientX, y: e.clientY, time: Date.now() };
     });
 
-    window.addEventListener('mouseup', (e) => {
-      if (this.isMouseDown && e.button === 0) {
-        const dx = e.clientX - mouseDownStart.x;
-        const dy = e.clientY - mouseDownStart.y;
-        const dt = Date.now() - mouseDownStart.time;
-        // 若位移極小 (< 8px) 且在 450ms 內，判定為點擊 3D 空間目標互動！
-        if (Math.hypot(dx, dy) < 8 && dt < 450) {
-          this.interactRequested = true;
-        }
-      }
-      this.isMouseDown = false;
-    });
+    window.addEventListener('mouseup', () => { this.isMouseDown = false; });
 
     window.addEventListener('mousemove', (e) => {
       if (document.pointerLockElement === canvas) {
@@ -110,13 +115,6 @@ class TouchControls {
     const actionBtn = document.getElementById('touchActionBtn');
 
     if (actionBtn) {
-      actionBtn.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        this.interactRequested = true;
-        if (window.audioManager) window.audioManager.playSfx('click');
-      }, { passive: false });
-
       actionBtn.addEventListener('click', (e) => {
         e.preventDefault();
         this.interactRequested = true;
@@ -130,7 +128,7 @@ class TouchControls {
         if (touch.clientX < window.innerWidth * 0.45 && this.joystickTouchId === null) {
           this.joystickTouchId = touch.identifier;
           this.joystickOrigin = { x: touch.clientX, y: touch.clientY };
-          this.joystickCurrent = { x: touch.clientX, y: touch.clientY };
+          this.joystickCurrent = { x: 0, y: 0 };
 
           if (joystickBase && joystickKnob) {
             joystickBase.style.display = 'block';
@@ -151,6 +149,7 @@ class TouchControls {
           const maxDist = this.joystickRadius;
 
           const clampedDist = Math.min(dist, maxDist);
+          const strength = dist < 7 ? 0 : (clampedDist - 7) / (maxDist - 7);
           const angle = Math.atan2(dy, dx);
 
           const knobX = Math.cos(angle) * clampedDist;
@@ -162,8 +161,8 @@ class TouchControls {
 
           // 搖桿向量：X控制左右平移，Y控制前後
           this.joystickCurrent = {
-            x: knobX / maxDist,
-            y: knobY / maxDist
+            x: Math.cos(angle) * strength,
+            y: Math.sin(angle) * strength
           };
         } else if (touch.identifier === this.lookTouchId) {
           const dx = touch.clientX - this.lastLookPos.x;
@@ -233,7 +232,8 @@ class TouchControls {
   }
 
   getLookDelta() {
-    const delta = { ...this.lookDelta };
+    const sensitivity = window.world3D?.settings.sensitivity || 1;
+    const delta = { yaw: this.lookDelta.yaw * sensitivity, pitch: this.lookDelta.pitch * sensitivity };
     this.lookDelta.yaw = 0;
     this.lookDelta.pitch = 0;
     return delta;

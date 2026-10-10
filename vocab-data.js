@@ -4,6 +4,8 @@ const VOCAB_DATA = {
     word: "LIGHT",
     phonics: "/laɪt/ • L-I-G-H-T",
     zh: "光芒、點亮",
+    sentence: "The candle gives us a warm light.",
+    sentenceZh: "蠟燭帶給我們溫暖的光。",
     category: "幼苗村日常",
     mascot: "foxy",
     mascotName: "小狐狸 Foxy",

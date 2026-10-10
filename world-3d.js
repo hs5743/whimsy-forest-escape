@@ -3,6 +3,9 @@
 
 class World3D {
   constructor() {
+    this.settings = GamePolish.loadSettings(window.localStorage);
+    this.devMode = ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname) && new URLSearchParams(location.search).get("dev") === "1";
+    this.zoneTimers = new Set();
     this.scene = null;
     this.camera = null;
     this.renderer = null;
@@ -58,6 +61,11 @@ class World3D {
     this.buildAtelierRoom(this.activeZoneGroup);
     this.buildProps(this.activeZoneGroup);
     this.buildOutsideMeadow(this.activeZoneGroup);
+    this.zoneManager.loadSceneTextures(this.activeZoneGroup);
+    GamePolish.applySceneStyle(this,'zone1');
+    this.targetFocus = new GamePolish.TargetFocus(this.scene);
+    this.restoreStudyState();
+    this.setQualityPreference(this.settings.quality);
     this.setupEvents();
     this.initCloudSync();
 
@@ -133,6 +141,8 @@ class World3D {
 
     // 溫暖陽光與環境光
     const hemiLight = new THREE.HemisphereLight(0xfff6e8, 0x8f7259, 0.95);
+    this.hemiLight = hemiLight;
+    hemiLight.intensity = 0.65;
     this.scene.add(hemiLight);
 
     const sunLight = new THREE.DirectionalLight(0xfffaed, 1.25);
@@ -163,9 +173,9 @@ class World3D {
     const dustTex = this.createSoftCircleParticleTexture();
     const dustMat = new THREE.PointsMaterial({
       color: 0xffe89e,
-      size: 0.12,
+      size: 0.055,
       transparent: true,
-      opacity: 0.75,
+      opacity: 0.28,
       map: dustTex || null,
       depthWrite: false,
       blending: THREE.AdditiveBlending
@@ -178,18 +188,18 @@ class World3D {
   buildAtelierRoom(parentGroup) {
     const container = parentGroup || this.activeZoneGroup || this.scene;
     const roomGroup = new THREE.Group();
-    const textureLoader = new THREE.TextureLoader();
-
     // 1. 溫潤古木地板 (AI 精緻木紋皮膚)
-    const floorTex = textureLoader.load('assets/textures/tex-wood-floor.jpg');
+    const floorTex = this.zoneManager.getTexture('assets/textures/tex-wood-floor.jpg','atelier-floor');
+    floorTex.encoding = THREE.sRGBEncoding;
+    floorTex.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy());
     floorTex.wrapS = THREE.RepeatWrapping;
     floorTex.wrapT = THREE.RepeatWrapping;
     floorTex.repeat.set(4, 4);
     const floorGeo = new THREE.PlaneGeometry(12, 12);
     const floorMat = new THREE.MeshStandardMaterial({
       map: floorTex,
-      roughness: 0.55,
-      metalness: 0.05
+      roughness: 0.78,
+      metalness: 0.0
     });
     const floor = new THREE.Mesh(floorGeo, floorMat);
     floor.rotation.x = -Math.PI / 2;
@@ -197,7 +207,9 @@ class World3D {
     roomGroup.add(floor);
 
     // 2. 天花板與深木橫樑 (木紋皮膚)
-    const beamTex = textureLoader.load('assets/textures/tex-wood-desk.jpg');
+    const beamTex = this.zoneManager.getTexture('assets/textures/tex-wood-desk.jpg','atelier-wood');
+    beamTex.encoding = THREE.sRGBEncoding;
+    beamTex.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy());
     const ceilingGeo = new THREE.PlaneGeometry(12, 12);
     const ceilingMat = new THREE.MeshStandardMaterial({ color: 0x3d291d, roughness: 0.85 });
     const ceiling = new THREE.Mesh(ceilingGeo, ceilingMat);
@@ -215,7 +227,9 @@ class World3D {
     }
 
     // 3. 牆壁材質 (AI 精緻古石磚牆皮膚)
-    const wallTex = textureLoader.load('assets/textures/tex-stone-wall.jpg');
+    const wallTex = this.zoneManager.getTexture('assets/textures/tex-stone-wall.jpg','atelier-wall');
+    wallTex.encoding = THREE.sRGBEncoding;
+    wallTex.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy());
     wallTex.wrapS = THREE.RepeatWrapping;
     wallTex.wrapT = THREE.RepeatWrapping;
     wallTex.repeat.set(3, 2);
@@ -246,7 +260,9 @@ class World3D {
 
     // 窗外風景立體背板 (芙莉蓮風格陽光花田與遠景)
     const bgGeo = new THREE.PlaneGeometry(16, 9);
-    const bgTex = textureLoader.load('assets/textures/atelier-window-view.jpg');
+    const bgTex = this.zoneManager.getTexture('assets/textures/atelier-window-view.jpg');
+    bgTex.encoding = THREE.sRGBEncoding;
+    bgTex.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy());
     const bgMat = new THREE.MeshBasicMaterial({ map: bgTex });
     const bgMesh = new THREE.Mesh(bgGeo, bgMat);
     bgMesh.position.set(0, 2.5, -11.5);
@@ -254,21 +270,23 @@ class World3D {
 
     // 溫暖晨曦拱窗斜射光束 (Soft Volumetric Sunbeam / Godray)
     const beamGeo = new THREE.CylinderGeometry(0.7, 2.3, 5.8, 16, 1, true);
-    const beamMat = new THREE.MeshBasicMaterial({
-      color: 0xfff3db,
-      transparent: true,
-      opacity: 0.12,
-      side: THREE.DoubleSide,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
+    const beamMat = new THREE.ShaderMaterial({
+      transparent:true,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false,
+      uniforms:{tint:{value:new THREE.Color(0xfff3db)}},
+      vertexShader:'varying vec2 beamUv; varying vec3 beamNormal; varying vec3 viewDirection; void main(){beamUv=uv; vec4 viewPosition=modelViewMatrix*vec4(position,1.0); beamNormal=normalMatrix*normal; viewDirection=-viewPosition.xyz; gl_Position=projectionMatrix*viewPosition;}',
+      fragmentShader:'uniform vec3 tint; varying vec2 beamUv; varying vec3 beamNormal; varying vec3 viewDirection; void main(){float edge=pow(abs(dot(normalize(beamNormal),normalize(viewDirection))),1.5); float lengthFade=pow(sin(3.14159265*beamUv.y),2.0); gl_FragColor=vec4(tint,.055*edge*lengthFade);}'
     });
+    beamMat.opacity=.055;
     const sunbeam = new THREE.Mesh(beamGeo, beamMat);
     sunbeam.position.set(0.1, 2.0, -3.2);
     sunbeam.rotation.x = Math.PI / 4.2;
+    sunbeam.userData.nonBlocking = true;
     roomGroup.add(sunbeam);
 
     // 4. 地面中央華麗魔導圓形地毯 (Magic Circle Rug)
-    const rugTex = textureLoader.load('assets/textures/magic-circle-rug.jpg');
+    const rugTex = this.zoneManager.getTexture('assets/textures/magic-circle-rug.jpg');
+    rugTex.encoding = THREE.sRGBEncoding;
+    rugTex.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy());
     const rugGeo = new THREE.CircleGeometry(2.3, 32);
     const rugMat = new THREE.MeshStandardMaterial({
       map: rugTex,
@@ -282,7 +300,9 @@ class World3D {
     roomGroup.add(rugMesh);
 
     // 5. 西側石壁懸掛古老魔導「蒼月草植物圖鑑」畫框 (Botanical Herb Painting)
-    const paintingTex = textureLoader.load('assets/textures/botanical-flower-painting.jpg');
+    const paintingTex = this.zoneManager.getTexture('assets/textures/botanical-flower-painting.jpg');
+    paintingTex.encoding = THREE.sRGBEncoding;
+    paintingTex.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy());
     const paintingGeo = new THREE.PlaneGeometry(2.6, 1.95);
     const paintingMat = new THREE.MeshStandardMaterial({
       map: paintingTex,
@@ -325,8 +345,9 @@ class World3D {
 
   buildBookshelf(parent, x, y, z, rotY) {
     const shelfGroup = new THREE.Group();
-    const textureLoader = new THREE.TextureLoader();
-    const woodTex = textureLoader.load('assets/textures/tex-wood-desk.jpg');
+    const woodTex = this.zoneManager.getTexture('assets/textures/tex-wood-desk.jpg','atelier-wood');
+    woodTex.encoding = THREE.sRGBEncoding;
+    woodTex.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy());
     const woodMat = new THREE.MeshStandardMaterial({ map: woodTex, roughness: 0.6 });
 
     // 書架主體
@@ -356,10 +377,15 @@ class World3D {
   // 建造各項解謎互動道具
   buildProps(parentGroup) {
     const container = parentGroup || this.activeZoneGroup || this.scene;
-    const textureLoader = new THREE.TextureLoader();
-    const deskWoodTex = textureLoader.load('assets/textures/tex-wood-desk.jpg');
-    const grimoireTex = textureLoader.load('assets/textures/tex-grimoire-book.jpg');
-    const slateTex = textureLoader.load('assets/textures/tex-alchemy-slate.jpg');
+    const deskWoodTex = this.zoneManager.getTexture('assets/textures/tex-wood-desk.jpg','atelier-wood');
+    deskWoodTex.encoding = THREE.sRGBEncoding;
+    deskWoodTex.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy());
+    const grimoireTex = this.zoneManager.getTexture('assets/textures/tex-grimoire-book.jpg');
+    grimoireTex.encoding = THREE.sRGBEncoding;
+    grimoireTex.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy());
+    const slateTex = this.zoneManager.getTexture('assets/textures/tex-alchemy-slate.jpg');
+    slateTex.encoding = THREE.sRGBEncoding;
+    slateTex.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy());
 
     // ==========================================
     // 1. 銅燭台 (Candle -> LIGHT)
@@ -383,6 +409,16 @@ class World3D {
     wax.position.y = 0.32;
 
     candleGroup.add(base, stem, wax);
+    // Turned brass rings and soft wax drips read clearly at close range.
+    [0.04, 0.10, 0.23].forEach(y => {
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(y===.04?.12:.045,.012,8,24), standMat);
+      ring.rotation.x=Math.PI/2; ring.position.y=y; candleGroup.add(ring);
+    });
+    for(let i=0;i<4;i++) {
+      const drip = new THREE.Mesh(new THREE.SphereGeometry(.018,8,6), wax.material);
+      const angle=i*Math.PI/2; drip.position.set(Math.cos(angle)*.048,.37-i*.009,Math.sin(angle)*.048);
+      drip.scale.y=1.8; candleGroup.add(drip);
+    }
 
     // 燭火網格
     const flameGeo = new THREE.ConeGeometry(0.04, 0.1, 8);
@@ -445,10 +481,24 @@ class World3D {
       roughness: 0.35,
       metalness: 0.2
     });
-    const bookMesh = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.08, 0.35), coverMat);
+    const bookMesh = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.014, 0.35), coverMat);
+    this.bookCoverHinge = new THREE.Group(); this.bookCoverHinge.position.set(-.225,.043,0);
+    bookMesh.position.x=.225; this.bookCoverHinge.add(bookMesh);
+    const backCover=new THREE.Mesh(bookMesh.geometry,coverMat); backCover.position.y=-.043;
     const pages = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.06, 0.32), new THREE.MeshStandardMaterial({ color: 0xfdf6e2 }));
     pages.position.set(0.01, 0, 0);
-    this.bookGroup.add(bookMesh, pages);
+    this.bookGroup.add(this.bookCoverHinge, backCover, pages);
+    // Separate paper edges, leather spine and brass fittings, rather than a printed box.
+    for(let i=0;i<5;i++) {
+      const pageEdge = new THREE.Mesh(new THREE.BoxGeometry(.42,.002,.32), new THREE.MeshStandardMaterial({color:i%2?0xe2d1ac:0xf8efd7,roughness:.92}));
+      pageEdge.position.set(.01,-.023+i*.01,0); this.bookGroup.add(pageEdge);
+    }
+    [-1,1].forEach(x=>[-1,1].forEach(z=>{
+      const corner=new THREE.Mesh(new THREE.BoxGeometry(.055,.014,.055),standMat);
+      corner.position.set(.225+x*.193,.01,z*.145); this.bookCoverHinge.add(corner);
+    }));
+    const spine=new THREE.Mesh(new THREE.CylinderGeometry(.042,.042,.35,16),coverMat);
+    spine.rotation.x=Math.PI/2; spine.position.x=-.22; this.bookGroup.add(spine);
 
     this.bookGroup.position.set(-0.5, 1.25, -3.8);
     this.bookGroup.rotation.y = 0.2;
@@ -469,6 +519,14 @@ class World3D {
     container.add(this.keyMesh);
 
     container.add(deskGroup);
+    [-1,1].forEach(side=>{
+      const trim=new THREE.Mesh(new THREE.BoxGeometry(2.42,.035,.028),standMat);
+      trim.position.set(0,.935,-3.8+side*.60); deskGroup.add(trim);
+    });
+    this.addContactShadow(container, -3.2, -3.5, .7, .7);
+    this.addContactShadow(container, 0, -3.8, 1.5, .9);
+    this.addContactShadow(container, -4.5, 0, 1.05, .75);
+    this.addContactShadow(container, 4.5, 2.5, .6, .48);
 
     // ==========================================
     // 3. 元素煉金台 (Alchemy Table -> RED, BLUE, STAR)
@@ -487,6 +545,13 @@ class World3D {
     this.flaskLiquid = new THREE.Mesh(flaskGeo, new THREE.MeshStandardMaterial({ color: 0x999999, transparent: true, opacity: 0.85, roughness: 0.1 }));
     this.flaskLiquid.position.set(-4.5, 0.95, 0);
     alchemyGroup.add(this.flaskLiquid);
+
+    const bottle = new THREE.Mesh(new THREE.LatheGeometry([
+      new THREE.Vector2(.03,-.18),new THREE.Vector2(.16,-.14),new THREE.Vector2(.20,-.03),new THREE.Vector2(.15,.12),new THREE.Vector2(.055,.20),new THREE.Vector2(.055,.29)
+    ],24),new THREE.MeshStandardMaterial({color:0xc7e8ef,transparent:true,opacity:.25,roughness:.18,metalness:.05,side:THREE.DoubleSide,depthWrite:false}));
+    bottle.position.copy(this.flaskLiquid.position); bottle.userData.nonBlocking=true; alchemyGroup.add(bottle);
+    const stopper = new THREE.Mesh(new THREE.CylinderGeometry(.058,.05,.06,12),new THREE.MeshStandardMaterial({color:0x94734e,roughness:.95}));
+    stopper.position.set(-4.5,1.27,0); alchemyGroup.add(stopper);
 
     // 星芒之石 (調配完成後浮出)
     this.starStone = new THREE.Mesh(
@@ -549,7 +614,9 @@ class World3D {
     );
     this.flowerStone.position.set(4.5, 0.9, 2.5);
     this.flowerStone.visible = false;
+    this.flowerStone.userData={id:'flower',name:'蒼月花石刻 (FLOWER)'};
     container.add(this.flowerStone);
+    this.interactables.push(this.flowerStone);
 
     this.mimicGroup.position.set(4.5, 0, 2.5);
     this.mimicGroup.rotation.y = -Math.PI / 4;
@@ -558,7 +625,9 @@ class World3D {
     this.interactables.push(this.mimicGroup);
 
     // 寶箱怪旁邊東側牆壁上的可愛貓咪掛畫
-    const mimicPicTex = textureLoader.load('assets/textures/cute-cat-mimic.jpg');
+    const mimicPicTex = this.zoneManager.getTexture('assets/textures/cute-cat-mimic.jpg');
+    mimicPicTex.encoding = THREE.sRGBEncoding;
+    mimicPicTex.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy());
     const mimicPic = new THREE.Mesh(
       new THREE.PlaneGeometry(1.1, 1.1),
       new THREE.MeshStandardMaterial({ map: mimicPicTex, roughness: 0.5 })
@@ -579,7 +648,9 @@ class World3D {
     this.doorGroup.add(archTop);
 
     // 左右門扇專用古老星芒與蒼月花符文雕刻材質
-    const doorTexLeft = textureLoader.load('assets/textures/ancient-stone-door.jpg');
+    const doorTexLeft = this.zoneManager.getTexture('assets/textures/ancient-stone-door.jpg','door-left');
+    doorTexLeft.encoding = THREE.sRGBEncoding;
+    doorTexLeft.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy());
     doorTexLeft.repeat.set(0.5, 1);
     doorTexLeft.offset.set(0, 0);
     const doorLeafMatLeft = new THREE.MeshStandardMaterial({
@@ -588,7 +659,9 @@ class World3D {
       metalness: 0.15
     });
 
-    const doorTexRight = textureLoader.load('assets/textures/ancient-stone-door.jpg');
+    const doorTexRight = this.zoneManager.getTexture('assets/textures/ancient-stone-door.jpg','door-right');
+    doorTexRight.encoding = THREE.sRGBEncoding;
+    doorTexRight.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy());
     doorTexRight.repeat.set(0.5, 1);
     doorTexRight.offset.set(0.5, 0);
     const doorLeafMatRight = new THREE.MeshStandardMaterial({
@@ -690,6 +763,7 @@ class World3D {
       name: '🌸 陽光花海古徑',
       hint: '通往下一關【陽光微風市集】(點擊前往)',
       onClick: () => {
+        if (!this.gameState.escaped) { this.triggerEscapeCelebration(); return; }
         if (this.zoneManager) {
           this.showToast('🚀 踏上陽光花海古徑，前往陽光微風市集！');
           this.switchZone('zone2');
@@ -714,48 +788,16 @@ class World3D {
       this.renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    let pointerDownPos = { x: 0, y: 0 };
-    let pointerDownTime = 0;
-
-    window.addEventListener('pointerdown', (e) => {
-      pointerDownPos = { x: e.clientX, y: e.clientY };
-      pointerDownTime = Date.now();
+    // A single input queue owns clicks, taps and E; no duplicate pointerup path.
+    window.addEventListener('blur', () => window.touchControls?.reset());
+    document.addEventListener('visibilitychange', () => {
+      window.touchControls?.reset();
+      if (document.hidden) window.speechManager?.stopListening();
+      this.clock.getDelta(); this.lastFrameTimestamp = performance.now(); this.lowFpsDuration = 0;
     });
-
-    // 點擊 3D 畫面觸發互動 (只在短促點擊 Tap/Click 且不是滑動轉視角時觸發)
-    window.addEventListener('pointerup', (e) => {
-      // 避免點擊任何 UI、彈窗或觸控按鈕時誤觸 3D 空間互動
-      if (e.target.closest('#speechModal') ||
-          e.target.closest('#guardianTrialModal') ||
-          e.target.closest('#worldMapModal') ||
-          e.target.closest('#passportModal') ||
-          e.target.closest('#studentModal') ||
-          e.target.closest('#leaderboardModal') ||
-          e.target.closest('#cloudConfigModal') ||
-          e.target.closest('#guideModal') ||
-          e.target.closest('#victoryModal') ||
-          e.target.closest('#systemDrawer') ||
-          e.target.closest('.system-drawer-backdrop') ||
-          e.target.closest('#hudBar') ||
-          e.target.closest('#touchControlsLayer') ||
-          e.target.closest('#inventoryContainer') ||
-          e.target.closest('#toastNotice')) {
-        return;
-      }
-
-      // 若畫面上已有任何彈窗開啟，絕不觸發背景 3D 物件互動
-      if (this.isAnyModalOpen()) return;
-
-      const dist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
-      const elapsed = Date.now() - pointerDownTime;
-
-      // 若滑動距離大於 12px 或按壓超過 300ms，判定為轉動視角/滑動螢幕，絕不觸發互動
-      if (dist > 12 || elapsed > 300) return;
-
-      if (this.hoveredObject) {
-        this.triggerInteraction(this.hoveredObject);
-      }
-    });
+    const canvas = this.renderer.domElement;
+    canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); this.contextLost = true; this.showToast('畫面暫時中斷，請等待顯示恢復。'); });
+    canvas.addEventListener('webglcontextrestored', () => { this.contextLost = false; this.clock.getDelta(); this.setGraphicQuality(this.graphicQuality, true); });
 
     // 鍵盤快速鍵與彈窗控制
     window.addEventListener('keydown', (e) => {
@@ -773,7 +815,8 @@ class World3D {
       }
 
       if (e.code === 'Escape') {
-        this.closeSpeechCard();
+        const speech = document.getElementById('speechModal');
+        if (speech && speech.style.display === 'flex') this.closeSpeechCard();
         const guideModal = document.getElementById('guideModal');
         if (guideModal && guideModal.style.display === 'flex') {
           guideModal.style.display = 'none';
@@ -853,6 +896,8 @@ class World3D {
   // 檢查畫面上是否有任何全螢幕或對話彈窗開啟中
   isAnyModalOpen() {
     const modalIds = [
+      'storyPrologueModal',
+      'instructionsModal',
       'speechModal',
       'guardianTrialModal',
       'worldMapModal',
@@ -873,8 +918,10 @@ class World3D {
         return true;
       }
     }
-    const drawer = document.getElementById('systemDrawer');
-    if (drawer && drawer.classList.contains('open')) return true;
+    const drawer = document.getElementById('systemMenuDrawer');
+    if (drawer && drawer.style.display !== 'none') return true;
+    const cover = document.getElementById('gameCoverScreen');
+    if (cover && getComputedStyle(cover).display !== 'none' && getComputedStyle(cover).visibility !== 'hidden') return true;
     return false;
   }
 
@@ -883,8 +930,7 @@ class World3D {
     // 彈窗開啟時暫停視角旋轉與走動，防止誤觸
     if (this.isAnyModalOpen()) {
       if (window.touchControls) {
-        window.touchControls.consumeInteract();
-        window.touchControls.getLookDelta();
+        window.touchControls.reset();
       }
       return;
     }
@@ -906,42 +952,12 @@ class World3D {
 
       // 移動
       const move = window.touchControls.moveVector;
+      const previousZ = this.player.pos.z;
       if (move.forward !== 0 || move.right !== 0) {
-        const forwardDir = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), this.player.yaw);
-        const rightDir = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), this.player.yaw);
-
-        const moveStep = new THREE.Vector3()
-          .addScaledVector(forwardDir, move.forward * this.player.speed * delta)
-          .addScaledVector(rightDir, move.right * this.player.speed * delta);
-
-        const currentX = this.player.pos.x;
-        const currentZ = this.player.pos.z;
-        const targetX = currentX + moveStep.x;
-        const targetZ = currentZ + moveStep.z;
-        const radius = this.player.radius || 0.45;
-
-        let newX = currentX;
-        let newZ = currentZ;
-
-        // 1. 若全向移動不受阻，直接前進
-        if (!this.isPositionBlocked(targetX, targetZ, radius)) {
-          newX = targetX;
-          newZ = targetZ;
-        } else {
-          // 2. 遭遇固體障礙物阻擋：進行獨立軸向滑行計算 (Smooth Wall-Sliding)
-          if (!this.isPositionBlocked(targetX, currentZ, radius)) {
-            newX = targetX;
-          }
-          if (!this.isPositionBlocked(currentX, targetZ, radius)) {
-            newZ = targetZ;
-          }
-        }
-
-        this.player.pos.x = newX;
-        this.player.pos.z = newZ;
+        GamePolish.movePlayer(this.player, move, delta, (x,z,r) => this.isPositionBlocked(x,z,r));
 
         // 走入花田檢查 (僅在 Zone 1 見習書齋密室通關時觸發)
-        if ((!this.zoneManager || this.zoneManager.currentZoneId === 'zone1') && this.player.pos.z > 8.0 && !this.gameState.escaped) {
+        if ((!this.zoneManager || this.zoneManager.currentZoneId === 'zone1') && previousZ <= 8.0 && this.player.pos.z > 8.0 && !this.gameState.escaped) {
           this.triggerEscapeCelebration();
         }
       }
@@ -950,10 +966,7 @@ class World3D {
 
       // 檢查互動鍵 (E、手機互動鈕 或 滑鼠點擊)
       if (window.touchControls.consumeInteract()) {
-        let target = this.hoveredObject;
-        if (!target) {
-          target = this.findNearbyInteractable(3.8);
-        }
+        const target = GamePolish.resolveTarget(this);
         if (target) {
           this.triggerInteraction(target);
         } else {
@@ -964,56 +977,21 @@ class World3D {
   }
 
   // 尋找玩家身邊最近的可互動目標 (半徑容錯輔助，防止準心微偏時按 E 或點擊沒反應)
-  findNearbyInteractable(maxDist = 3.8) {
-    if (!this.interactables || this.interactables.length === 0) return null;
-    let closest = null;
-    let minDist = maxDist;
-    const playerPos = this.player.pos;
-    const tempVec = new THREE.Vector3();
+  findNearbyInteractable(maxDist = 4) { return GamePolish.resolveTarget(this, maxDist); }
 
-    for (let i = 0; i < this.interactables.length; i++) {
-      const obj = this.interactables[i];
-      if (!obj || !obj.userData || !obj.userData.id) continue;
-      obj.getWorldPosition(tempVec);
-      const dist = Math.hypot(tempVec.x - playerPos.x, tempVec.z - playerPos.z);
-      if (dist < minDist) {
-        minDist = dist;
-        closest = obj;
-      }
-    }
-    return closest;
-  }
-
-  // 射線偵測滑鼠/螢幕正中心的物件
   updateRaycast() {
-    this.raycaster.setFromCamera(new THREE.Vector2(0, 0), this.camera);
-    const intersects = this.raycaster.intersectObjects(this.interactables, true);
-
+    const now=performance.now(); if(now-(this.lastRaycastTime || 0)<65) return; this.lastRaycastTime=now;
+    const root = this.isAnyModalOpen() ? null : GamePolish.resolveTarget(this);
+    if (root === this.hoveredObject) return;
+    this.hoveredObject = root;
+    this.targetFocus?.select(root);
     const tooltip = document.getElementById('interactPrompt');
     const crosshair = document.getElementById('crosshair');
-
-    if (intersects.length > 0 && intersects[0].distance < 4.5) {
-      let root = intersects[0].object;
-      while (root.parent && !root.userData.id && root !== this.scene) {
-        root = root.parent;
-      }
-
-      if (root.userData && root.userData.id) {
-        this.hoveredObject = root;
-        if (tooltip) {
-          tooltip.style.display = 'block';
-          const title = root.userData.name || root.userData.label || '謎之物件';
-          const hint = root.userData.hint ? ` • ${root.userData.hint}` : '';
-          tooltip.textContent = `[ 點擊 / 互動 ] ${title}${hint}`;
-        }
-        if (crosshair) crosshair.classList.add('focused');
-        return;
-      }
+    if (tooltip) {
+      tooltip.style.display = root ? 'block' : 'none';
+      if (root) tooltip.textContent = 'E / 互動 · ' + GamePolish.actionText(this, root);
     }
-
-    this.hoveredObject = null;
-    if (tooltip) tooltip.style.display = 'none';
-    if (crosshair) crosshair.classList.remove('focused');
+    if (crosshair) crosshair.classList.toggle('focused', !!root);
   }
 
   // 觸發解謎口說練習互動
@@ -1064,16 +1042,19 @@ class World3D {
 
       case 'book':
         if (!this.gameState.candleLit) {
-          this.showToast('周圍太暗了，請先點燃旁邊的燭台 (LIGHT)！');
+          this.showToast('魔導書的封印尚未甦醒，請先點亮旁邊的燭台 (LIGHT)！');
           return;
         }
         if (!this.gameState.bookOpened) {
           this.openSpeechCard('BOOK', () => {
             this.gameState.bookOpened = true;
             this.keyMesh.visible = true;
+            const duration=this.settings.reducedMotion ? .01 : .55; let progress=0;
+            this.animators.push({update:dt=>{ progress=Math.min(1,progress+dt/duration); const ease=1-Math.pow(1-progress,3); this.bookCoverHinge.rotation.z=ease*2.35; this.keyMesh.position.y=1.15+ease*.35; return progress<1; }});
+            if(window.audioManager) window.audioManager.playSfx('pickup');
             this.addXP(50);
             this.showToast('📖 魔導書翻開了！裡面夾著一把黃銅鑰匙 (KEY)！');
-            setTimeout(() => {
+            this.scheduleZoneAction(() => {
               this.openSpeechCard('KEY', () => {
                 this.gameState.hasKey = true;
                 this.keyMesh.visible = false;
@@ -1104,7 +1085,8 @@ class World3D {
         }
         if (!this.gameState.drawerOpened) {
           this.gameState.drawerOpened = true;
-          this.animators.push({
+          if(this.settings.reducedMotion) this.drawerMesh.position.z=-3.3;
+          else this.animators.push({
             update: (dt) => {
               if (this.drawerMesh.position.z < -3.3) {
                 this.drawerMesh.position.z += 1.2 * dt;
@@ -1114,7 +1096,7 @@ class World3D {
             }
           });
           this.showToast('🔓 抽屜打開了！發現了一瓶深紅色魔藥 (RED)！');
-          setTimeout(() => {
+          this.scheduleZoneAction(() => {
             this.openSpeechCard('RED', () => {
               this.gameState.hasRedPotion = true;
               this.addInventory('RED', '🧪 火紅魔藥', '#fc8181');
@@ -1149,7 +1131,7 @@ class World3D {
               if (window.audioManager) window.audioManager.playSfx('potionMix');
               this.flaskLiquid.material.color.setHex(0x9955ff); // 變紫魔力混合
 
-              setTimeout(() => {
+              this.scheduleZoneAction(() => {
                 this.openSpeechCard('STAR', () => {
                   this.gameState.alchemyMixed = true;
                   this.gameState.hasStarStone = true;
@@ -1189,7 +1171,7 @@ class World3D {
               this.gameState.catPracticed = true;
               if (hasFishInBag) {
                 this.showToast('😺 寶箱怪肚子咕嚕嚕叫，聞到你身上的小魚乾了！');
-                setTimeout(() => {
+                this.scheduleZoneAction(() => {
                   this.openSpeechCard('FISH', () => {
                     this.feedMimicSuccess();
                   });
@@ -1208,9 +1190,16 @@ class World3D {
               this.showToast('😺 寶箱怪正眼巴巴地等著小魚乾，快去煉金台調配魔藥獲取小魚乾吧！');
             }
           }
+        } else if(!this.gameState.hasFlowerStone) {
+          this.collectFlowerStone();
         } else {
           this.showToast('😺 貓咪寶箱怪吃得飽飽的，正在心滿意足地打呼嚕：Purr, purr...');
         }
+        break;
+
+      case 'flower':
+        if(this.gameState.mimicFed && !this.gameState.hasFlowerStone) this.collectFlowerStone();
+        else this.showToast('蒼月花石刻已收入背包，帶它前往石門吧。');
         break;
 
       case 'door':
@@ -1236,7 +1225,7 @@ class World3D {
               this.socketFlower.material.color.setHex(0x4da6ff);
               this.showToast('🗝️ 兩顆魔法石完美契入！請詠唱最後的開門咒語 (OPEN)！');
 
-              setTimeout(() => {
+              this.scheduleZoneAction(() => {
                 this.openSpeechCard('OPEN', () => {
                   this.openStoneDoorSuccess();
                 });
@@ -1255,19 +1244,31 @@ class World3D {
   }
 
   feedMimicSuccess() {
+    if(this.gameState.mimicFed) return;
     this.gameState.mimicFed = true;
-    this.gameState.hasFlowerStone = true;
     this.flowerStone.visible = true;
-    this.mimicLid.rotation.x = -Math.PI / 3;
-    this.addInventory('FLOWER', '🌸 蒼月花石刻', '#63b3ed');
-    this.addXP(80);
-    this.showToast('🌸 貓咪寶箱怪吃飽飽，開心地吐出了蒼月花石刻 (FLOWER)！');
+    if(this.settings.reducedMotion) this.mimicLid.rotation.x=-Math.PI/3;
+    else {let time=0;this.animators.push({update:dt=>{time=Math.min(1,time+dt/.45);this.mimicLid.rotation.x=-Math.PI/3*(1-Math.pow(1-time,3));return time<1;}});}
+    this.showToast('寶箱怪吃飽了！發現蒼月花石刻，詠唱 FLOWER 將它收入背包。');
+    this.scheduleZoneAction(()=>this.collectFlowerStone(),500);
+  }
+  collectFlowerStone() {
+    if(!this.gameState.mimicFed || this.gameState.hasFlowerStone) return;
+    this.openSpeechCard('FLOWER',()=>{
+      if(this.gameState.hasFlowerStone) return;
+      this.gameState.hasFlowerStone=true;
+      this.addInventory('FLOWER','🌸 蒼月花石刻','#63b3ed');this.addXP(80);
+      window.audioManager?.playSfx('pickup');
+      this.showToast('獲得蒼月花石刻！帶著兩顆魔法石前往石門。');
+    });
   }
 
   openStoneDoorSuccess() {
+    if(this.gameState.doorOpened) return;
     this.gameState.doorOpened = true;
     if (window.audioManager) window.audioManager.playSfx('doorOpen');
-    this.animators.push({
+    if(this.settings.reducedMotion) {this.doorLeft.position.x=-1.7;this.doorRight.position.x=1.7;}
+    else this.animators.push({
       update: (dt) => {
         let stillMoving = false;
         if (this.doorLeft.position.x > -1.7) {
@@ -1287,6 +1288,13 @@ class World3D {
 
   // 開啟單字練習對話視窗
   openSpeechCard(wordKey, onComplete) {
+    this.speechReturnFocus = document.activeElement;
+    this.teacherPassPending = false;
+    const cardToken = Symbol(wordKey); this.speechCardToken = cardToken;
+    const activeGroup = this.activeZoneGroup;
+    const isCurrent = () => this.speechCardToken === cardToken && this.activeZoneGroup === activeGroup;
+    const complete = onComplete; let completed=false;
+    onComplete = () => { if (!isCurrent() || completed) return; completed=true; if(complete) complete(); };
     const modal = document.getElementById('speechModal');
     let data = VOCAB_DATA[wordKey];
 
@@ -1361,13 +1369,7 @@ class World3D {
         btn.title = `點擊聆聽 [ ${chunk} ] 發音`;
         btn.onclick = (e) => {
           e.stopPropagation();
-          if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-            const u = new SpeechSynthesisUtterance(chunk);
-            u.lang = 'en-US';
-            u.rate = 0.85;
-            window.speechSynthesis.speak(u);
-          }
+          if(window.speechManager) {window.speechManager.stopVoice();window.speechManager.playSentenceVoice(chunk);}
           if (window.audioManager) window.audioManager.playSfx('click');
         };
         chunksContainer.appendChild(btn);
@@ -1379,16 +1381,19 @@ class World3D {
     const sentenceEn = document.getElementById('modalSentenceEn');
     const sentenceZh = document.getElementById('modalSentenceZh');
     if (sentenceBox && sentenceEn && sentenceZh) {
-      if (passportWord && passportWord.sentence) {
-        sentenceEn.textContent = `💬 "${passportWord.sentence}"`;
-        sentenceZh.textContent = passportWord.sentenceZh || '';
+      if (data.sentence || (passportWord && passportWord.sentence)) {
+        sentenceEn.textContent = `💬 "${data.sentence || passportWord.sentence}"`;
+        sentenceZh.textContent = data.sentenceZh || passportWord.sentenceZh || '';
         sentenceBox.style.display = 'block';
       } else {
         sentenceBox.style.display = 'none';
       }
     }
 
+    modal.querySelector('.practice-details')?.removeAttribute('open');
     modal.style.display = 'flex';
+    modal.setAttribute('role','dialog'); modal.setAttribute('aria-modal','true'); modal.setAttribute('aria-labelledby','modalWord');
+    document.getElementById('playVoiceBtn')?.focus();
 
     // 每次開啟單字卡時，重置錄音狀態與按鈕外觀
     if (window.speechManager) {
@@ -1398,11 +1403,11 @@ class World3D {
     if (micBtn) {
       micBtn.className = 'btn-mic';
       micBtn.style.background = '';
-      micBtn.innerHTML = '<span>🎙️ 按下開始口說挑戰 (Speak)</span>';
+      micBtn.innerHTML = '<span>開始朗讀</span>';
     }
     const statusBox = document.getElementById('speechStatus');
     if (statusBox) {
-      statusBox.textContent = '點擊上方「開始口說挑戰」，靠近麥克風唸出單字！';
+      statusBox.textContent = '先聽示範，再點擊「開始朗讀」唸出單字。';
       statusBox.className = 'speech-status';
     }
 
@@ -1423,14 +1428,15 @@ class World3D {
       if (e) e.stopPropagation();
       if (window.speechManager) {
         window.speechManager.startListening(wordKey, (success) => {
-          if (success) {
+          if (success && isCurrent() && !completed) {
             modal.style.display = 'none';
-            if (window.cloudSyncManager) {
+            this.restoreSpeechFocus();
+            if (!this.devMode && window.cloudSyncManager) {
               window.cloudSyncManager.recordWordPass(wordKey, data.xp || 50, false);
             }
             this.showToast(`📘 英語護照已蓋上簽證印章：【${wordKey}】！`);
             if (onComplete) onComplete();
-            if (this.zoneManager && this.zoneManager.checkZoneCompletionStatus) {
+            if (!this.devMode && this.zoneManager && this.zoneManager.checkZoneCompletionStatus) {
               this.zoneManager.checkZoneCompletionStatus();
             }
           }
@@ -1442,16 +1448,21 @@ class World3D {
     const passBtn = document.getElementById('teacherPassBtn');
     passBtn.onclick = (e) => {
       if (e) e.stopPropagation();
-      if (window.speechManager) {
-        window.speechManager.forcePass();
-        if (window.cloudSyncManager) {
+      if (window.speechManager && isCurrent() && !completed && !this.teacherPassPending) {
+        this.teacherPassPending = true;
+        window.speechManager.targetData = data;
+        window.speechManager.forcePass(false);
+        if (!this.devMode && window.cloudSyncManager) {
           window.cloudSyncManager.recordWordPass(wordKey, data.xp || 50, true);
         }
         this.showToast(`✨ 教師驗證通過：已認證【${wordKey}】！`);
-        setTimeout(() => {
+        this.scheduleZoneAction(() => {
+          this.teacherPassPending = false;
+          if (!isCurrent()) return;
           modal.style.display = 'none';
+          this.restoreSpeechFocus();
           if (onComplete) onComplete();
-          if (this.zoneManager && this.zoneManager.checkZoneCompletionStatus) {
+          if (!this.devMode && this.zoneManager && this.zoneManager.checkZoneCompletionStatus) {
             this.zoneManager.checkZoneCompletionStatus();
           }
         }, 300);
@@ -1459,7 +1470,13 @@ class World3D {
     };
   }
 
+  restoreSpeechFocus() {
+    if(this.speechReturnFocus?.isConnected && this.speechReturnFocus.getClientRects().length && this.speechReturnFocus !== document.body) this.speechReturnFocus.focus();
+    else document.getElementById('renderCanvas')?.focus({preventScroll:true});
+  }
   closeSpeechCard() {
+    this.speechCardToken = null; this.teacherPassPending = false;
+    this.restoreSpeechFocus();
     const modal = document.getElementById('speechModal');
     if (modal) modal.style.display = 'none';
     if (window.speechManager) {
@@ -1481,6 +1498,7 @@ class World3D {
 
   // 初始化雲端身分與排行榜同步監聽
   initCloudSync() {
+    if (this.devMode) return;
     if (window.cloudSyncManager) {
       if (window.cloudSyncManager.profile) {
         this.gameState.xp = window.cloudSyncManager.profile.xp;
@@ -1521,8 +1539,10 @@ class World3D {
 
   // 走入花田迎接朝陽 (SUN 通關慶典)
   triggerEscapeCelebration() {
-    this.gameState.escaped = true;
+    if(this.gameState.escaped || this.isAnyModalOpen()) return;
     this.openSpeechCard('SUN', () => {
+      if(this.gameState.escaped) return;
+      this.gameState.escaped = true;
       this.addXP(100);
       if (window.audioManager) window.audioManager.playSfx('magicSuccess');
 
@@ -1536,6 +1556,7 @@ class World3D {
   }
 
   addInventory(id, name, color) {
+    if (this.gameState.inventory.some(item => item.id === id)) return;
     this.gameState.inventory.push({ id, name, color });
     const invContainer = document.getElementById('inventoryList');
     if (!invContainer) return;
@@ -1557,7 +1578,7 @@ class World3D {
       this.gameState.level = Math.floor(this.gameState.xp / 100) + 1;
     }
 
-    if (window.cloudSyncManager && window.cloudSyncManager.profile) {
+    if (!this.devMode && window.cloudSyncManager && window.cloudSyncManager.profile) {
       window.cloudSyncManager.profile.xp = this.gameState.xp;
       window.cloudSyncManager.profile.level = this.gameState.level;
       window.cloudSyncManager.notifyListeners();
@@ -1630,28 +1651,17 @@ class World3D {
 
   // 透過 PMREMGenerator 由全景圖動態生成次世代 Image-Based Lighting (IBL) 環境反射光
   updateEnvironmentFromTexture(texture, zoneId) {
-    if (!texture || !this.scene) return;
-    if (this.graphicQuality === 'low') {
-      this.scene.environment = null;
-      return;
-    }
-    if (zoneId && this.envMapCache[zoneId]) {
-      this.scene.environment = this.envMapCache[zoneId];
-      return;
-    }
-    if (!this.pmremGenerator) return;
-
+    if (!this.scene || this.graphicQuality === 'low' || !texture) { this.scene.environment=null; return; }
+    const current = this.zoneManager?.currentZoneId || 'zone1'; if (zoneId !== current) return;
+    if (this.envMapCache[zoneId]) { this.scene.environment=this.envMapCache[zoneId].texture; return; }
+    // LoadingManager retries after textures arrive; never compile an incomplete image.
+    if (!texture.image || !(texture.image.width > 0) || !this.pmremGenerator) { this.scene.environment=null; return; }
     try {
-      const envRenderTarget = this.pmremGenerator.fromEquirectangular(texture);
-      if (envRenderTarget && envRenderTarget.texture) {
-        if (zoneId) {
-          this.envMapCache[zoneId] = envRenderTarget.texture;
-        }
-        this.scene.environment = envRenderTarget.texture;
-      }
-    } catch (err) {
-      console.warn('Failed to compile PMREM environment reflection:', err);
-    }
+      const target=this.pmremGenerator.fromEquirectangular(texture);
+      this.envMapCache[zoneId]=target; this.scene.environment=target.texture;
+      const keys=Object.keys(this.envMapCache);
+      while(keys.length>2) { const key=keys.shift(); this.envMapCache[key].dispose(); delete this.envMapCache[key]; }
+    } catch (err) { console.warn('Environment reflection skipped:',err); this.scene.environment=null; }
   }
 
   // 畫質分級控制系統 (高 / 中 / 低)
@@ -1701,12 +1711,13 @@ class World3D {
     } else {
       const curZone = (this.zoneManager && this.zoneManager.currentZoneId) ? this.zoneManager.currentZoneId : 'zone1';
       if (this.envMapCache && this.envMapCache[curZone]) {
-        this.scene.environment = this.envMapCache[curZone];
+        this.scene.environment = this.envMapCache[curZone].texture;
       } else if (this.zoneManager && typeof this.zoneManager.refreshZoneEnvironment === 'function') {
         this.zoneManager.refreshZoneEnvironment();
       }
     }
 
+    GamePolish.applyQuality(this);
     this.updateFpsPillUI();
 
     const names = {
@@ -1722,14 +1733,41 @@ class World3D {
   }
 
   // 循環切換畫質
+  addContactShadow(group, x, z, width, depth) {
+    const material = new THREE.MeshBasicMaterial({map:this.createSoftCircleParticleTexture(),color:0x20160f,transparent:true,opacity:.26,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1});
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(width*2,depth*2),material);
+    mesh.rotation.x=-Math.PI/2; mesh.position.set(x,.012,z); mesh.userData.nonBlocking=true; group.add(mesh);
+  }
+  saveSettings() { try { localStorage.setItem('whimsy.settings.v1', JSON.stringify(this.settings)); } catch (_) {} }
+  setQualityPreference(preference) {
+    if (!['auto','high','medium','low'].includes(preference)) return;
+    this.settings.quality = preference; this.lowFpsDuration = 0; this.saveSettings();
+    this.setGraphicQuality(preference === 'auto' ? (navigator.maxTouchPoints > 0 ? 'medium' : 'high') : preference);
+    const select = document.getElementById('qualityPreference'); if (select) select.value = preference;
+  }
   cycleQuality() {
-    const cycle = { high: 'medium', medium: 'low', low: 'high' };
-    const next = cycle[this.graphicQuality] || 'high';
-    this.setGraphicQuality(next, false);
-    const shortNames = { high: '高畫質 (2K陰影+環境反射)', medium: '中畫質 (均衡模式)', low: '流暢低畫質 (極致順暢)' };
-    if (typeof this.showToast === 'function') {
-      this.showToast(`🎨 畫質模式已切換為：【${shortNames[next]}】`);
-    }
+    const cycle = { auto:'high', high:'medium', medium:'low', low:'auto' };
+    this.setQualityPreference(cycle[this.settings.quality]);
+    this.showToast('畫質偏好已儲存 · ' + ({auto:'自動調整',high:'精緻',medium:'均衡',low:'流暢'}[this.settings.quality]));
+  }
+  scheduleZoneAction(callback, delay) {
+    const group = this.activeZoneGroup;
+    const timer = setTimeout(() => { this.zoneTimers.delete(timer); if (this.activeZoneGroup === group) callback(); }, delay);
+    this.zoneTimers.add(timer);
+  }
+  restoreStudyState() {
+    const s = this.gameState;
+    this.candleFlame.material.opacity = s.candleLit ? 1 : 0;
+    this.candleLight.intensity = s.candleLit ? 1.8 : 0;
+    this.bookCoverHinge.rotation.z = s.bookOpened ? 2.35 : 0;
+    this.keyMesh.position.y = s.bookOpened ? 1.5 : 1.15;
+    this.keyMesh.visible = s.bookOpened && !s.hasKey;
+    this.starStone.visible = s.hasStarStone; this.flowerStone.visible = s.mimicFed;
+    if (s.drawerOpened) this.drawerMesh.position.z = -3.3;
+    if (s.hasBluePotion) this.flaskLiquid.material.color.setHex(0x9955ff);
+    if (s.mimicFed) this.mimicLid.rotation.x = -Math.PI / 3;
+    if (s.doorStonePlaced) { this.socketStar.material.color.setHex(0xffe600); this.socketFlower.material.color.setHex(0x4da6ff); }
+    if (s.doorOpened) { this.doorLeft.position.x=-1.7; this.doorRight.position.x=1.7; }
   }
 
   getGraphicQuality() {
@@ -1741,6 +1779,13 @@ class World3D {
     if (typeof document === 'undefined') return;
     const pill = document.getElementById('fpsQualityPill');
     if (!pill) return;
+    const diagnostics = document.getElementById('devDiagnostics');
+    if(this.devMode && diagnostics) {
+      const frame = this.frameMetrics?.summary();
+      diagnostics.textContent = '幾何 ' + this.renderer.info.memory.geometries + ' · 貼圖 ' + this.renderer.info.memory.textures + ' · 繪製 ' + this.renderer.info.render.calls + (frame ? ' · P95 ' + frame.p95Ms + 'ms · 長幀 ' + frame.longFrames : '');
+    }
+    const task = document.getElementById('currentObjective');
+    if (task) { const text = GamePolish.taskText(this.gameState, this.zoneManager?.currentZoneId || 'zone1'); if (task.textContent !== text) task.textContent = text; }
     const fpsVal = Math.round(this.rollingFps || 60);
     const fpsEl = document.getElementById('fpsPillText');
     const qualEl = document.getElementById('qualityPillText');
@@ -1751,15 +1796,17 @@ class World3D {
       fpsEl.className = fpsVal >= 45 ? 'fps-good' : (fpsVal >= 28 ? 'fps-med' : 'fps-low');
     }
     if (qualEl) {
-      qualEl.textContent = qualLabels[this.graphicQuality] || '高畫質';
+      qualEl.textContent = (this.settings.quality === 'auto' ? '自動 · ' : '') + (qualLabels[this.graphicQuality] || '高畫質');
     }
   }
 
   animate() {
     requestAnimationFrame(() => this.animate());
 
-    const delta = this.clock.getDelta();
-    const elapsedTime = this.clock.getElapsedTime();
+    const rawDelta = this.clock.getDelta();
+    const delta = GamePolish.frameDelta(rawDelta);
+    const elapsedTime = this.clock.elapsedTime;
+    if (document.hidden || this.contextLost) return;
 
     // 計算即時滾動 FPS
     const nowTime = (typeof performance !== 'undefined') ? performance.now() : Date.now();
@@ -1778,7 +1825,7 @@ class World3D {
     }
 
     // 當幀率連續低於 28 FPS 逾 4 秒且高於低畫質時，自動降級以維護流暢度
-    if (this.rollingFps < 28 && this.graphicQuality !== 'low') {
+    if (this.settings.quality === 'auto' && !this.isAnyModalOpen() && this.rollingFps < 28 && this.graphicQuality !== 'low') {
       this.lowFpsDuration += delta;
       if (this.lowFpsDuration > 4.0) {
         this.lowFpsDuration = 0;
@@ -1793,7 +1840,7 @@ class World3D {
     for (let i = this.animators.length - 1; i >= 0; i--) {
       const anim = this.animators[i];
       if (typeof anim === 'function') {
-        anim(elapsedTime, delta);
+        if(!this.settings.reducedMotion) anim(elapsedTime, delta);
       } else if (anim && typeof anim.update === 'function') {
         if (!anim.update(delta)) {
           this.animators.splice(i, 1);
@@ -1802,19 +1849,19 @@ class World3D {
     }
 
     // 漂浮魔導書與微光起伏
-    if (this.bookGroup && !this.gameState.bookOpened) {
+    if (this.bookGroup && !this.gameState.bookOpened && !this.settings.reducedMotion) {
       this.bookGroup.position.y = 1.25 + Math.sin(elapsedTime * 2.0) * 0.05;
       this.bookGroup.rotation.y = 0.2 + Math.cos(elapsedTime * 1.5) * 0.04;
     }
 
     // 旋轉星芒之石
-    if (this.starStone && this.starStone.visible) {
+    if (this.starStone && this.starStone.visible && !this.settings.reducedMotion) {
       this.starStone.rotation.y += delta * 1.2;
       this.starStone.rotation.x += delta * 0.8;
     }
 
     // 旋轉花之石
-    if (this.flowerStone && this.flowerStone.visible) {
+    if (this.flowerStone && this.flowerStone.visible && !this.settings.reducedMotion) {
       this.flowerStone.rotation.y += delta * 1.2;
       this.flowerStone.rotation.z += delta * 0.6;
     }
@@ -1825,6 +1872,10 @@ class World3D {
       this.dustParticles.position.y = Math.sin(elapsedTime * 0.6) * 0.12;
     }
 
+    if (this.candleLight && this.gameState.candleLit) {
+      this.candleLight.intensity = this.settings.reducedMotion ? 1.8 : 1.75 + Math.sin(elapsedTime*9)*.07;
+      this.candleFlame.scale.y = this.settings.reducedMotion ? 1 : 1+Math.sin(elapsedTime*11)*.08;
+    }
     this.updatePlayer(delta);
     this.updateRaycast();
 
@@ -1836,7 +1887,9 @@ class World3D {
       this.scavengerHunt.update(delta);
     }
 
+    this.targetFocus?.update(elapsedTime,this.settings.reducedMotion);
     this.renderer.render(this.scene, this.camera);
+    if (this.frameMetrics && !this.isAnyModalOpen()) this.frameMetrics.record(rawDelta * 1000);
   }
 }
 

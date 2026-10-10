@@ -7,6 +7,7 @@ const TEACHER_PASS_KEY = 'teacherpass';
 // 雲端資料同步與學生護照歷程管理器 (CloudSyncManager)
 class CloudSyncManager {
   constructor() {
+    this.devMode = window.GamePolish?.isLocalPreview() || false;
     this.storageKey = 'whimsy_student_profile';
     this.queueKey = 'whimsy_pending_logs';
     this.gasUrlKey = 'whimsy_gas_url';
@@ -88,6 +89,7 @@ class CloudSyncManager {
   }
 
   saveLocalProfile() {
+    if(this.devMode) return;
     try {
       localStorage.setItem(this.storageKey, JSON.stringify(this.profile));
     } catch (e) {}
@@ -116,6 +118,7 @@ class CloudSyncManager {
 
   // 安全測試 GAS 連線 (帶上 Security Token)
   async testPing(customUrl = null) {
+    if(this.devMode) return {success:false, message:"本機場景檢查停用雲端連線"};
     const targetUrl = (customUrl || this.gasUrl || '').trim();
     if (!targetUrl) return { success: false, message: '未設定 GAS 網址' };
     try {
@@ -148,6 +151,7 @@ class CloudSyncManager {
 
   // 學生登入 / 切換身分
   async login(grade, classId, seatNo, name) {
+    if(this.devMode) return {success:false, message:"本機場景檢查停用雲端連線"};
     const paddedSeat = String(seatNo || '01').padStart(2, '0');
     const studentId = `${classId}${paddedSeat}`;
 
@@ -231,6 +235,7 @@ class CloudSyncManager {
 
   // 記錄單字過關並寫入雲端與本地 (含連擊倍率與五星精熟度)
   async recordWordPass(wordKey, baseXP = 50, isTeacherPass = false, zone = 'Zone 1: 見習學徒書齋') {
+    if(this.devMode) return;
     const word = String(wordKey || '').toUpperCase();
     
     // 1. 計算連續答對連擊加成 (Streak Multiplier)
@@ -309,6 +314,7 @@ class CloudSyncManager {
 
   // 發送或存入離線佇列
   async sendOrQueue(payload) {
+    if(this.devMode) return;
     if (!navigator.onLine) {
       this.enqueue(payload);
       return;
@@ -332,6 +338,7 @@ class CloudSyncManager {
   }
 
   enqueue(payload) {
+    if(this.devMode) return;
     try {
       const q = JSON.parse(localStorage.getItem(this.queueKey) || '[]');
       q.push({ ...payload, queuedAt: Date.now() });
@@ -342,6 +349,7 @@ class CloudSyncManager {
 
   // 清空並補傳離線日誌
   async flushQueue() {
+    if(this.devMode) return;
     if (!this.gasUrl || !navigator.onLine || this.isSyncing) return;
     
     let q = [];
@@ -378,6 +386,7 @@ class CloudSyncManager {
 
   // 查詢排行榜
   async getLeaderboard(classFilter = '') {
+    if(this.devMode) return [];
     // 若有串接 GAS，向雲端撈取
     if (this.gasUrl && navigator.onLine) {
       try {
@@ -422,6 +431,7 @@ class CloudSyncManager {
 
   // 更新 HUD 上面的雲端連線狀態圖示
   updateCloudStatusIndicator(justSent = false) {
+    if(this.devMode) { const pill=document.getElementById("cloudStatusPill"); if(pill) pill.textContent="本機場景檢查 · 不同步成績"; return; }
     const indicator = document.getElementById('cloudStatusPill');
     const dot = document.getElementById('cloudStatusDot');
 
