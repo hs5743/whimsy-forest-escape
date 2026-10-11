@@ -2,33 +2,38 @@
 /* Connected restaurant chapter. Pure state also runs in the checkpoint validator. */
 (function(root){
  'use strict';
- const initial=()=>({accepted:false,key:false,pantryOpen:false,ingredients:[0,0,0],step:0,cooked:false,served:false});
+ const initial=()=>({accepted:false,key:false,pantryOpen:false,ingredients:[0,0,0],step:0,cooked:false,served:false,spokenSteps:[],deliverySpoken:false});
  const exact=s=>s.ingredients[0]===2&&s.ingredients[1]===1&&s.ingredients[2]===0;
  function validate(raw){
   if(!raw||['accepted','key','pantryOpen','cooked','served'].some(k=>typeof raw[k]!=='boolean')||!Array.isArray(raw.ingredients)||raw.ingredients.length!==3||!raw.ingredients.every(n=>Number.isInteger(n)&&n>=0&&n<=3)||!Number.isInteger(raw.step)||raw.step<0||raw.step>3)return null;
-  const s={...initial(),...Object.fromEntries(Object.keys(initial()).map(k=>[k,k==='ingredients'?[...raw[k]]:raw[k]]))};
+  const s={...initial(),...Object.fromEntries(Object.keys(initial()).map(k=>[k,k==='ingredients'?[...raw[k]]:k==='spokenSteps'?[]:k==='deliverySpoken'?false:raw[k]]))};
   if(!s.accepted){s.key=false;s.pantryOpen=false;s.ingredients=[0,0,0];}
   if(!s.key)s.pantryOpen=false;
   if(!s.pantryOpen)s.ingredients=[0,0,0];
-  if(!s.pantryOpen||!exact(s))s.step=0;
-  s.cooked=s.cooked&&s.step===3;s.served=s.served&&s.cooked;
+  if(raw.spokenSteps!==undefined&&(!Array.isArray(raw.spokenSteps)||raw.spokenSteps.length>3||raw.spokenSteps.some((w,i)=>w!==['WASH','PUT','COOK'][i])))return null;
+  s.spokenSteps=Array.isArray(raw.spokenSteps)?[...raw.spokenSteps]:[];s.deliverySpoken=raw.deliverySpoken===true;
+  s.step=Math.min(s.step,s.spokenSteps.length);if(!s.pantryOpen||!exact(s))s.step=0;
+  s.spokenSteps=s.spokenSteps.slice(0,s.step);s.cooked=s.cooked&&s.step===3;s.served=s.served&&s.cooked&&s.deliverySpoken;if(!s.served)s.deliverySpoken=false;
   return s;
  }
  const solved=s=>!!validate(s)?.served;
+ function requiredWord(a){return a?.type==='order'||a?.type==='serve'?'SOUP':a?.type==='key'?'KEY':a?.type==='door'?'OPEN':a?.type==='ingredient'?['EGG','PUMPKIN','LEMON'][a.index]:a?.type==='prepare'&&['WASH','PUT','COOK'].includes(a.value)?a.value:null;}
+ function canPerform(raw,a){const s=validate(raw)||initial();if(s.served)return false;switch(a?.type){case 'order':return !s.accepted;case 'key':return s.accepted&&!s.key;case 'door':return s.key&&!s.pantryOpen;case 'ingredient':return s.pantryOpen&&!s.cooked&&Number.isInteger(a.index)&&a.index>=0&&a.index<3&&[-1,1].includes(a.delta)&&s.ingredients[a.index]+a.delta>=0&&s.ingredients[a.index]+a.delta<=3;case 'prepare':return s.pantryOpen&&exact(s)&&!s.cooked&&a.value===['WASH','PUT','COOK'][s.step];case 'serve':return s.cooked&&!s.served;default:return false;}}
  function transition(raw,a){
   const s=validate(raw)||initial();let message='看看英語線索，再試下一步。';
   if(!a)return {state:s,message};if(s.served)return {state:s,message:'熱湯已送達！可以返回陽光微風市集，或繼續練習英語。'};
+  const word=requiredWord(a);if(word&&a.verifiedWord!==word)return {state:s,message:'請先口說 '+word+' 並通過辨識，才會完成這個步驟。'};
   if(a.type==='order'){s.accepted=true;message='訂單已接下：Two eggs and one pumpkin, please.';}
   else if(!s.accepted)message='先到餐廳的訂單台接下任務。';
   else if(a.type==='key'){s.key=true;message='找到椅子下的 KEY！拿它到廚房東側打開儲藏室。';}
   else if(a.type==='door'){if(s.key){s.pantryOpen=true;message='儲藏室已打開。依訂單選食材，選錯也能放回。';}else message='Find the key under the chair. 鑰匙在餐廳的椅子下。';}
-  else if(a.type==='ingredient'&&s.pantryOpen&&!s.cooked&&Number.isInteger(a.index)&&a.index>=0&&a.index<3&&[-1,1].includes(a.delta)){s.ingredients[a.index]=Math.max(0,Math.min(3,s.ingredients[a.index]+a.delta));s.step=0;message='籃子：雞蛋 '+s.ingredients[0]+'、南瓜 '+s.ingredients[1]+'、檸檬 '+s.ingredients[2]+'。';}
-  else if(a.type==='prepare'&&!s.cooked){if(!exact(s)||!s.pantryOpen)message='先依訂單準備兩顆雞蛋、一顆南瓜；不需要檸檬。';else if(a.value===['WASH','PUT','COOK'][s.step]){s.step++;s.cooked=s.step===3;message=s.cooked?'湯煮好了！回餐廳的訂單台送餐。':'完成 '+a.value+'！下一步是 '+['WASH','PUT','COOK'][s.step]+'。';}else {s.step=0;message='順序不同，再從 WASH → PUT → COOK 試試，食材仍在籃子裡。';}}
-  else if(a.type==='serve'){if(s.cooked){s.served=true;message='Here is your soup. 客人收到熱湯，魔法餐廳任務完成！';}else message='熱湯還沒準備好，先到廚房依步驟料理。';}
+  else if(a.type==='ingredient'&&s.pantryOpen&&!s.cooked&&Number.isInteger(a.index)&&a.index>=0&&a.index<3&&[-1,1].includes(a.delta)){s.ingredients[a.index]=Math.max(0,Math.min(3,s.ingredients[a.index]+a.delta));s.step=0;s.spokenSteps=[];message='籃子：雞蛋 '+s.ingredients[0]+'、南瓜 '+s.ingredients[1]+'、檸檬 '+s.ingredients[2]+'。';}
+  else if(a.type==='prepare'&&!s.cooked){if(!exact(s)||!s.pantryOpen)message='先依訂單準備兩顆雞蛋、一顆南瓜；不需要檸檬。';else if(a.value===['WASH','PUT','COOK'][s.step]){s.spokenSteps.push(a.value);s.step++;s.cooked=s.step===3;message=s.cooked?'湯煮好了！回餐廳的訂單台送餐。':'完成 '+a.value+'！下一步是 '+['WASH','PUT','COOK'][s.step]+'。';}else {s.step=0;s.spokenSteps=[];message='順序不同，再從 WASH → PUT → COOK 試試，食材仍在籃子裡。';}}
+  else if(a.type==='serve'){if(s.cooked){s.served=true;s.deliverySpoken=true;message='Here is your soup. 客人收到熱湯，魔法餐廳任務完成！';}else message='熱湯還沒準備好，先到廚房依步驟料理。';}
   return {state:s,message};
  }
- function hint(raw){const s=validate(raw)||initial();let id='restaurant_order',clues=['先到餐廳的訂單台接單。','Two eggs and one pumpkin, please.'];if(!s.accepted)return {key:'zone11:order',word:null,targetId:id,clues};if(!s.key){id='restaurant_key';clues=['Find the key under the chair.','看看餐廳左側椅子的下方；可以拖曳向下看。'];}else if(s.key&&!s.pantryOpen){id='restaurant_door';clues=['拿鑰匙打開廚房東側的儲藏室。','穿過 KITCHEN 門口，往右找到 PANTRY。'];}else if(s.pantryOpen&&!exact(s)){id='restaurant_ingredient_'+(s.ingredients[2]?'2':s.ingredients[0]!==2?'0':'1');clues=['訂單需要兩顆雞蛋與一根南瓜。','在儲藏室靠近食材箱取用；多拿的食材可以放回。'];}else if(!s.cooked){id='restaurant_'+['wash','put','cook'][s.step];clues=['WASH first. PUT next. COOK last.','依序到水槽、備料台、爐台互動。'];}else {id='restaurant_order';clues=s.served?['魔法餐廳任務完成！','可以返回陽光微風市集，或靠近物件練習英語。']:['Here is your soup.','回到餐廳的訂單台，把熱湯送給客人。'];}return {key:'zone11:'+JSON.stringify(s),word:null,targetId:id,clues};}
- const api={initial,validate,solved,transition,hint};root.RestaurantChapter=api;if(typeof module!=='undefined')module.exports=api;
+ function hint(raw){const s=validate(raw)||initial();let id='restaurant_order',clues=['先到餐廳的訂單台接單。','Two eggs and one pumpkin, please.'];if(!s.accepted)return {key:'zone11:order',word:null,targetId:id,clues};if(!s.key){id='restaurant_key';clues=['Find the key under the chair.','看看餐廳左側椅子的下方；可以拖曳向下看。'];}else if(s.key&&!s.pantryOpen){id='restaurant_door';clues=['拿鑰匙打開廚房東側的儲藏室。','穿過 KITCHEN 門口，往右找到 PANTRY。'];}else if(s.pantryOpen&&!exact(s)){id='restaurant_ingredient_'+(s.ingredients[2]?'2':s.ingredients[0]!==2?'0':'1');clues=['訂單需要兩顆雞蛋與一顆南瓜。','在儲藏室靠近食材箱取用；多拿的食材可以放回。'];}else if(!s.cooked){id='restaurant_'+['wash','put','cook'][s.step];clues=['WASH first. PUT next. COOK last.','依序到水槽、備料台、爐台互動。'];}else {id='restaurant_order';clues=s.served?['魔法餐廳任務完成！','可以返回陽光微風市集，或靠近物件練習英語。']:['Here is your soup.','回到餐廳的訂單台，把熱湯送給客人。'];}return {key:'zone11:'+JSON.stringify(s),word:null,targetId:id,clues};}
+ const api={initial,validate,solved,transition,hint,requiredWord,canPerform};root.RestaurantChapter=api;if(typeof module!=='undefined')module.exports=api;
 })(globalThis);
 /* Realm-specific mechanisms. Puzzle actions never write grades or award XP. */
 (function(root){

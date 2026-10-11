@@ -1291,7 +1291,7 @@ class World3D {
   }
 
   // 開啟單字練習對話視窗
-  openSpeechCard(wordKey, onComplete) {
+  openSpeechCard(wordKey, onComplete, options = {}) {
     this.speechReturnFocus = document.activeElement;
     this.teacherPassPending = false;
     const cardToken = Symbol(wordKey); this.speechCardToken = cardToken;
@@ -1451,9 +1451,11 @@ class World3D {
 
     // 綁定教師/備用過關按鈕 (免於雜音卡關)
     const passBtn = document.getElementById('teacherPassBtn');
+    const fallback=passBtn.closest?.('.fallback-pass-container');if(fallback){fallback.hidden=options.requireRecognition===true;fallback.style.display=options.requireRecognition?'none':'';}
+    passBtn.hidden=options.requireRecognition===true;
     passBtn.onclick = (e) => {
       if (e) e.stopPropagation();
-      if (window.speechManager && isCurrent() && !completed && !this.teacherPassPending) {
+      if (!options.requireRecognition && window.speechManager && isCurrent() && !completed && !this.teacherPassPending) {
         this.teacherPassPending = true;
         window.speechManager.targetData = data;
         window.speechManager.forcePass(false);

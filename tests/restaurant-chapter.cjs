@@ -1,10 +1,40 @@
 const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');const C=require('../restaurant-chapter.js'),S=require('../restaurant-scene.js');
-const move=(s,type,extra={})=>C.transition(s,{type,...extra}).state;
+const move=(s,type,extra={})=>{const a={type,...extra};return C.transition(s,{...a,verifiedWord:C.requiredWord(a)}).state;};
 const order=()=>move(C.initial(),'order');const open=()=>move(move(order(),'key'),'door');const food=()=>move(move(move(open(),'ingredient',{index:0,delta:1}),'ingredient',{index:0,delta:1}),'ingredient',{index:1,delta:1});
+
+test('every task action requires the matching fresh spoken word',()=>{
+ const cases=[[C.initial(),{type:'order'}],[order(),{type:'key'}],[move(order(),'key'),{type:'door'}],[open(),{type:'ingredient',index:0,delta:1}],[food(),{type:'prepare',value:'WASH'}],[move(food(),'prepare',{value:'WASH'}),{type:'prepare',value:'PUT'}]];
+ for(const [s,a]of cases){assert.deepEqual(C.transition(s,a).state,s);assert.deepEqual(C.transition(s,{...a,verifiedWord:'WRONG'}).state,s);assert.notDeepEqual(C.transition(s,{...a,verifiedWord:C.requiredWord(a)}).state,s);}
+ let s=food();for(const value of ['WASH','PUT','COOK'])s=move(s,'prepare',{value});assert.deepEqual(C.transition(s,{type:'serve'}).state,s);assert.equal(move(s,'serve').served,true);
+});
+
+test('spoken cooking checkpoints survive reload but click-only legacy cooking must be spoken again',()=>{
+ const s=move(move(food(),'prepare',{value:'WASH'}),'prepare',{value:'PUT'});assert.deepEqual(C.validate(JSON.parse(JSON.stringify(s))),s);
+ const old={...s,step:3,cooked:true,served:true};delete old.spokenSteps;delete old.deliverySpoken;
+ const restored=C.validate(old);assert.equal(restored.step,0);assert.equal(restored.cooked,false);assert.equal(restored.served,false);assert.deepEqual(restored.ingredients,[2,1,0]);assert.equal(restored.pantryOpen,true);
+ assert.equal(C.validate({...s,spokenSteps:['PUT','WASH']}),null);
+});
+
+function oralFixture(){
+ const elements={},cards=[];const element=()=>({style:{display:'none'},children:[],append(...c){this.children.push(...c);},replaceChildren(){this.children=[];},focus(){},isConnected:false});
+ const document={activeElement:null,createElement:element,getElementById:id=>elements[id]||(elements[id]=element())};
+ const w={activeZoneGroup:{},zoneManager:{currentZoneId:'zone11'},gameState:{realmPuzzles:{zone11:food()}},isAnyModalOpen:()=>false,openSpeechCard:(word,pass,options)=>cards.push({word,pass,options})};
+ const ctx=vm.createContext({document,addEventListener(){},world3D:w});vm.runInContext(fs.readFileSync(path.join(__dirname,'../restaurant-chapter.js'),'utf8'),ctx);return {w,cards,chapter:ctx.RestaurantChapter};
+}
+test('task UI opens recognition without advancing; cancellation and repeated completion cannot advance twice',()=>{
+ const {w,cards,chapter}=oralFixture();chapter.beginAction({type:'prepare',value:'WASH'});assert.equal(cards[0].word,'WASH');assert.equal(cards[0].options.requireRecognition,true);assert.equal(w.gameState.realmPuzzles.zone11.step,0);
+ chapter.beginAction({type:'prepare',value:'WASH'});cards[1].pass();assert.equal(w.gameState.realmPuzzles.zone11.step,1);cards[1].pass();cards[0].pass();assert.equal(w.gameState.realmPuzzles.zone11.step,1);
+ chapter.beginAction({type:'prepare',value:'PUT'});assert.equal(cards[2].word,'PUT');assert.equal(w.gameState.realmPuzzles.zone11.step,1);cards[2].pass();assert.equal(w.gameState.realmPuzzles.zone11.step,2);
+});
+test('late speech completion after a scene or checkpoint change cannot perform a restaurant action',()=>{
+ for(const change of [w=>{w.activeZoneGroup={};},w=>{w.zoneManager.currentZoneId='zone2';},w=>{w.gameState.realmPuzzles.zone11.ingredients[0]=1;}]){
+  const {w,cards,chapter}=oralFixture();chapter.beginAction({type:'prepare',value:'WASH'});change(w);cards[0].pass();assert.equal(w.gameState.realmPuzzles.zone11.step,0);
+ }
+});
 test('restaurant requires accepting the order before collecting, unlocking, cooking or serving',()=>{for(const type of ['key','door','ingredient','prepare','serve'])assert.deepEqual(move(C.initial(),type,{index:0,delta:1,value:'WASH'}),C.initial());assert.equal(move(order(),'door').pantryOpen,false);});
 test('ingredients can be returned and quantities are bounded, with no food loss on a wrong preparation',()=>{let s=open();for(let n=0;n<8;n++)s=move(s,'ingredient',{index:2,delta:1});assert.equal(s.ingredients[2],3);for(let n=0;n<8;n++)s=move(s,'ingredient',{index:2,delta:-1});assert.equal(s.ingredients[2],0);s=food();s=move(s,'prepare',{value:'PUT'});assert.deepEqual(s.ingredients,[2,1,0]);assert.equal(s.step,0);});
 test('exact food and spatial WASH PUT COOK order are necessary before delivery',()=>{let s=food();s=move(s,'ingredient',{index:2,delta:1});assert.equal(move(s,'prepare',{value:'WASH'}).step,0);s=move(s,'ingredient',{index:2,delta:-1});assert.equal(move(s,'serve').served,false);for(const value of ['WASH','PUT','COOK'])s=move(s,'prepare',{value});assert.equal(s.cooked,true);assert.equal(C.solved(s),false);s=move(s,'serve');assert.equal(C.solved(s),true);assert.deepEqual(move(s,'ingredient',{index:0,delta:-1}),s);});
-test('forged or inconsistent checkpoint success cannot unlock the chapter',()=>{assert.equal(C.validate({...C.initial(),step:NaN}),null);assert.equal(C.validate({...C.initial(),ingredients:[100,1,0]}),null);assert.deepEqual(C.validate({...C.initial(),key:true,pantryOpen:true,step:3,cooked:true,served:true}),C.initial());let s={...food(),step:3,cooked:true,served:true};assert.equal(C.solved(s),true);s.ingredients=[2,0,0];assert.equal(C.validate(s).cooked,false);assert.equal(C.validate(s).served,false);});
+test('forged or inconsistent checkpoint success cannot unlock the chapter',()=>{assert.equal(C.validate({...C.initial(),step:NaN}),null);assert.equal(C.validate({...C.initial(),ingredients:[100,1,0]}),null);assert.deepEqual(C.validate({...C.initial(),key:true,pantryOpen:true,step:3,cooked:true,served:true}),C.initial());let s={...food(),step:3,cooked:true,served:true,spokenSteps:['WASH','PUT','COOK'],deliverySpoken:true};assert.equal(C.solved(s),true);s.ingredients=[2,0,0];assert.equal(C.validate(s).cooked,false);assert.equal(C.validate(s).served,false);});
 test('partial checkpoints preserve genuine progress and provide the next physical target',()=>{let s=move(food(),'prepare',{value:'WASH'});assert.deepEqual(C.validate(JSON.parse(JSON.stringify(s))),s);assert.equal(C.hint(s).targetId,'restaurant_put');assert.equal(C.hint(C.initial()).targetId,'restaurant_order');assert.equal(C.hint(order()).targetId,'restaurant_key');assert.equal(C.hint(open()).targetId,'restaurant_ingredient_0');});
 test('pantry collision disappears only after unlocking; kitchen doorway remains walkable',()=>{const hit=(x,z,cs)=>cs.some(c=>x>c.minX-.45&&x<c.maxX+.45&&z>c.minZ-.45&&z<c.maxZ+.45);assert.equal(hit(0,0,S.colliders(C.initial())),false);assert.equal(hit(4,0,S.colliders(open())),true);assert.equal(hit(8,-5,S.colliders(C.initial())),true);assert.equal(hit(8,-5,S.colliders(open())),false);assert.equal(hit(12,4,S.colliders(open())),true);});
 test('restaurant progress is sanitized with old realms and travel cannot bypass the old mainline',()=>{const ctx=vm.createContext({});for(const f of ['restaurant-chapter.js','realm-quests.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,'..',f),'utf8'),ctx);const R=ctx.RealmQuests;assert.equal(R.canTravel('zone2','zone11',{}),false);assert.equal(R.canTravel('zone1','zone11',{}),false);assert.equal(R.canTravel('zone2','zone11',{zone2:{cart:[2,1,0],paid:true}}),true);assert.equal(R.canTravel('zone2','zone11',{zone2:{cart:[2,1,0],paid:false}}),false);assert.equal(R.canTravel('zone11','zone9',{}),false);assert.equal(R.canTravel('zone11','zone1',{}),false);assert.equal(R.canTravel('zone11','zone2',{}),true);assert.equal(R.canTravel('zone2','zone3',{}),false);const map=R.sanitizeMap({zone2:{cart:[2,1,0],paid:true},zone11:food()});assert.equal(map.zone2.paid,true);assert.deepEqual(Array.from(map.zone11.ingredients),[2,1,0]);});

@@ -21,6 +21,16 @@ function context() {
  return {ctx,window,document,listeners,elements,timers};
 }
 function load(c,file,exportName) {vm.runInContext(fs.readFileSync(path.join(base,file),'utf8')+';window.Exported='+exportName+';',c.ctx);return c.window.Exported;}
+
+test('required recognition cards reject teacher clicks and only the current successful speech callback completes',()=>{
+ const c=context(),fallback={style:{}},node=()=>({style:{},setAttribute(){},focus(){},querySelector:()=>null,appendChild(){},closest:()=>fallback});
+ c.document.createElement=node;c.document.getElementById=id=>c.elements[id]||(c.elements[id]=node());
+ let spokenCallback,passes=0,teacherCalls=0;c.window.speechManager={stopListening(){},playWordVoice(){},startListening:(word,cb)=>{assert.equal(word,'PUT');spokenCallback=cb;},forcePass(){teacherCalls++;}};
+ const World=load(c,'world-3d.js','World3D'),w=Object.create(World.prototype);Object.assign(w,{activeZoneGroup:{},zoneManager:{currentZoneId:'zone11'},devMode:true,restoreSpeechFocus(){},notePracticeCompletion(){},showToast(){},scheduleZoneAction:fn=>fn()});
+ w.openSpeechCard('PUT',()=>passes++,{requireRecognition:true});assert.equal(fallback.style.display,'none');assert.equal(c.elements.teacherPassBtn.hidden,true);c.elements.teacherPassBtn.onclick();assert.equal(teacherCalls,0);assert.equal(passes,0);
+ c.elements.micButton.onclick();spokenCallback(false);assert.equal(passes,0);spokenCallback(true);spokenCallback(true);assert.equal(passes,1);
+ w.openSpeechCard('PUT',()=>passes++,{requireRecognition:true});c.elements.micButton.onclick();const stale=spokenCallback;w.openSpeechCard('PUT',()=>passes++);assert.equal(c.elements.teacherPassBtn.hidden,false);assert.equal(fallback.style.display,'');stale(true);assert.equal(passes,1);
+});
 test('corrupt or blocked settings fall back safely',()=>{const s=P.loadSettings({getItem:()=>{throw Error('blocked');}});assert.equal(s.quality,'auto');assert.equal(s.voice,1);});
 test('settings are bounded and invalid quality rejected',()=>{const s=P.loadSettings({getItem:()=>JSON.stringify({quality:'ultra',sensitivity:10,music:-2})});assert.equal(s.quality,'auto');assert.equal(s.sensitivity,1.5);assert.equal(s.music,0);});
 test('stall frame movement is bounded',()=>{const p={pos:{x:0,z:0},yaw:0,speed:3.6,radius:.45};P.movePlayer(p,{forward:1,right:0},30,()=>false);assert.ok(Math.abs(p.pos.z+.18)<1e-9);});
