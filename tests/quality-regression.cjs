@@ -329,7 +329,7 @@ test('study hint sequence follows all twelve live puzzle steps without skipping 
 test('each later realm receives contextual hints and tracks its own unfinished word',()=>{
  const c=context(),Manager=load(c,'spatial-zone-manager.js','SpatialZoneManager');
  Manager.prototype.initTextures=()=>{};const m=new Manager({});
- for(const zone of Object.values(m.zones).filter(z=>z.id!=='zone1')){
+ for(const zone of Object.values(m.zones).filter(z=>z.id!=='zone1'&&z.id!=='zone11')){
   const plan=Assist.hintPlan({realmPuzzles:questDoneStates},zone,[]);assert.equal(plan.word,zone.words[0]);assert.ok(plan.clues[0].length>10);
   assert.notEqual(plan.clues[0],Assist.hintPlan({},m.zones.zone1).clues[0]);
   assert.equal(Assist.hintPlan({},zone,zone.words).word,null);

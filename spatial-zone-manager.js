@@ -133,6 +133,7 @@ class SpatialZoneManager {
       }
     };
 
+    this.zones.zone11={id:'zone11',name:'魔法餐廳：一碗熱湯的冒險',englishName:'Magic Restaurant',icon:'🍲',topic:'Food, Actions & Prepositions',reqLevel:1,desc:'穿梭餐廳、廚房與儲藏室，依英語訂單找鑰匙、取食材、料理與送餐。',words:['EGG','PUMPKIN','LEMON','SOUP','WASH','PUT','COOK','SPOON'],spawnPos:[0,1.6,7],spawnYaw:0};
     this.initTextures();
     this.initColliders();
   }
@@ -313,6 +314,7 @@ class SpatialZoneManager {
 
   // 取得各空間邊界限制
   getZoneBounds() {
+    if(this.currentZoneId==='zone11')return window.RestaurantScene.bounds;
     if (this.currentZoneId === 'zone1') {
       return {
         minX: -5.4,
@@ -331,6 +333,7 @@ class SpatialZoneManager {
 
   // 取得目前空間所有障礙物碰撞體
   getColliders() {
+    if(this.currentZoneId==='zone11')return window.RestaurantScene.colliders(this.world.gameState.realmPuzzles?.zone11);
     return this.colliders[this.currentZoneId] || [];
   }
 
@@ -352,6 +355,9 @@ class SpatialZoneManager {
     }};
 
     this.tex = {
+      restaurantWood:loader.load('assets/textures/restaurant-oak-v1.jpg'),
+      restaurantOak:loader.load('assets/textures/restaurant-oak-v1.jpg'),
+      restaurantPlaster:loader.load('assets/textures/restaurant-plaster-v1.jpg'),
       landscapeDaySky: loader.load('assets/textures/sky-day-v2.jpg'),
       landscapeNightSky: loader.load('assets/textures/sky-night-v2.jpg'),
       landscapeAuroraSky: loader.load('assets/textures/sky-aurora-v2.jpg'),
@@ -400,6 +406,7 @@ class SpatialZoneManager {
       sunbreezeMarketPanorama: loader.load('assets/textures/sunbreeze_market_panorama.jpg')
     };
 
+    for(const key of ['restaurantOak','restaurantPlaster']){this.tex[key].wrapS=this.tex[key].wrapT=THREE.RepeatWrapping;this.tex[key].repeat.set(key==='restaurantOak'?6:4,key==='restaurantOak'?4:2);}
     this.tex.naturalBark.wrapS=THREE.RepeatWrapping;
     this.tex.naturalBark.wrapT=THREE.RepeatWrapping;
     this.tex.naturalBark.repeat.set(1,2);
@@ -1133,7 +1140,7 @@ class SpatialZoneManager {
       shared.add(this._softParticleTexture); shared.add(this.world._softCircleParticleTexture);
       this.world.scene.remove(this.world.activeZoneGroup);
       GamePolish.releaseGroup(this.world.activeZoneGroup, shared);
-      for (const key of ['bookGroup','bookCoverHinge','starStone','flowerStone','candleFlame','candleLight','keyMesh','drawerMesh','mimicLid','mimicGroup','flaskLiquid','socketStar','socketFlower','doorLeft','doorRight']) this.world[key] = null;
+      for (const key of ['bookGroup','bookCoverHinge','starStone','flowerStone','candleFlame','candleLight','keyMesh','drawerMesh','mimicLid','mimicGroup','flaskLiquid','socketStar','socketFlower','doorLeft','doorRight','restaurantRefs']) this.world[key] = null;
     }
     this.world.interactables = [];
     this.world.animators = [];
@@ -1171,6 +1178,7 @@ class SpatialZoneManager {
       this.buildZone9_AstralPantheon(group);
     } else if (zoneId === 'zone10') {
       this.buildZone10_PrismaticSkyIsles(group);
+    } else if(zoneId==='zone11'){window.RestaurantScene.build(this,group);
     }
 
     this.loadSceneTextures(group);

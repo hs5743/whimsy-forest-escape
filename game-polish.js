@@ -137,6 +137,7 @@
     return actions[target.userData.id] || target.userData.name || target.userData.label || '探索魔法物件';
   }
   function taskText(state,zone) {
+    if(zone==='zone11'&&root.RestaurantChapter)return root.RestaurantChapter.hint(state.realmPuzzles?.zone11).clues[0];
     if(zone!=='zone1') return '探索附近的魔法物件 · 對準後按 E 或互動';
     if(!state.candleLit) return '第一步 · 找到銅燭台，詠唱 LIGHT';
     if(!state.hasKey) return '第二步 · 閱讀魔導書，取得 KEY';
@@ -157,6 +158,7 @@
     zone7:{exposure:1.06,key:0xbed9ff,intensity:.85,sky:0x6f88ba,ground:0x292947,fill:.8},
     zone8:{exposure:1.03,key:0xd7ebff,intensity:1,sky:0xabcddb,ground:0x34455f,fill:.85},
     zone9:{exposure:1,key:0xffedc4,intensity:1.1,sky:0xc4d1e8,ground:0x34314d,fill:.85},
+    zone11:{exposure:1.0,key:0xffefda,intensity:1.15,sky:0xfff7e8,ground:0x76513c,fill:.6},
     zone10:{exposure:.98,key:0xfff3da,intensity:1.15,sky:0xdaedf3,ground:0x416879,fill:.85}
   };
   function applySceneStyle(world,zoneId) {

@@ -1,0 +1,14 @@
+{
+  "date": "2026-10-11",
+  "materials": [
+    {
+      "file": "assets/textures/restaurant-oak-v1.jpg",
+      "prompt": "Use case: stylized-concept. Asset type: seamless square albedo for a polished child-friendly 3D fantasy restaurant interior. Only a flat orthographic overhead surface of warm honey oak floorboards, narrow straight parallel planks with staggered joints, natural subtle grain, lightly worn satin wood, restrained warm amber color variations. Uniform diffuse illumination, seamless borders suitable for tiling. No objects, furniture, room, perspective, shadows, highlights, text, ornaments or watermark."
+    },
+    {
+      "file": "assets/textures/restaurant-plaster-v1.jpg",
+      "prompt": "Use case: stylized-concept. Asset type: seamless square game wall albedo. Only a flat orthographic cream ivory lime plaster surface, delicate handcrafted mineral grain, subtle warm beige variation, fine tactile texture, elegant welcoming restaurant interior material. Uniform diffuse illumination, seamless tileable borders. No objects, buildings, perspective, bricks, mold, cracks, stains, carvings, patterns, shadows, highlights, text or watermark."
+    }
+  ],
+  "processing": "1024px JPEG conversion only; room architecture and furniture are procedural 3D geometry."
+}

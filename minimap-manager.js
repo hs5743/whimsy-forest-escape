@@ -74,6 +74,7 @@ class MinimapManager {
 
     // 依空間定義 POI 地理坐標與圖標
     const poiDict = {
+      zone11:[{x:4,z:2,label:'訂單台',icon:'🍲',color:'#d9773b'},{x:-4,z:2.2,label:'椅子下的鑰匙',icon:'🔑',color:'#eab308'},{x:8,z:-5,label:'儲藏室門',icon:'🚪',color:'#537f72'},{x:14,z:-7.5,label:'雞蛋',icon:'🍅',color:'#ef4444'},{x:14,z:-4.9,label:'南瓜',icon:'🥕',color:'#fb923c'},{x:-5,z:-8.25,label:'洗菜',icon:'💧',color:'#38bdf8'},{x:0,z:-8.25,label:'放入食材',icon:'🔪',color:'#94a3b8'},{x:5,z:-8.25,label:'煮湯',icon:'🍲',color:'#d9773b'}],
       'zone1': [
         { x: 0, z: -3.8, label: '書桌/魔導書', icon: '📖', color: '#f59e0b' },
         { x: 1.2, z: -3.8, label: '古銅燭台', icon: '🕯️', color: '#facc15' },
@@ -159,7 +160,8 @@ class MinimapManager {
     ctx.save();
     ctx.translate(cx, cy);
 
-    if (curZone === 'zone1') {
+    if(curZone==='zone11'){ctx.fillStyle='#c99e70';ctx.fillRect(-8*s,0,16*s,10*s);ctx.fillRect(8*s,-10*s,8*s,10*s);ctx.fillStyle='#ded7c5';ctx.fillRect(-8*s,-10*s,16*s,10*s);ctx.strokeStyle='#72503c';ctx.lineWidth=2;ctx.strokeRect(-8*s,0,16*s,10*s);ctx.strokeRect(-8*s,-10*s,16*s,10*s);ctx.strokeRect(8*s,-10*s,8*s,10*s);ctx.fillStyle='#f4ecd4';ctx.fillRect(-1.6*s,-.4*s,3.2*s,.8*s);if(this.world.gameState.realmPuzzles?.zone11?.pantryOpen)ctx.fillRect(7.6*s,-6.6*s,.8*s,3.2*s);
+    } else if (curZone === 'zone1') {
       // 見習書齋：室內長方形房間 (12m x 12m)
       ctx.fillStyle = '#fdf6e2';
       ctx.fillRect(-6 * s, -6 * s, 12 * s, 12 * s);

@@ -28,6 +28,7 @@
   };
   function hintPlan(state,zone,completed=[]) {
     if(!zone || !Array.isArray(zone.words)) return null;
+    if(zone.id==='zone11'&&root.RestaurantChapter)return root.RestaurantChapter.hint(state.realmPuzzles?.zone11);
     if(zone.id==='zone1') {
       const step=studySteps.find(row=>!state[row[0]]);
       if(!step) return {key:'zone1:done',word:null,targetId:'exit_portal_zone1',clues:['書齋已完成！找找通往下一個秘境的路標。','沿花田路標前往微風市集，展開下一個任務。']};

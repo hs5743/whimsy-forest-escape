@@ -1804,7 +1804,7 @@ class World3D {
     if (task) {
       const id=this.zoneManager?.currentZoneId || 'zone1',quest=window.RealmQuests?.specs[id];
       let text=GamePolish.taskText(this.gameState,id);
-      if(quest){
+      if(quest&&id!=='zone11'){
         const done=window.RealmQuests.solved(id,this.gameState.realmPuzzles?.[id]);
         const next=this.zoneManager.zones[id].words.find(word=>!this.gameState.practicedWordsByZone?.[id]?.includes(word));
         text=!done?'秘境任務 · '+quest.title:next?'機關已解開 · 探索並練習 '+next:'任務與英語線索完成 · 探索守護者或下一個出口';

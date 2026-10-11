@@ -10,9 +10,9 @@ function fixture(support=true){
  const c=vm.createContext({window,console,GamePolish:{loadSettings:()=>({master:1,music:1,effects:1})},setTimeout:fn=>{timers.set(++id,fn);return id;},clearTimeout:i=>timers.delete(i)});vm.runInContext(fs.readFileSync(require.resolve('../audio-manager.js'),'utf8')+';window.Manager=AudioManager;',c);
  return {m:window.audioManager,window,ctx,timers,nodes,listeners,labels,storage};
 }
-test('all ten scenes have distinct original scores with finite, playable variation across a full form',()=>{
- assert.equal(Object.keys(S.themes).length,10);const signatures=new Set();
- for(const t of Object.values(S.themes)){signatures.add(JSON.stringify([t.bpm,t.lead,t.roots,t.motif]));const counts=new Set();for(let step=0;step<t.meter*2*32;step++){const p=S.events(t,step);assert.ok(p.stepSeconds>0);counts.add(p.events.length);for(const e of p.events){assert.ok(Number.isFinite(e.frequency)&&e.frequency>20&&e.frequency<6000);assert.ok(e.duration>0&&e.level<=.13);assert.ok(S.voices[e.voice]);}}assert.ok(counts.size>1);assert.notDeepEqual(S.events(t,0),S.events(t,t.meter*2*12));}assert.equal(signatures.size,10);
+test('all eleven scenes have distinct original scores with finite, playable variation across a full form',()=>{
+ assert.equal(Object.keys(S.themes).length,11);const signatures=new Set();
+ for(const t of Object.values(S.themes)){signatures.add(JSON.stringify([t.bpm,t.lead,t.roots,t.motif]));const counts=new Set();for(let step=0;step<t.meter*2*32;step++){const p=S.events(t,step);assert.ok(p.stepSeconds>0);counts.add(p.events.length);for(const e of p.events){assert.ok(Number.isFinite(e.frequency)&&e.frequency>20&&e.frequency<6000);assert.ok(e.duration>0&&e.level<=.13);assert.ok(S.voices[e.voice]);}}assert.ok(counts.size>1);assert.notDeepEqual(S.events(t,0),S.events(t,t.meter*2*12));}assert.equal(signatures.size,11);
 });
 test('scene changes retire old notes, fade in a new bus and keep a single scheduler',()=>{
  const f=fixture();assert.equal(f.m.startBgm(),true);const old=f.m.musicBus;assert.equal(f.timers.size,1);f.ctx.currentTime=.2;f.m.setZone('zone6');assert.equal(old.retired,true);assert.notEqual(f.m.musicBus,old);assert.equal(f.timers.size,1);assert.equal(f.m.currentThemeKey,'zone6');assert.ok(f.labels.bgmThemeLabel.textContent.includes('海港'));for(const v of old.voices)assert.equal(v.stopped,1.34);const bus=f.m.musicBus;f.m.setZone('zone6');assert.equal(f.m.musicBus,bus);
