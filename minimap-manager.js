@@ -74,7 +74,7 @@ class MinimapManager {
 
     // 依空間定義 POI 地理坐標與圖標
     const poiDict = {
-      zone11:[{x:4,z:2,label:'訂單台',icon:'🍲',color:'#d9773b'},{x:-4,z:2.2,label:'椅子下的鑰匙',icon:'🔑',color:'#eab308'},{x:8,z:-5,label:'儲藏室門',icon:'🚪',color:'#537f72'},{x:14,z:-7.5,label:'雞蛋',icon:'🍅',color:'#ef4444'},{x:14,z:-4.9,label:'南瓜',icon:'🥕',color:'#fb923c'},{x:-5,z:-8.25,label:'洗菜',icon:'💧',color:'#38bdf8'},{x:0,z:-8.25,label:'放入食材',icon:'🔪',color:'#94a3b8'},{x:5,z:-8.25,label:'煮湯',icon:'🍲',color:'#d9773b'}],
+      zone11:[{x:0,z:9.45,label:'店門/返回市集',icon:'🚪',color:'#537f72',isPortal:true},{x:4,z:2,label:'訂單台',icon:'🍲',color:'#d9773b'},{x:-4,z:2.2,label:'椅子下的鑰匙',icon:'🔑',color:'#eab308'},{x:8,z:-5,label:'儲藏室門',icon:'🚪',color:'#537f72'},{x:14,z:-7.5,label:'雞蛋',icon:'🥚',color:'#ef4444'},{x:14,z:-4.9,label:'南瓜',icon:'🎃',color:'#fb923c'},{x:-5,z:-8.25,label:'洗菜',icon:'💧',color:'#38bdf8'},{x:0,z:-8.25,label:'放入食材',icon:'🥣',color:'#94a3b8'},{x:5,z:-8.25,label:'煮湯',icon:'🍲',color:'#d9773b'}],
       'zone1': [
         { x: 0, z: -3.8, label: '書桌/魔導書', icon: '📖', color: '#f59e0b' },
         { x: 1.2, z: -3.8, label: '古銅燭台', icon: '🕯️', color: '#facc15' },
@@ -84,6 +84,7 @@ class MinimapManager {
         { x: 0, z: 12.0, label: '蒼月花田/往市集', icon: '🌸', color: '#3b82f6', isPortal: true }
       ],
       'zone2': [
+        {x:-8.8,z:6,label:'微風餐廳/市集委託',icon:'🍲',color:'#d9773b',isPortal:true},
         { x: -4.5, z: -1.0, label: '紅蘋果攤', icon: '🍎', color: '#ef4444' },
         { x: 4.2, z: 1.2, label: '金香蕉攤', icon: '🍌', color: '#eab308' },
         { x: -3.2, z: -5.2, label: '烤麵包車', icon: '🥖', color: '#b45309' },

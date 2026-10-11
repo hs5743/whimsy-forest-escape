@@ -17,17 +17,17 @@
  const solved=s=>!!validate(s)?.served;
  function transition(raw,a){
   const s=validate(raw)||initial();let message='看看英語線索，再試下一步。';
-  if(!a)return {state:s,message};if(s.served)return {state:s,message:'熱湯已送達！可以返回書齋，或繼續練習英語。'};
+  if(!a)return {state:s,message};if(s.served)return {state:s,message:'熱湯已送達！可以返回陽光微風市集，或繼續練習英語。'};
   if(a.type==='order'){s.accepted=true;message='訂單已接下：Two eggs and one pumpkin, please.';}
   else if(!s.accepted)message='先到餐廳的訂單台接下任務。';
   else if(a.type==='key'){s.key=true;message='找到椅子下的 KEY！拿它到廚房東側打開儲藏室。';}
   else if(a.type==='door'){if(s.key){s.pantryOpen=true;message='儲藏室已打開。依訂單選食材，選錯也能放回。';}else message='Find the key under the chair. 鑰匙在餐廳的椅子下。';}
   else if(a.type==='ingredient'&&s.pantryOpen&&!s.cooked&&Number.isInteger(a.index)&&a.index>=0&&a.index<3&&[-1,1].includes(a.delta)){s.ingredients[a.index]=Math.max(0,Math.min(3,s.ingredients[a.index]+a.delta));s.step=0;message='籃子：雞蛋 '+s.ingredients[0]+'、南瓜 '+s.ingredients[1]+'、檸檬 '+s.ingredients[2]+'。';}
-  else if(a.type==='prepare'&&!s.cooked){if(!exact(s)||!s.pantryOpen)message='先依訂單準備兩顆雞蛋、一根南瓜；不需要檸檬。';else if(a.value===['WASH','PUT','COOK'][s.step]){s.step++;s.cooked=s.step===3;message=s.cooked?'湯煮好了！回餐廳的訂單台送餐。':'完成 '+a.value+'！下一步是 '+['WASH','PUT','COOK'][s.step]+'。';}else {s.step=0;message='順序不同，再從 WASH → PUT → COOK 試試，食材仍在籃子裡。';}}
+  else if(a.type==='prepare'&&!s.cooked){if(!exact(s)||!s.pantryOpen)message='先依訂單準備兩顆雞蛋、一顆南瓜；不需要檸檬。';else if(a.value===['WASH','PUT','COOK'][s.step]){s.step++;s.cooked=s.step===3;message=s.cooked?'湯煮好了！回餐廳的訂單台送餐。':'完成 '+a.value+'！下一步是 '+['WASH','PUT','COOK'][s.step]+'。';}else {s.step=0;message='順序不同，再從 WASH → PUT → COOK 試試，食材仍在籃子裡。';}}
   else if(a.type==='serve'){if(s.cooked){s.served=true;message='Here is your soup. 客人收到熱湯，魔法餐廳任務完成！';}else message='熱湯還沒準備好，先到廚房依步驟料理。';}
   return {state:s,message};
  }
- function hint(raw){const s=validate(raw)||initial();let id='restaurant_order',clues=['先到餐廳的訂單台接單。','Two eggs and one pumpkin, please.'];if(!s.accepted)return {key:'zone11:order',word:null,targetId:id,clues};if(!s.key){id='restaurant_key';clues=['Find the key under the chair.','看看餐廳左側椅子的下方；可以拖曳向下看。'];}else if(s.key&&!s.pantryOpen){id='restaurant_door';clues=['拿鑰匙打開廚房東側的儲藏室。','穿過 KITCHEN 門口，往右找到 PANTRY。'];}else if(s.pantryOpen&&!exact(s)){id='restaurant_ingredient_'+(s.ingredients[2]?'2':s.ingredients[0]!==2?'0':'1');clues=['訂單需要兩顆雞蛋與一根南瓜。','在儲藏室靠近食材箱取用；多拿的食材可以放回。'];}else if(!s.cooked){id='restaurant_'+['wash','put','cook'][s.step];clues=['WASH first. PUT next. COOK last.','依序到水槽、備料台、爐台互動。'];}else {id='restaurant_order';clues=s.served?['魔法餐廳任務完成！','可以返回書齋，或靠近物件練習英語。']:['Here is your soup.','回到餐廳的訂單台，把熱湯送給客人。'];}return {key:'zone11:'+JSON.stringify(s),word:null,targetId:id,clues};}
+ function hint(raw){const s=validate(raw)||initial();let id='restaurant_order',clues=['先到餐廳的訂單台接單。','Two eggs and one pumpkin, please.'];if(!s.accepted)return {key:'zone11:order',word:null,targetId:id,clues};if(!s.key){id='restaurant_key';clues=['Find the key under the chair.','看看餐廳左側椅子的下方；可以拖曳向下看。'];}else if(s.key&&!s.pantryOpen){id='restaurant_door';clues=['拿鑰匙打開廚房東側的儲藏室。','穿過 KITCHEN 門口，往右找到 PANTRY。'];}else if(s.pantryOpen&&!exact(s)){id='restaurant_ingredient_'+(s.ingredients[2]?'2':s.ingredients[0]!==2?'0':'1');clues=['訂單需要兩顆雞蛋與一根南瓜。','在儲藏室靠近食材箱取用；多拿的食材可以放回。'];}else if(!s.cooked){id='restaurant_'+['wash','put','cook'][s.step];clues=['WASH first. PUT next. COOK last.','依序到水槽、備料台、爐台互動。'];}else {id='restaurant_order';clues=s.served?['魔法餐廳任務完成！','可以返回陽光微風市集，或靠近物件練習英語。']:['Here is your soup.','回到餐廳的訂單台，把熱湯送給客人。'];}return {key:'zone11:'+JSON.stringify(s),word:null,targetId:id,clues};}
  const api={initial,validate,solved,transition,hint};root.RestaurantChapter=api;if(typeof module!=='undefined')module.exports=api;
 })(globalThis);
 /* Realm-specific mechanisms. Puzzle actions never write grades or award XP. */
@@ -130,7 +130,7 @@
     }
     return {state:s,message:solved(id,s)?'秘境任務完成！ '+message:message};
   }
-  function canTravel(from,to,map,{restore=false,dev=false}={}){return restore||dev||to==='zone11'||(from==='zone11'?to==='zone1':!specs[from]||Number(to.slice(4))<=Number(from.slice(4))||solved(from,map?.[from]));}
+  function canTravel(from,to,map,{restore=false,dev=false}={}){if(restore||dev)return true;if(to==='zone11')return solved('zone2',map?.zone2);if(from==='zone11')return to==='zone2';return !specs[from]||Number(to.slice(4))<=Number(from.slice(4))||solved(from,map?.[from]);}
   const api={specs,initial,solved,validateState,sanitizeMap,transition,canTravel};root.RealmQuests=api;if(typeof module!=='undefined')module.exports=api;
 })(globalThis);
 /* Puzzle checkpoints are separate from the learning-record service. */

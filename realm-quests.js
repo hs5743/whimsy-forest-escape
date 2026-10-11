@@ -98,7 +98,7 @@
     }
     return {state:s,message:solved(id,s)?'秘境任務完成！ '+message:message};
   }
-  function canTravel(from,to,map,{restore=false,dev=false}={}){return restore||dev||to==='zone11'||(from==='zone11'?to==='zone1':!specs[from]||Number(to.slice(4))<=Number(from.slice(4))||solved(from,map?.[from]));}
+  function canTravel(from,to,map,{restore=false,dev=false}={}){if(restore||dev)return true;if(to==='zone11')return solved('zone2',map?.zone2);if(from==='zone11')return to==='zone2';return !specs[from]||Number(to.slice(4))<=Number(from.slice(4))||solved(from,map?.[from]);}
   const api={specs,initial,solved,validateState,sanitizeMap,transition,canTravel};root.RealmQuests=api;if(typeof module!=='undefined')module.exports=api;
   if(!root.document)return;
   root.addEventListener('load',()=>{
@@ -117,7 +117,7 @@
       switch(active){
         case 'zone2':
           ['🍎 APPLE · 每顆 1 枚','🥛 MILK · 每瓶 2 枚','🍞 BREAD · 每個 2 枚'].forEach((label,i)=>select(label,[0,1,2,3].map(n=>[n,String(n)]),s.cart[i],v=>({type:'quantity',index:i,value:Number(v)})));
-          text('購物籃 '+(s.cart[0]+s.cart[1]*2+s.cart[2]*2)+' / 4 枚金幣');row(button('用 4 枚金幣結帳',{type:'pay'}));break;
+          text('購物籃 '+(s.cart[0]+s.cart[1]*2+s.cart[2]*2)+' / 4 枚金幣');row(button('用 4 枚金幣結帳',{type:'pay'}));if(done)text('店主：採買完成了！請到市集西南側的微風餐廳，幫小客人準備熱湯；也可以繼續往花園冒險。');break;
         case 'zone3':
           row(...[['WATER','💧 水'],['LEAF','🍃 葉子'],['SEEDS','🌾 種子']].map(([value,label])=>button(label,{type:'tool',value},s.tool===value)));
           row(...['🌳 TREE','🐰 RABBIT','🐦 BIRD'].map((label,i)=>button((s.care[i]?'✓ ':'')+label,{type:'care',index:i},s.care[i])));text('已照護 '+s.care.filter(Boolean).length+' / 3 位夥伴');break;
@@ -175,7 +175,7 @@
       if(solved(active,result.state))$('realmQuestExplore').focus({preventScroll:true});
       else area.querySelectorAll('button,select')[Math.max(0,focusIndex)]?.focus({preventScroll:true});
       if(action.type==='note')playNotes([action.value]);
-      if(solved(active,result.state)){root.audioManager?.playSfx('magicSuccess');reward('秘境任務完成：'+specs[active].title,active==='zone10'?'回家的虹橋亮起了！':'出口已準備好，回到場景繼續探索。');world.hintController?.clear();$('realmQuestBtn').textContent='✓ 秘境任務完成';if(board)board.material.color.setHex(0x68c9a7);}
+      if(solved(active,result.state)){root.audioManager?.playSfx('magicSuccess');reward('秘境任務完成：'+specs[active].title,active==='zone10'?'回家的虹橋亮起了！':active==='zone2'?'微風餐廳店主在西南側等你；花園出口也已準備好。':'出口已準備好，回到場景繼續探索。');world.hintController?.clear();$('realmQuestBtn').textContent='✓ 秘境任務完成';if(board)board.material.color.setHex(0x68c9a7);}
       updateMechanism();
       world.adventureProgress?.save(true);
     }

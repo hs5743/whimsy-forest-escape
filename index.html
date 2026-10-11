@@ -852,7 +852,6 @@
       </div>
       <div id="assetLoadStatus" class="asset-status" role="status">正在準備魔法世界…</div>
       <button id="btnBootRetry" class="cover-skip-link" type="button" hidden onclick="location.reload()">重新準備魔法世界 ↻</button>
-      <div class="cover-skip-row"><button id="btnRestaurantChapter" class="cover-skip-link" type="button" disabled>🍲 新章節：魔法餐廳 · 三房間冒險 →</button></div>
       <div class="cover-skip-row"><button id="btnCoverDirectPlay" disabled class="cover-skip-link" onclick="completeOnboardingAndEnterGame()" type="button">我會操作，直接探索 ↗</button></div>
     </div>
     <div class="title-world-note" aria-hidden="true"><span>✦</span> 說出英語，解開線索，開啟下一段冒險</div>
@@ -1062,7 +1061,6 @@
         <button id="adventureCloudKeep" type="button" hidden>以這台進度取代較新的雲端版本</button><button id="adventureCloudUndo" type="button" disabled>回復上次本機備份</button>
       </fieldset>
       <button class="retry-textures-btn" type="button" onclick="window.world3D?.zoneManager.retryTextures()">重新載入缺少的素材</button>
-      <button id="menuRestaurantChapter" type="button" class="btn-guardian-primary">🍲 前往魔法餐廳新章節</button>
       <div id="devZonePanel" hidden><label for="devZoneSelect">本機場景檢查（不記錄成績）</label><select id="devZoneSelect"></select><button id="devQuestReset" type="button">重置此關測試機關</button><output id="devDiagnostics"></output></div>
       <div class="system-drawer-grid">
         <button id="bgmToggleBtn" class="drawer-action-btn" onclick="toggleMusic()" type="button">
@@ -1888,29 +1886,29 @@
 
   <!-- 核心庫與遊戲腳本 -->
   <script src="three.min.js"></script>
-  <script src="game-polish.js?v=20261011a"></script>
+  <script src="game-polish.js?v=20261011b"></script>
   <script src="realm-landscape.js?v=20261010c"></script>
   <script src="title-screen.js?v=20261010"></script>
-  <script src="restaurant-chapter.js?v=20261011a"></script>
-  <script src="restaurant-scene.js?v=20261011a"></script>
-  <script src="realm-quests.js?v=20261011a"></script>
+  <script src="restaurant-chapter.js?v=20261011b"></script>
+  <script src="restaurant-scene.js?v=20261011b"></script>
+  <script src="realm-quests.js?v=20261011b"></script>
   <script src="adventure-progress.js?v=20261010c"></script>
   <script src="adventure-cloud.js?v=20261010"></script>
-  <script src="adventure-assist.js?v=20261011a"></script>
+  <script src="adventure-assist.js?v=20261011b"></script>
   <script src="game-diagnostics.js?v=20261010"></script>
-  <script src="realm-presentation.js?v=20261011a"></script>
-  <script src="gept-kids-vocabulary.js?v=20261011a"></script>
-  <script src="vocab-data.js?v=20261011a"></script>
+  <script src="realm-presentation.js?v=20261011b"></script>
+  <script src="gept-kids-vocabulary.js?v=20261011b"></script>
+  <script src="vocab-data.js?v=20261011b"></script>
   <script src="vocab-passport-bank.js?v=20260930_v16"></script>
   <script src="speech-manager.js?v=20261010"></script>
-  <script src="scene-music.js?v=20261011a"></script>
+  <script src="scene-music.js?v=20261011b"></script>
   <script src="audio-manager.js?v=20261010e"></script>
   <script src="touch-controls.js?v=20261010"></script>
   <script src="cloud-sync-manager.js?v=20261010b"></script>
-  <script src="spatial-zone-manager.js?v=20261011a"></script>
-  <script src="minimap-manager.js?v=20261011a"></script>
+  <script src="spatial-zone-manager.js?v=20261011b"></script>
+  <script src="minimap-manager.js?v=20261011b"></script>
   <script src="scavenger-hunt-manager.js?v=20260930_v16"></script>
-  <script src="world-3d.js?v=20261011a"></script>
+  <script src="world-3d.js?v=20261011b"></script>
 
   <script>
     let curLeaderboardTab = 'school';
@@ -2637,7 +2635,7 @@
               <div class="realm-sub">${z.englishName} • <span class="realm-topic-tag">${z.topic}</span></div>
             </div>
             <div class="realm-badge ${isUnlocked ? 'badge-open' : 'badge-lock'}">
-              ${isUnlocked ? '已解鎖' : `Lv.${z.reqLevel} 解鎖`}
+              ${isUnlocked ? '已解鎖' : z.parentZone ? '完成市集採買解鎖' : `Lv.${z.reqLevel} 解鎖`}
             </div>
           </div>
           <div class="realm-desc-text">${z.desc}</div>

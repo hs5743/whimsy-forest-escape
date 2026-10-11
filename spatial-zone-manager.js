@@ -133,7 +133,7 @@ class SpatialZoneManager {
       }
     };
 
-    this.zones.zone11={id:'zone11',name:'魔法餐廳：一碗熱湯的冒險',englishName:'Magic Restaurant',icon:'🍲',topic:'Food, Actions & Prepositions',reqLevel:1,desc:'穿梭餐廳、廚房與儲藏室，依英語訂單找鑰匙、取食材、料理與送餐。',words:['EGG','PUMPKIN','LEMON','SOUP','WASH','PUT','COOK','SPOON'],spawnPos:[0,1.6,7],spawnYaw:0};
+    this.zones.zone11={id:'zone11',name:'魔法餐廳：一碗熱湯的冒險',englishName:'Magic Restaurant',icon:'🍲',topic:'Food, Actions & Prepositions',reqLevel:2,parentZone:'zone2',desc:'陽光微風市集的街角餐廳。完成採買後接受店主委託，穿梭餐廳、廚房與儲藏室，準備熱湯，再回市集繼續冒險。',words:['EGG','PUMPKIN','LEMON','SOUP','WASH','PUT','COOK','SPOON'],spawnPos:[0,1.6,7],spawnYaw:0};
     this.initTextures();
     this.initColliders();
   }
@@ -1052,6 +1052,7 @@ class SpatialZoneManager {
     const userLevel = (window.cloudSyncManager && window.cloudSyncManager.profile) 
       ? window.cloudSyncManager.profile.level 
       : 1;
+    if(zoneId==='zone11')return userLevel>=zone.reqLevel && !!window.RealmQuests?.solved('zone2',this.world.gameState.realmPuzzles?.zone2);
     return userLevel >= zone.reqLevel;
   }
 
@@ -1117,7 +1118,7 @@ class SpatialZoneManager {
   switchZone(zoneId, options = {}) {
     if (!this.zones[zoneId]) return false;
     if (window.RealmQuests && !window.RealmQuests.canTravel(this.currentZoneId, zoneId, this.world.gameState.realmPuzzles, {restore:options.restore===true,dev:this.world.devMode})) {
-      this.world.showToast('出口還在等待秘境任務。點「秘境任務」閱讀線索、完成機關，再往下一關出發。');
+      this.world.showToast(zoneId==='zone11'?'店主：先完成陽光微風市集的採買並結帳，再來幫忙準備熱湯！':'出口還在等待秘境任務。點「秘境任務」閱讀線索、完成機關，再往下一關出發。');
       return false;
     }
     if (!this.world.devMode && !this.isZoneUnlocked(zoneId)) {
@@ -1525,6 +1526,8 @@ class SpatialZoneManager {
       this.world.showToast('🧭 穿過驛站石板古徑，返回見習學徒書齋！');
       this.switchZone('zone1');
     });
+
+    window.RestaurantScene.buildMarketEntrance(this,group);
 
     // 市集生活感道具 (木桶、木箱、店鋪招牌、鑄鐵路燈)
     this.buildMarketStreetProps(group);
