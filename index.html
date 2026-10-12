@@ -828,6 +828,10 @@
   <link rel="stylesheet" href="adventure-assist.css?v=20261010">
   <link rel="stylesheet" href="realm-quests.css?v=20261010">
   <link rel="stylesheet" href="adventure-cloud.css?v=20261010">
+<style>
+.harmonica-hole-grid{display:grid;grid-template-columns:repeat(6,minmax(44px,1fr));gap:7px;width:100%}.harmonica-hole-grid button{min-width:0;padding:10px}.harmonica-hole-grid button[aria-pressed="true"]{background:#185965!important;color:#fff!important;outline:3px solid #d6b76b}.harmonica-note-readout{width:100%;padding:12px;border-radius:10px;background:#173e49;color:#f6dfaa!important;font-size:1.1rem!important}
+@media(max-width:600px){.harmonica-hole-grid{grid-template-columns:repeat(4,minmax(44px,1fr))}}
+</style>
 </head>
 <body>
   <!-- ========================================================= -->
@@ -1886,31 +1890,33 @@
 
   <!-- 核心庫與遊戲腳本 -->
   <script src="three.min.js"></script>
-  <script src="game-polish.js?v=20261012c"></script>
+  <script src="game-polish.js?v=20261013a"></script>
   <script src="realm-landscape.js?v=20261010c"></script>
   <script src="title-screen.js?v=20261010"></script>
-  <script src="restaurant-chapter.js?v=20261012c"></script>
-  <script src="restaurant-scene.js?v=20261012c"></script>
-  <script src="school-chapter.js?v=20261012c"></script>
-  <script src="school-scene.js?v=20261012c"></script>
-  <script src="realm-quests.js?v=20261012c"></script>
+  <script src="restaurant-chapter.js?v=20261013a"></script>
+  <script src="restaurant-scene.js?v=20261013a"></script>
+  <script src="harmonica-chapter.js?v=20261013a"></script>
+  <script src="harmonica-scene.js?v=20261013a"></script>
+  <script src="school-chapter.js?v=20261013a"></script>
+  <script src="school-scene.js?v=20261013a"></script>
+  <script src="realm-quests.js?v=20261013a"></script>
   <script src="adventure-progress.js?v=20261010c"></script>
   <script src="adventure-cloud.js?v=20261010"></script>
-  <script src="adventure-assist.js?v=20261012c"></script>
+  <script src="adventure-assist.js?v=20261013a"></script>
   <script src="game-diagnostics.js?v=20261010"></script>
-  <script src="realm-presentation.js?v=20261012c"></script>
-  <script src="gept-kids-vocabulary.js?v=20261012c"></script>
-  <script src="vocab-data.js?v=20261012c"></script>
+  <script src="realm-presentation.js?v=20261013a"></script>
+  <script src="gept-kids-vocabulary.js?v=20261013a"></script>
+  <script src="vocab-data.js?v=20261013a"></script>
   <script src="vocab-passport-bank.js?v=20260930_v16"></script>
   <script src="speech-manager.js?v=20261010"></script>
-  <script src="scene-music.js?v=20261012c"></script>
+  <script src="scene-music.js?v=20261013a"></script>
   <script src="audio-manager.js?v=20261010e"></script>
   <script src="touch-controls.js?v=20261010"></script>
   <script src="cloud-sync-manager.js?v=20261010b"></script>
-  <script src="spatial-zone-manager.js?v=20261012c"></script>
-  <script src="minimap-manager.js?v=20261012c"></script>
+  <script src="spatial-zone-manager.js?v=20261013a"></script>
+  <script src="minimap-manager.js?v=20261013a"></script>
   <script src="scavenger-hunt-manager.js?v=20260930_v16"></script>
-  <script src="world-3d.js?v=20261012c"></script>
+  <script src="world-3d.js?v=20261013a"></script>
 
   <script>
     let curLeaderboardTab = 'school';
@@ -2637,7 +2643,7 @@
               <div class="realm-sub">${z.englishName} • <span class="realm-topic-tag">${z.topic}</span></div>
             </div>
             <div class="realm-badge ${isUnlocked ? 'badge-open' : 'badge-lock'}">
-              ${isUnlocked ? '已解鎖' : z.parentZone ? z.parentZone==='zone4' ? '完成操場任務解鎖' : '完成市集採買解鎖' : `Lv.${z.reqLevel} 解鎖`}
+              ${isUnlocked ? '已解鎖' : z.parentZone ? z.parentZone==='zone12' ? '完成新港迎賓任務解鎖' : z.parentZone==='zone4' ? '完成操場任務解鎖' : '完成市集採買解鎖' : `Lv.${z.reqLevel} 解鎖`}
             </div>
           </div>
           <div class="realm-desc-text">${z.desc}</div>

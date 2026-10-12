@@ -28,6 +28,7 @@
   };
   function hintPlan(state,zone,completed=[]) {
     if(!zone || !Array.isArray(zone.words)) return null;
+    if(zone.id==='zone13'&&root.HarmonicaChapter)return root.HarmonicaChapter.hint(state.realmPuzzles?.zone13);
     if(zone.id==='zone12'&&root.SchoolChapter)return root.SchoolChapter.hint(state.realmPuzzles?.zone12);
     if(zone.id==='zone11'&&root.RestaurantChapter)return root.RestaurantChapter.hint(state.realmPuzzles?.zone11);
     if(zone.id==='zone1') {

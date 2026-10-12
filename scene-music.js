@@ -1,6 +1,7 @@
 /* Original procedural scores; no external music downloads. */
 (function(root){
  const voices={
+  reed:{wave:'sawtooth',overtone:'sine',ratio:2,blend:.08,attack:.05,release:.5,cutoff:1400},
   felt:{wave:'triangle',overtone:'sine',ratio:2,blend:.12,attack:.018,release:1.1,cutoff:1600},
   pluck:{wave:'triangle',overtone:'sine',ratio:2,blend:.24,attack:.012,release:.6,cutoff:2300},
   flute:{wave:'sine',overtone:'sine',ratio:2,blend:.08,attack:.09,release:.7,cutoff:1800},
@@ -21,6 +22,7 @@
   ['zone7','觀測站｜星軌漫遊','玻璃音・疏朗氛圍',62,4,'glass','strings',[57,53,60,55],[[0,3,7,14],[0,4,7,11],[0,4,7,11],[0,5,7,10]],[81,null,null,null,83,null,84,null,88,null,null,86,84,null,null,null],.0],
   ['zone8','冰雪｜極光結晶','冰晶鈴音・緩慢旋律',66,4,'bell','glass',[64,61,57,59],[[0,4,7,11],[0,3,7],[0,4,7],[0,4,7]],[88,null,90,null,92,null,null,95,92,null,88,null,85,null,null,null],.0],
   ['zone9','殿堂｜古老星辰之門','弦音・莊重和聲',72,4,'strings','felt',[52,48,55,50],[[0,3,7],[0,4,7],[0,4,7],[0,4,7]],[76,null,null,79,83,null,81,null,79,null,76,null,74,null,null,null],.008],
+  ['zone13','口琴館｜掌心小奏鳴','簧片音色・柔和展館小品',82,4,'reed','felt',[60,65,57,55],[[0,4,7,11],[0,4,7,11],[0,3,7],[0,4,7]],[72,null,74,76,77,null,79,null,76,null,74,72,71,null,72,null],.0],
   ['zone12','校園｜迎賓小鼓隊','木琴・五聲旋律與輕鼓點',100,4,'mallet','flute',[60,65,62,55],[[0,4,7],[0,4,7],[0,3,7],[0,4,7]],[72,74,76,null,79,81,79,null,76,74,72,null,74,76,79,null],.024],
   ['zone11','餐廳｜暖湯小舞曲','撥弦・輕柔餐桌舞曲',96,3,'pluck','felt',[60,57,65,55],[[0,4,7,11],[0,3,7,10],[0,4,7,11],[0,4,7,10]],[76,null,79,81,null,79,77,76,null,74,72,null],.009],
   ['zone10','空島｜虹光歸途','鐘琴・明朗冒險',108,4,'bell','pluck',[60,57,65,55],[[0,4,7],[0,3,7],[0,4,7],[0,4,7]],[72,76,79,null,84,null,83,79,81,79,76,null,74,76,72,null],.022]
