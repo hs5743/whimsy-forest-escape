@@ -1294,7 +1294,10 @@ class SpatialZoneManager {
     let fogColor = 0xe0f2fe;
     let fogDensity = 0.012;
 
-    if (zoneId === 'zone10') {
+    if (zoneId === 'zone12') {
+      // Photo-inspired campus: softer blue-grey daylight, distinct from the fantasy market.
+      skyColorTop = 0xb7cbd8; fogColor = 0xdce4e6; fogDensity = 0.003;
+    } else if (zoneId === 'zone10') {
       // 蒼穹虹光空島：天際清澈晨曦蔚藍與天界柔彩薄霞
       skyColorTop = 0x38bdf8;
       fogColor = 0xe0f2fe;
