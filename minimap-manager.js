@@ -74,6 +74,7 @@ class MinimapManager {
 
     // 依空間定義 POI 地理坐標與圖標
     const poiDict = {
+      zone12:[{x:0,z:6.8,label:'迎賓桌',icon:'🏫',color:'#256677'},{x:-7,z:-14.8,label:'校史閱讀角',icon:'🎧',color:'#c89040'},{x:5,z:-10.8,label:'教室',icon:'🏫',color:'#256677'},{x:7,z:-14.8,label:'紙張',icon:'📄',color:'#dddddd'},{x:2,z:-14.8,label:'圖卡',icon:'🎨',color:'#d96749'},{x:3,z:-4.2,label:'鼓台',icon:'🥁',color:'#c94b40'},{x:7,z:-3.7,label:'獅頭',icon:'🦁',color:'#d4a545'},{x:-4,z:-4.1,label:'迎賓台',icon:'👋',color:'#256677'},{x:0,z:9.3,label:'返回操場',icon:'🚪',color:'#537f72',isPortal:true}],
       zone11:[{x:0,z:9.45,label:'店門/返回市集',icon:'🚪',color:'#537f72',isPortal:true},{x:4,z:2,label:'訂單台',icon:'🍲',color:'#d9773b'},{x:-4,z:2.2,label:'椅子下的鑰匙',icon:'🔑',color:'#eab308'},{x:8,z:-5,label:'儲藏室門',icon:'🚪',color:'#537f72'},{x:14,z:-7.5,label:'雞蛋',icon:'🥚',color:'#ef4444'},{x:14,z:-4.9,label:'南瓜',icon:'🎃',color:'#fb923c'},{x:-5,z:-8.25,label:'洗菜',icon:'💧',color:'#38bdf8'},{x:0,z:-8.25,label:'放入食材',icon:'🥣',color:'#94a3b8'},{x:5,z:-8.25,label:'煮湯',icon:'🍲',color:'#d9773b'}],
       'zone1': [
         { x: 0, z: -3.8, label: '書桌/魔導書', icon: '📖', color: '#f59e0b' },
@@ -101,6 +102,7 @@ class MinimapManager {
         { x: 0.0, z: 11.5, label: '花園門扉/往市集', icon: '🚪', color: '#a855f7', isPortal: true }
       ],
       'zone4': [
+        {x:-3,z:10,label:'新港國小校園委託',icon:'🏫',color:'#256677',isPortal:true},
         { x: 0, z: -8.5, label: '足球門/足球', icon: '⚽', color: '#3b82f6' },
         { x: -7.3, z: 4.0, label: '起跑線加速', icon: '🏃', color: '#ef4444' },
         { x: 2.8, z: 3.2, label: '跳箱/跳躍區', icon: '🦘', color: '#f59e0b' },
@@ -161,7 +163,8 @@ class MinimapManager {
     ctx.save();
     ctx.translate(cx, cy);
 
-    if(curZone==='zone11'){ctx.fillStyle='#c99e70';ctx.fillRect(-8*s,0,16*s,10*s);ctx.fillRect(8*s,-10*s,8*s,10*s);ctx.fillStyle='#ded7c5';ctx.fillRect(-8*s,-10*s,16*s,10*s);ctx.strokeStyle='#72503c';ctx.lineWidth=2;ctx.strokeRect(-8*s,0,16*s,10*s);ctx.strokeRect(-8*s,-10*s,16*s,10*s);ctx.strokeRect(8*s,-10*s,8*s,10*s);ctx.fillStyle='#f4ecd4';ctx.fillRect(-1.6*s,-.4*s,3.2*s,.8*s);if(this.world.gameState.realmPuzzles?.zone11?.pantryOpen)ctx.fillRect(7.6*s,-6.6*s,.8*s,3.2*s);
+    if(curZone==='zone12'){ctx.fillStyle='#c9c4b4';ctx.fillRect(-12*s,-18*s,24*s,28*s);ctx.fillStyle='#e3d4b9';ctx.fillRect(-12*s,-18*s,24*s,8*s);ctx.strokeStyle='#765a42';ctx.lineWidth=2;ctx.strokeRect(-12*s,-18*s,24*s,8*s);ctx.beginPath();ctx.moveTo(0,-18*s);ctx.lineTo(0,-10*s);ctx.stroke();ctx.fillStyle='#d6e7e9';for(const x of [-5,5])ctx.fillRect((x-1.5)*s,-10.3*s,3*s,.6*s);
+    }else if(curZone==='zone11'){ctx.fillStyle='#c99e70';ctx.fillRect(-8*s,0,16*s,10*s);ctx.fillRect(8*s,-10*s,8*s,10*s);ctx.fillStyle='#ded7c5';ctx.fillRect(-8*s,-10*s,16*s,10*s);ctx.strokeStyle='#72503c';ctx.lineWidth=2;ctx.strokeRect(-8*s,0,16*s,10*s);ctx.strokeRect(-8*s,-10*s,16*s,10*s);ctx.strokeRect(8*s,-10*s,8*s,10*s);ctx.fillStyle='#f4ecd4';ctx.fillRect(-1.6*s,-.4*s,3.2*s,.8*s);if(this.world.gameState.realmPuzzles?.zone11?.pantryOpen)ctx.fillRect(7.6*s,-6.6*s,.8*s,3.2*s);
     } else if (curZone === 'zone1') {
       // 見習書齋：室內長方形房間 (12m x 12m)
       ctx.fillStyle = '#fdf6e2';

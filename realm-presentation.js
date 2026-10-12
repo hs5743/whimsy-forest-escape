@@ -1,8 +1,8 @@
 /* Compact geographic route with a keyboard-friendly details panel. */
 (function(root){
   'use strict';
-  const positions=[[14,80],[32,73],[21,52],[41,43],[54,62],[75,77],[84,51],[76,26],[53,20],[32,15],[53,87]];
-  const compactPositions=[[22,89],[74,89],[74,70],[22,70],[22,51],[74,51],[74,32],[22,32],[22,13],[74,13],[48,94]];
+  const positions=[[14,80],[32,73],[21,52],[41,43],[54,62],[75,77],[84,51],[76,26],[53,20],[32,15],[53,87],[7,32]];
+  const compactPositions=[[22,89],[74,89],[74,70],[22,70],[22,51],[74,51],[74,32],[22,32],[22,13],[74,13],[48,94],[48,75]];
   const symbols=[
     '<path d="M5 20V9l7-5 7 5v11M8 20v-5h8v5M4 9h16M10 8v3m4-3v3"/>',
     '<path d="M4 9h16l-2-5H6L4 9Zm1 0v11h14V9M9 20v-7h6v7M4 9q2 4 4 0 2 4 4 0 2 4 4 0 2 4 4 0"/>',
@@ -15,6 +15,8 @@
     '<path d="m3 8 9-5 9 5H3Zm2 3v8m5-8v8m4-8v8m5-8v8M3 21h18M2 9h20"/>',
     '<path d="m12 3 2.7 5.5 6 .9-4.3 4.2 1 6-5.4-2.9-5.4 2.9 1-6-4.3-4.2 6-.9L12 3Z"/>'
   ];
+  symbols.push('<path d="M4 10h16l-2 9H6L4 10Zm3-5v3m5-4v4m5-3v3"/>','<path d="m3 10 9-7 9 7H3Zm2 0v11h14V10M10 21v-6h4v6M7 12h2m6 0h2M7 2h4"/>');
+  const lockLabel=zone=>zone.parentZone==='zone4'?'完成操場任務解鎖':'完成市集採買解鎖';
   function model(zm,profile) {
     const completed=new Set((profile?.completedWords || []).map(w=>String(w).toUpperCase()));
     return Object.values(zm.zones).map((zone,i)=>({...zone,position:positions[i] || [50,50],current:zone.id===zm.currentZoneId,unlocked:zm.isZoneUnlocked(zone.id),done:zone.words.filter(w=>completed.has(w.toUpperCase())).length,total:zone.words.length}));
@@ -36,10 +38,10 @@
     zones.forEach((zone,i)=>{
       const button=document.createElement('button');button.type='button';button.className='atlas-node'+(zone.current?' is-current':'')+(!zone.unlocked?' is-locked':'');
       button.style.setProperty('--atlas-x',zone.position[0]+'%');button.style.setProperty('--atlas-y',zone.position[1]+'%');button.style.setProperty('--compact-x',compactPositions[i][0]+'%');button.style.setProperty('--compact-y',compactPositions[i][1]+'%');button.setAttribute('aria-pressed','false');
-      button.setAttribute('aria-label',zone.name+'，'+(zone.current?'目前位置，':zone.unlocked?'已解鎖，':zone.parentZone?'完成市集採買解鎖，':'等級 '+zone.reqLevel+' 解鎖，')+'單字 '+zone.done+' / '+zone.total);
+      button.setAttribute('aria-label',zone.name+'，'+(zone.current?'目前位置，':zone.unlocked?'已解鎖，':zone.parentZone?lockLabel(zone)+'，':'等級 '+zone.reqLevel+' 解鎖，')+'單字 '+zone.done+' / '+zone.total);
       button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">'+(symbols[i]||'<path d="M4 10h16l-2 9H6L4 10Zm3-5v3m5-4v4m5-3v3"/>')+'</svg>';
       const name=document.createElement('span');name.textContent=zone.name;button.append(name);
-      const badge=document.createElement('small');badge.textContent=zone.current?'目前位置':zone.unlocked?zone.done+'/'+zone.total:zone.parentZone?'市集委託':'Lv.'+zone.reqLevel;button.append(badge);
+      const badge=document.createElement('small');badge.textContent=zone.current?'目前位置':zone.unlocked?zone.done+'/'+zone.total:zone.parentZone?zone.parentZone==='zone4'?'校園委託':'市集委託':'Lv.'+zone.reqLevel;button.append(badge);
       button.onclick=()=>select(zone,true);buttons.set(zone.id,button);map.append(button);
     });
     container.append(map);
@@ -53,7 +55,7 @@
       const progress=document.createElement('span');progress.className='atlas-progress';progress.textContent='單字收集 '+zone.done+' / '+zone.total+' · '+zone.topic;content.append(progress);
       detail.append(content);
       const action=document.createElement('button');action.type='button';action.className='atlas-travel';action.disabled=zone.current||!zone.unlocked;
-      action.textContent=zone.current?'正在此處冒險':zone.unlocked?'傳送前往':zone.parentZone?'完成市集採買解鎖':'Lv.'+zone.reqLevel+' 解鎖';
+      action.textContent=zone.current?'正在此處冒險':zone.unlocked?'傳送前往':zone.parentZone?lockLabel(zone):'Lv.'+zone.reqLevel+' 解鎖';
       action.onclick=()=>{if(zm.isZoneUnlocked(zone.id)) travel(zone.id);};detail.append(action);
       if(reveal) detail.scrollIntoView({block:'nearest',behavior:'auto'});
     }

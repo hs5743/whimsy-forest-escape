@@ -35,6 +35,31 @@
  function hint(raw){const s=validate(raw)||initial();let id='restaurant_order',clues=['先到餐廳的訂單台接單。','Two eggs and one pumpkin, please.'];if(!s.accepted)return {key:'zone11:order',word:null,targetId:id,clues};if(!s.key){id='restaurant_key';clues=['Find the key under the chair.','看看餐廳左側椅子的下方；可以拖曳向下看。'];}else if(s.key&&!s.pantryOpen){id='restaurant_door';clues=['拿鑰匙打開廚房東側的儲藏室。','穿過 KITCHEN 門口，往右找到 PANTRY。'];}else if(s.pantryOpen&&!exact(s)){id='restaurant_ingredient_'+(s.ingredients[2]?'2':s.ingredients[0]!==2?'0':'1');clues=['訂單需要兩顆雞蛋與一顆南瓜。','在儲藏室靠近食材箱取用；多拿的食材可以放回。'];}else if(!s.cooked){id='restaurant_'+['wash','put','cook'][s.step];clues=['WASH first. PUT next. COOK last.','依序到水槽、備料台、爐台互動。'];}else {id='restaurant_order';clues=s.served?['魔法餐廳任務完成！','可以返回陽光微風市集，或靠近物件練習英語。']:['Here is your soup.','回到餐廳的訂單台，把熱湯送給客人。'];}return {key:'zone11:'+JSON.stringify(s),word:null,targetId:id,clues};}
  const api={initial,validate,solved,transition,hint,requiredWord,canPerform};root.RestaurantChapter=api;if(typeof module!=='undefined')module.exports=api;
 })(globalThis);
+/* School-inspired adventure; facts and fictional tasks are documented separately. */
+(function(root){
+ 'use strict';
+ const words=['SCHOOL','LISTEN','CLASSROOM','PAPER','DRAW','DRUM','LION','WELCOME'];
+ const initial=()=>({stage:0,spoken:[],history:null,drawing:null,rhythm:[]});
+ const rhythmOK=s=>JSON.stringify(s.rhythm)==='[1,1,2]';
+ function validate(raw){
+  if(!raw||!Number.isInteger(raw.stage)||raw.stage<0||raw.stage>8||!Array.isArray(raw.spoken)||raw.spoken.length>8||raw.spoken.some((w,i)=>w!==words[i])||![null,1960,1963,2021].includes(raw.history)||![null,'LION','RABBIT','FISH'].includes(raw.drawing)||!Array.isArray(raw.rhythm)||raw.rhythm.length>3||raw.rhythm.some(n=>n!==1&&n!==2))return null;
+  const s={stage:Math.min(raw.stage,raw.spoken.length),spoken:[...raw.spoken],history:raw.history,drawing:raw.drawing,rhythm:[...raw.rhythm]};
+  if(s.stage>2&&s.history!==1963)s.stage=2;if(s.stage>4&&s.drawing!=='LION')s.stage=4;if(s.stage>6&&!rhythmOK(s))s.stage=6;s.spoken=s.spoken.slice(0,s.stage);return s;
+ }
+ const solved=raw=>validate(raw)?.stage===8;
+ function canSpeak(raw,word){const s=validate(raw)||initial();return s.stage<words.length&&typeof word==='string'&&word===words[s.stage]&&(s.stage!==2||s.history===1963)&&(s.stage!==4||s.drawing==='LION')&&(s.stage!==6||rhythmOK(s));}
+ function transition(raw,a){const s=validate(raw)||initial();let message='依任務手冊尋找校園線索。';
+  if(s.stage===8)return {state:s,message:'迎賓準備完成！可以返回冒險操場。'};
+  if(a?.type==='speak'){if(!canSpeak(s,a.word))message='先完成線索與前一個口說步驟。';else if(a.verifiedWord!==a.word)message='請先口說 '+a.word+' 並通過辨識。';else{s.spoken.push(a.word);s.stage++;message=s.stage===8?'Welcome! 舞獅迎賓任務完成！':'口說 '+a.word+' 通過！下一個線索是 '+words[s.stage]+'。';}}
+  else if(a?.type==='history'&&s.stage===2&&[1960,1963,2021].includes(a.value)){s.history=a.value;message=a.value===1963?'答對了！1963 年獨立設校。接著到右側教室口說 CLASSROOM。':'1960 年是設分校；2021 年是新教學大樓落成。再找找獨立設校的年份。';}
+  else if(a?.type==='drawing'&&s.stage===4&&['LION','RABBIT','FISH'].includes(a.value)){s.drawing=a.value;message=a.value==='LION'?'獅子圖卡選好了，口說 DRAW 才會完成製作。':'迎賓主題是舞獅，請找獅子圖案。';}
+  else if(a?.type==='beat'&&s.stage===6&&[1,2].includes(a.value)){if(s.rhythm.length===3)s.rhythm=[];s.rhythm.push(a.value);message=s.rhythm.length===3?(rhythmOK(s)?'鼓點正確！靠近獅頭，口說 LION。':'鼓點不同，按重試後照「咚、咚、鏘」再敲一次。'):'鼓點 '+s.rhythm.length+' / 3';}
+  else if(a?.type==='resetBeat'&&s.stage===6){s.rhythm=[];message='鼓點已清空，依咚、咚、鏘重試。';}
+  return {state:s,message};
+ }
+ function hint(raw){const s=validate(raw)||initial(),targets=['school_school','school_listen','school_classroom','school_paper','school_draw','school_drum','school_lion','school_welcome'],clues=[['在校門迎賓桌口說 SCHOOL，接下校園任務。','新竹縣竹北市新港國小邀請小小探險家協助迎賓。'],['穿過北側左邊門口，到閱讀角口說 LISTEN。','聽校史線索，注意分校與獨立設校的年份。'],['在閱讀角選出獨立設校年份，再到右側門口口說 CLASSROOM。','1960 設分校；1963 獨立設校；2021 新教學大樓落成剪綵。'],['在教室的紙張桌口說 PAPER，領取圖卡材料。','右側桌上有一疊白紙。'],['選獅子圖案，再到畫圖桌口說 DRAW。','圖卡要配合學校舞獅迎賓主題。'],['回庭院的鼓台口說 DRUM，準備節奏。','閱讀示範：咚、咚、鏘。'],['在鼓台敲咚、咚、鏘，再靠近獅頭口說 LION。','鼓點錯了可以重試，前面的口說進度保留。'],['到庭院迎賓台口說 WELCOME。','讓獅頭向來賓點頭，完成迎賓！'],['新港迎賓任務完成！','由南側校門返回冒險操場。']];return {key:'zone12:'+JSON.stringify(s),word:null,targetId:s.stage===2&&s.history!==1963?'school_listen':s.stage===6&&!rhythmOK(s)?'school_drum':targets[s.stage]||'school_exit',clues:clues[s.stage]};}
+ const api={words,initial,validate,solved,transition,hint,canSpeak};root.SchoolChapter=api;if(typeof module!=='undefined')module.exports=api;
+})(globalThis);
 /* Realm-specific mechanisms. Puzzle actions never write grades or award XP. */
 (function(root){
   'use strict';
@@ -49,14 +74,17 @@
     zone9:{title:'智慧殿堂：修復故事卷軸',english:'Read first. Think next. Write last.',brief:'卷軸的步驟散開了。依英文線索把三張卡依序放回；放錯可以取回重排。',clues:['First、next、last 告訴你先後順序。','先 READ，再 THINK，最後 WRITE；排好後蓋上印章。']},
     zone10:{title:'虹光空島：奏響回家之歌',english:'Listen to the music. Sing the song.',brief:'彩虹琴譜：C → E → G → C。先聽四個音，再用琴鍵重現旋律，讓回家的虹橋亮起。',clues:['聽示範旋律，留意最後一個音與第一個音相同。','依序按 C、E、G、C；按錯可以清空琴譜重來。']}
   };
+  specs.zone12={title:'新港國小：舞獅迎賓任務',english:'Welcome to our school!',brief:'校史尋寶、迎賓圖卡、鼓點與舞獅口說任務。',clues:['到校門迎賓桌接下任務。','口說辨識通過才完成步驟。']};
   specs.zone11={title:'魔法餐廳：一碗熱湯的冒險',english:'Two eggs and one pumpkin, please.',brief:'穿梭三個房間，依訂單準備食材並送餐。',clues:['先到訂單台接單。','依英語線索找鑰匙、取食材、料理與送餐。']};
   const defaults={zone2:{cart:[0,0,0],paid:false},zone3:{tool:'WATER',care:[false,false,false]},zone4:{equipment:'',stage:0},zone5:{hour:6,minute:0,platform:1,boarded:false},zone6:{x:0,y:2},zone7:{object:'STAR',angle:0,aligned:false},zone8:{gear:[],heat:0,ready:false},zone9:{order:[],sealed:false},zone10:{notes:[],played:false}};
+  defaults.zone12={stage:0,spoken:[],history:null,drawing:null,rhythm:[]};
   defaults.zone11={accepted:false,key:false,pantryOpen:false,ingredients:[0,0,0],step:0,cooked:false,served:false};
   const clone=x=>JSON.parse(JSON.stringify(x));
   const isInt=(x,a,b)=>Number.isInteger(x)&&x>=a&&x<=b;
   const eq=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
   function initial(id){return defaults[id]?clone(defaults[id]):null;}
   function solved(id,s){
+    if(id==='zone12')return root.SchoolChapter?.solved(s)||false;
     if(id==='zone11')return root.RestaurantChapter?.solved(s)||false;
     if(!s)return false;
     switch(id){
@@ -73,6 +101,7 @@
     }
   }
   function validateState(id,raw){
+    if(id==='zone12')return root.SchoolChapter?.validate(raw)||null;
     if(id==='zone11')return root.RestaurantChapter?.validate(raw)||null;
     if(!raw||!defaults[id])return null;
     let ok=false;
@@ -95,6 +124,7 @@
   }
   function sanitizeMap(map){const result={};if(!map||typeof map!=='object')return result;for(const id of Object.keys(defaults)){const state=validateState(id,map[id]);if(state)result[id]=state;}return result;}
   function transition(id,raw,action){
+    if(id==='zone12')return root.SchoolChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入校園任務。'};
     if(id==='zone11')return root.RestaurantChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入餐廳章節。'};
     const s=validateState(id,raw)||initial(id);if(!s||!action)return {state:s,message:'請先閱讀任務線索。'};
     if(solved(id,s))return {state:s,message:'任務已完成，可以回到秘境探索。'};
@@ -135,7 +165,7 @@
     }
     return {state:s,message:solved(id,s)?'秘境任務完成！ '+message:message};
   }
-  function canTravel(from,to,map,{restore=false,dev=false}={}){if(restore||dev)return true;if(to==='zone11')return solved('zone2',map?.zone2);if(from==='zone11')return to==='zone2';return !specs[from]||Number(to.slice(4))<=Number(from.slice(4))||solved(from,map?.[from]);}
+  function canTravel(from,to,map,{restore=false,dev=false}={}){if(restore||dev)return true;if(to==='zone12')return solved('zone4',map?.zone4);if(from==='zone12')return to==='zone4';if(to==='zone11')return solved('zone2',map?.zone2);if(from==='zone11')return to==='zone2';return !specs[from]||Number(to.slice(4))<=Number(from.slice(4))||solved(from,map?.[from]);}
   const api={specs,initial,solved,validateState,sanitizeMap,transition,canTravel};root.RealmQuests=api;if(typeof module!=='undefined')module.exports=api;
 })(globalThis);
 /* Puzzle checkpoints are separate from the learning-record service. */
@@ -193,4 +223,4 @@
   const api={flags,ownerKey,validate,capture,applySavedPosition,CheckpointStore};root.AdventureProgress=api;
   if(typeof module!=='undefined')module.exports=api;
 })(globalThis);
-var ADVENTURE_CHECKPOINT_ZONES={"zone1":{"id":"zone1","words":["LIGHT","BOOK","KEY","RED","BLUE","STAR","CAT","FISH","DOOR","FLOWER","OPEN","SUN"]},"zone2":{"id":"zone2","words":["APPLE","BANANA","BREAD","MILK","SWEET","OPEN"]},"zone3":{"id":"zone3","words":["RABBIT","BIRD","TREE","WATER","OPEN"]},"zone4":{"id":"zone4","words":["SOCCER","BALL","RUN","JUMP","OPEN"]},"zone5":{"id":"zone5","words":["TIME","CLOCK","TRAIN","MORNING","OPEN"]},"zone6":{"id":"zone6","words":["SHIP","BOAT","WIND","FISH","WATER","OPEN"]},"zone7":{"id":"zone7","words":["STAR","MOON","CLOUD","SUN","SKY","OPEN"]},"zone8":{"id":"zone8","words":["SNOW","COLD","WINTER","WHITE","WARM","CLIMB"]},"zone9":{"id":"zone9","words":["LIBRARY","READ","WRITE","THINK","SMART","FLY"]},"zone10":{"id":"zone10","words":["ISLAND","RAINBOW","MUSIC","SING","DANCE","DREAM"]},"zone11":{"id":"zone11","words":["EGG","PUMPKIN","LEMON","SOUP","WASH","PUT","COOK","SPOON"]}};
+var ADVENTURE_CHECKPOINT_ZONES={"zone1":{"id":"zone1","words":["LIGHT","BOOK","KEY","RED","BLUE","STAR","CAT","FISH","DOOR","FLOWER","OPEN","SUN"]},"zone2":{"id":"zone2","words":["APPLE","BANANA","BREAD","MILK","SWEET","OPEN"]},"zone3":{"id":"zone3","words":["RABBIT","BIRD","TREE","WATER","OPEN"]},"zone4":{"id":"zone4","words":["SOCCER","BALL","RUN","JUMP","OPEN"]},"zone5":{"id":"zone5","words":["TIME","CLOCK","TRAIN","MORNING","OPEN"]},"zone6":{"id":"zone6","words":["SHIP","BOAT","WIND","FISH","WATER","OPEN"]},"zone7":{"id":"zone7","words":["STAR","MOON","CLOUD","SUN","SKY","OPEN"]},"zone8":{"id":"zone8","words":["SNOW","COLD","WINTER","WHITE","WARM","CLIMB"]},"zone9":{"id":"zone9","words":["LIBRARY","READ","WRITE","THINK","SMART","FLY"]},"zone10":{"id":"zone10","words":["ISLAND","RAINBOW","MUSIC","SING","DANCE","DREAM"]},"zone11":{"id":"zone11","words":["EGG","PUMPKIN","LEMON","SOUP","WASH","PUT","COOK","SPOON"]},"zone12":{"id":"zone12","words":["SCHOOL","CLASSROOM","PAPER","DRAW","LISTEN","DRUM","LION","WELCOME"]}};

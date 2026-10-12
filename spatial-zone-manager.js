@@ -134,6 +134,7 @@ class SpatialZoneManager {
     };
 
     this.zones.zone11={id:'zone11',name:'魔法餐廳：一碗熱湯的冒險',englishName:'Magic Restaurant',icon:'🍲',topic:'Food, Actions & Prepositions',reqLevel:2,parentZone:'zone2',desc:'陽光微風市集的街角餐廳。完成採買後接受店主委託，穿梭餐廳、廚房與儲藏室，準備熱湯，再回市集繼續冒險。',words:['EGG','PUMPKIN','LEMON','SOUP','WASH','PUT','COOK','SPOON'],spawnPos:[0,1.6,7],spawnYaw:0};
+    this.zones.zone12={id:'zone12',name:'新港國小：舞獅迎賓任務',englishName:'Xin-gang School Adventure',icon:'🏫',topic:'School, Art & Lion Dance',reqLevel:4,parentZone:'zone4',desc:'以新竹縣竹北市新港國小的校史與龍鳳舞獅特色改編。從閱讀角到教室與迎賓庭院，口說解鎖圖卡、鼓點與舞獅任務。',words:['SCHOOL','CLASSROOM','PAPER','DRAW','LISTEN','DRUM','LION','WELCOME'],spawnPos:[0,1.6,8.4],spawnYaw:0};
     this.initTextures();
     this.initColliders();
   }
@@ -314,6 +315,7 @@ class SpatialZoneManager {
 
   // 取得各空間邊界限制
   getZoneBounds() {
+    if(this.currentZoneId==='zone12')return window.SchoolScene.bounds;
     if(this.currentZoneId==='zone11')return window.RestaurantScene.bounds;
     if (this.currentZoneId === 'zone1') {
       return {
@@ -333,6 +335,7 @@ class SpatialZoneManager {
 
   // 取得目前空間所有障礙物碰撞體
   getColliders() {
+    if(this.currentZoneId==='zone12')return window.SchoolScene.colliders();
     if(this.currentZoneId==='zone11')return window.RestaurantScene.colliders(this.world.gameState.realmPuzzles?.zone11);
     return this.colliders[this.currentZoneId] || [];
   }
@@ -1052,6 +1055,7 @@ class SpatialZoneManager {
     const userLevel = (window.cloudSyncManager && window.cloudSyncManager.profile) 
       ? window.cloudSyncManager.profile.level 
       : 1;
+    if(zoneId==='zone12')return userLevel>=zone.reqLevel && !!window.RealmQuests?.solved('zone4',this.world.gameState.realmPuzzles?.zone4);
     if(zoneId==='zone11')return userLevel>=zone.reqLevel && !!window.RealmQuests?.solved('zone2',this.world.gameState.realmPuzzles?.zone2);
     return userLevel >= zone.reqLevel;
   }
@@ -1141,7 +1145,7 @@ class SpatialZoneManager {
       shared.add(this._softParticleTexture); shared.add(this.world._softCircleParticleTexture);
       this.world.scene.remove(this.world.activeZoneGroup);
       GamePolish.releaseGroup(this.world.activeZoneGroup, shared);
-      for (const key of ['bookGroup','bookCoverHinge','starStone','flowerStone','candleFlame','candleLight','keyMesh','drawerMesh','mimicLid','mimicGroup','flaskLiquid','socketStar','socketFlower','doorLeft','doorRight','restaurantRefs']) this.world[key] = null;
+      for (const key of ['bookGroup','bookCoverHinge','starStone','flowerStone','candleFlame','candleLight','keyMesh','drawerMesh','mimicLid','mimicGroup','flaskLiquid','socketStar','socketFlower','doorLeft','doorRight','restaurantRefs','schoolRefs']) this.world[key] = null;
     }
     this.world.interactables = [];
     this.world.animators = [];
@@ -1179,6 +1183,7 @@ class SpatialZoneManager {
       this.buildZone9_AstralPantheon(group);
     } else if (zoneId === 'zone10') {
       this.buildZone10_PrismaticSkyIsles(group);
+    } else if(zoneId==='zone12'){window.SchoolScene.build(this,group);
     } else if(zoneId==='zone11'){window.RestaurantScene.build(this,group);
     }
 
@@ -1828,6 +1833,7 @@ class SpatialZoneManager {
       this.switchZone('zone3');
     });
 
+    window.SchoolScene.buildEntrance(this,group);
     this.addFloatingParticles(group, 0x67e8f9, 140, 36, 6);
   }
 
