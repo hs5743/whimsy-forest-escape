@@ -137,6 +137,7 @@
     return actions[target.userData.id] || target.userData.name || target.userData.label || '探索魔法物件';
   }
   function taskText(state,zone) {
+    if(zone==='learningHub')return '與狐狸館長、貓頭鷹老師或兔子教練互動，自由選題學習。';
     if(zone==='zone13'&&root.HarmonicaChapter)return root.HarmonicaChapter.hint(state.realmPuzzles?.zone13).clues[0];
     if(zone==='zone12'&&root.SchoolChapter)return root.SchoolChapter.hint(state.realmPuzzles?.zone12).clues[0];
     if(zone==='zone11'&&root.RestaurantChapter)return root.RestaurantChapter.hint(state.realmPuzzles?.zone11).clues[0];
@@ -160,6 +161,7 @@
     zone7:{exposure:1.06,key:0xbed9ff,intensity:.85,sky:0x6f88ba,ground:0x292947,fill:.8},
     zone8:{exposure:1.03,key:0xd7ebff,intensity:1,sky:0xabcddb,ground:0x34455f,fill:.85},
     zone9:{exposure:1,key:0xffedc4,intensity:1.1,sky:0xc4d1e8,ground:0x34314d,fill:.85},
+    learningHub:{exposure:.94,key:0xffeed3,intensity:.9,sky:0xe9f3ee,ground:0x66604c,fill:.57},
     zone13:{exposure:1,key:0xfff0db,intensity:.9,sky:0xd8e9ef,ground:0x6a5742,fill:.58},
     zone12:{exposure:1,key:0xffefda,intensity:1.15,sky:0xdceff6,ground:0x6b675c,fill:.65},
     zone11:{exposure:1.0,key:0xffefda,intensity:1.15,sky:0xfff7e8,ground:0x76513c,fill:.6},

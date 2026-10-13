@@ -92,6 +92,7 @@ class CloudSyncManager {
     if(this.devMode) return;
     try {
       localStorage.setItem(this.storageKey, JSON.stringify(this.profile));
+      localStorage.setItem(this.storageKey+':'+this.profile.studentId, JSON.stringify(this.profile));
     } catch (e) {}
   }
 
@@ -154,6 +155,10 @@ class CloudSyncManager {
     if(this.devMode) return {success:false, message:"本機場景檢查停用雲端連線"};
     const paddedSeat = String(seatNo || '01').padStart(2, '0');
     const studentId = `${classId}${paddedSeat}`;
+    this.saveLocalProfile();
+    let savedStudent=null;
+    try{savedStudent=JSON.parse(localStorage.getItem(this.storageKey+':'+studentId)||'null');if(savedStudent?.studentId!==studentId)savedStudent=null;}catch(_){}
+    const localProgress=this.profile.isGuest?this.profile:savedStudent;
 
     this.profile = {
       studentId: studentId,
@@ -161,15 +166,17 @@ class CloudSyncManager {
       classId: String(classId || '501'),
       seatNo: paddedSeat,
       name: String(name || '學生').trim(),
-      xp: this.profile.isGuest ? this.profile.xp : 0,
-      level: this.profile.isGuest ? this.profile.level : 1,
-      stars: this.profile.isGuest ? this.profile.stars : 0,
-      completedWords: this.profile.isGuest ? this.profile.completedWords : [],
-      badgesCount: this.profile.isGuest ? this.profile.badgesCount : 0,
+      xp: localProgress?.xp || 0,
+      level: localProgress?.level || 1,
+      stars: localProgress?.stars || 0,
+      completedWords: [...(localProgress?.completedWords || [])],
+      badgesCount: localProgress?.badgesCount || 0,
+      wordMastery: localProgress?.wordMastery || {},
       isGuest: false
     };
 
     this.notifyListeners();
+    const loginOwner=this.profile.studentId;
 
     // 若已串接 GAS，向雲端嘗試同步
     if (this.gasUrl) {
@@ -189,7 +196,7 @@ class CloudSyncManager {
         });
 
         const json = await res.json();
-        if (json.status === 'success' && json.student) {
+        if (this.profile.studentId===loginOwner && json.status === 'success' && json.student) {
           // 合併雲端進度
           const s = json.student;
           this.profile.xp = Math.max(this.profile.xp, s.xp || 0);
@@ -463,13 +470,13 @@ class CloudSyncManager {
       }
     } else {
       if (indicator) {
-        indicator.innerHTML = `<span>🟢</span> 學習紀錄已同步`;
-        indicator.title = '英語學習紀錄服務已連接；冒險存檔請查看跨裝置續玩。';
+        indicator.textContent = justSent ? '🟢 原關卡紀錄已送達' : '⚪ 雲端服務已設定';
+        indicator.title = '原關卡英語學習服務已設定。大廳紀錄的同步狀態請查看大廳視窗；冒險存檔請查看跨裝置續玩。';
         indicator.className = 'cloud-status-pill mode-online';
       }
       if (dot) {
         dot.className = 'status-dot dot-online';
-        dot.title = '學習紀錄：Google 試算表已同步';
+        dot.title = justSent ? '原關卡紀錄已送達' : '雲端服務已設定；尚無本次傳送確認';
       }
     }
   }

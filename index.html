@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <meta name="description" content="專為國小學生設計的 3D 英語解謎逃脫遊戲。聽示範、開口說英語、找線索，從魔法書屋出發探索市集、海港與奇幻秘境。">
   <title>英語魔法探險家：秘境逃脫任務 (English Magic Explorers)</title>
-  <link rel="stylesheet" href="style.css?v=20260913_v11">
+  <link rel="stylesheet" href="style.css?v=20261014a">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%20%22100%22><text y=%22.9em%22 font-size=%2290%22>🗝️</text></svg>">
   <style>
     /* ========================================================= */
@@ -822,16 +822,17 @@
       .btn-cover-primary { padding: 10px 20px !important; font-size: 16px !important; }
     }
   </style>
-  <link rel="stylesheet" href="game-polish.css?v=20261010">
-  <link rel="stylesheet" href="title-screen.css?v=20261010d">
-  <link rel="stylesheet" href="learning-polish.css?v=20261010">
-  <link rel="stylesheet" href="adventure-assist.css?v=20261010">
-  <link rel="stylesheet" href="realm-quests.css?v=20261010">
-  <link rel="stylesheet" href="adventure-cloud.css?v=20261010">
+  <link rel="stylesheet" href="game-polish.css?v=20261014a">
+  <link rel="stylesheet" href="title-screen.css?v=20261014a">
+  <link rel="stylesheet" href="learning-polish.css?v=20261014a">
+  <link rel="stylesheet" href="adventure-assist.css?v=20261014a">
+  <link rel="stylesheet" href="realm-quests.css?v=20261014a">
+  <link rel="stylesheet" href="adventure-cloud.css?v=20261014a">
 <style>
 .harmonica-hole-grid{display:grid;grid-template-columns:repeat(6,minmax(44px,1fr));gap:7px;width:100%}.harmonica-hole-grid button{min-width:0;padding:10px}.harmonica-hole-grid button[aria-pressed="true"]{background:#185965!important;color:#fff!important;outline:3px solid #d6b76b}.harmonica-note-readout{width:100%;padding:12px;border-radius:10px;background:#173e49;color:#f6dfaa!important;font-size:1.1rem!important}
 @media(max-width:600px){.harmonica-hole-grid{grid-template-columns:repeat(4,minmax(44px,1fr))}}
 </style>
+  <link rel="stylesheet" href="learning-hub.css?v=20261014a">
 </head>
 <body>
   <!-- ========================================================= -->
@@ -1084,11 +1085,14 @@
           </div>
         </button>
 
+<button id="learningHubMenuBtn" class="drawer-action-btn" type="button" onclick="LearningHub.enter()">📚 英語學習大廳 · 自由選題</button>
+        <button id="learningHubPracticeBtn" class="drawer-action-btn" type="button" onclick="closeSystemMenu(); LearningHub.open()">🦊 與大廳館長學習</button>
+        <button id="learningHubReturnBtn" class="drawer-action-btn" type="button" onclick="closeSystemMenu(); LearningHub.leave()">↩ 返回原本的冒險</button>
         <button id="worldMapBtn" class="drawer-action-btn map-btn-highlight" onclick="toggleWorldMapModal(); closeSystemMenu();" type="button">
           <span class="drawer-btn-icon">🗺️</span>
           <div class="drawer-btn-info">
             <span class="drawer-btn-title">空間星圖</span>
-            <span class="drawer-btn-sub">十大場景快速旅行</span>
+            <span class="drawer-btn-sub">秘境與學習大廳</span>
           </div>
         </button>
 
@@ -1890,33 +1894,37 @@
 
   <!-- 核心庫與遊戲腳本 -->
   <script src="three.min.js"></script>
-  <script src="game-polish.js?v=20261013a"></script>
-  <script src="realm-landscape.js?v=20261010c"></script>
-  <script src="title-screen.js?v=20261010"></script>
-  <script src="restaurant-chapter.js?v=20261013a"></script>
-  <script src="restaurant-scene.js?v=20261013a"></script>
-  <script src="harmonica-chapter.js?v=20261013a"></script>
-  <script src="harmonica-scene.js?v=20261013a"></script>
-  <script src="school-chapter.js?v=20261013a"></script>
-  <script src="school-scene.js?v=20261013a"></script>
-  <script src="realm-quests.js?v=20261013a"></script>
-  <script src="adventure-progress.js?v=20261010c"></script>
-  <script src="adventure-cloud.js?v=20261010"></script>
-  <script src="adventure-assist.js?v=20261013a"></script>
-  <script src="game-diagnostics.js?v=20261010"></script>
-  <script src="realm-presentation.js?v=20261013a"></script>
-  <script src="gept-kids-vocabulary.js?v=20261013a"></script>
-  <script src="vocab-data.js?v=20261013a"></script>
-  <script src="vocab-passport-bank.js?v=20260930_v16"></script>
-  <script src="speech-manager.js?v=20261010"></script>
-  <script src="scene-music.js?v=20261013a"></script>
-  <script src="audio-manager.js?v=20261010e"></script>
-  <script src="touch-controls.js?v=20261010"></script>
-  <script src="cloud-sync-manager.js?v=20261010b"></script>
-  <script src="spatial-zone-manager.js?v=20261013a"></script>
-  <script src="minimap-manager.js?v=20261013a"></script>
-  <script src="scavenger-hunt-manager.js?v=20260930_v16"></script>
-  <script src="world-3d.js?v=20261013a"></script>
+  <script src="game-polish.js?v=20261014a"></script>
+  <script src="realm-landscape.js?v=20261014a"></script>
+  <script src="title-screen.js?v=20261014a"></script>
+  <script src="restaurant-chapter.js?v=20261014a"></script>
+  <script src="restaurant-scene.js?v=20261014a"></script>
+  <script src="harmonica-chapter.js?v=20261014a"></script>
+  <script src="harmonica-scene.js?v=20261014a"></script>
+  <script src="school-chapter.js?v=20261014a"></script>
+  <script src="school-scene.js?v=20261014a"></script>
+  <script src="realm-quests.js?v=20261014a"></script>
+  <script src="adventure-progress.js?v=20261014a"></script>
+  <script src="adventure-cloud.js?v=20261014a"></script>
+  <script src="adventure-assist.js?v=20261014a"></script>
+  <script src="game-diagnostics.js?v=20261014a"></script>
+  <script src="realm-presentation.js?v=20261014a"></script>
+  <script src="gept-kids-vocabulary.js?v=20261014a"></script>
+  <script src="vocab-data.js?v=20261014a"></script>
+  <script src="vocab-passport-bank.js?v=20261014a"></script>
+  <script src="learning-rewards.js?v=20261014a"></script>
+  <script src="learning-data.js?v=20261014a"></script>
+  <script src="learning-hub-scene.js?v=20261014a"></script>
+  <script src="learning-hub.js?v=20261014a"></script>
+  <script src="speech-manager.js?v=20261014a"></script>
+  <script src="scene-music.js?v=20261014a"></script>
+  <script src="audio-manager.js?v=20261014a"></script>
+  <script src="touch-controls.js?v=20261014a"></script>
+  <script src="cloud-sync-manager.js?v=20261014a"></script>
+  <script src="spatial-zone-manager.js?v=20261014a"></script>
+  <script src="minimap-manager.js?v=20261014a"></script>
+  <script src="scavenger-hunt-manager.js?v=20261014a"></script>
+  <script src="world-3d.js?v=20261014a"></script>
 
   <script>
     let curLeaderboardTab = 'school';
@@ -2633,7 +2641,7 @@
         const card = document.createElement('div');
         card.className = `realm-card ${isCurrent ? 'current' : ''} ${isUnlocked ? 'unlocked' : 'locked'}`;
 
-        const wordsChips = z.words.slice(0, 5).map(w => `<span class="realm-word-chip">${w}</span>`).join('');
+        const wordsChips = z.isLearningHub ? '<span class="realm-word-chip">八個主題 · 單字 · 句型 · 複習 · 收藏</span>' : z.words.slice(0, 5).map(w => `<span class="realm-word-chip">${w}</span>`).join('');
 
         card.innerHTML = `
           <div class="realm-card-top">

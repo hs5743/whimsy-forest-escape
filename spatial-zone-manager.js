@@ -136,6 +136,8 @@ class SpatialZoneManager {
     this.zones.zone11={id:'zone11',name:'魔法餐廳：一碗熱湯的冒險',englishName:'Magic Restaurant',icon:'🍲',topic:'Food, Actions & Prepositions',reqLevel:2,parentZone:'zone2',desc:'陽光微風市集的街角餐廳。完成採買後接受店主委託，穿梭餐廳、廚房與儲藏室，準備熱湯，再回市集繼續冒險。',words:['EGG','PUMPKIN','LEMON','SOUP','WASH','PUT','COOK','SPOON'],spawnPos:[0,1.6,7],spawnYaw:0};
     this.zones.zone12={id:'zone12',name:'新港國小：舞獅迎賓任務',englishName:'Xin-gang School Adventure',icon:'🏫',topic:'School, Art & Lion Dance',reqLevel:4,parentZone:'zone4',desc:'以新竹縣竹北市新港國小的校史與龍鳳舞獅特色改編。從閱讀角到教室與迎賓庭院，口說解鎖圖卡、鼓點與舞獅任務。',words:['SCHOOL','CLASSROOM','PAPER','DRAW','LISTEN','DRUM','LION','WELCOME'],spawnPos:[0,1.6,8.4],spawnYaw:0};
     this.zones.zone13={id:'zone13',name:'半音階口琴：掌心音樂展示館',englishName:'Chromatic Harmonica Gallery',icon:'🎵',topic:'Harmonica, Sound & Playing',reqLevel:4,parentZone:'zone12',desc:'從新港校園音樂翼走進口琴展示館。探索完整口琴、分層簧片、滑鍵半音與吹吸練習，用八個新英語詞完成小小展演。',words:['SMALL','MOUTH','HAND','LEFT','RIGHT','HIGH','PLAY','SONG'],spawnPos:[0,1.6,9.4],spawnYaw:0};
+    const learningHub={id:'learningHub',name:'英語探險家學習大廳',englishName:'Explorer Language Lounge',icon:'📚',topic:'自由選題 · 單字 · 句型 · 複習',reqLevel:1,isLearningHub:true,desc:'與狐狸館長、貓頭鷹老師和兔子教練反覆練習，收藏想學的單字，累積口說、句型與跨日複習紀錄。完成後返回原來的冒險。',words:[],spawnPos:[0,1.6,8],spawnYaw:0};
+    this.zones.learningHub=learningHub;
     this.initTextures();
     this.initColliders();
   }
@@ -316,6 +318,7 @@ class SpatialZoneManager {
 
   // 取得各空間邊界限制
   getZoneBounds() {
+    if(this.currentZoneId==='learningHub')return window.LearningHubScene.bounds;
     if(this.currentZoneId==='zone13')return window.HarmonicaScene.bounds;
     if(this.currentZoneId==='zone12')return window.SchoolScene.bounds;
     if(this.currentZoneId==='zone11')return window.RestaurantScene.bounds;
@@ -337,6 +340,7 @@ class SpatialZoneManager {
 
   // 取得目前空間所有障礙物碰撞體
   getColliders() {
+    if(this.currentZoneId==='learningHub')return window.LearningHubScene.colliders();
     if(this.currentZoneId==='zone13')return window.HarmonicaScene.colliders();
     if(this.currentZoneId==='zone12')return window.SchoolScene.colliders();
     if(this.currentZoneId==='zone11')return window.RestaurantScene.colliders(this.world.gameState.realmPuzzles?.zone11);
@@ -1125,6 +1129,11 @@ class SpatialZoneManager {
   // 切換至指定空間
   switchZone(zoneId, options = {}) {
     if (!this.zones[zoneId]) return false;
+    const leavingHub=this.currentZoneId==='learningHub'&&zoneId!=='learningHub';
+    const hubReturn=leavingHub?window.LearningHub.returnTarget():null;
+    if(leavingHub&&!options.restore&&zoneId!==hubReturn.zone){this.world.showToast('請先返回原本的冒險，再沿秘境路線前進。');return false;}
+    if(zoneId==='learningHub'&&this.currentZoneId!=='learningHub'&&!options.restore&&!window.LearningHub.remember(this.world))return false;
+    window.LearningHub?.close();
     if (window.RealmQuests && !window.RealmQuests.canTravel(this.currentZoneId, zoneId, this.world.gameState.realmPuzzles, {restore:options.restore===true,dev:this.world.devMode})) {
       this.world.showToast(zoneId==='zone11'?'店主：先完成陽光微風市集的採買並結帳，再來幫忙準備熱湯！':'出口還在等待秘境任務。點「秘境任務」閱讀線索、完成機關，再往下一關出發。');
       return false;
@@ -1170,6 +1179,7 @@ class SpatialZoneManager {
     // 依空間 ID 建造專屬 3D 景致
     if (zoneId === 'zone1') {
       this.buildZone1_Study(group);
+      window.LearningHubScene.buildEntrance(this,group);
     } else if (zoneId === 'zone2') {
       this.buildZone2_Market(group);
     } else if (zoneId === 'zone3') {
@@ -1188,6 +1198,7 @@ class SpatialZoneManager {
       this.buildZone9_AstralPantheon(group);
     } else if (zoneId === 'zone10') {
       this.buildZone10_PrismaticSkyIsles(group);
+    } else if(zoneId==='learningHub'){window.LearningHubScene.build(this,group);
     } else if(zoneId==='zone13'){window.HarmonicaScene.build(this,group);
     } else if(zoneId==='zone12'){window.SchoolScene.build(this,group);
     } else if(zoneId==='zone11'){window.RestaurantScene.build(this,group);
@@ -1203,6 +1214,7 @@ class SpatialZoneManager {
     this.world.player.pos.set(...zone.spawnPos);
     this.world.player.yaw = zone.spawnYaw;
     this.world.player.pitch = 0;
+    if(leavingHub&&!options.restore&&hubReturn.pos){this.world.player.pos.set(...hubReturn.pos);this.world.player.yaw=hubReturn.yaw;this.world.player.pitch=hubReturn.pitch;}
     this.world.clock?.getDelta();
     this.world.frameCadence?.reset();
     this.world.lastFrameTimestamp=performance.now();
@@ -1223,6 +1235,7 @@ class SpatialZoneManager {
     const tag = document.getElementById('hudCurrentZoneLabel');
     if (tag) tag.textContent = `${zone.icon} ${zone.name}`;
     this.world.realmQuests?.sync();
+    window.LearningHub?.syncNavigation();
 
     return true;
   }
@@ -1290,6 +1303,7 @@ class SpatialZoneManager {
     // 同步生成/套用空間專屬全景 PMREM 環境反射貼圖
     this.setupZoneEnvironment(zoneId);
 
+    if (zoneId === 'learningHub') {this.world.scene.background=new THREE.Color(0x254149);this.world.scene.fog=new THREE.FogExp2(0xb4afa0,.004);return;}
     if (zoneId === 'zone13') {
       this.world.scene.background = new THREE.Color(0x18353f);
       this.world.scene.fog = new THREE.FogExp2(0x243a40,0.004);

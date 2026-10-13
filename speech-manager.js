@@ -54,7 +54,12 @@ class SpeechManager {
       if (!final) return;
       this.recognitionResolved = true;
       clearTimeout(this.recognitionWatchdog);
-      if (this.mode === 'sentence') this.evaluateSentencePronunciation(transcript);
+      if(this.mode==='hub'){
+        const ok=window.LearningRewards.matches(transcript,this.hubTarget);
+        this.setRecognitionStatus(ok?'success':'retry',ok?'口說內容辨識通過。':'聽到「'+transcript+'」，請依目標完整朗讀再試一次。');
+        if(ok){const callback=this.hubCallback;this.hubCallback=null;callback?.();}
+      }
+      else if (this.mode === 'sentence') this.evaluateSentencePronunciation(transcript);
       else this.evaluatePronunciation(transcript);
     };
     recognition.onerror = event => {
@@ -74,6 +79,7 @@ class SpeechManager {
   }
 
   setRecognitionStatus(state, message) {
+    if(this.mode==='hub'){this.hubStatus?.(state,message);return;}
     if (this.mode === 'sentence') this.updateSentenceUI(state, message);
     else this.updateUIStatus(state, message);
   }
@@ -230,8 +236,13 @@ class SpeechManager {
     this.beginRecognition();
   }
 
+  startHubListening(target,callback,status){
+    this.session++;this.stopVoice();this.mode='hub';this.hubTarget=target;this.hubCallback=callback;this.hubStatus=status;this.beginRecognition();
+  }
+
   stopListening() {
     this.session++;
+    this.hubCallback=null;this.hubStatus=null;
     this.cancelRecognition();
     this.stopVoice();
     this.mode = 'word';
@@ -327,7 +338,7 @@ class SpeechManager {
   // 關卡主英語問句整句朗讀試煉 (Sentence Trial)
   // ==========================================
 
-  playSentenceVoice(sentence) {
+  playSentenceVoice(sentence, rate = .85) {
     this.interruptForVoice();
     this.stopVoice();
     if ('speechSynthesis' in window) {
@@ -335,7 +346,7 @@ class SpeechManager {
         window.speechSynthesis.cancel();
         const utter = new SpeechSynthesisUtterance(sentence);
         utter.lang = 'en-US';
-        utter.rate = 0.85;
+        utter.rate = Math.max(.4,Math.min(1.2,rate));
       const settings=window.world3D?.settings || GamePolish.loadSettings(localStorage); utter.volume=settings.master*settings.voice;
         utter.pitch = 1.05;
         utter.onstart = () => {

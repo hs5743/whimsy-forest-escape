@@ -310,6 +310,11 @@ function doPost(e) {
       return makeJsonResponse({ status: "error", message: "Unauthorized access: Invalid security token" });
     }
 
+    // Learning requests must pass the same token verification above as all other POST requests.
+    if (action === 'learningGet' || action === 'learningEvent') {
+      return makeJsonResponse(learningHubAction(payload, ss));
+    }
+
     // Separate puzzle checkpoint protocol. The existing script lock protects revisions.
     if (["adventureCapabilities", "saveAdventure", "getAdventure"].includes(action)) {
       return makeJsonResponse(adventureCheckpointAction(payload, ss));

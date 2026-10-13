@@ -1,8 +1,8 @@
 /* Compact geographic route with a keyboard-friendly details panel. */
 (function(root){
   'use strict';
-  const positions=[[14,80],[32,73],[21,52],[41,43],[54,62],[75,77],[84,51],[76,26],[53,20],[32,15],[53,87],[7,32],[7,12]];
-  const compactPositions=[[22,89],[74,89],[74,70],[22,70],[22,51],[74,51],[74,32],[22,32],[22,13],[74,13],[48,94],[48,75],[48,58]];
+  const positions=[[14,80],[32,73],[21,52],[41,43],[54,62],[75,77],[84,51],[76,26],[53,20],[32,15],[53,87],[7,32],[7,12],[52,43]];
+  const compactPositions=[[22,89],[74,89],[74,70],[22,70],[22,51],[74,51],[74,32],[22,32],[22,13],[74,13],[48,94],[48,75],[48,58],[48,40]];
   const symbols=[
     '<path d="M5 20V9l7-5 7 5v11M8 20v-5h8v5M4 9h16M10 8v3m4-3v3"/>',
     '<path d="M4 9h16l-2-5H6L4 9Zm1 0v11h14V9M9 20v-7h6v7M4 9q2 4 4 0 2 4 4 0 2 4 4 0 2 4 4 0"/>',
@@ -17,6 +17,7 @@
   ];
   symbols.push('<path d="M4 10h16l-2 9H6L4 10Zm3-5v3m5-4v4m5-3v3"/>','<path d="m3 10 9-7 9 7H3Zm2 0v11h14V10M10 21v-6h4v6M7 12h2m6 0h2M7 2h4"/>');
   symbols.push('<path d="M3 8h16v9H3V8Zm3 3v3m3-3v3m3-3v3m3-3v3m3-3v3M19 12h3"/>');
+  symbols.push('<path d="M3 5h7l2 3 2-3h7v15h-7l-2 2-2-2H3V5Zm9 3v14M6 9h3m-3 4h3m6-4h3m-3 4h3"/>');
   const lockLabel=zone=>zone.parentZone==='zone12'?'完成新港迎賓任務解鎖':zone.parentZone==='zone4'?'完成操場任務解鎖':'完成市集採買解鎖';
   function model(zm,profile) {
     const completed=new Set((profile?.completedWords || []).map(w=>String(w).toUpperCase()));
@@ -28,7 +29,7 @@
     container.className='realm-atlas';container.replaceChildren();
     const summary=document.createElement('div');summary.className='atlas-summary';
     const currentLabel=document.createElement('span');currentLabel.textContent='目前位置 · '+current.name;summary.append(currentLabel);
-    const mainline=zones.filter(z=>!z.parentZone);const next=current.parentZone?zones.find(z=>z.id===current.parentZone):mainline[mainline.indexOf(current)+1];
+    const mainline=zones.filter(z=>!z.parentZone&&!z.isLearningHub);const next=current.isLearningHub?null:current.parentZone?zones.find(z=>z.id===current.parentZone):mainline[mainline.indexOf(current)+1];
     if(next) {const button=document.createElement('button');button.type='button';button.className='atlas-next';button.textContent='下一站 · '+next.name;button.onclick=()=>select(next,true);summary.append(button);}
     container.append(summary);
     const map=document.createElement('div');map.className='atlas-land';map.setAttribute('aria-label','秘境與章節探索路線');
@@ -37,12 +38,12 @@
     map.innerHTML='<svg class="atlas-landscape" viewBox="0 0 1000 600" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="atlasSea" x2="0" y2="1"><stop stop-color="#172d43"/><stop offset="1" stop-color="#2e5960"/></linearGradient></defs><rect width="1000" height="600" rx="30" fill="url(#atlasSea)"/><path d="M40 470Q20 290 130 210Q230 170 360 215Q520 205 580 350Q530 520 350 545Q170 565 40 470Z" fill="#5d7660"/><path d="M430 450Q520 300 680 310Q820 325 855 465Q790 550 615 545Z" fill="#7b8f70"/><path d="M185 150Q200 10 385 15Q545-5 640 85Q760 90 840 185Q840 245 755 256Q620 215 505 245Q320 250 185 150Z" fill="#a4bec6" opacity=".24"/><g fill="none" stroke="#bad4d0" stroke-opacity=".2" stroke-width="2"><path d="M20 580Q120 545 205 580T410 580M610 285Q720 260 845 290T1000 285M840 570Q920 540 1000 570"/></g><g fill="#304f45" opacity=".65"><path d="m80 390 30-80 30 80Zm130-70 30-80 30 80Zm115 35 30-80 30 80Z"/></g><g fill="#7e96a8" opacity=".5"><path d="m650 140 50-100 60 100Zm65 35 65-110 70 110Z"/></g><path class="atlas-desktop-trail" d="'+path+'" fill="none" stroke="#101e2b" stroke-opacity=".4" stroke-width="12"/><path class="atlas-desktop-trail" d="'+path+'" fill="none" stroke="#e6cb8f" stroke-width="4" stroke-dasharray="8 8"/><path class="atlas-compact-trail" d="'+compactPath+'" fill="none" stroke="#e6cb8f" stroke-width="4" stroke-dasharray="8 8"/><text x="350" y="565" fill="#d4e0c8" font-size="22" text-anchor="middle">林野與城鎮</text><text x="670" y="580" fill="#d4e0c8" font-size="22" text-anchor="middle">海岸與遠洋</text><text x="360" y="40" fill="#d4e0e8" font-size="20" text-anchor="middle">雲海與星穹</text></svg>';
     const buttons=new Map();
     zones.forEach((zone,i)=>{
-      const button=document.createElement('button');button.type='button';button.className='atlas-node'+(zone.current?' is-current':'')+(!zone.unlocked?' is-locked':'');
+      const button=document.createElement('button');button.type='button';button.className='atlas-node'+(zone.isLearningHub?' is-learning-hub':'')+(zone.current?' is-current':'')+(!zone.unlocked?' is-locked':'');
       button.style.setProperty('--atlas-x',zone.position[0]+'%');button.style.setProperty('--atlas-y',zone.position[1]+'%');button.style.setProperty('--compact-x',compactPositions[i][0]+'%');button.style.setProperty('--compact-y',compactPositions[i][1]+'%');button.setAttribute('aria-pressed','false');
-      button.setAttribute('aria-label',zone.name+'，'+(zone.current?'目前位置，':zone.unlocked?'已解鎖，':zone.parentZone?lockLabel(zone)+'，':'等級 '+zone.reqLevel+' 解鎖，')+'單字 '+zone.done+' / '+zone.total);
+      button.setAttribute('aria-label',zone.name+'，'+(zone.current?'目前位置，':zone.unlocked?'已解鎖，':zone.parentZone?lockLabel(zone)+'，':'等級 '+zone.reqLevel+' 解鎖，')+(zone.isLearningHub?'自由選題學習':'單字 '+zone.done+' / '+zone.total));
       button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">'+(symbols[i]||'<path d="M4 10h16l-2 9H6L4 10Zm3-5v3m5-4v4m5-3v3"/>')+'</svg>';
       const name=document.createElement('span');name.textContent=zone.name;button.append(name);
-      const badge=document.createElement('small');badge.textContent=zone.current?'目前位置':zone.unlocked?zone.done+'/'+zone.total:zone.parentZone?zone.parentZone==='zone12'?'音樂委託':zone.parentZone==='zone4'?'校園委託':'市集委託':'Lv.'+zone.reqLevel;button.append(badge);
+      const badge=document.createElement('small');badge.textContent=zone.current?'目前位置':zone.unlocked?zone.isLearningHub?'自由學習':zone.done+'/'+zone.total:zone.parentZone?zone.parentZone==='zone12'?'音樂委託':zone.parentZone==='zone4'?'校園委託':'市集委託':'Lv.'+zone.reqLevel;button.append(badge);
       button.onclick=()=>select(zone,true);buttons.set(zone.id,button);map.append(button);
     });
     container.append(map);
@@ -53,7 +54,7 @@
       const content=document.createElement('div');content.className='atlas-detail-copy';
       const title=document.createElement('h3');title.textContent=zone.name+' · '+zone.englishName;content.append(title);
       const desc=document.createElement('p');desc.textContent=zone.desc;content.append(desc);
-      const progress=document.createElement('span');progress.className='atlas-progress';progress.textContent='單字收集 '+zone.done+' / '+zone.total+' · '+zone.topic;content.append(progress);
+      const progress=document.createElement('span');progress.className='atlas-progress';progress.textContent=zone.isLearningHub?'隨時選題 · 反覆練習 · 收藏與跨日複習':'單字收集 '+zone.done+' / '+zone.total+' · '+zone.topic;content.append(progress);
       detail.append(content);
       const action=document.createElement('button');action.type='button';action.className='atlas-travel';action.disabled=zone.current||!zone.unlocked;
       action.textContent=zone.current?'正在此處冒險':zone.unlocked?'傳送前往':zone.parentZone?lockLabel(zone):'Lv.'+zone.reqLevel+' 解鎖';
