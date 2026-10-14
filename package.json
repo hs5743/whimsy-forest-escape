@@ -1,0 +1,18 @@
+{
+  "name": "whimsy-forest-escape",
+  "version": "2.4.0",
+  "description": "3D WebGL / Three.js English Learning Adventure Game",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/*.cjs"
+  },
+  "keywords": [
+    "threejs",
+    "webgl",
+    "english-learning",
+    "gamification",
+    "gept-kids"
+  ],
+  "author": "hs5743",
+  "license": "MIT"
+}

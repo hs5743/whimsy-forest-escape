@@ -318,10 +318,10 @@ class SpatialZoneManager {
 
   // 取得各空間邊界限制
   getZoneBounds() {
-    if(this.currentZoneId==='learningHub')return window.LearningHubScene.bounds;
-    if(this.currentZoneId==='zone13')return window.HarmonicaScene.bounds;
-    if(this.currentZoneId==='zone12')return window.SchoolScene.bounds;
-    if(this.currentZoneId==='zone11')return window.RestaurantScene.bounds;
+    if(this.currentZoneId==='learningHub')return window.LearningHubScene?.bounds || { minX: -15, maxX: 15, minZ: -15, maxZ: 15 };
+    if(this.currentZoneId==='zone13')return window.HarmonicaScene?.bounds || { minX: -15, maxX: 15, minZ: -15, maxZ: 15 };
+    if(this.currentZoneId==='zone12')return window.SchoolScene?.bounds || { minX: -15, maxX: 15, minZ: -15, maxZ: 15 };
+    if(this.currentZoneId==='zone11')return window.RestaurantScene?.bounds || { minX: -15, maxX: 15, minZ: -15, maxZ: 15 };
     if (this.currentZoneId === 'zone1') {
       return {
         minX: -5.4,
