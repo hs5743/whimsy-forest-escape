@@ -1348,6 +1348,21 @@ class World3D {
 
     if (!modal) return;
 
+    // 依當前秘境區域動態對齊專屬守護者立繪與導師肖像
+    const currentZone = this.zoneManager?.currentZoneId || 'zone1';
+    const zonePortraits = {
+      'zone1': { name: '貓頭鷹長老 Ollie', img: 'assets/textures/owl-guide.png' },
+      'zone6': { name: '瑪琳娜船長 Marina', img: 'assets/textures/captain_marina_portrait.jpg' },
+      'zone7': { name: '艾瑟爾賢者 Aethel', img: 'assets/textures/astrologer_aethel_portrait.jpg' },
+      'zone8': { name: '佛洛斯特長老 Frost', img: 'assets/textures/archmage_frost_portrait.jpg' },
+      'zone9': { name: '奧利弗大校長 Oliver', img: 'assets/textures/grand_archmage_oliver_portrait.jpg' },
+      'zone10': { name: '艾莉雅精靈使 Aria', img: 'assets/textures/aria_guardian_portrait.png' }
+    };
+    if (zonePortraits[currentZone] && (!data.mascotImg || data.mascotImg.includes('fox-guide'))) {
+      data.mascotName = zonePortraits[currentZone].name;
+      data.mascotImg = zonePortraits[currentZone].img;
+    }
+
     // 填入吉祥物與單字資料
     document.getElementById('modalMascotImg').src = data.mascotImg;
     document.getElementById('modalMascotName').textContent = data.mascotName;
@@ -1421,12 +1436,21 @@ class World3D {
       window.speechManager.playWordVoice(wordKey);
     }
 
-    // 綁定發音按鈕
+    // 綁定發音按鈕 (正常速 0.95x 與慢速示範 0.65x)
     const voiceBtn = document.getElementById('playVoiceBtn');
-    voiceBtn.onclick = (e) => {
-      if (e) e.stopPropagation();
-      if (window.speechManager) window.speechManager.playWordVoice(wordKey);
-    };
+    if (voiceBtn) {
+      voiceBtn.onclick = (e) => {
+        if (e) e.stopPropagation();
+        if (window.speechManager) window.speechManager.playWordVoice(wordKey, 0.95);
+      };
+    }
+    const slowVoiceBtn = document.getElementById('btnSlowVoice');
+    if (slowVoiceBtn) {
+      slowVoiceBtn.onclick = (e) => {
+        if (e) e.stopPropagation();
+        if (window.speechManager) window.speechManager.playWordVoice(wordKey, 0.65);
+      };
+    }
 
     // 綁定麥克風口說辨識
     micBtn.onclick = (e) => {

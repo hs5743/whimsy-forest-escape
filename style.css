@@ -3281,5 +3281,235 @@ body, html {
   }
 }
 
+/* ========================================================= */
+/* 封面主題直達入口與傳送門 (Cover Quick Portals)               */
+/* ========================================================= */
+.cover-portal-section {
+  margin: 14px 0 10px;
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.portal-section-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: #fde68a;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  letter-spacing: 0.8px;
+  text-align: center;
+}
+
+.cover-portal-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+}
+
+.btn-cover-portal {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  cursor: pointer;
+  border: 1.5px solid rgba(245, 158, 11, 0.6);
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.92) 0%, rgba(15, 23, 42, 0.96) 100%);
+  color: #ffffff;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  text-align: left;
+  user-select: none;
+}
+
+.btn-cover-portal:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.45);
+  border-color: #fbbf24;
+}
+
+.btn-cover-portal.portal-hub {
+  border-color: rgba(56, 189, 248, 0.7);
+  background: linear-gradient(135deg, rgba(12, 74, 110, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%);
+}
+
+.btn-cover-portal.portal-hub:hover {
+  border-color: #38bdf8;
+  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.45);
+}
+
+.btn-cover-portal.portal-school {
+  border-color: rgba(234, 88, 12, 0.7);
+  background: linear-gradient(135deg, rgba(124, 45, 18, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%);
+}
+
+.btn-cover-portal.portal-school:hover {
+  border-color: #fb923c;
+  box-shadow: 0 6px 20px rgba(234, 88, 12, 0.45);
+}
+
+.portal-badge-icon {
+  font-size: 22px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.portal-text-box {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.portal-main-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #fef08a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.portal-sub-desc {
+  font-size: 10px;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.portal-arrow {
+  font-size: 13px;
+  color: #f59e0b;
+  flex-shrink: 0;
+}
+
+@media (max-width: 540px) {
+  .cover-portal-buttons {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ========================================================= */
+/* 慢速發音 (0.65x~0.8x) 語音按鈕樣式                        */
+/* ========================================================= */
+.btn-voice.btn-slow-voice,
+.btn-listen-mini.btn-listen-slow {
+  background: linear-gradient(135deg, rgba(180, 83, 9, 0.85) 0%, rgba(146, 64, 14, 0.95) 100%) !important;
+  border: 1px solid #fde68a !important;
+  color: #fef3c7 !important;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.btn-voice.btn-slow-voice:hover,
+.btn-listen-mini.btn-listen-slow:hover {
+  background: linear-gradient(135deg, rgba(217, 119, 6, 0.95) 0%, rgba(180, 83, 9, 1) 100%) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(245, 158, 11, 0.4);
+}
+
+/* ========================================================= */
+/* 守護者對話視窗：高解析度立繪側欄 (Guardian Standee)        */
+/* ========================================================= */
+.guardian-dialog-container.guardian-dialog-split {
+  max-width: 860px;
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  align-items: stretch;
+}
+
+.guardian-standee-side {
+  width: 220px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.standee-frame {
+  width: 100%;
+  height: 100%;
+  min-height: 380px;
+  background: radial-gradient(circle at 50% 20%, #1e293b 0%, #090d16 100%);
+  border: 2px solid #f59e0b;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), inset 0 0 24px rgba(245, 158, 11, 0.25);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.standee-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  transition: transform 0.5s ease;
+}
+
+.standee-frame:hover .standee-img {
+  transform: scale(1.04);
+}
+
+.standee-overlay-aura {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 40%, rgba(15, 23, 42, 0.75) 80%, rgba(15, 23, 42, 0.98) 100%);
+  pointer-events: none;
+}
+
+.standee-badge-box {
+  position: relative;
+  z-index: 2;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.standee-role-badge {
+  font-size: 11px;
+  font-weight: 800;
+  color: #fde047;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+.standee-name-badge {
+  font-size: 16px;
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+}
+
+.guardian-main-panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 768px) {
+  .guardian-dialog-container.guardian-dialog-split {
+    flex-direction: column;
+    max-width: 600px;
+  }
+  .guardian-standee-side {
+    display: none;
+  }
+}
+
 
 

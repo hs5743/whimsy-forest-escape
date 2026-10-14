@@ -139,23 +139,24 @@ class SpeechManager {
     }
   }
 
-  playWordVoice(wordKey) {
+  playWordVoice(wordKey, rate = 0.85) {
     this.interruptForVoice();
     this.stopVoice();
     this.applyVoiceVolume();
     const key = wordKey.toUpperCase();
     if (this.audioCache[key]) {
       this.currentVoice = this.audioCache[key];
+      try { this.currentVoice.playbackRate = (rate < 0.8) ? 0.75 : 1.0; } catch (_) {}
       window.audioManager?.duckBgm(.25);
       const voice = this.currentVoice;
       voice.onended = () => { if (this.currentVoice === voice) window.audioManager?.unduckBgm(); };
-      voice.onerror = () => { if (this.currentVoice === voice) this.fallbackSpeechSynthesis(key); };
+      voice.onerror = () => { if (this.currentVoice === voice) this.fallbackSpeechSynthesis(key, rate); };
       this.audioCache[key].currentTime = 0;
       this.audioCache[key].play().catch(() => {
-        if (this.currentVoice === voice) this.fallbackSpeechSynthesis(key);
+        if (this.currentVoice === voice) this.fallbackSpeechSynthesis(key, rate);
       });
     } else {
-      this.fallbackSpeechSynthesis(key);
+      this.fallbackSpeechSynthesis(key, rate);
     }
   }
 
@@ -175,12 +176,12 @@ class SpeechManager {
     window.audioManager?.unduckBgm();
   }
   defer(callback, delay) { const session=this.session; return setTimeout(()=>{if(session===this.session) callback();},delay); }
-  fallbackSpeechSynthesis(word) {
+  fallbackSpeechSynthesis(word, rate = 0.85) {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utter = new SpeechSynthesisUtterance(word.toLowerCase());
       utter.lang = 'en-US';
-      utter.rate = 0.85;
+      utter.rate = Math.max(0.4, Math.min(1.2, rate));
       const settings=window.world3D?.settings || GamePolish.loadSettings(localStorage); utter.volume=settings.master*settings.voice;
       utter.onstart = () => {
         if (window.audioManager && typeof window.audioManager.duckBgm === 'function') {

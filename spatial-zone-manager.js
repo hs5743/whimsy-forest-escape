@@ -1134,11 +1134,11 @@ class SpatialZoneManager {
     if(leavingHub&&!options.restore&&zoneId!==hubReturn.zone){this.world.showToast('請先返回原本的冒險，再沿秘境路線前進。');return false;}
     if(zoneId==='learningHub'&&this.currentZoneId!=='learningHub'&&!options.restore&&!window.LearningHub.remember(this.world))return false;
     window.LearningHub?.close();
-    if (window.RealmQuests && !window.RealmQuests.canTravel(this.currentZoneId, zoneId, this.world.gameState.realmPuzzles, {restore:options.restore===true,dev:this.world.devMode})) {
+    if (!options.directAccess && window.RealmQuests && !window.RealmQuests.canTravel(this.currentZoneId, zoneId, this.world.gameState.realmPuzzles, {restore:options.restore===true,dev:this.world.devMode})) {
       this.world.showToast(zoneId==='zone11'?'店主：先完成陽光微風市集的採買並結帳，再來幫忙準備熱湯！':'出口還在等待秘境任務。點「秘境任務」閱讀線索、完成機關，再往下一關出發。');
       return false;
     }
-    if (!this.world.devMode && !this.isZoneUnlocked(zoneId)) {
+    if (!this.world.devMode && !options.directAccess && !this.isZoneUnlocked(zoneId)) {
       if (this.world) {
         this.world.showToast(`🔒 冒險者等級未達 Lv.${this.zones[zoneId].reqLevel}，請先完成前序空間！`);
       }

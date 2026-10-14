@@ -855,6 +855,28 @@
         <button type="button" onclick="openStoryPrologue(1)">閱讀故事序章</button><span aria-hidden="true">·</span>
         <button id="btnCoverLogin" type="button" onclick="toggleStudentModal()">冒險者登入</button>
       </div>
+      <!-- 課堂教學與實境直達入口 (Quick Teleport Portals) -->
+      <div class="cover-portal-section" aria-label="主題直達傳送門">
+        <div class="portal-section-title">⚡ 課堂教學與新功能直達入口</div>
+        <div class="cover-portal-buttons">
+          <button id="btnCoverQuickHub" class="btn-cover-portal portal-hub" type="button" onclick="quickJumpToZone('learningHub')">
+            <span class="portal-badge-icon">🌟</span>
+            <div class="portal-text-box">
+              <span class="portal-main-title">探險家學習大廳</span>
+              <span class="portal-sub-desc">GEPT 603單字・88句型・複習牆</span>
+            </div>
+            <span class="portal-arrow" aria-hidden="true">➔</span>
+          </button>
+          <button id="btnCoverQuickSchool" class="btn-cover-portal portal-school" type="button" onclick="quickJumpToZone('zone12')">
+            <span class="portal-badge-icon">🏫</span>
+            <div class="portal-text-box">
+              <span class="portal-main-title">新港國小實境展館</span>
+              <span class="portal-sub-desc">傳統舞獅・校史建築・口琴展館</span>
+            </div>
+            <span class="portal-arrow" aria-hidden="true">➔</span>
+          </button>
+        </div>
+      </div>
       <div id="assetLoadStatus" class="asset-status" role="status">正在準備魔法世界…</div>
       <button id="btnBootRetry" class="cover-skip-link" type="button" hidden onclick="location.reload()">重新準備魔法世界 ↻</button>
       <div class="cover-skip-row"><button id="btnCoverDirectPlay" disabled class="cover-skip-link" onclick="completeOnboardingAndEnterGame()" type="button">我會操作，直接探索 ↗</button></div>
@@ -1318,8 +1340,11 @@
       </div>
 
       <div class="action-buttons-row">
-        <button id="playVoiceBtn" class="btn-voice" type="button">
+        <button id="playVoiceBtn" class="btn-voice" type="button" title="正常速度聆聽示範 (0.95x)">
           <span aria-hidden="true">🔊</span> 聽示範
+        </button>
+        <button id="btnSlowVoice" class="btn-voice btn-slow-voice" type="button" title="慢速示範發音 (0.65x)">
+          <span aria-hidden="true">🐢</span> 慢速
         </button>
         <button id="micButton" class="btn-mic" type="button">
           <span>開始朗讀</span>
@@ -1694,11 +1719,25 @@
   <div id="sceneLoadNotice" class="scene-load-notice" hidden><span id="sceneLoadLabel" role="status" aria-live="polite"></span><button id="sceneLoadRetry" type="button" hidden onclick="window.world3D?.zoneManager.retryTextures()">重新載入</button></div>
   <!-- 關卡主英語問句三重試煉彈窗 (Guardian Question Trial Modal) -->
   <div id="guardianTrialModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 160; display: none; justify-content: center; align-items: center; padding: 12px;">
-    <div class="guardian-dialog-container">
+    <div class="guardian-dialog-container guardian-dialog-split">
       <button class="modal-close-btn" type="button" onclick="closeGuardianTrialModal()" aria-label="關閉">✕</button>
 
-      <!-- 頂部：關卡主標頭與試煉進度 -->
-      <div class="guardian-header">
+      <!-- 左側：專屬守護者高清動態立繪看板 (Guardian High-Res Standee) -->
+      <div class="guardian-standee-side" id="guardianStandeeSide">
+        <div class="standee-frame">
+          <img id="guardianStandeeImg" class="standee-img" src="assets/textures/captain_marina_portrait.jpg" alt="Guardian Portrait">
+          <div class="standee-overlay-aura"></div>
+          <div class="standee-badge-box">
+            <span id="guardianStandeeBadge" class="standee-role-badge">⚓ 皇家海港總督</span>
+            <div id="guardianStandeeName" class="standee-name-badge">瑪琳娜船長</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右側：主要對話與試煉面板 -->
+      <div class="guardian-main-panel">
+        <!-- 頂部：關卡主標頭與試煉進度 -->
+        <div class="guardian-header">
         <div class="guardian-identity-badge">
           <div id="guardianAvatarWrap" class="guardian-avatar-wrap">
             <span id="guardianAvatarEmoji">⚓</span>
@@ -1769,9 +1808,14 @@
           <div class="guardian-speech-bubble" style="margin-bottom: 12px;">
             <div class="bubble-speaker" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
               <span id="mcCaptainSpeakerTag">📢 瑪琳娜船長發問：</span>
-              <button type="button" id="btnListenSentenceVoice" class="btn-listen-mini" onclick="event.stopPropagation(); playCurrentQuestionVoice();" title="聆聽船長示範整句">
-                🔊 聽船長示範整句
-              </button>
+              <div style="display: flex; gap: 6px;">
+                <button type="button" id="btnListenSentenceVoice" class="btn-listen-mini" onclick="event.stopPropagation(); playCurrentQuestionVoice(0.9);" title="聆聽示範整句 (正常速)">
+                  🔊 聽示範
+                </button>
+                <button type="button" id="btnListenSentenceSlow" class="btn-listen-mini btn-listen-slow" onclick="event.stopPropagation(); playCurrentQuestionVoice(0.65);" title="慢速示範發音 (0.65x)">
+                  🐢 慢速
+                </button>
+              </div>
             </div>
             <p id="mcCaptainPromptText" style="margin: 6px 0 0 0; color: #f8fafc; font-size: 14px; line-height: 1.5;">
               “Ahoy! 看看碼頭邊這艘遠洋三桅帆船。如果你想向水手打聽它的航行方向，英語該怎麼問呢？請告訴我空格該填什麼字詞：”
@@ -1812,9 +1856,14 @@
           <div class="guardian-speech-bubble" style="margin-bottom: 12px;">
             <div class="bubble-speaker" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
               <span id="speechCaptainSpeakerTag">📢 瑪琳娜船長指令：</span>
-              <button type="button" class="btn-listen-mini" onclick="event.stopPropagation(); playCurrentSpeechTargetVoice();" title="聆聽外師示範">
-                🔊 聽船長示範發音
-              </button>
+              <div style="display: flex; gap: 6px;">
+                <button type="button" class="btn-listen-mini" onclick="event.stopPropagation(); playCurrentSpeechTargetVoice(0.9);" title="聆聽外師示範 (正常速)">
+                  🔊 聽示範
+                </button>
+                <button type="button" class="btn-listen-mini btn-listen-slow" onclick="event.stopPropagation(); playCurrentSpeechTargetVoice(0.65);" title="慢速示範發音 (0.65x)">
+                  🐢 慢速
+                </button>
+              </div>
             </div>
             <p id="speechCaptainPromptText" style="margin: 6px 0 0 0; color: #f8fafc; font-size: 14px; line-height: 1.5;">
               “最後一關！請看著海港燈塔，向我清晰朗讀這句問句：『Where is the harbor lighthouse?』正確率達到 80% 以上，就能正式通關！”
@@ -1887,6 +1936,7 @@
         </div>
       </div>
     </div>
+  </div>
   </div>
 
   <!-- 提示氣泡 (Toast Notice) -->
@@ -2262,6 +2312,27 @@
     }
     window.completeOnboardingAndEnterGame = completeOnboardingAndEnterGame;
     window.directEnterGame = completeOnboardingAndEnterGame;
+
+    function quickJumpToZone(zoneId) {
+      completeOnboardingAndEnterGame();
+      const tryJump = (attempts = 0) => {
+        if (window.world3D?.zoneManager && window.world3D.zoneManager.zones[zoneId]) {
+          if (zoneId === 'learningHub') {
+            window.world3D.switchZone('learningHub', { directAccess: true });
+            setTimeout(() => window.LearningHub?.open?.(), 350);
+          } else {
+            window.world3D.switchZone(zoneId, { directAccess: true });
+            if (zoneId === 'zone12') {
+              window.world3D.showToast('🏫 已直達新港國小實境展館！請向左右環視探索校園。');
+            }
+          }
+        } else if (attempts < 50) {
+          setTimeout(() => tryJump(attempts + 1), 100);
+        }
+      };
+      tryJump();
+    }
+    window.quickJumpToZone = quickJumpToZone;
 
     // 向下相容既有導引呼叫
     function toggleGuideModal() {
@@ -2755,6 +2826,20 @@
           avatarWrap.innerHTML = `<span id="guardianAvatarEmoji">${trialData.bossEmoji || '⚓'}</span>`;
         }
       }
+      const standeeImg = document.getElementById('guardianStandeeImg');
+      const standeeBadge = document.getElementById('guardianStandeeBadge');
+      const standeeName = document.getElementById('guardianStandeeName');
+      if (standeeImg) {
+        if (trialData.bossAvatar && (trialData.bossAvatar.endsWith('.png') || trialData.bossAvatar.endsWith('.jpg'))) {
+          standeeImg.src = trialData.bossAvatar;
+          standeeImg.style.display = 'block';
+        } else {
+          standeeImg.src = 'assets/textures/owl-guide.png';
+        }
+      }
+      if (standeeBadge) standeeBadge.textContent = trialData.bossRole || '關卡守護者';
+      if (standeeName) standeeName.textContent = bossName;
+
       if (roleEl) roleEl.textContent = trialData.bossRole || '關卡主';
       if (nameEl) nameEl.textContent = bossName;
       if (introSpeakerEl) introSpeakerEl.textContent = `📢 ${bossName} 對話：`;
@@ -2975,22 +3060,22 @@
     }
     window.forcePassGuardianSpeech = forcePassGuardianSpeech;
 
-    function playCurrentQuestionVoice() {
+    function playCurrentQuestionVoice(rate = 0.85) {
       if (!currentGuardianTrial || !currentGuardianTrial.questions) return;
       if (currentTrialStep === 1 || currentTrialStep === 2) {
         const q = currentGuardianTrial.questions[currentTrialStep - 1];
         if (q && q.audioText && window.speechManager) {
-          window.speechManager.playSentenceVoice(q.audioText);
+          window.speechManager.playSentenceVoice(q.audioText, rate);
         }
       }
     }
     window.playCurrentQuestionVoice = playCurrentQuestionVoice;
 
-    function playCurrentSpeechTargetVoice() {
+    function playCurrentSpeechTargetVoice(rate = 0.85) {
       if (!currentGuardianTrial || !currentGuardianTrial.questions) return;
       const q = currentGuardianTrial.questions[2];
       if (q && q.audioText && window.speechManager) {
-        window.speechManager.playSentenceVoice(q.audioText);
+        window.speechManager.playSentenceVoice(q.audioText, rate);
       }
     }
     window.playCurrentSpeechTargetVoice = playCurrentSpeechTargetVoice;
