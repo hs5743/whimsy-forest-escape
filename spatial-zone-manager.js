@@ -3,7 +3,7 @@
 // 全面實作：全景天空頂穹 (Sky Dome)、標準幾何奧林匹克跑道、精準障礙物防穿透實體碰撞 (Solid Collision)
 
 class SpatialZoneManager {
-  constructor(world) {
+  constructor(world, options = {}) {
     this.world = world;
     this.currentZoneId = 'zone1';
     this.texturesLoaded = false;
@@ -138,7 +138,8 @@ class SpatialZoneManager {
     this.zones.zone13={id:'zone13',name:'半音階口琴：掌心音樂展示館',englishName:'Chromatic Harmonica Gallery',icon:'🎵',topic:'Harmonica, Sound & Playing',reqLevel:4,parentZone:'zone12',desc:'從新港校園音樂翼走進口琴展示館。探索完整口琴、分層簧片、滑鍵半音與吹吸練習，用八個新英語詞完成小小展演。',words:['SMALL','MOUTH','HAND','LEFT','RIGHT','HIGH','PLAY','SONG'],spawnPos:[0,1.6,9.4],spawnYaw:0};
     const learningHub={id:'learningHub',name:'英語探險家學習大廳',englishName:'Explorer Language Lounge',icon:'📚',topic:'自由選題 · 單字 · 句型 · 複習',reqLevel:1,isLearningHub:true,desc:'與狐狸館長、貓頭鷹老師和兔子教練反覆練習，收藏想學的單字，累積口說、句型與跨日複習紀錄。完成後返回原來的冒險。',words:[],spawnPos:[0,1.6,8],spawnYaw:0};
     this.zones.learningHub=learningHub;
-    this.initTextures();
+    if(!options.metadataOnly)this.initTextures();
+    else {this.textureSources=new Map();this.textureStatus=new Map();}
     this.initColliders();
   }
 
@@ -1060,12 +1061,17 @@ class SpatialZoneManager {
     const zone = this.zones[zoneId];
     if (!zone) return false;
     const userLevel = (window.cloudSyncManager && window.cloudSyncManager.profile) 
-      ? window.cloudSyncManager.profile.level 
+      ? Math.max(window.cloudSyncManager.profile.level, window.cloudSyncManager.profile.accessLevel || 1)
       : 1;
     if(zoneId==='zone13')return userLevel>=zone.reqLevel && !!window.HarmonicaChapter && !!window.SchoolChapter?.solved(this.world.gameState.realmPuzzles?.zone12);
     if(zoneId==='zone12')return userLevel>=zone.reqLevel && !!window.RealmQuests?.solved('zone4',this.world.gameState.realmPuzzles?.zone4);
     if(zoneId==='zone11')return userLevel>=zone.reqLevel && !!window.RealmQuests?.solved('zone2',this.world.gameState.realmPuzzles?.zone2);
     return userLevel >= zone.reqLevel;
+  }
+
+  // The learning lounge has no scavenger clues; branch zones retain their unlock gates.
+  getUnlockedZoneIds() {
+    return Object.keys(this.zones).filter(id => !this.zones[id].isLearningHub && this.isZoneUnlocked(id));
   }
 
   getTexture(url, variant = '') {
@@ -1116,7 +1122,7 @@ class SpatialZoneManager {
     const failed=textures.filter(t=>this.textureStatus.get(t)==='failed').length;
     const loading=textures.length-ready-failed;
     const message=failed?'部分素材暫缺，可重新載入':loading?'場景素材準備中 '+ready+' / '+textures.length:'場景素材已就緒';
-    const status=document.getElementById('assetLoadStatus');if(status) status.textContent=message;
+    const status=document.getElementById('assetLoadStatus');if(status) status.textContent=(this.world.isFallback2D?'圖卡模式 · ':'')+message;
     const notice=document.getElementById('sceneLoadNotice');if(notice) notice.hidden=!loading&&!failed;
     const label=document.getElementById('sceneLoadLabel');if(label) label.textContent=message;
     const retry=document.getElementById('sceneLoadRetry');if(retry) retry.hidden=!failed;
@@ -1520,28 +1526,24 @@ class SpatialZoneManager {
     // 蔬果與烘焙攤位 (自然有機分布)
     this.buildDetailedMarketStall(group, -4.5, 0, -1.0, 'apple', '🍎 甜美紅蘋果攤 (APPLE)', 'stall_apple', () => {
       this.world.openSpeechCard('APPLE', () => {
-        this.world.addXP(60);
         this.world.addInventory('ITEM_APPLE', '🍎 甜脆紅蘋果', '#ef4444');
       });
     }, 0.2);
 
     this.buildDetailedMarketStall(group, 4.2, 0, 1.2, 'banana', '🍌 活力金香蕉 (BANANA)', 'stall_banana', () => {
       this.world.openSpeechCard('BANANA', () => {
-        this.world.addXP(60);
         this.world.addInventory('ITEM_BANANA', '🍌 香甜金香蕉', '#eab308');
       });
     }, -0.3);
 
     this.buildDetailedCart(group, -3.2, 0, -5.2, 'bread', '🥖 剛出爐的烤麵包 (BREAD)', 'cart_bread', () => {
       this.world.openSpeechCard('BREAD', () => {
-        this.world.addXP(60);
         this.world.addInventory('ITEM_BREAD', '🥖 麥香長法棍', '#b45309');
       });
     }, 0.2);
 
     this.buildDetailedCart(group, 3.5, 0, -3.5, 'milk', '🥛 香濃鮮牛奶 (MILK)', 'cart_milk', () => {
       this.world.openSpeechCard('MILK', () => {
-        this.world.addXP(60);
         this.world.addInventory('ITEM_MILK', '🥛 牧場鮮牛奶', '#60a5fa');
       });
     }, -0.15);
@@ -1682,28 +1684,24 @@ class SpatialZoneManager {
     // 中央大理石噴泉 (WATER)
     this.buildMarbleFountain(group, -0.5, 0, -1.2, '⛲ 清涼純淨的活泉水 (WATER)', 'poi_water', () => {
       this.world.openSpeechCard('WATER', () => {
-        this.world.addXP(60);
       });
     });
 
     // 守護白兔 (RABBIT)
     this.buildSculptedRabbit(group, 3.8, 0, 0.6, '🐰 正在草地上蹦跳的兔子 (RABBIT)', 'RABBIT', () => {
       this.world.openSpeechCard('RABBIT', () => {
-        this.world.addXP(70);
       });
     });
 
     // 歌唱青鳥 (BIRD)
     this.buildBirdOnPedestal(group, -4.5, 0, 1.5, '🐦 枝頭歌唱的青鳥 (BIRD)', 'BIRD', () => {
       this.world.openSpeechCard('BIRD', () => {
-        this.world.addXP(70);
       });
     });
 
     // 精靈古樹 (TREE)
     this.buildAncientWorldTree(group, 4.8, 0, -4.5, '🌳 茂密的精靈古樹 (TREE)', 'TREE', () => {
       this.world.openSpeechCard('TREE', () => {
-        this.world.addXP(60);
       });
     });
 
@@ -1831,21 +1829,18 @@ class SpatialZoneManager {
     // 足球與標準球門 (BALL / SOCCER) - 位於北側禁區
     this.buildSoccerGoalAndBall(group, 0, 0, -8.5, '⚽ 綠茵場上的足球 (SOCCER / BALL)', 'BALL', () => {
       this.world.openSpeechCard('BALL', () => {
-        this.world.addXP(60);
       });
     });
 
     // 直道起跑點、助跑塊與接力棒 (RUN) - 位於西直道第 1 分道
     this.buildStartingBlocks(group, -7.3, 0, 4.0, '🏃 起跑線加速奔跑 (RUN)', 'RUN', () => {
       this.world.openSpeechCard('RUN', () => {
-        this.world.addXP(60);
       });
     });
 
     // 跳躍運動區 (JUMP) - 位於內場跳高墊、跳箱與沙坑
     this.buildJumpEquipment(group, 2.8, 0, 3.2, '🦘 體育跳箱與跳躍 (JUMP)', 'JUMP', () => {
       this.world.openSpeechCard('JUMP', () => {
-        this.world.addXP(60);
       });
     });
 
@@ -2139,21 +2134,18 @@ class SpatialZoneManager {
     // 巨型天文時鐘塔 (TIME / CLOCK)
     this.buildAstronomicalClockTower(group, -2.8, 0, -8.5, '🕰️ 月台巨型天文時鐘 (TIME / CLOCK)', 'TIME', () => {
       this.world.openSpeechCard('TIME', () => {
-        this.world.addXP(80);
       });
     });
 
     // 3D 蒸汽特快車頭 (TRAIN) - 具備實體碰撞
     this.buildSteamLocomotive(group, 5.2, 0, -3.2, '🚂 魔法星光特快列車 (TRAIN)', 'TRAIN', () => {
       this.world.openSpeechCard('TRAIN', () => {
-        this.world.addXP(80);
       });
     });
 
     // 晨曦煤氣路燈與長椅 (MORNING)
     this.buildGasLampAndBench(group, -4.5, 0, 1.0, '🌅 照亮晨曦的月台路燈 (MORNING)', 'MORNING', () => {
       this.world.openSpeechCard('MORNING', () => {
-        this.world.addXP(80);
       });
     });
 
@@ -4140,7 +4132,6 @@ class SpatialZoneManager {
     // 9. 航向新世界海關拱門 (OPEN POI)
     this.buildHarborGrandArchPortal(group, 0.0, 0, -13.0, '🚪 航向新世界海關拱門 (OPEN)', 'OPEN', () => {
       this.world.openSpeechCard('OPEN', () => {
-        this.world.addXP(80);
         this.checkZoneCompletionStatus();
       });
     });
@@ -4425,7 +4416,6 @@ class SpatialZoneManager {
       label: '🚢 皇家遠洋三桅帆船 (SHIP)',
       onClick: () => {
         this.world.openSpeechCard('SHIP', () => {
-          this.world.addXP(80);
           this.checkZoneCompletionStatus();
         });
       }
@@ -4549,7 +4539,6 @@ class SpatialZoneManager {
       label: '🌬️ 燈塔航海風向標 (WIND)',
       onClick: () => {
         this.world.openSpeechCard('WIND', () => {
-          this.world.addXP(80);
           this.checkZoneCompletionStatus();
         });
       }
@@ -4622,7 +4611,6 @@ class SpatialZoneManager {
       label: '🛶 碼頭木造巡邏小艇 (BOAT)',
       onClick: () => {
         this.world.openSpeechCard('BOAT', () => {
-          this.world.addXP(80);
           this.checkZoneCompletionStatus();
         });
       }
@@ -4692,7 +4680,6 @@ class SpatialZoneManager {
       label: '🐟 鮮美漁獲貨箱 (FISH)',
       onClick: () => {
         this.world.openSpeechCard('FISH', () => {
-          this.world.addXP(80);
           this.checkZoneCompletionStatus();
         });
       }
@@ -4742,7 +4729,6 @@ class SpatialZoneManager {
       label: '🌊 澄澈碧藍港灣 (WATER)',
       onClick: () => {
         this.world.openSpeechCard('WATER', () => {
-          this.world.addXP(80);
           this.checkZoneCompletionStatus();
         });
       }
@@ -5244,7 +5230,6 @@ class SpatialZoneManager {
     // 9. 星界凱旋星門 (OPEN POI, x: 0.0, z: -12.5) - 雙柱古典大理石凱旋門與事件視界漩渦
     this.buildObservatoryStargatePortal(group, 0.0, 0, -12.5, '🚪 星界凱旋星門 (OPEN)', 'OPEN', () => {
       this.world.openSpeechCard('OPEN', () => {
-        this.world.addXP(100);
         this.checkZoneCompletionStatus();
       });
     });
@@ -5834,7 +5819,6 @@ class SpatialZoneManager {
       label: '🔭 觀測星穹巨型折射望遠鏡 (SKY)',
       onClick: () => {
         this.world.openSpeechCard('SKY', () => {
-          this.world.addXP(50);
           this.checkZoneCompletionStatus();
         });
       }
@@ -5953,7 +5937,6 @@ class SpatialZoneManager {
       label: '⭐ 轉動遠古星辰渾天儀 (STAR)',
       onClick: () => {
         this.world.openSpeechCard('STAR', () => {
-          this.world.addXP(60);
           this.checkZoneCompletionStatus();
         });
       }
@@ -6055,7 +6038,6 @@ class SpatialZoneManager {
       label: '🌙 凝望蒼月潮汐日晷儀 (MOON)',
       onClick: () => {
         this.world.openSpeechCard('MOON', () => {
-          this.world.addXP(60);
           this.checkZoneCompletionStatus();
         });
       }
@@ -6171,7 +6153,6 @@ class SpatialZoneManager {
       label: '☀️ 調校日冕光學分光鏡 (SUN)',
       onClick: () => {
         this.world.openSpeechCard('SUN', () => {
-          this.world.addXP(50);
           this.checkZoneCompletionStatus();
         });
       }
@@ -6257,7 +6238,6 @@ class SpatialZoneManager {
       label: '☁️ 聆聽雲海氣象祭壇之風 (CLOUD)',
       onClick: () => {
         this.world.openSpeechCard('CLOUD', () => {
-          this.world.addXP(50);
           this.checkZoneCompletionStatus();
         });
       }
@@ -6613,7 +6593,6 @@ class SpatialZoneManager {
     // 10. 寒霜極光攀登冰階 (CLIMB POI, x: 0.0, z: -12.5) - 符文階梯、冰雕扶手與極光巨石天門
     this.buildGlacialClimbStaircase(group, 0.0, 0, -12.5, '🪜 極光寒霜冰階 (CLIMB)', 'CLIMB', () => {
       this.world.openSpeechCard('CLIMB', () => {
-        this.world.addXP(100);
         this.checkZoneCompletionStatus();
         if (this.isZoneUnlocked('zone9')) {
           this.world.showToast('✨ 登上寒霜冰階之巔！通往【星界萬神殿堂】的天梯已完全開啟！');
@@ -7097,7 +7076,6 @@ class SpatialZoneManager {
       label: '❄️ 觸碰冰雪結晶風向儀 (SNOW)',
       onClick: () => {
         this.world.openSpeechCard('SNOW', () => {
-          this.world.addXP(50);
           this.checkZoneCompletionStatus();
         });
       }
@@ -7200,7 +7178,6 @@ class SpatialZoneManager {
       label: '🧊 觸碰極寒玄冰方尖碑 (COLD)',
       onClick: () => {
         this.world.openSpeechCard('COLD', () => {
-          this.world.addXP(50);
           this.checkZoneCompletionStatus();
         });
       }
@@ -7321,7 +7298,6 @@ class SpatialZoneManager {
       label: '🌲 仰望冬之永凍常青松 (WINTER)',
       onClick: () => {
         this.world.openSpeechCard('WINTER', () => {
-          this.world.addXP(60);
           this.checkZoneCompletionStatus();
         });
       }
@@ -7450,7 +7426,6 @@ class SpatialZoneManager {
       label: '⛄ 拜訪純白雪境雪精靈守護者 (WHITE)',
       onClick: () => {
         this.world.openSpeechCard('WHITE', () => {
-          this.world.addXP(50);
           this.checkZoneCompletionStatus();
         });
       }
@@ -7585,7 +7560,6 @@ class SpatialZoneManager {
       label: '🔥 伸手靠近極光暖心魔爐 (WARM)',
       onClick: () => {
         this.world.openSpeechCard('WARM', () => {
-          this.world.addXP(60);
           this.checkZoneCompletionStatus();
         });
       }
@@ -8296,7 +8270,6 @@ class SpatialZoneManager {
       label: '📚 智慧萬卷大書閣 (LIBRARY)',
       onClick: () => {
         this.world.openSpeechCard('LIBRARY', () => {
-          this.world.addXP(60);
           this.checkZoneCompletionStatus();
         });
       }
@@ -8380,7 +8353,6 @@ class SpatialZoneManager {
       label: '📖 遠古懸浮魔法大典 (READ)',
       onClick: () => {
         this.world.openSpeechCard('READ', () => {
-          this.world.addXP(50);
           this.checkZoneCompletionStatus();
         });
       }
@@ -8471,7 +8443,6 @@ class SpatialZoneManager {
       label: '✍️ 大魔導士金羽書寫台 (WRITE)',
       onClick: () => {
         this.world.openSpeechCard('WRITE', () => {
-          this.world.addXP(50);
           this.checkZoneCompletionStatus();
         });
       }
@@ -8552,7 +8523,6 @@ class SpatialZoneManager {
       label: '💡 深思水晶沉思之泉 (THINK)',
       onClick: () => {
         this.world.openSpeechCard('THINK', () => {
-          this.world.addXP(60);
           this.checkZoneCompletionStatus();
         });
       }
@@ -8649,7 +8619,6 @@ class SpatialZoneManager {
       label: '🧠 智慧賢者之冠天秤儀 (SMART)',
       onClick: () => {
         this.world.openSpeechCard('SMART', () => {
-          this.world.addXP(60);
           this.checkZoneCompletionStatus();
         });
       }
@@ -8729,7 +8698,6 @@ class SpatialZoneManager {
       label: '🦅 星界榮耀展翅天台 (FLY)',
       onClick: () => {
         this.world.openSpeechCard('FLY', () => {
-          this.world.addXP(70);
           this.checkZoneCompletionStatus();
         });
       }
@@ -9293,7 +9261,6 @@ class SpatialZoneManager {
       label: '🏝️ [E] 蒼穹浮空主島迎賓方尖碑 (ISLAND)',
       onClick: () => {
         this.world.openSpeechCard('ISLAND', () => {
-          this.world.addXP(60);
           this.checkZoneCompletionStatus();
         });
       }
@@ -9366,7 +9333,6 @@ class SpatialZoneManager {
       label: '🌈 [E] 七彩虹霓以太天橋 (RAINBOW)',
       onClick: () => {
         this.world.openSpeechCard('RAINBOW', () => {
-          this.world.addXP(60);
           this.checkZoneCompletionStatus();
         });
       }
@@ -9456,7 +9422,6 @@ class SpatialZoneManager {
       label: '🎵 [E] 浮空涼亭天籟水晶星琴 (MUSIC)',
       onClick: () => {
         this.world.openSpeechCard('MUSIC', () => {
-          this.world.addXP(60);
           this.checkZoneCompletionStatus();
         });
       }
@@ -9540,7 +9505,6 @@ class SpatialZoneManager {
       label: '🎶 [E] 天青靈鳥歌詠鳥居 (SING)',
       onClick: () => {
         this.world.openSpeechCard('SING', () => {
-          this.world.addXP(60);
           this.checkZoneCompletionStatus();
         });
       }
@@ -9604,7 +9568,6 @@ class SpatialZoneManager {
       label: '💃 [E] 星光石英律動舞池 (DANCE)',
       onClick: () => {
         this.world.openSpeechCard('DANCE', () => {
-          this.world.addXP(60);
           this.checkZoneCompletionStatus();
         });
       }
@@ -9678,7 +9641,6 @@ class SpatialZoneManager {
       label: '✨ [E] 蒼穹祈願星泉與落雲飛瀑 (DREAM)',
       onClick: () => {
         this.world.openSpeechCard('DREAM', () => {
-          this.world.addXP(70);
           this.checkZoneCompletionStatus();
         });
       }

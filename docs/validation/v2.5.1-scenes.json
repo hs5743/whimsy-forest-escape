@@ -1,0 +1,784 @@
+{
+  "version": 1,
+  "capturedAt": "2026-10-16T23:07:04.916Z",
+  "outcome": "巡檢完成",
+  "viewport": {
+    "width": 2560,
+    "height": 1440,
+    "pixelRatio": 0.75
+  },
+  "current": {
+    "zone": "zone2",
+    "quality": "medium",
+    "geometries": 141,
+    "textures": 48,
+    "drawCalls": 110,
+    "frame": {
+      "samples": 1711,
+      "meanMs": 36.86,
+      "p95Ms": 37.1,
+      "totalFrames": 1711,
+      "longFrames": 56,
+      "observedSeconds": 63.1
+    }
+  },
+  "samples": [
+    {
+      "zone": "zone1",
+      "quality": "medium",
+      "geometries": 272,
+      "textures": 17,
+      "drawCalls": 94,
+      "frame": {
+        "samples": 26,
+        "meanMs": 50.79,
+        "p95Ms": 71.6,
+        "totalFrames": 26,
+        "longFrames": 2,
+        "observedSeconds": 1.3
+      },
+      "round": 0,
+      "warmup": true,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone2",
+      "quality": "medium",
+      "geometries": 138,
+      "textures": 17,
+      "drawCalls": 86,
+      "frame": {
+        "samples": 27,
+        "meanMs": 197.35,
+        "p95Ms": 722.6,
+        "totalFrames": 27,
+        "longFrames": 3,
+        "observedSeconds": 5.3
+      },
+      "round": 0,
+      "warmup": true,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone3",
+      "quality": "medium",
+      "geometries": 162,
+      "textures": 22,
+      "drawCalls": 107,
+      "frame": {
+        "samples": 55,
+        "meanMs": 157.66,
+        "p95Ms": 1022.8,
+        "totalFrames": 55,
+        "longFrames": 8,
+        "observedSeconds": 8.7
+      },
+      "round": 0,
+      "warmup": true,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone4",
+      "quality": "medium",
+      "geometries": 457,
+      "textures": 25,
+      "drawCalls": 134,
+      "frame": {
+        "samples": 94,
+        "meanMs": 116.44,
+        "p95Ms": 722.6,
+        "totalFrames": 94,
+        "longFrames": 10,
+        "observedSeconds": 10.9
+      },
+      "round": 0,
+      "warmup": true,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone5",
+      "quality": "medium",
+      "geometries": 149,
+      "textures": 26,
+      "drawCalls": 78,
+      "frame": {
+        "samples": 132,
+        "meanMs": 119.21,
+        "p95Ms": 722.6,
+        "totalFrames": 132,
+        "longFrames": 13,
+        "observedSeconds": 15.7
+      },
+      "round": 0,
+      "warmup": true,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone6",
+      "quality": "medium",
+      "geometries": 174,
+      "textures": 31,
+      "drawCalls": 96,
+      "frame": {
+        "samples": 191,
+        "meanMs": 95.78,
+        "p95Ms": 109.9,
+        "totalFrames": 191,
+        "longFrames": 15,
+        "observedSeconds": 18.3
+      },
+      "round": 0,
+      "warmup": true,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone7",
+      "quality": "medium",
+      "geometries": 307,
+      "textures": 36,
+      "drawCalls": 208,
+      "frame": {
+        "samples": 237,
+        "meanMs": 91.6,
+        "p95Ms": 85.3,
+        "totalFrames": 237,
+        "longFrames": 17,
+        "observedSeconds": 21.7
+      },
+      "round": 0,
+      "warmup": true,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone8",
+      "quality": "medium",
+      "geometries": 225,
+      "textures": 44,
+      "drawCalls": 170,
+      "frame": {
+        "samples": 278,
+        "meanMs": 96.07,
+        "p95Ms": 85.3,
+        "totalFrames": 278,
+        "longFrames": 19,
+        "observedSeconds": 26.7
+      },
+      "round": 0,
+      "warmup": true,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone9",
+      "quality": "medium",
+      "geometries": 314,
+      "textures": 45,
+      "drawCalls": 214,
+      "frame": {
+        "samples": 319,
+        "meanMs": 86.86,
+        "p95Ms": 71.6,
+        "totalFrames": 319,
+        "longFrames": 20,
+        "observedSeconds": 27.7
+      },
+      "round": 0,
+      "warmup": true,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone10",
+      "quality": "medium",
+      "geometries": 122,
+      "textures": 50,
+      "drawCalls": 85,
+      "frame": {
+        "samples": 383,
+        "meanMs": 80.98,
+        "p95Ms": 59.1,
+        "totalFrames": 383,
+        "longFrames": 22,
+        "observedSeconds": 31
+      },
+      "round": 0,
+      "warmup": true,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone11",
+      "quality": "medium",
+      "geometries": 29,
+      "textures": 58,
+      "drawCalls": 51,
+      "frame": {
+        "samples": 449,
+        "meanMs": 74.8,
+        "p95Ms": 55,
+        "totalFrames": 449,
+        "longFrames": 24,
+        "observedSeconds": 33.6
+      },
+      "round": 0,
+      "warmup": true,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone12",
+      "quality": "medium",
+      "geometries": 47,
+      "textures": 64,
+      "drawCalls": 79,
+      "frame": {
+        "samples": 450,
+        "meanMs": 76.88,
+        "p95Ms": 59.1,
+        "totalFrames": 450,
+        "longFrames": 25,
+        "observedSeconds": 34.6
+      },
+      "round": 0,
+      "warmup": true,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone13",
+      "quality": "medium",
+      "geometries": 31,
+      "textures": 56,
+      "drawCalls": 38,
+      "frame": {
+        "samples": 450,
+        "meanMs": 76.88,
+        "p95Ms": 59.1,
+        "totalFrames": 450,
+        "longFrames": 25,
+        "observedSeconds": 34.6
+      },
+      "round": 0,
+      "warmup": true,
+      "failedTextures": 0
+    },
+    {
+      "zone": "learningHub",
+      "quality": "medium",
+      "geometries": 29,
+      "textures": 55,
+      "drawCalls": 34,
+      "frame": {
+        "samples": 455,
+        "meanMs": 78.06,
+        "p95Ms": 60.7,
+        "totalFrames": 455,
+        "longFrames": 27,
+        "observedSeconds": 35.5
+      },
+      "round": 0,
+      "warmup": true,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone1",
+      "quality": "medium",
+      "geometries": 280,
+      "textures": 48,
+      "drawCalls": 94,
+      "frame": {
+        "samples": 493,
+        "meanMs": 74.08,
+        "p95Ms": 59.1,
+        "totalFrames": 493,
+        "longFrames": 28,
+        "observedSeconds": 36.5
+      },
+      "round": 1,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone2",
+      "quality": "medium",
+      "geometries": 139,
+      "textures": 48,
+      "drawCalls": 86,
+      "frame": {
+        "samples": 535,
+        "meanMs": 70.11,
+        "p95Ms": 55,
+        "totalFrames": 535,
+        "longFrames": 29,
+        "observedSeconds": 37.5
+      },
+      "round": 1,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone3",
+      "quality": "medium",
+      "geometries": 161,
+      "textures": 48,
+      "drawCalls": 105,
+      "frame": {
+        "samples": 572,
+        "meanMs": 67.34,
+        "p95Ms": 55,
+        "totalFrames": 572,
+        "longFrames": 31,
+        "observedSeconds": 38.5
+      },
+      "round": 1,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone4",
+      "quality": "medium",
+      "geometries": 457,
+      "textures": 50,
+      "drawCalls": 134,
+      "frame": {
+        "samples": 606,
+        "meanMs": 65.09,
+        "p95Ms": 53.5,
+        "totalFrames": 606,
+        "longFrames": 32,
+        "observedSeconds": 39.4
+      },
+      "round": 1,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone5",
+      "quality": "medium",
+      "geometries": 149,
+      "textures": 48,
+      "drawCalls": 78,
+      "frame": {
+        "samples": 653,
+        "meanMs": 61.93,
+        "p95Ms": 52.7,
+        "totalFrames": 653,
+        "longFrames": 33,
+        "observedSeconds": 40.4
+      },
+      "round": 1,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone6",
+      "quality": "medium",
+      "geometries": 174,
+      "textures": 49,
+      "drawCalls": 96,
+      "frame": {
+        "samples": 703,
+        "meanMs": 58.93,
+        "p95Ms": 47.7,
+        "totalFrames": 703,
+        "longFrames": 34,
+        "observedSeconds": 41.4
+      },
+      "round": 1,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone7",
+      "quality": "medium",
+      "geometries": 308,
+      "textures": 49,
+      "drawCalls": 210,
+      "frame": {
+        "samples": 745,
+        "meanMs": 56.95,
+        "p95Ms": 47.5,
+        "totalFrames": 745,
+        "longFrames": 35,
+        "observedSeconds": 42.4
+      },
+      "round": 1,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone8",
+      "quality": "medium",
+      "geometries": 225,
+      "textures": 49,
+      "drawCalls": 170,
+      "frame": {
+        "samples": 788,
+        "meanMs": 55.08,
+        "p95Ms": 47.2,
+        "totalFrames": 788,
+        "longFrames": 36,
+        "observedSeconds": 43.4
+      },
+      "round": 1,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone9",
+      "quality": "medium",
+      "geometries": 314,
+      "textures": 49,
+      "drawCalls": 214,
+      "frame": {
+        "samples": 833,
+        "meanMs": 53.28,
+        "p95Ms": 46.6,
+        "totalFrames": 833,
+        "longFrames": 37,
+        "observedSeconds": 44.4
+      },
+      "round": 1,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone10",
+      "quality": "medium",
+      "geometries": 122,
+      "textures": 53,
+      "drawCalls": 85,
+      "frame": {
+        "samples": 882,
+        "meanMs": 51.41,
+        "p95Ms": 45.5,
+        "totalFrames": 882,
+        "longFrames": 38,
+        "observedSeconds": 45.3
+      },
+      "round": 1,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone11",
+      "quality": "medium",
+      "geometries": 29,
+      "textures": 58,
+      "drawCalls": 51,
+      "frame": {
+        "samples": 932,
+        "meanMs": 49.69,
+        "p95Ms": 43.2,
+        "totalFrames": 932,
+        "longFrames": 39,
+        "observedSeconds": 46.3
+      },
+      "round": 1,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone12",
+      "quality": "medium",
+      "geometries": 47,
+      "textures": 64,
+      "drawCalls": 79,
+      "frame": {
+        "samples": 985,
+        "meanMs": 48.04,
+        "p95Ms": 42.7,
+        "totalFrames": 985,
+        "longFrames": 40,
+        "observedSeconds": 47.3
+      },
+      "round": 1,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone13",
+      "quality": "medium",
+      "geometries": 31,
+      "textures": 56,
+      "drawCalls": 38,
+      "frame": {
+        "samples": 1035,
+        "meanMs": 46.68,
+        "p95Ms": 42.5,
+        "totalFrames": 1035,
+        "longFrames": 41,
+        "observedSeconds": 48.3
+      },
+      "round": 1,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "learningHub",
+      "quality": "medium",
+      "geometries": 29,
+      "textures": 55,
+      "drawCalls": 34,
+      "frame": {
+        "samples": 1085,
+        "meanMs": 45.4,
+        "p95Ms": 41.8,
+        "totalFrames": 1085,
+        "longFrames": 42,
+        "observedSeconds": 49.3
+      },
+      "round": 1,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone1",
+      "quality": "medium",
+      "geometries": 285,
+      "textures": 48,
+      "drawCalls": 96,
+      "frame": {
+        "samples": 1133,
+        "meanMs": 44.35,
+        "p95Ms": 41.6,
+        "totalFrames": 1133,
+        "longFrames": 43,
+        "observedSeconds": 50.2
+      },
+      "round": 2,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone2",
+      "quality": "medium",
+      "geometries": 139,
+      "textures": 48,
+      "drawCalls": 86,
+      "frame": {
+        "samples": 1173,
+        "meanMs": 43.68,
+        "p95Ms": 41.4,
+        "totalFrames": 1173,
+        "longFrames": 44,
+        "observedSeconds": 51.2
+      },
+      "round": 2,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone3",
+      "quality": "medium",
+      "geometries": 161,
+      "textures": 48,
+      "drawCalls": 105,
+      "frame": {
+        "samples": 1206,
+        "meanMs": 43.31,
+        "p95Ms": 41.1,
+        "totalFrames": 1206,
+        "longFrames": 45,
+        "observedSeconds": 52.2
+      },
+      "round": 2,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone4",
+      "quality": "medium",
+      "geometries": 457,
+      "textures": 50,
+      "drawCalls": 134,
+      "frame": {
+        "samples": 1236,
+        "meanMs": 43.02,
+        "p95Ms": 41.1,
+        "totalFrames": 1236,
+        "longFrames": 46,
+        "observedSeconds": 53.2
+      },
+      "round": 2,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone5",
+      "quality": "medium",
+      "geometries": 149,
+      "textures": 48,
+      "drawCalls": 78,
+      "frame": {
+        "samples": 1281,
+        "meanMs": 42.28,
+        "p95Ms": 40.6,
+        "totalFrames": 1281,
+        "longFrames": 47,
+        "observedSeconds": 54.2
+      },
+      "round": 2,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone6",
+      "quality": "medium",
+      "geometries": 173,
+      "textures": 49,
+      "drawCalls": 97,
+      "frame": {
+        "samples": 1329,
+        "meanMs": 41.5,
+        "p95Ms": 40.3,
+        "totalFrames": 1329,
+        "longFrames": 48,
+        "observedSeconds": 55.2
+      },
+      "round": 2,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone7",
+      "quality": "medium",
+      "geometries": 308,
+      "textures": 49,
+      "drawCalls": 210,
+      "frame": {
+        "samples": 1367,
+        "meanMs": 41.07,
+        "p95Ms": 39.9,
+        "totalFrames": 1367,
+        "longFrames": 49,
+        "observedSeconds": 56.1
+      },
+      "round": 2,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone8",
+      "quality": "medium",
+      "geometries": 225,
+      "textures": 49,
+      "drawCalls": 170,
+      "frame": {
+        "samples": 1412,
+        "meanMs": 40.47,
+        "p95Ms": 39.9,
+        "totalFrames": 1412,
+        "longFrames": 50,
+        "observedSeconds": 57.1
+      },
+      "round": 2,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone9",
+      "quality": "medium",
+      "geometries": 314,
+      "textures": 49,
+      "drawCalls": 214,
+      "frame": {
+        "samples": 1458,
+        "meanMs": 39.87,
+        "p95Ms": 39.4,
+        "totalFrames": 1458,
+        "longFrames": 51,
+        "observedSeconds": 58.1
+      },
+      "round": 2,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone10",
+      "quality": "medium",
+      "geometries": 122,
+      "textures": 53,
+      "drawCalls": 85,
+      "frame": {
+        "samples": 1507,
+        "meanMs": 39.22,
+        "p95Ms": 38.8,
+        "totalFrames": 1507,
+        "longFrames": 52,
+        "observedSeconds": 59.1
+      },
+      "round": 2,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone11",
+      "quality": "medium",
+      "geometries": 29,
+      "textures": 58,
+      "drawCalls": 51,
+      "frame": {
+        "samples": 1559,
+        "meanMs": 38.56,
+        "p95Ms": 38.5,
+        "totalFrames": 1559,
+        "longFrames": 53,
+        "observedSeconds": 60.1
+      },
+      "round": 2,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone12",
+      "quality": "medium",
+      "geometries": 47,
+      "textures": 64,
+      "drawCalls": 79,
+      "frame": {
+        "samples": 1611,
+        "meanMs": 37.94,
+        "p95Ms": 37.8,
+        "totalFrames": 1611,
+        "longFrames": 54,
+        "observedSeconds": 61.1
+      },
+      "round": 2,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "zone13",
+      "quality": "medium",
+      "geometries": 31,
+      "textures": 56,
+      "drawCalls": 38,
+      "frame": {
+        "samples": 1660,
+        "meanMs": 37.42,
+        "p95Ms": 37.2,
+        "totalFrames": 1660,
+        "longFrames": 55,
+        "observedSeconds": 62.1
+      },
+      "round": 2,
+      "warmup": false,
+      "failedTextures": 0
+    },
+    {
+      "zone": "learningHub",
+      "quality": "medium",
+      "geometries": 29,
+      "textures": 55,
+      "drawCalls": 34,
+      "frame": {
+        "samples": 1711,
+        "meanMs": 36.86,
+        "p95Ms": 37.1,
+        "totalFrames": 1711,
+        "longFrames": 56,
+        "observedSeconds": 63.1
+      },
+      "round": 2,
+      "warmup": false,
+      "failedTextures": 0
+    }
+  ],
+  "limitations": "本機瀏覽器觀察；繪圖資源數不等於完整 GPU 記憶體；背景、封面和選單幀不納入；不能代替真實裝置、麥克風和 30 分鐘驗收。"
+}

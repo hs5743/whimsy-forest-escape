@@ -1,8 +1,7 @@
 // 預設校本官方 Google 試算表 (GAS) 網址（學童進入網頁直接自動連線，完全免手動輸入）
 const DEFAULT_OFFICIAL_GAS_URL = 'https://script.google.com/macros/s/AKfycbxMzYX-1b-fxlC6QN41uEdywDl0O-rRkt6Hw9AxypGdJB7FC3Ns7rpdvXryJwLULR01/exec';
-// 校本前端安全防護 Token 與教師管理密鑰
+// Public client marker. Teacher maintenance authorization is validated by GAS.
 const APP_CLIENT_SECURITY_TOKEN = 'whimsy_forest_escape_2026';
-const TEACHER_PASS_KEY = 'teacherpass';
 
 // 雲端資料同步與學生護照歷程管理器 (CloudSyncManager)
 class CloudSyncManager {
@@ -13,10 +12,13 @@ class CloudSyncManager {
     this.gasUrlKey = 'whimsy_gas_url';
     this.defaultGasUrl = DEFAULT_OFFICIAL_GAS_URL;
     this.clientToken = APP_CLIENT_SECURITY_TOKEN;
-    this.teacherPassKey = TEACHER_PASS_KEY;
+    this.outbox = window.RecordOutbox ? new window.RecordOutbox(localStorage, this.queueKey) : null;
+    this.teacherSession = null;
+    this.recordProtocol = null;
 
     // 優先讀取本地端 GAS 網址；若未設定或為空，直接預設採用校本官方網址
-    const localGas = localStorage.getItem(this.gasUrlKey);
+    let localGas=null;
+    try{localGas=localStorage.getItem(this.gasUrlKey);}catch(_){this.lastStorageError='無法存取此裝置儲存空間';}
     this.gasUrl = (localGas && localGas.trim() !== '') ? localGas.trim() : this.defaultGasUrl;
     try {
       if (!localGas || localGas.trim() === '') {
@@ -44,9 +46,12 @@ class CloudSyncManager {
       this.profile.wordMastery = {};
     }
 
+    this.profile.accessLevel=Math.max(this.profile.accessLevel||1,this.profile.level||1,this.calculateLevel(this.profile.xp));
+    this.profile.level=this.calculateLevel(this.profile.xp);
     this.currentStreak = 0;
     this.listeners = [];
     this.isSyncing = false;
+    this.recoverPendingProfile();
 
     // 啟動離線重試佇列計時器 (每 25 秒檢查一次)
     setInterval(() => this.flushQueue(), 25000);
@@ -89,17 +94,20 @@ class CloudSyncManager {
   }
 
   saveLocalProfile() {
-    if(this.devMode) return;
+    if(this.devMode)return true;
     try {
-      localStorage.setItem(this.storageKey, JSON.stringify(this.profile));
-      localStorage.setItem(this.storageKey+':'+this.profile.studentId, JSON.stringify(this.profile));
-    } catch (e) {}
+      const value=JSON.stringify(this.profile);localStorage.setItem(this.storageKey,value);
+      if(localStorage.getItem(this.storageKey)!==value)return false;
+      try{localStorage.setItem(this.storageKey+':'+this.profile.studentId,value);}catch(_){}
+      return true;
+    } catch(_){return false;}
   }
 
   // 設定或更新 GAS Web App 網址
   setGasUrl(url) {
     const cleanUrl = (url || '').trim();
     this.gasUrl = cleanUrl || this.defaultGasUrl;
+    this.recordProtocol = null; this.teacherSession = null;
     try {
       localStorage.setItem(this.gasUrlKey, this.gasUrl);
     } catch (e) {}
@@ -112,9 +120,15 @@ class CloudSyncManager {
     return this.defaultGasUrl;
   }
 
-  // 驗證教師管理密鑰 (比對 teacherpass)
-  verifyTeacherPassword(pwd) {
-    return (pwd || '').trim() === this.teacherPassKey;
+  // Maintenance sessions stay in memory and are validated by the backend.
+  async verifyTeacherPassword(passcode) {
+    if (this.devMode || !this.gasUrl || !navigator.onLine) return false;
+    try {
+      const response = await fetch(this.gasUrl, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify({action:'teacherAuthenticate',token:this.clientToken,passcode})});
+      const data = await response.json();
+      if (data.status !== 'success' || data.protocol !== 'teacher-v1' || !/^[a-f0-9]{64}$/.test(data.session || '')) { this.teacherAuthError=data.message || '請先更新並設定教師後台'; return false; }
+      this.teacherSession={token:data.session,expires:Date.now()+Math.min(600,Number(data.expiresIn)||0)*1000,url:this.gasUrl};return true;
+    } catch (_) { this.teacherAuthError='無法連接教師驗證服務，請稍後重試';return false; }
   }
 
   // 安全測試 GAS 連線 (帶上 Security Token)
@@ -134,7 +148,7 @@ class CloudSyncManager {
     }
   }
 
-  // 學生姓名個資遮罩輔助函式（符合國中小個資保護指引）
+  // Public display-name masking; this is not student authentication.
   static maskStudentName(name) {
     const str = String(name || '').trim();
     if (!str || str.startsWith('見習')) return str;
@@ -168,15 +182,19 @@ class CloudSyncManager {
       name: String(name || '學生').trim(),
       xp: localProgress?.xp || 0,
       level: localProgress?.level || 1,
+      accessLevel: Math.max(localProgress?.accessLevel||1,localProgress?.level||1),
       stars: localProgress?.stars || 0,
       completedWords: [...(localProgress?.completedWords || [])],
       badgesCount: localProgress?.badgesCount || 0,
       wordMastery: localProgress?.wordMastery || {},
+      appliedPassEvents: [...(localProgress?.appliedPassEvents || [])],
       isGuest: false
     };
 
+    this.recoverPendingProfile();
     this.notifyListeners();
     const loginOwner=this.profile.studentId;
+    this.lastLoginSync={owner:loginOwner,state:'local'};
 
     // 若已串接 GAS，向雲端嘗試同步
     if (this.gasUrl) {
@@ -200,7 +218,9 @@ class CloudSyncManager {
           // 合併雲端進度
           const s = json.student;
           this.profile.xp = Math.max(this.profile.xp, s.xp || 0);
-          this.profile.level = Math.max(this.profile.level, s.level || 1);
+          this.profile.level = this.calculateLevel(this.profile.xp);
+          this.profile.accessLevel=Math.max(this.profile.accessLevel||1,s.accessLevel||s.level||1,this.profile.level);
+          this.lastLoginSync={owner:loginOwner,state:'synced'};
           this.profile.stars = Math.max(this.profile.stars, s.stars || 0);
           this.profile.badgesCount = Math.max(this.profile.badgesCount, s.badgesCount || 0);
           
@@ -214,6 +234,7 @@ class CloudSyncManager {
           this.notifyListeners();
         }
       } catch (err) {
+        if(this.profile.studentId===loginOwner)this.lastLoginSync={owner:loginOwner,state:'offline'};
         console.warn('GAS 登入雲端同步略過，維持本地進度:', err);
       }
     }
@@ -240,155 +261,86 @@ class CloudSyncManager {
     return this.profile;
   }
 
-  // 記錄單字過關並寫入雲端與本地 (含連擊倍率與五星精熟度)
-  async recordWordPass(wordKey, baseXP = 50, isTeacherPass = false, zone = 'Zone 1: 見習學徒書齋') {
-    if(this.devMode) return;
-    const word = String(wordKey || '').toUpperCase();
-    
-    // 1. 計算連續答對連擊加成 (Streak Multiplier)
-    let streakMultiplier = 1.0;
-    if (isTeacherPass) {
-      this.currentStreak = 0;
-    } else {
-      this.currentStreak++;
-      if (this.currentStreak >= 5) {
-        streakMultiplier = 1.5; // 5 連擊 1.5x 加成
-      } else if (this.currentStreak >= 3) {
-        streakMultiplier = 1.2; // 3 連擊 1.2x 加成
-      }
+  // A pass is saved before its network request; the profile is its local projection.
+  recordWordPass(wordKey, baseXP = 50, isTeacherPass = false, zone = 'zone1', options = {}) {
+    if(this.devMode) return {saved:true,preview:true};
+    const word=String(wordKey||'').trim().toUpperCase();
+    if(!word || word.length>35 || !Number.isFinite(baseXP) || baseXP<0)return {saved:false};
+    const streak=options.streak===false?this.currentStreak:isTeacherPass?0:this.currentStreak+1,multiplier=options.streak===false?1:streak>=5?1.5:streak>=3?1.2:1;
+    const companionWord=String(options.companionWord||'').trim().toUpperCase();
+    const words=[...new Set([word,...(companionWord?[companionWord]:[])])];
+    if(words.some(w=>w.length>35))return {saved:false};
+    const actualXP=Math.min(300,Math.round(baseXP*multiplier));
+    const eventId=window.crypto?.randomUUID?.() || ('pass_'+Date.now()+'_'+Math.random().toString(36).slice(2));
+    const payload={action:'recordPass',eventId,token:this.clientToken,studentId:this.profile.studentId,word,companionWord,xp:actualXP,isTeacherPass,zone,projection:true,ua:(navigator.userAgent||'').slice(0,80),destination:this.gasUrl};
+    const oldProfile=this.profile,oldStreak=this.currentStreak,p=JSON.parse(JSON.stringify(oldProfile));
+    const isFirstTime=!p.completedWords.includes(word);
+    if(!p.isGuest && !this.enqueue(payload))return {saved:false};
+    p.xp+=actualXP;p.level=this.calculateLevel(p.xp);p.accessLevel=Math.max(p.accessLevel||1,p.level);p.wordMastery||={};
+    for(const entry of words){const mastery=p.wordMastery[entry]||{stars:0,times:0};mastery.times++;
+      mastery.stars=isTeacherPass?Math.max(1,mastery.stars):Math.min(5,mastery.stars+1);mastery.lastPassedAt=Date.now();p.wordMastery[entry]=mastery;
+      if(!p.completedWords.includes(entry))p.completedWords.push(entry);
     }
-
-    const actualXP = Math.round(baseXP * streakMultiplier);
-
-    // 2. 更新本地經驗值與溫和冪次等級
-    this.profile.xp += actualXP;
-    this.profile.level = this.calculateLevel(this.profile.xp);
-
-    // 3. 更新五星精熟度 (5-Star Mastery)
-    if (!this.profile.wordMastery) this.profile.wordMastery = {};
-    const curMastery = this.profile.wordMastery[word] || { stars: 0, times: 0 };
-    curMastery.times++;
-    if (!isTeacherPass && curMastery.stars < 5) {
-      curMastery.stars = Math.min(5, curMastery.stars + 1);
-    } else if (curMastery.stars === 0) {
-      curMastery.stars = 1;
-    }
-    curMastery.lastPassedAt = Date.now();
-    this.profile.wordMastery[word] = curMastery;
-
-    let isFirstTime = false;
-    if (!this.profile.completedWords.includes(word)) {
-      this.profile.completedWords.push(word);
-      this.profile.stars = this.profile.completedWords.length;
-      this.profile.badgesCount = Math.floor(this.profile.stars / 3);
-      isFirstTime = true;
-    }
-
-    this.notifyListeners();
-
-    // 4. 構建通關資料包
-    const payload = {
-      action: 'recordPass',
-      token: this.clientToken,
-      studentId: this.profile.studentId,
-      grade: this.profile.grade,
-      classId: this.profile.classId,
-      seatNo: this.profile.seatNo,
-      name: this.profile.name,
-      word: word,
-      xp: actualXP,
-      isTeacherPass: isTeacherPass,
-      streak: this.currentStreak,
-      streakMultiplier: streakMultiplier,
-      zone: zone,
-      ua: navigator.userAgent.substring(0, 80)
-    };
-
-    // 5. 若有 GAS 網址則嘗試傳送，失敗則加入離線重試佇列
-    if (this.gasUrl) {
-      this.sendOrQueue(payload);
-    }
-
-    return {
-      isFirstTime,
-      actualXP,
-      streak: this.currentStreak,
-      streakMultiplier,
-      mastery: curMastery,
-      profile: this.profile
-    };
+    const mastery=p.wordMastery[word];p.stars=p.completedWords.length;p.badgesCount=Math.floor(p.stars/3);
+    p.appliedPassEvents=[...(p.appliedPassEvents||[]),eventId];this.profile=p;this.currentStreak=streak;
+    if(p.isGuest && !this.saveLocalProfile()){this.profile=oldProfile;this.currentStreak=oldStreak;this.lastStorageError='此裝置無法保存紀錄，請檢查儲存空間';return {saved:false};}
+    this.notifyListeners();if(!p.isGuest)void this.flushQueue();
+    return {saved:true,isFirstTime,actualXP,streak,streakMultiplier:multiplier,mastery,profile:this.profile};
   }
 
-  // 發送或存入離線佇列
-  async sendOrQueue(payload) {
-    if(this.devMode) return;
-    if (!navigator.onLine) {
-      this.enqueue(payload);
-      return;
-    }
-
+  recoverPendingProfile() {
+    if(this.devMode || !this.outbox || this.profile.isGuest)return;
     try {
-      const res = await fetch(this.gasUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (data.status !== 'success') {
-        this.enqueue(payload);
-      } else {
-        this.updateCloudStatusIndicator(true);
+      const p=this.profile,applied=new Set(p.appliedPassEvents||[]);let changed=false;
+      for(const e of this.outbox.entries())if(e.projection===true && e.studentId===p.studentId && !applied.has(e.eventId)){
+        p.xp+=e.xp;for(const word of [e.word,e.companionWord].filter(Boolean))if(!p.completedWords.includes(word))p.completedWords.push(word);applied.add(e.eventId);changed=true;
       }
-    } catch (e) {
-      this.enqueue(payload);
-    }
+      if(changed){p.appliedPassEvents=[...applied];p.level=this.calculateLevel(p.xp);p.stars=p.completedWords.length;p.badgesCount=Math.floor(p.stars/3);this.saveLocalProfile();}
+    }catch(e){this.lastStorageError=e.message;}
   }
 
   enqueue(payload) {
-    if(this.devMode) return;
-    try {
-      const q = JSON.parse(localStorage.getItem(this.queueKey) || '[]');
-      q.push({ ...payload, queuedAt: Date.now() });
-      localStorage.setItem(this.queueKey, JSON.stringify(q));
-      this.updateCloudStatusIndicator();
-    } catch (e) {}
+    if(this.devMode)return false;
+    try { if(!this.outbox)throw Error('同步模組尚未載入');this.outbox.put(payload);this.lastStorageError='';this.updateCloudStatusIndicator();return true; }
+    catch(e){this.lastStorageError=e.message||'無法保存待傳紀錄';this.updateCloudStatusIndicator();return false;}
   }
-
-  // 清空並補傳離線日誌
-  async flushQueue() {
-    if(this.devMode) return;
-    if (!this.gasUrl || !navigator.onLine || this.isSyncing) return;
-    
-    let q = [];
+  async sendOrQueue(payload) {if(!this.devMode && this.enqueue(payload))await this.flushQueue();}
+  async ensureRecordProtocol() {
+    if(this.recordProtocol?.url===this.gasUrl && Date.now()<this.recordProtocol.until)return this.recordProtocol.ready;
+    const url=this.gasUrl;
     try {
-      q = JSON.parse(localStorage.getItem(this.queueKey) || '[]');
-    } catch (e) { q = []; }
-
-    if (q.length === 0) return;
-
-    this.isSyncing = true;
-    const remaining = [];
-
-    for (let i = 0; i < q.length; i++) {
-      const item = q[i];
-      try {
-        const res = await fetch(this.gasUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(item)
-        });
-        const data = await res.json();
-        if (data.status !== 'success') {
-          remaining.push(item);
-        }
-      } catch (err) {
-        remaining.push(item);
+      const response=await fetch(url+'?action=ping');const data=await response.json();
+      const ready=data.status==='success'&&data.recordProtocol==='record-v2';
+      this.recordProtocol={url,ready,until:Date.now()+(ready?60000:10000)};return ready;
+    } catch(_){return null;}
+  }
+  async flushQueue() {
+    if(this.devMode || !this.outbox || !this.gasUrl || !navigator.onLine || this.isSyncing)return;
+    this.isSyncing=true;
+    try {
+      const snapshot=this.outbox.entries().filter(e=>!String(e.studentId).startsWith('guest_')&&(!e.destination||e.destination===this.gasUrl)).slice(0,25);if(!snapshot.length)return;
+      // Persist legacy array entries with stable IDs before the first request.
+      for(const item of snapshot)this.outbox.put(item);
+      const ready=await this.ensureRecordProtocol();
+      if(ready!==true){this.backendNeedsUpdate=ready===false;return;}
+      this.backendNeedsUpdate=false;
+      for(const item of snapshot){
+        if(item.destination && item.destination!==this.gasUrl)continue;
+        if(String(item.studentId).startsWith('guest_'))continue;
+        try {
+          const response=await fetch(this.gasUrl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(item)});
+          const data=await response.json();
+          if(data.status!=='success'||data.protocol!=='record-v2'||data.eventId!==item.eventId)continue;
+          if(this.profile.studentId===item.studentId && data.updatedProfile){
+            const p=this.profile;p.xp=Math.max(p.xp,Number(data.updatedProfile.xp)||0);p.level=this.calculateLevel(p.xp);
+            p.completedWords=[...new Set([...p.completedWords,...(data.updatedProfile.completedWords||[])])];p.stars=p.completedWords.length;p.badgesCount=Math.floor(p.stars/3);this.notifyListeners();
+          }
+          this.outbox.acknowledge(item.eventId);
+          if(this.profile.studentId===item.studentId){this.profile.appliedPassEvents=(this.profile.appliedPassEvents||[]).filter(id=>id!==item.eventId);this.saveLocalProfile();}
+        }catch(e){console.warn('紀錄保留，等待安全重試:',e.message);}
       }
-    }
-
-    localStorage.setItem(this.queueKey, JSON.stringify(remaining));
-    this.isSyncing = false;
-    this.updateCloudStatusIndicator();
+    } catch(e){this.lastStorageError=e.message||'無法讀取待傳紀錄';}
+    finally{this.isSyncing=false;this.updateCloudStatusIndicator();}
   }
 
   // 查詢排行榜
@@ -443,10 +395,9 @@ class CloudSyncManager {
     const dot = document.getElementById('cloudStatusDot');
 
     let pendingCount = 0;
-    try {
-      const q = JSON.parse(localStorage.getItem(this.queueKey) || '[]');
-      pendingCount = q.length;
-    } catch (e) {}
+    try { pendingCount=this.outbox?.entries().filter(e=>!String(e.studentId).startsWith('guest_')).length||0; } catch(e) { this.lastStorageError=e.message; }
+    if(this.lastStorageError){if(indicator)indicator.textContent='儲存待確認 · '+this.lastStorageError;return;}
+
 
     if (!this.gasUrl) {
       if (indicator) {
@@ -460,7 +411,7 @@ class CloudSyncManager {
       }
     } else if (pendingCount > 0) {
       if (indicator) {
-        indicator.innerHTML = `<span>🟡</span> 暫存 ${pendingCount} 筆待傳`;
+        indicator.textContent = this.backendNeedsUpdate ? `本機已保存 · ${pendingCount} 筆等待後台更新` : `暫存 ${pendingCount} 筆待傳`;
         indicator.title = `有 ${pendingCount} 筆通關資料將在連線順暢時自動補傳。`;
         indicator.className = 'cloud-status-pill mode-pending';
       }

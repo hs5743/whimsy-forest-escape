@@ -176,11 +176,24 @@ class SpeechManager {
     window.audioManager?.unduckBgm();
   }
   defer(callback, delay) { const session=this.session; return setTimeout(()=>{if(session===this.session) callback();},delay); }
+  getPreferredEnglishVoice() {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window) || typeof window.speechSynthesis.getVoices !== 'function') return null;
+    const voices = window.speechSynthesis.getVoices() || [];
+    if (!voices.length) return null;
+    const preferredNames = ['Google US English', 'Microsoft Aria', 'Microsoft Jenny', 'Microsoft Guy', 'Samantha', 'Alex', 'Daniel', 'Karen'];
+    for (const name of preferredNames) {
+      const found = voices.find(v => v.name && v.name.includes(name));
+      if (found) return found;
+    }
+    return voices.find(v => /^en[-_](US|GB)/i.test(v.lang || '')) || voices.find(v => /^en/i.test(v.lang || '')) || null;
+  }
   fallbackSpeechSynthesis(word, rate = 0.85) {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utter = new SpeechSynthesisUtterance(word.toLowerCase());
       utter.lang = 'en-US';
+      const preferredVoice = this.getPreferredEnglishVoice();
+      if (preferredVoice) utter.voice = preferredVoice;
       utter.rate = Math.max(0.4, Math.min(1.2, rate));
       const settings=window.world3D?.settings || GamePolish.loadSettings(localStorage); utter.volume=settings.master*settings.voice;
       utter.onstart = () => {
@@ -347,6 +360,8 @@ class SpeechManager {
         window.speechSynthesis.cancel();
         const utter = new SpeechSynthesisUtterance(sentence);
         utter.lang = 'en-US';
+        const preferredVoice = this.getPreferredEnglishVoice();
+        if (preferredVoice) utter.voice = preferredVoice;
         utter.rate = Math.max(.4,Math.min(1.2,rate));
       const settings=window.world3D?.settings || GamePolish.loadSettings(localStorage); utter.volume=settings.master*settings.voice;
         utter.pitch = 1.05;

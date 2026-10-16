@@ -87,7 +87,7 @@
       world.clock.getDelta();world.frameCadence.reset();root.touchControls?.reset();rebuildInventory();
       world.updateHUDFromProfile({isGuest:true,...profile,xp:world.gameState.xp,level:world.gameState.level});
       const start=$('btnCoverStartJourney').querySelector('span');if(start)start.textContent=record?'繼續冒險':'開始冒險';
-      const entered=$('btnEnterGameFinal');entered.textContent=record?'繼續我的冒險 →':'進入魔法書齋 →';
+      const entered=$('btnEnterGameFinal');entered.innerHTML=(record?'繼續我的冒險':'進入魔法書齋')+' <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>';
     }
     function selectProfile(profile){
       const owner=ownerKey(profile,world.devMode);if(store?.owner===owner)return;

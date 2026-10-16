@@ -28,7 +28,7 @@
     const panel = root.document.getElementById('devZonePanel');
     const section = root.document.createElement('section');
     section.className = 'acceptance-tools';
-    section.innerHTML = '<h3>穩定性檢查</h3><p>僅限本機預覽，不寫入學習成績。幀時間統計僅納入可見遊戲畫面。</p><output id="acceptanceStatus" aria-live="polite">尚未開始場景巡檢</output><div><button type="button" id="startSceneSoak">暖機＋巡檢十界兩輪</button><button type="button" id="stopSceneSoak" hidden>停止巡檢</button><button type="button" id="exportAcceptance">下載檢查紀錄</button></div>';
+    section.innerHTML = '<h3>穩定性檢查</h3><p>僅限本機預覽，不寫入學習成績。幀時間統計僅納入可見遊戲畫面。</p><output id="acceptanceStatus" aria-live="polite">尚未開始場景巡檢</output><div><button type="button" id="startSceneSoak">暖機＋巡檢十四空間兩輪</button><button type="button" id="stopSceneSoak" hidden>停止巡檢</button><button type="button" id="exportAcceptance">下載檢查紀錄</button></div>';
     panel.append(section);
     const status = section.querySelector('output');
     const start = section.querySelector('#startSceneSoak'), stop = section.querySelector('#stopSceneSoak');
@@ -48,7 +48,7 @@
         for (let i=0;i<plan.length;i++) {
           if (!active || token !== runId) break;
           if (root.document.hidden) { outcome = '已中止：頁面切換至背景'; break; }
-          world.closeSpeechCard(); world.switchZone(plan[i].zone);
+          world.closeSpeechCard(); world.switchZone(plan[i].zone,{restore:true});
           const deadline = performance.now()+18000;
           while ([...world.zoneManager.activeTextures].some(t=>world.zoneManager.textureStatus.get(t)==='loading') && performance.now()<deadline && active) await sleep(200);
           if (!active) break;
@@ -64,7 +64,7 @@
       } catch(error) { outcome = '巡檢中斷：'+error.message; }
       finally {
         active = false; start.disabled = false; stop.hidden = true;
-        world.switchZone(originalZone);
+        world.switchZone(originalZone,{restore:true});
         const select = root.document.getElementById('devZoneSelect'); if (select) select.value = originalZone;
         status.textContent = outcome+' · 共 '+samples.length+' 次切換。可下載紀錄比較同一場景的資源數量。';
         if (root.document.getElementById('systemMenuDrawer').style.display === 'none') root.document.getElementById('systemMenuBtn').click();

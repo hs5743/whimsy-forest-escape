@@ -120,3 +120,132 @@ button:focus-visible, [role=button]:focus-visible, select:focus-visible, input:f
 .overworld-map-nav {margin-bottom:10px !important;}
 
 #toastNotice {z-index:40 !important;pointer-events:none;}
+
+/* Cover screen & HUD isolation state machine + 2D Fallback Panel */
+body:not(.game-entered) #hudBar,
+body:not(.game-entered) #minimapContainer,
+body:not(.game-entered) #currentObjective,
+body:not(.game-entered) #adventureHintBtn,
+body:not(.game-entered) #realmQuestBtn,
+body:not(.game-entered) #touchControlsContainer {
+  display: none !important;
+}
+.game-cover-screen.fade-out,
+#gameCoverScreen[hidden] {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+.modal-close-btn svg, #hubClose svg, #hintStop svg {
+  display: block;
+  margin: auto;
+  pointer-events: none;
+}
+.fallback-2d-panel {
+  position: fixed;
+  inset: 68px 16px 16px 16px;
+  z-index: 30;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  overflow-y: auto;
+}
+.fallback-2d-card {
+  width: min(880px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  background: linear-gradient(135deg, #fdfbf5 0%, #f3ead6 100%);
+  border: 2px solid #c8b080;
+  border-radius: 20px;
+  padding: 22px 24px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+  color: #263834;
+}
+.fallback-2d-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #1f5c52;
+  background: #e1f0ea;
+  border: 1px solid #9dc5b8;
+  border-radius: 20px;
+  padding: 4px 12px;
+  margin-bottom: 8px;
+}
+.fallback-2d-header h2 {
+  margin: 4px 0 6px;
+  font-size: 22px;
+  color: #18423d;
+}
+.fallback-2d-header h2 small {
+  font-size: 13px;
+  color: #65766e;
+  font-weight: 500;
+  margin-left: 6px;
+}
+.fallback-2d-header p {
+  margin: 0 0 14px;
+  font-size: 13px;
+  color: #54635b;
+  line-height: 1.6;
+}
+.fallback-2d-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.fallback-2d-item-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #cbb78c;
+  background: #fffdf8;
+  color: #244740;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.fallback-2d-item-btn:hover {
+  transform: translateY(-2px);
+  border-color: #247768;
+  background: #f0f7f2;
+}
+.fallback-2d-item-btn strong {
+  font-size: 14px;
+  color: #1b4d44;
+}
+.fallback-2d-item-btn span {
+  font-size: 12px;
+  color: #66736b;
+}
+.fallback-2d-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-top: 1px solid #d8caa8;
+  padding-top: 12px;
+}
+.fallback-2d-actions button {
+  flex: 1 1 180px;
+  min-height: 42px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid #245c52;
+  background: #245c52;
+  color: #fff9e8;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.fallback-2d-item-btn:disabled{opacity:.65;cursor:default;background:#ebe7dc}.fallback-2d-item-btn:disabled:hover{transform:none}
+body:not(.game-entered) #touchControlsLayer{display:none!important}
+
+body.fallback-2d #minimapContainer,body.fallback-2d #touchControlsLayer,body.fallback-2d #crosshair,body.fallback-2d #interactPrompt,body.fallback-2d #currentObjective,body.fallback-2d #adventureHintBtn{display:none!important}
+.fallback-current-goal{padding:10px 12px;background:#e3eddf;border-radius:8px;color:#275342!important;font-weight:700}
+@media(max-width:600px){.fallback-2d-panel{inset:164px 8px 12px}.fallback-2d-card{padding:16px}.fallback-2d-grid{grid-template-columns:1fr}.fallback-2d-actions button{flex-basis:130px;font-size:13px}}

@@ -14,9 +14,9 @@ function fixture() {
 }
 function target(w,x=0,z=-2) {const o=new THREE.Mesh(new THREE.BoxGeometry(.2,.2,.2),new THREE.MeshBasicMaterial());o.position.set(x,0,z);o.userData.id='target';w.activeZoneGroup.add(o);w.interactables.push(o);return o;}
 function context() {
- const listeners={},elements={}; const localStorage={getItem:()=>null,setItem:()=>{}};
+ const listeners={},elements={}; const localStorage=require('./helpers/storage.cjs')().storage;
  const document={activeElement:{tagName:'BODY'},getElementById:id=>elements[id]||null,addEventListener:()=>{}};
- const window={document,localStorage,addEventListener:(name,fn)=>(listeners[name]??=[]).push(fn),audioManager:null};
+ const window={RecordOutbox:require('../record-outbox.js'),document,localStorage,addEventListener:(name,fn)=>(listeners[name]??=[]).push(fn),audioManager:null};
  const timers=[];const ctx=vm.createContext({window,document,navigator:{maxTouchPoints:0},performance:{now:()=>100},localStorage,console,GamePolish:P,VOCAB_DATA:{},THREE,location:{hostname:'127.0.0.1',search:'?dev=1'},URLSearchParams,setTimeout:fn=>(timers.push(fn),timers.length),clearTimeout:()=>{},setInterval:()=>{},getComputedStyle:()=>({display:'none'}),fetch:()=>{throw Error('Unexpected network call');}});
  return {ctx,window,document,listeners,elements,timers};
 }
@@ -166,7 +166,7 @@ test('cancelled FLOWER collection can resume from mimic without repeating feedin
  interact('mimic');pass('FLOWER');const xp=w.gameState.xp;interact('mimic');w.collectFlowerStone();assert.equal(w.gameState.xp,xp);assert.equal(cards.length,0);
 });
 test('cancelled SUN can be retried and the completion reward runs once',()=>{
- const {w,cards,pass}=questFixture();w.triggerEscapeCelebration();cards.shift();assert.equal(!!w.gameState.escaped,false);
+ const {w,cards,pass}=questFixture();w.gameState.doorOpened=true;w.triggerEscapeCelebration();cards.shift();assert.equal(!!w.gameState.escaped,false);
  w.triggerEscapeCelebration();pass('SUN');const xp=w.gameState.xp;w.triggerEscapeCelebration();assert.equal(cards.length,0);assert.equal(w.gameState.xp,xp);
 });
 test('stone door opening reward cannot run twice',()=>{
@@ -492,4 +492,151 @@ test('scene replacement resets gameplay timing and clears the previous target pr
  const c=context();c.ctx.GamePolish={...P,applySceneStyle:()=>{},applyQuality:()=>{},releaseGroup:()=>{}};const M=load(c,'spatial-zone-manager.js','SpatialZoneManager');let clock=0,cadence=0,focused=true,cleared=0;const scene=new THREE.Scene(),old=new THREE.Group();scene.add(old);c.elements.interactPrompt={style:{display:'block'},textContent:'OLD'};c.elements.crosshair={classList:{toggle:(key,value)=>focused=value}};
  const w={devMode:true,gameState:{},scene,activeZoneGroup:old,zoneTimers:new Set(),closeSpeechCard:()=>{},player:{pos:new THREE.Vector3(),yaw:2,pitch:1},clock:{getDelta:()=>clock++},frameCadence:{reset:()=>cadence++},hintController:{clear:()=>cleared++},showToast:()=>{}};const m={world:w,zones:{zone2:{spawnPos:[0,1.6,3],spawnYaw:0,name:'Market'}},currentZoneId:'zone1',tex:{},textureSources:new Map(),setupZoneSkyAndAtmosphere:()=>{},buildZone2_Market:()=>{},loadSceneTextures:()=>{}};
  assert.equal(M.prototype.switchZone.call(m,'zone2'),true);assert.equal(clock,1);assert.equal(cadence,1);assert.equal(cleared,1);assert.equal(focused,false);assert.equal(c.elements.interactPrompt.style.display,'none');assert.equal(c.elements.interactPrompt.textContent,'');assert.equal(w.sceneBuildMs,0);assert.equal(scene.children.includes(old),false);
+});
+
+// --- P0/P1 Regression Tests ---
+test('scavenger hunt streak, all and branch-zone modes resolve unlocked clues without crashing',()=>{
+ const c=context();
+ let interrupted=0,ducked=0,unducked=0,spokenUtter=null;
+ c.window.speechManager={interruptForVoice:()=>interrupted++};
+ c.window.audioManager={playSfx:()=>{},duckBgm:()=>ducked++,unduckBgm:()=>unducked++};
+ c.window.speechSynthesis={cancel:()=>{},speak:u=>{spokenUtter=u;u.onstart?.();u.onend?.();}};
+ c.ctx.SpeechSynthesisUtterance=class{constructor(t){this.text=t;}};
+ const Manager=load(c,'spatial-zone-manager.js','SpatialZoneManager');
+ Manager.prototype.initTextures=()=>{};
+ const Scavenger=load(c,'scavenger-hunt-manager.js','window.ScavengerHuntManager');
+ const world={devMode:true,settings:{master:0.8,voice:0.5},gameState:{xp:0,level:1,realmPuzzles:{}},player:{pos:{x:0,z:0}},showToast:()=>{},addXP:n=>{world.gameState.xp+=n;}};
+ const zm=new Manager(world);world.zoneManager=zm;
+ assert.ok(Array.isArray(zm.getUnlockedZoneIds()));
+ assert.ok(zm.getUnlockedZoneIds().includes('zone1'));
+ assert.equal(zm.getUnlockedZoneIds().includes('learningHub'),false);
+ const hunt=new Scavenger(world);
+ for(const z of ['zone11','zone12','zone13','learningHub']){
+  zm.currentZoneId=z;
+  assert.equal(hunt.startHunt('zone'),true);
+  assert.equal(hunt.isQuestActive(),true);
+  assert.ok(hunt.currentQuest.targetWord);
+  assert.doesNotThrow(()=>hunt.update(0.016));
+ }
+ assert.equal(hunt.startHunt('streak'),true);
+ assert.equal(hunt.startHunt('all'),true);
+ hunt.playClueVoice(0.85);
+ assert.equal(interrupted,1);
+ assert.equal(ducked,1);
+ assert.equal(unducked,1);
+ assert.ok(Math.abs(spokenUtter.volume-0.4)<1e-6);
+});
+
+test('openSpeechCard with cloudSyncManager awards XP once and updates HUD power-curve progress',()=>{
+ const c=context(),fallback={style:{}},node=()=>({style:{},setAttribute(){},focus(){},querySelector:()=>null,appendChild(){},closest:()=>fallback});
+ c.document.createElement=node;c.document.getElementById=id=>c.elements[id]||(c.elements[id]=node());
+ c.ctx.VOCAB_DATA={LIGHT:{word:'LIGHT',xp:50}};
+ let spokenCallback;
+ c.window.speechManager={stopListening(){},playWordVoice(){},startListening:(_w,cb)=>{spokenCallback=cb;},forcePass(){}};
+ const Cloud=load(c,'cloud-sync-manager.js','CloudSyncManager');
+ const csm=new Cloud();c.window.cloudSyncManager=csm;
+ const World=load(c,'world-3d.js','World3D'),w=Object.create(World.prototype);
+ Object.assign(w,{activeZoneGroup:{},zoneManager:{currentZoneId:'zone1',zones:{zone1:{id:'zone1',name:'見習學徒書齋',words:['LIGHT']}}},devMode:false,gameState:{xp:0,level:1,inventory:[]},restoreSpeechFocus(){},notePracticeCompletion(){},showToast(){},scheduleZoneAction:fn=>fn()});
+ w.initCloudSync();
+ w.openSpeechCard('LIGHT',()=>{});
+ c.elements.micButton.onclick();
+ spokenCallback(true);
+ assert.equal(csm.profile.xp,50);
+ assert.equal(w.gameState.xp,50);
+ csm.profile.xp=150;csm.profile.level=csm.calculateLevel(150);
+ w.updateHUDFromProfile(csm.profile);
+ const expectedPct=((150-100)/(100*Math.pow(2,1.35)-100))*100;
+ assert.ok(Math.abs(parseFloat(c.elements.hudXpFill.style.width)-expectedPct)<0.01);
+});
+
+test('cloudSyncManager flushQueue retains newly enqueued events and requires matching server receipts',async()=>{
+ const {storage}=require('./helpers/storage.cjs')();let resolveFetch;
+ const c={window:{RecordOutbox:require('../record-outbox.js'),GamePolish:{isLocalPreview:()=>false},addEventListener(){}},localStorage:storage,navigator:{onLine:true,userAgent:'TestUA'},document:{getElementById:()=>null},setInterval(){},console,fetch:()=>new Promise(r=>resolveFetch=r)};
+ vm.createContext(c);vm.runInContext(fs.readFileSync(path.join(base,'cloud-sync-manager.js'),'utf8'),c);const m=c.window.cloudSyncManager;
+ m.recordProtocol={url:m.gasUrl,ready:true,until:Date.now()+60000};
+ m.enqueue({action:'recordPass',eventId:'evt_0001',studentId:'50101',word:'LIGHT',xp:50});
+ const work=m.flushQueue();await Promise.resolve();
+ m.enqueue({action:'recordPass',eventId:'evt_0002',studentId:'50101',word:'BOOK',xp:50});
+ resolveFetch({json:async()=>({status:'success',protocol:'record-v2',eventId:'evt_0001'})});await work;
+ const remaining=m.outbox.entries();assert.equal(remaining.length,1);assert.equal(remaining[0].eventId,'evt_0002');
+});
+
+test('complete GAS router uses one level curve, deduplicates passes and masks student names',()=>{
+ const f=require('./helpers/backend.cjs')();f.sheets.Students.rows[1][5]=950;
+ const request={action:'recordPass',eventId:'evt_unique_100',studentId:'50101',word:'LIGHT',xp:50};
+ const first=f.post(request);assert.equal(first.status,'success');assert.equal(first.updatedProfile.xp,1000);assert.equal(first.updatedProfile.level,6);
+ const replay=f.post(request);assert.equal(replay.replayed,true);assert.equal(replay.updatedProfile.xp,1000);assert.equal(f.sheets.Passport_Logs.rows.length,2);
+ assert.equal(f.post({...request,word:'KEY'}).status,'error');
+ assert.equal(f.get({action:'getStudent',studentId:'50101'}).student.name,'王○明');
+ assert.equal(f.get({action:'generateReport',classId:'501'}).code,'teacher_required');
+});
+
+// --- P2/P3 & External Review Regression Tests ---
+test('WebGL failure activates 2D interactive fallback renderer and renders clickable 2D station cards without crashing World3D',()=>{
+ const c=context();
+ const appended=[];
+ const makeEl=tag=>({tagName:tag,id:'',className:'',style:{},children:[],innerHTML:'',textContent:'',addEventListener(){},setAttribute(){},appendChild(ch){this.children.push(ch);},append(...xs){this.children.push(...xs);}});
+ c.document.body=makeEl('BODY');
+ c.document.createElement=tag=>{
+  if(tag==='canvas')return {width:2,height:2,getContext:()=>({fillStyle:'',fillRect(){},createRadialGradient:()=>({addColorStop(){}})}),addEventListener(){}};
+  return makeEl(tag);
+ };
+ c.document.getElementById=id=>{
+  if(id==='fallback2DPanel')return c.document.body.children.find(ch=>ch.id==='fallback2DPanel')||null;
+  return c.elements[id]||(c.elements[id]=makeEl('DIV'));
+ };
+ vm.runInContext('THREE=Object.create(THREE);THREE.WebGLRenderer=function(){throw new Error("WebGL disabled");};',c.ctx);
+ const Manager=load(c,'spatial-zone-manager.js','SpatialZoneManager');
+ Manager.prototype.initTextures=function(){this.tex=new Proxy({},{get:(o,k)=>o[k]||(o[k]=new THREE.Texture())});this.textureSources=new Map();this.textureStatus=new Map();};Manager.prototype.loadSceneTextures=()=>{};c.ctx.requestAnimationFrame=()=>{};Manager.prototype.loadSceneTextures=()=>{};c.ctx.requestAnimationFrame=()=>{};
+ c.window.SpatialZoneManager=Manager;
+ const World=load(c,'world-3d.js','World3D');
+ const w=new World();
+ assert.equal(w.isFallback2D,true);
+ assert.equal(w.renderer.isFallback2D,true);
+ assert.ok(w.zoneManager);
+ const panel=c.document.getElementById('fallback2DPanel');
+ assert.ok(panel);
+ assert.equal(panel.style.display,'flex');
+ assert.ok(panel.children.length>0);
+});
+
+test('retryBootWorld recovers from uninitialized world3D and enables entry buttons',()=>{
+ const c=context();
+ for(const id of ['btnCoverStartJourney','btnCoverDirectPlay','btnEnterGameFinal','btnBootRetry','assetLoadStatus','instructionsModal','guideDesktopTab','guideTouchTab','guideDesktop','guideTouch']){
+  c.elements[id]={disabled:true,hidden:true,textContent:'',tabIndex:0,setAttribute(){},getAttribute:()=>'true',focus(){}};
+ }
+ c.document.querySelector=()=>({addEventListener(){}});
+ c.ctx.matchMedia=()=>({matches:false});
+ c.ctx.World3D=class{constructor(){this.renderer={};this.isFallback2D=false;this.zoneManager={retryTextures(){}};}};
+ vm.runInContext(fs.readFileSync(path.join(base,'title-screen.js'),'utf8'),c.ctx);
+ assert.equal(typeof c.window.retryBootWorld,'function');
+ assert.equal(c.window.retryBootWorld(),true);
+ assert.equal(c.elements.btnCoverStartJourney.disabled,false);
+ assert.equal(c.elements.btnCoverDirectPlay.disabled,false);
+ assert.equal(c.elements.btnEnterGameFinal.disabled,false);
+ assert.equal(c.elements.btnBootRetry.hidden,true);
+});
+
+test('speechManager getPreferredEnglishVoice selects natural US/GB voices before generic fallbacks',()=>{
+ const c=speechFixture();
+ c.window.speechSynthesis={
+  cancel(){},
+  speak(){},
+  getVoices:()=>[
+   {name:'Generic Robot',lang:'de-DE'},
+   {name:'Local English',lang:'en-AU'},
+   {name:'Google US English',lang:'en-US'}
+  ]
+ };
+ const voice=c.speech.getPreferredEnglishVoice();
+ assert.equal(voice.name,'Google US English');
+});
+
+test('all modal close buttons and cover screen portals use inline SVGs instead of missing glyph characters',()=>{
+ const html=fs.readFileSync(path.join(base,'index.html'),'utf8');
+ assert.equal(html.includes('>✕</button>'),false);
+ assert.equal(html.includes('>➔</span>'),false);
+ assert.equal(html.includes('重新準備魔法世界 ↻'),false);
+ assert.ok(html.includes('function getEffectiveZoneManager()'));
+ assert.ok(html.includes('id="btnSubmitStudentLogin"'));
 });

@@ -1060,7 +1060,7 @@
     }
 
     isQuestActive() {
-      return this.currentQuest !== null;
+      return !!(this.currentQuest && this.currentQuest.targetWord && Array.isArray(this.currentQuest.targetPos));
     }
 
     getCurrentZoneId() {
@@ -1070,26 +1070,55 @@
       return 'zone1';
     }
 
+    getUnlockedZonesSafe(curZone) {
+      const zm = this.world && this.world.zoneManager;
+      if (!zm) return [curZone || 'zone1'];
+      if (typeof zm.getUnlockedZoneIds === 'function') {
+        const list = zm.getUnlockedZoneIds();
+        return list.length > 0 ? list : ['zone1'];
+      }
+      if (zm.zones && typeof zm.isZoneUnlocked === 'function') {
+        const list = Object.keys(zm.zones).filter(id => !zm.zones[id]?.isLearningHub && zm.isZoneUnlocked(id));
+        return list.length > 0 ? list : ['zone1'];
+      }
+      return [curZone || 'zone1'];
+    }
+
     // 啟動尋寶任務
     startHunt(mode = 'zone') {
       this.questMode = mode;
       const curZone = this.getCurrentZoneId();
+      const unlocked = this.getUnlockedZonesSafe(curZone);
 
       let candidateClues = [];
+      let usedFallbackZone = false;
       if (mode === 'zone') {
         candidateClues = this.clues.filter(c => c.zoneId === curZone);
-      } else if (mode === 'streak') {
-        // 每日三連：優先挑選當前空間或已解鎖空間
-        const unlocked = (this.world && this.world.zoneManager) ? this.world.zoneManager.getUnlockedZoneIds() : [curZone];
-        candidateClues = this.clues.filter(c => unlocked.includes(c.zoneId));
+        if (candidateClues.length === 0) {
+          usedFallbackZone = true;
+          const parentZone = this.world?.zoneManager?.zones?.[curZone]?.parentZone;
+          if (parentZone) {
+            candidateClues = this.clues.filter(c => c.zoneId === parentZone);
+          }
+          if (candidateClues.length === 0) {
+            candidateClues = this.clues.filter(c => unlocked.includes(c.zoneId));
+          }
+        }
       } else {
-        // all: 全境隨機
-        const unlocked = (this.world && this.world.zoneManager) ? this.world.zoneManager.getUnlockedZoneIds() : [curZone];
+        // 每日三連 (streak) 或全境隨機 (all)：挑選已解鎖空間
         candidateClues = this.clues.filter(c => unlocked.includes(c.zoneId));
       }
 
       if (candidateClues.length === 0) {
-        candidateClues = this.clues.filter(c => c.zoneId === curZone);
+        candidateClues = this.clues.filter(c => c.zoneId === 'zone1');
+      }
+      if (candidateClues.length === 0) {
+        this.currentQuest = null;
+        this.closeScavengerModal();
+        if (this.world && typeof this.world.showToast === 'function') {
+          this.world.showToast('目前空間暫無可用的聽力尋寶謎題。');
+        }
+        return false;
       }
 
       // 優先挑選未解過的題目
@@ -1097,6 +1126,10 @@
       const pool = unsolved.length > 0 ? unsolved : candidateClues;
 
       const pick = pool[Math.floor(Math.random() * pool.length)];
+      if (!pick || !pick.targetWord || !Array.isArray(pick.targetPos)) {
+        this.currentQuest = null;
+        return false;
+      }
       this.currentQuest = {
         ...pick,
         startTime: Date.now(),
@@ -1116,34 +1149,49 @@
       }, 400);
 
       if (this.world) {
-        this.world.showToast(`🧭 聽力尋寶任務啟動！請仔細聆聽外師線索，找出藏在空間裡的寶物！`);
+        if (usedFallbackZone && pick.zoneId !== curZone) {
+          const targetZoneName = this.world.zoneManager?.zones?.[pick.zoneId]?.name || pick.zoneId;
+          this.world.showToast(`🧭 此支線無尋寶題，已為你開啟【${targetZoneName}】的聽力尋寶謎題！`);
+        } else {
+          this.world.showToast(`🧭 聽力尋寶任務啟動！請仔細聆聽外師線索，找出藏在空間裡的寶物！`);
+        }
       }
+      return true;
     }
 
-    // 播放英語線索外師語音 (支援正常速度 0.85x 與慢速 0.65x)
+    // 播放英語線索外師語音 (支援正常速度 0.85x 與慢速 0.65x，並整合麥克風中斷、音量與 BGM 避讓)
     playClueVoice(rate = 0.85) {
-      if (!this.currentQuest) return;
+      if (!this.currentQuest || !this.currentQuest.clueEn) return;
       this.currentVoiceRate = rate;
+
+      if (typeof window !== 'undefined' && window.speechManager && typeof window.speechManager.interruptForVoice === 'function') {
+        window.speechManager.interruptForVoice();
+      }
 
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         try {
           window.speechSynthesis.cancel();
           const utter = new SpeechSynthesisUtterance(this.currentQuest.clueEn);
           utter.lang = 'en-US';
-          utter.rate = rate;
+          utter.rate = Math.max(0.4, Math.min(1.2, rate));
           utter.pitch = 1.05;
+          const settings = this.world?.settings || window.world3D?.settings || window.GamePolish?.loadSettings?.(window.localStorage) || { master: 1, voice: 1 };
+          utter.volume = Math.max(0, Math.min(1, (settings.master ?? 1) * (settings.voice ?? 1)));
 
           utter.onstart = () => {
             this.isVoicePlaying = true;
             this.updateVoiceVisualizer(true);
+            window.audioManager?.duckBgm?.(0.25);
           };
           utter.onend = () => {
             this.isVoicePlaying = false;
             this.updateVoiceVisualizer(false);
+            window.audioManager?.unduckBgm?.();
           };
           utter.onerror = () => {
             this.isVoicePlaying = false;
             this.updateVoiceVisualizer(false);
+            window.audioManager?.unduckBgm?.();
           };
 
           window.speechSynthesis.speak(utter);
@@ -1157,13 +1205,16 @@
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         try { window.speechSynthesis.cancel(); } catch (e) {}
       }
+      if (this.isVoicePlaying) {
+        window.audioManager?.unduckBgm?.();
+      }
       this.isVoicePlaying = false;
       this.updateVoiceVisualizer(false);
     }
 
     // 每幀更新雷達距離計算 (Euclidean Distance)
     update(delta) {
-      if (!this.currentQuest || !this.world || !this.world.player) return;
+      if (!this.isQuestActive() || !this.world || !this.world.player) return;
 
       const playerPos = this.world.player.pos;
       const curZone = this.getCurrentZoneId();
@@ -1186,6 +1237,8 @@
         if (verifyBtn) verifyBtn.style.display = 'none';
         return;
       }
+
+      if(this.world.isFallback2D){if(radarLabel)radarLabel.textContent='依英語線索選擇正確圖卡';if(verifyBtn)verifyBtn.style.display='none';return;}
 
       // 同空間計算距離
       const dx = playerPos.x - this.currentQuest.targetPos[0];
@@ -1242,32 +1295,13 @@
       const q = this.currentQuest;
       if (!q) return;
 
-      this.stopClueVoice();
-      this.solvedClueIds.add(q.id);
-      this.totalFound++;
-      this.coins++;
-      this.streakCount++;
-
-      this.saveProgress();
-
-      // 經驗值獎勵：基礎 80 XP，若 streak 達成 3 題額外贈送 150 XP
-      let bonusXp = 80;
-      let isStreakAchieved = false;
-      if (this.questMode === 'streak' && this.streakCount >= this.targetStreak) {
-        bonusXp += 150;
-        this.coins += 2;
-        isStreakAchieved = true;
-      }
-
-      if (this.world) {
-        this.world.addXP(bonusXp);
-      }
-
-      // 同步寫入雲端護照與本機單字庫 (目標詞 + 護照延伸生活詞)
-      if (typeof window !== 'undefined' && window.cloudSyncManager && typeof window.cloudSyncManager.recordWordPass === 'function') {
-        window.cloudSyncManager.recordWordPass(q.targetWord, 50, false);
-        window.cloudSyncManager.recordWordPass(q.companionWord, 50, false);
-      }
+      const isStreakAchieved=this.questMode==='streak' && this.streakCount+1>=this.targetStreak;
+      const bonusXp=80+(isStreakAchieved?150:0);
+      if(window.cloudSyncManager?.recordWordPass && !this.world?.devMode){
+        const reward=window.cloudSyncManager.recordWordPass(q.targetWord,bonusXp,false,q.zoneId||'zone1',{streak:false,companionWord:q.companionWord});
+        if(reward?.saved===false){this.world?.showToast('紀錄無法保存，請先檢查儲存空間後重試。');return;}
+      }else this.world?.addXP(bonusXp);
+      this.stopClueVoice();this.solvedClueIds.add(q.id);this.totalFound++;this.coins+=isStreakAchieved?3:1;this.streakCount++;this.saveProgress();
 
       if (this.world && window.audioManager) {
         window.audioManager.playSfx('magicSuccess');
@@ -1289,7 +1323,7 @@
     }
 
     verifyCurrentTargetManual() {
-      if (!this.currentQuest || !this.world || !this.world.player) return;
+      if (!this.isQuestActive() || !this.world || !this.world.player) return;
       const playerPos = this.world.player.pos;
       const dx = playerPos.x - this.currentQuest.targetPos[0];
       const dz = playerPos.z - this.currentQuest.targetPos[1];

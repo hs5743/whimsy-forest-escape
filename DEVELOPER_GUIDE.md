@@ -1,3 +1,5 @@
+> 歷史架構文件：部分 API、場景數與授權方式已變更。現行版本請先讀 [工程交接手冊](docs/ENGINEERING_HANDOVER_MANUAL.md)；舊 GET generateReport 已停用，請勿依此文件直接部署。
+
 # 📘 3D 第一人稱英語教育密室逃脫開發者手冊 (Developer & Architecture Guide)
 
 > 本手冊整理自《童趣森林魔法書齋逃脫：蒼月之約》（Whimsy Forest 3D Escape）之完整開發實踐。  

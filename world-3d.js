@@ -84,12 +84,150 @@ class World3D {
       }, 1500);
     }
 
+    if (this.isFallback2D) {
+      this.renderFallback2DPanel();
+    }
     this.animate();
+  }
+
+  createFallback2DRenderer(canvas) {
+    const domElement = canvas || (typeof document !== 'undefined' ? document.createElement('canvas') : { addEventListener: () => {} }); if (domElement && typeof domElement.addEventListener !== 'function') domElement.addEventListener = () => {};
+    return {
+      domElement,
+      isFallback2D: true,
+      outputEncoding: null,
+      toneMapping: null,
+      toneMappingExposure: 1.0,
+      shadowMap: { enabled: false, type: null },
+      capabilities: { getMaxAnisotropy: () => 1 },
+      info: { memory: { geometries: 0, textures: 0 }, render: { calls: 0 } },
+      setSize: () => {},
+      setPixelRatio: () => {},
+      render: () => {},
+      dispose: () => {}
+    };
+  }
+
+  interactionAvailability(target) {
+    if(!target?.userData)return {available:false};
+    for(let p=target;p;p=p.parent)if(p.visible===false)return {available:false,hidden:true};
+    if(target.userData.id==='exit_portal_zone1' && !this.gameState.doorOpened && !this.gameState.escaped)
+      return {available:false,reason:'先完成石門機關，再前往花田。'};
+    return {available:true};
+  }
+
+  tryRestore3D() {
+    if(!this.isFallback2D)return true;
+    const previous=this.renderer,canvas=previous.domElement;let renderer;
+    for(const antialias of [true,false]){try{renderer=new THREE.WebGLRenderer({canvas,antialias,alpha:false});break;}catch(_){}}
+    if(!renderer)return false;
+    try{
+      this.renderer=renderer;renderer.setSize(window.innerWidth,window.innerHeight);
+      renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;
+      this.isFallback2D=false;this.contextLost=false;this.setGraphicQuality(this.graphicQuality||'medium');
+      if(typeof THREE.PMREMGenerator==='function')try{this.pmremGenerator=new THREE.PMREMGenerator(renderer);this.zoneManager?.refreshZoneEnvironment?.();}catch(_){}
+      previous.dispose();window.touchControls?.reset();this.frameCadence.reset();this.clock.getDelta();this.renderFallback2DPanel();return true;
+    }catch(error){renderer.dispose();this.renderer=previous;this.isFallback2D=true;return false;}
+  }
+
+  toggleFallback2DMode(forceState) {
+    this.isFallback2D = typeof forceState === 'boolean' ? forceState : !this.isFallback2D;
+    this.renderFallback2DPanel();
+    return this.isFallback2D;
+  }
+
+  renderFallback2DPanel() {
+    if (typeof document === 'undefined' || !document.getElementById) return;
+    document.body?.classList?.toggle('fallback-2d',!!this.isFallback2D);
+    let panel = document.getElementById('fallback2DPanel');
+    if (!this.isFallback2D) {
+      if (panel) panel.style.display = 'none';
+      return;
+    }
+    if (!panel && document.body && typeof document.createElement === 'function') {
+      panel = document.createElement('section');
+      panel.id = 'fallback2DPanel';
+      panel.className = 'fallback-2d-panel';
+      panel.setAttribute('aria-label', '2D 圖卡探索與單字練習模式');
+      document.body.appendChild(panel);
+    }
+    if (!panel) return;
+    panel.style.display = 'flex';
+    const zm = this.zoneManager;
+    const curZone = zm ? zm.getCurrentZone() : { id: 'zone1', name: '見習學徒書齋', englishName: 'Apprentice Study', icon: '🏰', topic: 'School & Prepositions', desc: '古老而溫暖的魔法書齋，點擊下方圖卡即可直接進行英語發音與解謎互動！' };
+    const seen = new Set();
+    const items = [];
+    for (const obj of (this.interactables || [])) {
+      if (!obj || !obj.userData) continue;
+      const availability=this.interactionAvailability(obj);if(availability.hidden)continue;
+      const key = obj.userData.id || obj.userData.name || obj.userData.label;
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      items.push({
+        key,
+        title: (window.GamePolish && typeof window.GamePolish.actionText === 'function') ? window.GamePolish.actionText(this, obj) : (obj.userData.name || obj.userData.label || key),
+        hint: obj.userData.hint || obj.userData.label || '點擊開始英語互動',
+        obj, availability
+      });
+    }
+    const goal=window.GamePolish?.taskText?.(this.gameState,curZone.id)||'';
+    const signature=curZone.id+'|'+goal+'|'+items.map(i=>[i.key,i.title,i.availability.available,i.hint].join(':')).join('|');
+    if(this.fallbackSignature===signature && panel.children.length)return;
+    this.fallbackSignature=signature;
+    const focusKey=document.activeElement?.getAttribute?.('data-fallback-key');
+    panel.innerHTML = '';
+    const card = document.createElement('div');
+    card.className = 'fallback-2d-card';
+    const header = document.createElement('div');
+    header.className = 'fallback-2d-header';
+    header.innerHTML = `<div class="fallback-2d-badge">🖼️ 2D 輕量圖卡互動模式（免 3D 硬體加速）</div><h2>${curZone.icon || '🏰'} ${curZone.name} <small>${curZone.englishName || ''}</small></h2><p>${curZone.desc || ''}</p><p class="fallback-current-goal">${goal}</p>`;
+    card.appendChild(header);
+
+    const grid = document.createElement('div');
+    grid.className = 'fallback-2d-grid';
+    items.forEach(item => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'fallback-2d-item-btn';
+      btn.setAttribute('data-fallback-key',item.key);btn.disabled=!item.availability.available;
+      if(item.availability.reason)btn.title=item.availability.reason;
+      btn.innerHTML = `<strong>✨ ${item.title}</strong><span>${item.hint}</span>`;
+      btn.onclick = () => { this.triggerInteraction(item.obj); this.renderFallback2DPanel(); };
+      grid.appendChild(btn);
+    });
+    card.appendChild(grid);
+
+    const footer = document.createElement('div');
+    footer.className = 'fallback-2d-actions';
+    const mapBtn = document.createElement('button');
+    mapBtn.type = 'button';
+    mapBtn.textContent = '🗺️ 開啟空間星圖（切換關卡）';
+    mapBtn.onclick = () => window.toggleWorldMapModal?.();
+    const hubBtn = document.createElement('button');
+    hubBtn.type = 'button';
+    hubBtn.textContent = '📚 探險家學習大廳';
+    hubBtn.onclick = () => {
+      if (curZone.id === 'learningHub') window.LearningHub?.open?.();
+      else { window.LearningHub?.enter?.(); setTimeout(() => window.LearningHub?.open?.(), 150); }
+    };
+    const huntBtn = document.createElement('button');
+    huntBtn.type = 'button';
+    huntBtn.textContent = '🧭 聽力尋寶任務';
+    huntBtn.onclick = () => window.openScavengerModal?.();
+    const retryBtn=document.createElement('button');retryBtn.type='button';retryBtn.textContent='重新嘗試 3D';
+    retryBtn.onclick=()=>{const restored=this.tryRestore3D();this.showToast(restored?'已恢復 3D 探索，關卡進度完整保留。':'目前仍無法使用 3D，可以繼續圖卡探索。');};
+    const hintBtn=document.createElement('button');hintBtn.type='button';hintBtn.textContent='需要一點提示？';hintBtn.onclick=()=>document.getElementById('adventureHintBtn')?.click();
+    footer.append(mapBtn,hubBtn,huntBtn,retryBtn,hintBtn);
+    card.appendChild(footer);
+    panel.appendChild(card);
+    if(focusKey)for(const b of (panel.querySelectorAll?.('[data-fallback-key]')||[]))if(b.getAttribute('data-fallback-key')===focusKey)b.focus();
   }
 
   switchZone(zoneId, options = {}) {
     if (this.zoneManager) {
-      return this.zoneManager.switchZone(zoneId, options);
+      const switched = this.zoneManager.switchZone(zoneId, options);
+      if (this.isFallback2D) this.renderFallback2DPanel();
+      return switched;
     }
   }
 
@@ -102,21 +240,38 @@ class World3D {
     this.camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 400);
     this.camera.position.copy(this.player.pos);
 
-    this.renderer = new THREE.WebGLRenderer({
-      canvas: canvas,
-      antialias: true,
-      alpha: false,
-      powerPreference: 'high-performance'
-    });
+    this.isFallback2D = false;
+    try {
+      this.renderer = new THREE.WebGLRenderer({
+        canvas: canvas,
+        antialias: true,
+        alpha: false,
+        powerPreference: 'high-performance'
+      });
+    } catch (errHigh) {
+      try {
+        this.renderer = new THREE.WebGLRenderer({
+          canvas: canvas,
+          antialias: false,
+          alpha: false
+        });
+      } catch (errLow) {
+        console.warn('WebGL unavailable, activating 2D interactive fallback mode:', errLow);
+        this.isFallback2D = true;
+        this.renderer = this.createFallback2DRenderer(canvas);
+      }
+    }
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     if (THREE.sRGBEncoding) {
       this.renderer.outputEncoding = THREE.sRGBEncoding;
     }
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.08;
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    if (this.renderer.shadowMap) {
+      this.renderer.shadowMap.enabled = !this.isFallback2D;
+      this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    }
 
     // 畫質分級與效能監測系統 (高 / 中 / 低 + 自動降級)
     this.graphicQuality = 'high'; // 'high' | 'medium' | 'low'
@@ -128,7 +283,7 @@ class World3D {
 
     // PMREMGenerator 環境反射貼圖編譯器 (Three.js IBL 空間反射)
     this.pmremGenerator = null;
-    if (typeof THREE.PMREMGenerator === 'function') {
+    if (!this.isFallback2D && typeof THREE.PMREMGenerator === 'function') {
       try {
         this.pmremGenerator = new THREE.PMREMGenerator(this.renderer);
         if (typeof this.pmremGenerator.compileEquirectangularShader === 'function') {
@@ -1001,6 +1156,8 @@ class World3D {
   // 觸發解謎口說練習互動
   triggerInteraction(target) {
     if (!target || !target.userData) return;
+    const availability=this.interactionAvailability(target);
+    if(!availability.available){if(availability.reason)this.showToast(availability.reason);return;}
 
     // 若畫面上已有任何彈窗或對話介面，絕不觸發背景 3D 物件互動
     if (this.isAnyModalOpen()) return;
@@ -1008,13 +1165,13 @@ class World3D {
     if (window.audioManager) window.audioManager.playSfx('interact');
 
     // 若尋寶任務進行中，優先判定是否命中尋寶目標
-    if (this.scavengerHunt && this.scavengerHunt.isQuestActive()) {
+    if (this.scavengerHunt && this.scavengerHunt.isQuestActive() && this.scavengerHunt.currentQuest?.targetWord && this.scavengerHunt.currentQuest.zoneId===(this.zoneManager?.currentZoneId||'zone1')) {
       const q = this.scavengerHunt.currentQuest;
       const targetId = (target.userData.id || '').toLowerCase();
       const targetLabel = (target.userData.label || target.userData.name || '').toUpperCase();
-      const qWord = q.targetWord.toUpperCase();
+      const qWord = String(q.targetWord).toUpperCase();
       const zone1Map = { 'candle': 'LIGHT', 'book': 'BOOK', 'key': 'KEY', 'drawer': 'RED', 'alchemy': 'BLUE', 'cat': 'CAT', 'mimic': 'CAT', 'door': 'OPEN' };
-      const resolvedWord = zone1Map[targetId] || targetId.toUpperCase();
+      const resolvedWord = ((this.zoneManager?.currentZoneId||'zone1')==='zone1' ? zone1Map[targetId] : '') || targetId.toUpperCase();
       if (resolvedWord === qWord || targetLabel.includes(qWord) || targetId.includes(qWord.toLowerCase())) {
         this.scavengerHunt.handleQuestSuccess();
         return;
@@ -1036,7 +1193,6 @@ class World3D {
             this.gameState.candleLit = true;
             this.candleFlame.material.opacity = 1;
             this.candleLight.intensity = 1.8;
-            this.addXP(50);
             this.showToast('✨ 燭台點亮了！溫暖的光芒照耀著書桌角落。');
           });
         } else {
@@ -1056,14 +1212,12 @@ class World3D {
             const duration=this.settings.reducedMotion ? .01 : .55; let progress=0;
             this.animators.push({update:dt=>{ progress=Math.min(1,progress+dt/duration); const ease=1-Math.pow(1-progress,3); this.bookCoverHinge.rotation.z=ease*2.35; this.keyMesh.position.y=1.15+ease*.35; return progress<1; }});
             if(window.audioManager) window.audioManager.playSfx('pickup');
-            this.addXP(50);
             this.showToast('📖 魔導書翻開了！裡面夾著一把黃銅鑰匙 (KEY)！');
             this.scheduleZoneAction(() => {
               this.openSpeechCard('KEY', () => {
                 this.gameState.hasKey = true;
                 this.keyMesh.visible = false;
                 this.addInventory('KEY', '🔑 黃銅鑰匙', '#ecc94b');
-                this.addXP(50);
                 this.showToast('🔑 獲得道具：黃銅鑰匙！可用來打開書桌抽屜。');
               });
             }, 500);
@@ -1073,7 +1227,6 @@ class World3D {
             this.gameState.hasKey = true;
             this.keyMesh.visible = false;
             this.addInventory('KEY', '🔑 黃銅鑰匙', '#ecc94b');
-            this.addXP(50);
             this.showToast('🔑 獲得道具：黃銅鑰匙！可用來打開書桌抽屜。');
           });
         } else {
@@ -1104,7 +1257,6 @@ class World3D {
             this.openSpeechCard('RED', () => {
               this.gameState.hasRedPotion = true;
               this.addInventory('RED', '🧪 火紅魔藥', '#fc8181');
-              this.addXP(50);
               this.showToast('獲得火紅魔藥！去調劑台與水之魔藥融合吧。');
             });
           }, 400);
@@ -1112,7 +1264,6 @@ class World3D {
           this.openSpeechCard('RED', () => {
             this.gameState.hasRedPotion = true;
             this.addInventory('RED', '🧪 火紅魔藥', '#fc8181');
-            this.addXP(50);
             this.showToast('獲得火紅魔藥！去調劑台與水之魔藥融合吧。');
           });
         } else {
@@ -1143,7 +1294,6 @@ class World3D {
                   this.starStone.visible = true;
                   this.addInventory('STAR', '⭐ 星芒之石', '#f6e05e');
                   this.addInventory('FISH', '🐟 魔法小魚乾', '#4fd1c5');
-                  this.addXP(70);
                   this.showToast('⭐ 成功調配出星芒之石，並在底座發現了小魚乾 (FISH)！');
                 });
               }, 500);
@@ -1156,7 +1306,6 @@ class World3D {
               this.starStone.visible = true;
               this.addInventory('STAR', '⭐ 星芒之石', '#f6e05e');
               this.addInventory('FISH', '🐟 魔法小魚乾', '#4fd1c5');
-              this.addXP(70);
               this.showToast('⭐ 成功調配出星芒之石，並在底座發現了小魚乾 (FISH)！');
             });
           }
@@ -1260,8 +1409,8 @@ class World3D {
     if(!this.gameState.mimicFed || this.gameState.hasFlowerStone) return;
     this.openSpeechCard('FLOWER',()=>{
       if(this.gameState.hasFlowerStone) return;
-      this.gameState.hasFlowerStone=true;
-      this.addInventory('FLOWER','🌸 蒼月花石刻','#63b3ed');this.addXP(80);
+      this.gameState.hasFlowerStone=true;this.flowerStone.visible=false;
+      this.addInventory('FLOWER','🌸 蒼月花石刻','#63b3ed');
       window.audioManager?.playSfx('pickup');
       this.showToast('獲得蒼月花石刻！帶著兩顆魔法石前往石門。');
     });
@@ -1286,7 +1435,6 @@ class World3D {
         return stillMoving;
       }
     });
-    this.addXP(100);
     this.showToast('🚪 遠古石門敞開了！微風與花香飄進來，快走到花田迎接朝陽！');
   }
 
@@ -1299,7 +1447,17 @@ class World3D {
     const practiceZoneId = this.zoneManager?.currentZoneId || 'zone1';
     const isCurrent = () => this.speechCardToken === cardToken && this.activeZoneGroup === activeGroup;
     const complete = onComplete; let completed=false;
-    onComplete = () => { if (!isCurrent() || completed) return; completed=true; if(complete) complete(); this.notePracticeCompletion(wordKey,practiceZoneId); };
+    onComplete = (teacher=false) => {
+      if (!isCurrent() || completed) return false;
+      if (!this.awardWordPractice(wordKey, data.xp || 50, teacher, zoneLabel)) {
+        const message='紀錄無法保存，請確認儲存空間後重試；這次尚未完成步驟。';
+        if(window.speechManager?.updateUIStatus)window.speechManager.updateUIStatus('error',message);
+        else {const status=document.getElementById('speechStatus');if(status)status.textContent=message;}return false;
+      }
+      completed=true;modal.style.display='none';this.restoreSpeechFocus();
+      if(complete)complete();this.notePracticeCompletion(wordKey,practiceZoneId);
+      if(this.isFallback2D)this.renderFallback2DPanel();return true;
+    };
     const modal = document.getElementById('speechModal');
     let data = VOCAB_DATA[wordKey];
 
@@ -1452,53 +1610,39 @@ class World3D {
       };
     }
 
-    // 綁定麥克風口說辨識
-    micBtn.onclick = (e) => {
-      if (e) e.stopPropagation();
-      if (window.speechManager) {
-        window.speechManager.startListening(wordKey, (success) => {
-          if (success && isCurrent() && !completed) {
-            modal.style.display = 'none';
-            this.restoreSpeechFocus();
-            if (!this.devMode && window.cloudSyncManager) {
-              window.cloudSyncManager.recordWordPass(wordKey, data.xp || 50, false);
-            }
-            this.showToast(`📘 英語護照已蓋上簽證印章：【${wordKey}】！`);
-            if (onComplete) onComplete();
-            if (!this.devMode && this.zoneManager && this.zoneManager.checkZoneCompletionStatus) {
-              this.zoneManager.checkZoneCompletionStatus();
-            }
-          }
-        });
-      }
-    };
+    const zoneLabel = this.zoneManager?.zones?.[practiceZoneId]
+      ? `${this.zoneManager.zones[practiceZoneId].id}: ${this.zoneManager.zones[practiceZoneId].name}`
+      : practiceZoneId;
 
-    // 綁定教師/備用過關按鈕 (免於雜音卡關)
-    const passBtn = document.getElementById('teacherPassBtn');
-    const fallback=passBtn.closest?.('.fallback-pass-container');if(fallback){fallback.hidden=options.requireRecognition===true;fallback.style.display=options.requireRecognition?'none':'';}
-    passBtn.hidden=options.requireRecognition===true;
-    passBtn.onclick = (e) => {
-      if (e) e.stopPropagation();
-      if (!options.requireRecognition && window.speechManager && isCurrent() && !completed && !this.teacherPassPending) {
-        this.teacherPassPending = true;
-        window.speechManager.targetData = data;
-        window.speechManager.forcePass(false);
-        if (!this.devMode && window.cloudSyncManager) {
-          window.cloudSyncManager.recordWordPass(wordKey, data.xp || 50, true);
+    // Only the current successful oral callback can persist a reward and advance the puzzle.
+    micBtn.onclick = e => {
+      e?.stopPropagation();
+      window.speechManager?.startListening(wordKey, success => {
+        if(success && isCurrent() && !completed){
+          onComplete(false);
+          if(!this.devMode)this.zoneManager?.checkZoneCompletionStatus?.();
         }
-        this.showToast(`✨ 教師驗證通過：已認證【${wordKey}】！`);
-        this.scheduleZoneAction(() => {
-          this.teacherPassPending = false;
-          if (!isCurrent()) return;
-          modal.style.display = 'none';
-          this.restoreSpeechFocus();
-          if (onComplete) onComplete();
-          if (!this.devMode && this.zoneManager && this.zoneManager.checkZoneCompletionStatus) {
-            this.zoneManager.checkZoneCompletionStatus();
-          }
-        }, 300);
-      }
+      });
     };
+    const passBtn=document.getElementById('teacherPassBtn');
+    const fallback=passBtn.closest?.('.fallback-pass-container');
+    if(fallback){fallback.hidden=options.requireRecognition===true;fallback.style.display=options.requireRecognition?'none':'';}
+    passBtn.hidden=options.requireRecognition===true;
+    passBtn.onclick=e=>{
+      e?.stopPropagation();
+      if(options.requireRecognition || !window.speechManager || !isCurrent() || completed || this.teacherPassPending)return;
+      this.teacherPassPending=true;window.speechManager.targetData=data;window.speechManager.forcePass(false);
+      this.scheduleZoneAction(()=>{this.teacherPassPending=false;if(isCurrent())onComplete(true);},300);
+    };
+  }
+
+  awardWordPractice(word, amount, teacher, zone) {
+    if(!this.devMode && window.cloudSyncManager){
+      const result=window.cloudSyncManager.recordWordPass(word,amount,teacher,zone);
+      return result?.saved!==false;
+    }
+    if(this.gameState && Number.isFinite(this.gameState.xp))this.addXP(amount);
+    return true;
   }
 
   notePracticeCompletion(wordKey,practiceZoneId) {
@@ -1567,7 +1711,11 @@ class World3D {
     if (xpLabel) xpLabel.textContent = `${profile.xp} XP`;
     if (levelLabel) levelLabel.textContent = `Lv.${profile.level} 魔法使`;
     if (xpFill) {
-      const pct = Math.min(100, (profile.xp % 100));
+      const lvl = Math.max(1, Number(profile.level) || 1);
+      const nextLevelXp = 100 * Math.pow(lvl, 1.35);
+      const curLevelBaseXp = lvl > 1 ? 100 * Math.pow(lvl - 1, 1.35) : 0;
+      const range = Math.max(1, nextLevelXp - curLevelBaseXp);
+      const pct = Math.min(100, Math.max(0, (((Number(profile.xp) || 0) - curLevelBaseXp) / range) * 100));
       xpFill.style.width = `${pct}%`;
     }
     if (studentLabel) {
@@ -1582,10 +1730,10 @@ class World3D {
   // 走入花田迎接朝陽 (SUN 通關慶典)
   triggerEscapeCelebration() {
     if(this.gameState.escaped || this.isAnyModalOpen()) return;
+    if(!this.gameState.doorOpened){this.showToast('請先完成石門機關，再前往花田。');return;}
     this.openSpeechCard('SUN', () => {
       if(this.gameState.escaped) return;
       this.gameState.escaped = true;
-      this.addXP(100);
       if (window.audioManager) window.audioManager.playSfx('magicSuccess');
 
       // 彈出大勝利結算卡
@@ -1613,6 +1761,7 @@ class World3D {
   }
 
   addXP(amount) {
+
     this.gameState.xp += amount;
     if (window.cloudSyncManager && typeof window.cloudSyncManager.calculateLevel === 'function') {
       this.gameState.level = window.cloudSyncManager.calculateLevel(this.gameState.xp);
@@ -1843,11 +1992,11 @@ class World3D {
     const qualLabels = { high: '高畫質', medium: '中畫質', low: '低畫質' };
 
     if (fpsEl) {
-      fpsEl.textContent = this.frameCadence?.mode === 'reading' ? '閱讀中 · 背景省電' : `⚡ FPS: ${fpsVal}`;
+      fpsEl.textContent = this.isFallback2D ? '圖卡探索' : this.frameCadence?.mode === 'reading' ? '閱讀中 · 背景省電' : `⚡ FPS: ${fpsVal}`;
       fpsEl.className = fpsVal >= 45 ? 'fps-good' : (fpsVal >= 28 ? 'fps-med' : 'fps-low');
     }
     if (qualEl) {
-      qualEl.textContent = (this.settings.quality === 'auto' ? '自動 · ' : '') + (qualLabels[this.graphicQuality] || '高畫質');
+      qualEl.textContent = this.isFallback2D ? '免 3D 加速' : (this.settings.quality === 'auto' ? '自動 · ' : '') + (qualLabels[this.graphicQuality] || '高畫質');
     }
   }
 
@@ -1855,6 +2004,15 @@ class World3D {
     requestAnimationFrame(() => this.animate());
 
     const nowTime = performance.now();
+    if(this.isFallback2D){
+      if(!document.hidden && nowTime-(this.lastFallbackUpdate||0)>250){
+        this.lastFallbackUpdate=nowTime;
+        if(!this.isAnyModalOpen())this.renderFallback2DPanel();
+        this.scavengerHunt?.update(0);
+        this.updateFpsPillUI();
+      }
+      return;
+    }
     const modalOpen = this.isAnyModalOpen();
     if (!this.frameCadence.shouldRender(nowTime,document.hidden,this.contextLost,modalOpen)) return;
     const clockDelta = this.clock.getDelta();

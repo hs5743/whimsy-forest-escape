@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <meta name="description" content="專為國小學生設計的 3D 英語解謎逃脫遊戲。聽示範、開口說英語、找線索，從魔法書屋出發探索市集、海港與奇幻秘境。">
   <title>英語魔法探險家：秘境逃脫任務 (English Magic Explorers)</title>
-  <link rel="stylesheet" href="style.css?v=20261014a">
+  <link rel="stylesheet" href="style.css?v=20261017b">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%20%22100%22><text y=%22.9em%22 font-size=%2290%22>🗝️</text></svg>">
   <style>
     /* ========================================================= */
@@ -822,17 +822,17 @@
       .btn-cover-primary { padding: 10px 20px !important; font-size: 16px !important; }
     }
   </style>
-  <link rel="stylesheet" href="game-polish.css?v=20261014a">
-  <link rel="stylesheet" href="title-screen.css?v=20261014a">
-  <link rel="stylesheet" href="learning-polish.css?v=20261014a">
-  <link rel="stylesheet" href="adventure-assist.css?v=20261014a">
-  <link rel="stylesheet" href="realm-quests.css?v=20261014a">
-  <link rel="stylesheet" href="adventure-cloud.css?v=20261014a">
+  <link rel="stylesheet" href="game-polish.css?v=20261017b">
+  <link rel="stylesheet" href="title-screen.css?v=20261017b">
+  <link rel="stylesheet" href="learning-polish.css?v=20261017b">
+  <link rel="stylesheet" href="adventure-assist.css?v=20261017b">
+  <link rel="stylesheet" href="realm-quests.css?v=20261017b">
+  <link rel="stylesheet" href="adventure-cloud.css?v=20261017b">
 <style>
 .harmonica-hole-grid{display:grid;grid-template-columns:repeat(6,minmax(44px,1fr));gap:7px;width:100%}.harmonica-hole-grid button{min-width:0;padding:10px}.harmonica-hole-grid button[aria-pressed="true"]{background:#185965!important;color:#fff!important;outline:3px solid #d6b76b}.harmonica-note-readout{width:100%;padding:12px;border-radius:10px;background:#173e49;color:#f6dfaa!important;font-size:1.1rem!important}
 @media(max-width:600px){.harmonica-hole-grid{grid-template-columns:repeat(4,minmax(44px,1fr))}}
 </style>
-  <link rel="stylesheet" href="learning-hub.css?v=20261014a">
+  <link rel="stylesheet" href="learning-hub.css?v=20261017b">
 </head>
 <body>
   <!-- ========================================================= -->
@@ -848,7 +848,7 @@
       <div class="title-topics" aria-label="遊戲特色"><span>國小英語</span><span>3D 解謎</span><span>密室逃脫</span></div>
       <p class="cover-tagline">聽一聽、說英語，找到打開密室的線索！<br>從魔法書屋出發，探索每一個奇幻秘境。</p>
       <div class="cover-cta-row">
-        <button id="btnCoverStartJourney" disabled class="btn-cover-primary" onclick="openGameInstructions()" type="button"><span>開始冒險</span><span aria-hidden="true">→</span></button>
+        <button id="btnCoverStartJourney" class="btn-cover-primary" onclick="openGameInstructions()" type="button"><span>開始冒險</span><span aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span></button>
         <button id="btnCoverInstructions" class="btn-cover-secondary" onclick="openGameInstructions()" type="button">操作說明</button>
       </div>
       <div class="title-links">
@@ -865,7 +865,7 @@
               <span class="portal-main-title">探險家學習大廳</span>
               <span class="portal-sub-desc">GEPT 603單字・88句型・複習牆</span>
             </div>
-            <span class="portal-arrow" aria-hidden="true">➔</span>
+            <span class="portal-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span>
           </button>
           <button id="btnCoverQuickSchool" class="btn-cover-portal portal-school" type="button" onclick="quickJumpToZone('zone12')">
             <span class="portal-badge-icon">🏫</span>
@@ -873,15 +873,15 @@
               <span class="portal-main-title">新港國小實境展館</span>
               <span class="portal-sub-desc">傳統舞獅・校史建築・口琴展館</span>
             </div>
-            <span class="portal-arrow" aria-hidden="true">➔</span>
+            <span class="portal-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span>
           </button>
         </div>
       </div>
       <div id="assetLoadStatus" class="asset-status" role="status">正在準備魔法世界…</div>
-      <button id="btnBootRetry" class="cover-skip-link" type="button" hidden onclick="location.reload()">重新準備魔法世界 ↻</button>
-      <div class="cover-skip-row"><button id="btnCoverDirectPlay" disabled class="cover-skip-link" onclick="completeOnboardingAndEnterGame()" type="button">我會操作，直接探索 ↗</button></div>
+      <button id="btnBootRetry" class="cover-skip-link" type="button" hidden onclick="window.retryBootWorld ? window.retryBootWorld() : location.reload()">重新準備魔法世界 <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg></button>
+      <div class="cover-skip-row"><button id="btnCoverDirectPlay" class="cover-skip-link" onclick="completeOnboardingAndEnterGame()" type="button">我會操作，直接探索 <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M7 17 17 7M9 7h8v8"/></svg></button></div>
     </div>
-    <div class="title-world-note" aria-hidden="true"><span>✦</span> 說出英語，解開線索，開啟下一段冒險</div>
+    <div class="title-world-note" aria-hidden="true"><span><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="currentColor" style="vertical-align:middle"><path d="M12 2 14.8 9.2 22 12l-7.2 2.8L12 22l-2.8-7.2L2 12l7.2-2.8Z"/></svg></span> 說出英語，解開線索，開啟下一段冒險</div>
   </div>
   <!-- ========================================================= -->
   <!-- 2. 劇情前言繪本彈窗 (Storyline Prologue Modal)           -->
@@ -889,7 +889,7 @@
   <div id="storyPrologueModal" class="story-prologue-modal" style="display: none;">
     <div class="parchment-card story-book-frame">
       <div class="story-header">
-        <button class="modal-close-btn" type="button" onclick="closeStoryPrologue()" aria-label="關閉">✕</button>
+        <button class="modal-close-btn" type="button" onclick="closeStoryPrologue()" aria-label="關閉"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
         <div class="story-badge">📜 傳奇冒險序幕</div>
         <h2 id="storyActTitle" class="story-title">第一章：魔法書屋的秘密</h2>
         <div class="story-stepper-row">
@@ -955,7 +955,7 @@
   <div id="instructionsModal" class="story-prologue-modal" style="display:none;">
     <div class="parchment-card instructions-parchment-card">
       <div class="instructions-header">
-        <button class="modal-close-btn" type="button" onclick="closeInstructionsModal()" aria-label="關閉操作說明">✕</button>
+        <button class="modal-close-btn" type="button" onclick="closeInstructionsModal()" aria-label="關閉操作說明"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
         <div class="instructions-badge">冒險者手冊 · 第一頁</div>
         <h2 id="guideTitle" class="instructions-title">你的魔法旅程，從這裡開始</h2>
         <p class="instructions-sub">移動、環視、互動。三個動作，帶你探索每個秘境。</p>
@@ -980,7 +980,7 @@
         <section class="guide-first-quest"><span aria-hidden="true">🧩</span><div><h3>每個秘境，都有自己的任務</h3><p>離開書齋後，點擊<strong>「秘境任務」</strong>或與場景中的金色任務環互動。聽英語線索，完成購物、對時、導航等機關，再前往下一關；選錯也能重試。</p></div></section>
         <details class="guide-more"><summary>探索時還有哪些幫手？</summary><p><strong>三級提示：</strong>點「需要一點提示？」先看線索，需要時再看操作建議，最後才標示方向。</p><p><strong>冒險續玩：</strong>開始探索後，這台裝置會自動保存機關與位置；也能從冒險選單手動保存。雲端英語學習紀錄與此裝置的冒險存檔分開管理。</p><p><strong>聽力尋寶：</strong>從上方選單開啟，或電腦按 H。聽懂線索後尋找物品；HOT 越靠近，COLD 越遠。</p><p><strong>空間星圖：</strong>從冒險選單查看星界與探索進度。</p><p><strong>操作說明與設定：</strong>可從冒險選單隨時重看指南，調整音量、畫質與視角靈敏度。</p></details>
       </div>
-      <div class="instructions-footer"><span class="guide-footer-note">準備好，就從魔法書齋出發。</span><button id="btnEnterGameFinal" disabled class="btn-enter-game" onclick="completeOnboardingAndEnterGame()" type="button">進入魔法書齋 <span aria-hidden="true">→</span></button></div>
+      <div class="instructions-footer"><span class="guide-footer-note">準備好，就從魔法書齋出發。</span><button id="btnEnterGameFinal" class="btn-enter-game" onclick="completeOnboardingAndEnterGame()" type="button">進入魔法書齋 <span aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span></button></div>
     </div>
   </div>
 
@@ -1034,7 +1034,7 @@
   <button id="realmQuestBtn" type="button" hidden aria-haspopup="dialog" aria-controls="realmQuestModal">秘境任務</button>
   <div id="realmQuestModal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="realmQuestTitle">
     <section class="realm-quest-card">
-      <button id="realmQuestClose" class="modal-close-btn" type="button" aria-label="關閉">✕</button>
+      <button id="realmQuestClose" class="modal-close-btn" type="button" aria-label="關閉"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       <p id="realmQuestKicker" class="quest-kicker"></p><h2 id="realmQuestTitle"></h2>
       <p id="realmQuestEnglish" lang="en"></p><p id="realmQuestBrief"></p>
       <button id="realmQuestListen" type="button">▶ 聽英語線索</button>
@@ -1043,10 +1043,10 @@
     </section>
   </div>
   <div id="adventureReward" hidden role="status" aria-live="polite"><strong id="adventureRewardTitle"></strong><span id="adventureRewardNext"></span></div>
-  <div id="hintDirection" hidden><span id="hintDirectionCopy" role="status"></span><button id="hintStop" type="button" aria-label="關閉方向標示">✕</button></div>
+  <div id="hintDirection" hidden><span id="hintDirectionCopy" role="status"></span><button id="hintStop" type="button" aria-label="關閉方向標示"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
   <div id="cloudRestoreModal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="cloudRestoreTitle"><section class="cloud-restore-card"><h2 id="cloudRestoreTitle">接續哪一份冒險？</h2><p id="cloudRestoreCopy"></p><div class="cloud-checkpoint-actions"><button id="cloudRestoreConfirm" type="button">確認接續雲端存檔</button><button id="cloudRestoreCancel" type="button" aria-label="關閉">先保留這台進度</button></div></section></div>
   <div id="hintModal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="hintTitle">
-    <section class="hint-card"><button id="hintClose" class="modal-close-btn" type="button" aria-label="關閉">✕</button>
+    <section class="hint-card"><button id="hintClose" class="modal-close-btn" type="button" aria-label="關閉"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       <div id="hintLevel" class="hint-label">提示 1 / 3</div><h2 id="hintTitle">小小線索，自己解開</h2>
       <p id="hintCopy" aria-live="polite"></p><p class="hint-note">你決定要看多少提示。提示不會替你作答或通關。</p>
       <div class="hint-actions"><button id="hintMore" type="button">再給我一點提示</button><button id="hintContinue" type="button">我想先自己試試</button></div>
@@ -1059,7 +1059,7 @@
     <div class="system-drawer-content parchment-card">
       <div class="system-drawer-header">
         <div class="drawer-title">⚙️ 冒險使系統選單</div>
-        <button class="modal-close-btn" type="button" onclick="closeSystemMenu()" aria-label="關閉">✕</button>
+        <button class="modal-close-btn" type="button" onclick="closeSystemMenu()" aria-label="關閉"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       </div>
       <fieldset class="game-settings">
         <legend>遊戲設定</legend>
@@ -1077,7 +1077,7 @@
         <button id="adventureSaveNow" type="button">保存目前進度</button>
       </fieldset>
       <fieldset id="adventureCloudPanel" class="adventure-save-panel"><legend>跨裝置續玩</legend>
-        <output id="adventureCloudStatus" role="status">尚未連接冒險存檔服務。</output>
+        <output id="adventureCloudStatus" role="status">目前為本機自動存檔模式（請使用同一台裝置與瀏覽器繼續冒險；如需跨裝置轉移可點下方檢查雲端服務）。</output>
         <div class="cloud-checkpoint-actions"><button id="adventureCloudCheck" type="button">檢查雲端服務</button><button id="adventureCloudEnable" type="button" disabled>啟用跨裝置續玩</button></div>
         <label for="adventureCloudCode">這份冒險的續玩代碼</label><input id="adventureCloudCode" readonly autocomplete="off" spellcheck="false" placeholder="啟用並上傳後取得代碼">
         <button id="adventureCloudCopy" type="button" disabled>複製續玩代碼</button>
@@ -1197,9 +1197,9 @@
   </div>
 
   <!-- 聽力尋寶任務中心彈窗 (Scavenger Hunt Center Modal) -->
-  <div id="scavengerHuntModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 155; display: none; justify-content: center; align-items: center; padding: 16px;">
+  <div id="scavengerHuntModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 10045; display: none; justify-content: center; align-items: center; padding: 16px;">
     <div class="parchment-card" style="max-width: 580px; width: 100%;">
-      <button class="modal-close-btn" type="button" onclick="closeScavengerModal()" aria-label="關閉">✕</button>
+      <button class="modal-close-btn" type="button" onclick="closeScavengerModal()" aria-label="關閉"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       <div style="text-align: center; border-bottom: 2px dashed #dfc79b; padding-bottom: 12px; margin-bottom: 12px;">
         <h2 style="color: var(--warm-brown); font-size: 22px; margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px;">
           🧭 <span>情境聽力尋寶任務</span>
@@ -1243,9 +1243,9 @@
   </div>
 
   <!-- 尋寶成功雙軌學習卡彈窗 (Scavenger Victory Modal) -->
-  <div id="scavengerVictoryModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 160; display: none; justify-content: center; align-items: center; padding: 16px;">
+  <div id="scavengerVictoryModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10048; display: none; justify-content: center; align-items: center; padding: 16px;">
     <div class="parchment-card" style="max-width: 540px; width: 100%; text-align: center;">
-      <button class="modal-close-btn" type="button" onclick="closeScavengerVictory()" aria-label="關閉">✕</button>
+      <button class="modal-close-btn" type="button" onclick="closeScavengerVictory()" aria-label="關閉"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       <div style="font-size: 44px; margin-bottom: 4px;">🎉🪙</div>
       <h2 style="color: #065f46; font-size: 24px; margin: 0 0 6px 0;">聽力神探！尋寶成功！</h2>
       <p style="font-size: 13px; color: #52525b; margin-bottom: 12px;">
@@ -1320,7 +1320,7 @@
   <!-- 單字口說練習彈窗 (Speech Practice Modal) -->
   <div id="speechModal">
     <div class="parchment-card">
-      <button id="closeSpeechBtn" class="modal-close-btn" type="button" onclick="if(window.world3D) window.world3D.closeSpeechCard()" aria-label="關閉">✕</button>
+      <button id="closeSpeechBtn" class="modal-close-btn" type="button" onclick="if(window.world3D) window.world3D.closeSpeechCard()" aria-label="關閉"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       <p class="practice-eyebrow">英語咒語練習</p>
       <ol class="practice-flow" aria-label="練習步驟"><li>1 聽示範</li><li>2 開口朗讀</li><li>3 看回饋</li></ol>
       <div class="word-display-box">
@@ -1375,9 +1375,9 @@
   </div>
 
   <!-- 玩法說明指南彈窗 -->
-  <div id="guideModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 150; display: none; justify-content: center; align-items: center; padding: 20px;">
+  <div id="guideModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10045; display: none; justify-content: center; align-items: center; padding: 20px;">
     <div class="parchment-card" style="max-width: 520px;">
-      <button class="modal-close-btn" type="button" onclick="toggleGuideModal()" aria-label="關閉">✕</button>
+      <button class="modal-close-btn" type="button" onclick="toggleGuideModal()" aria-label="關閉"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       <h2 style="color: var(--warm-brown); font-size: 22px; text-align: center; border-bottom: 2px dashed #dfc79b; padding-bottom: 10px;">
         📖 魔法使書齋逃脫指南
       </h2>
@@ -1427,9 +1427,9 @@
   </div>
 
   <!-- 數位翻頁魔法護照手帳 (Digital Magic Passport Modal) -->
-  <div id="magicPassportModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 155; display: none; justify-content: center; align-items: center; padding: 12px;">
+  <div id="magicPassportModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 10045; display: none; justify-content: center; align-items: center; padding: 12px;">
     <div class="passport-book-container">
-      <button class="modal-close-btn" type="button" onclick="togglePassportModal()" aria-label="關閉">✕</button>
+      <button class="modal-close-btn" type="button" onclick="togglePassportModal()" aria-label="關閉"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
 
       <!-- 護照頂部主題篩選列 -->
       <div class="passport-header-bar">
@@ -1510,7 +1510,7 @@
   <!-- 學生護照登入與切換彈窗 (Student Login Modal) -->
   <div id="studentLoginModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 160; display: none; justify-content: center; align-items: center; padding: 16px;">
     <div class="parchment-card" style="max-width: 480px; text-align: center;">
-      <button class="modal-close-btn" type="button" onclick="toggleStudentModal()" aria-label="關閉">✕</button>
+      <button class="modal-close-btn" type="button" onclick="toggleStudentModal()" aria-label="關閉"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       <h2 style="color: var(--warm-brown); font-size: 20px; border-bottom: 2px dashed #dfc79b; padding-bottom: 8px;">
         🎒 魔法使身分登記（英語護照）
       </h2>
@@ -1558,7 +1558,7 @@
         </div>
 
         <div style="display: flex; gap: 10px; margin-top: 18px;">
-          <button type="submit" class="btn-mic" style="flex: 2; font-size: 15px; padding: 12px;">
+          <button id="btnSubmitStudentLogin" type="submit" class="btn-mic" style="flex: 2; font-size: 15px; padding: 12px;">
             ✨ 綁定護照並開始冒險
           </button>
           <button type="button" class="btn-voice" onclick="loginAsGuest()" style="flex: 1; font-size: 13px; padding: 12px; background: #e2d3be; color: #5c3d2e;">
@@ -1570,9 +1570,9 @@
   </div>
 
   <!-- 排行榜彈窗 (Leaderboard Modal) -->
-  <div id="leaderboardModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 160; display: none; justify-content: center; align-items: center; padding: 16px;">
+  <div id="leaderboardModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10055; display: none; justify-content: center; align-items: center; padding: 16px;">
     <div class="parchment-card" style="max-width: 540px; width: 95%;">
-      <button class="modal-close-btn" type="button" onclick="toggleLeaderboardModal()" aria-label="關閉">✕</button>
+      <button class="modal-close-btn" type="button" onclick="toggleLeaderboardModal()" aria-label="關閉"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       <h2 style="color: var(--warm-brown); font-size: 22px; text-align: center; border-bottom: 2px dashed #dfc79b; padding-bottom: 8px;">
         🏆 新港魔法學院：冒險榮譽榜
       </h2>
@@ -1596,7 +1596,7 @@
   <!-- 雲端連線設定彈窗 (Cloud Config Modal) -->
   <div id="cloudConfigModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 160; display: none; justify-content: center; align-items: center; padding: 16px;">
     <div class="parchment-card" style="max-width: 480px; text-align: left;">
-      <button class="modal-close-btn" type="button" onclick="toggleCloudConfigModal()" aria-label="關閉">✕</button>
+      <button class="modal-close-btn" type="button" onclick="toggleCloudConfigModal()" aria-label="關閉"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       <h2 style="color: var(--warm-brown); font-size: 20px; text-align: center; border-bottom: 2px dashed #dfc79b; padding-bottom: 8px;">
         ☁️ 英語冒險護照：雲端連線狀態
       </h2>
@@ -1605,7 +1605,7 @@
       <div style="background: #fefce8; border: 1.5px solid #fcd34d; border-radius: 12px; padding: 12px 16px; margin-top: 12px;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
           <div id="cloudModalStatusBadge" class="cloud-status-pill mode-online" style="font-size: 13px; padding: 4px 10px;">
-            <span>🟢</span> 官方試算表已連線同步
+            雲端服務已設定 · 尚未確認同步
           </div>
           <span style="font-size: 12px; color: #8c7361;">新港國小英語校本資料庫</span>
         </div>
@@ -1645,7 +1645,7 @@
             🔒 請輸入教師管理密碼以解鎖自訂試算表設定：
           </div>
           <div style="display: flex; gap: 8px;">
-            <input type="password" id="teacherAuthPassword" class="form-input" placeholder="教師密碼 (teacherpass)" style="font-size: 12px; padding: 6px 10px; flex: 1;">
+            <input type="password" id="teacherAuthPassword" class="form-input" placeholder="請輸入教師管理密碼" style="font-size: 12px; padding: 6px 10px; flex: 1;">
             <button type="button" class="btn-mic" onclick="verifyTeacherAdminAuth()" style="font-size: 12px; padding: 6px 12px;">
               解鎖
             </button>
@@ -1673,9 +1673,9 @@
   </div>
 
   <!-- 空間星圖大地圖 (Overworld Realm Map Modal) -->
-  <div id="worldMapModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 158; display: none; justify-content: center; align-items: center; padding: 12px;">
+  <div id="worldMapModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10050; display: none; justify-content: center; align-items: center; padding: 12px;">
     <div class="world-map-dialog">
-      <button class="modal-close-btn" type="button" onclick="toggleWorldMapModal()" aria-label="關閉">✕</button>
+      <button class="modal-close-btn" type="button" onclick="toggleWorldMapModal()" aria-label="關閉"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       <div class="world-map-header">
         <h2 class="world-map-title">冒險大陸 · 十界星圖</h2>
         <p class="world-map-subtitle">選擇星界查看探索進度；已解鎖的區域可以傳送前往。</p>
@@ -1718,9 +1718,9 @@
 
   <div id="sceneLoadNotice" class="scene-load-notice" hidden><span id="sceneLoadLabel" role="status" aria-live="polite"></span><button id="sceneLoadRetry" type="button" hidden onclick="window.world3D?.zoneManager.retryTextures()">重新載入</button></div>
   <!-- 關卡主英語問句三重試煉彈窗 (Guardian Question Trial Modal) -->
-  <div id="guardianTrialModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 160; display: none; justify-content: center; align-items: center; padding: 12px;">
+  <div id="guardianTrialModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10050; display: none; justify-content: center; align-items: center; padding: 12px;">
     <div class="guardian-dialog-container guardian-dialog-split">
-      <button class="modal-close-btn" type="button" onclick="closeGuardianTrialModal()" aria-label="關閉">✕</button>
+      <button class="modal-close-btn" type="button" onclick="closeGuardianTrialModal()" aria-label="關閉"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
 
       <!-- 左側：專屬守護者高清動態立繪看板 (Guardian High-Res Standee) -->
       <div class="guardian-standee-side" id="guardianStandeeSide">
@@ -1944,37 +1944,38 @@
 
   <!-- 核心庫與遊戲腳本 -->
   <script src="three.min.js"></script>
-  <script src="game-polish.js?v=20261014a"></script>
-  <script src="realm-landscape.js?v=20261014a"></script>
-  <script src="title-screen.js?v=20261014a"></script>
-  <script src="restaurant-chapter.js?v=20261014a"></script>
-  <script src="restaurant-scene.js?v=20261014a"></script>
-  <script src="harmonica-chapter.js?v=20261014a"></script>
-  <script src="harmonica-scene.js?v=20261014a"></script>
-  <script src="school-chapter.js?v=20261014a"></script>
-  <script src="school-scene.js?v=20261014a"></script>
-  <script src="realm-quests.js?v=20261014a"></script>
-  <script src="adventure-progress.js?v=20261014a"></script>
-  <script src="adventure-cloud.js?v=20261014a"></script>
-  <script src="adventure-assist.js?v=20261014a"></script>
-  <script src="game-diagnostics.js?v=20261014a"></script>
-  <script src="realm-presentation.js?v=20261014a"></script>
-  <script src="gept-kids-vocabulary.js?v=20261014a"></script>
-  <script src="vocab-data.js?v=20261014a"></script>
-  <script src="vocab-passport-bank.js?v=20261014a"></script>
-  <script src="learning-rewards.js?v=20261014a"></script>
-  <script src="learning-data.js?v=20261014a"></script>
-  <script src="learning-hub-scene.js?v=20261014a"></script>
-  <script src="learning-hub.js?v=20261014a"></script>
-  <script src="speech-manager.js?v=20261014a"></script>
-  <script src="scene-music.js?v=20261014a"></script>
-  <script src="audio-manager.js?v=20261014a"></script>
-  <script src="touch-controls.js?v=20261014a"></script>
-  <script src="cloud-sync-manager.js?v=20261014a"></script>
-  <script src="spatial-zone-manager.js?v=20261014a"></script>
-  <script src="minimap-manager.js?v=20261014a"></script>
-  <script src="scavenger-hunt-manager.js?v=20261014a"></script>
-  <script src="world-3d.js?v=20261014a"></script>
+  <script src="game-polish.js?v=20261017b"></script>
+  <script src="realm-landscape.js?v=20261017b"></script>
+  <script src="title-screen.js?v=20261017b"></script>
+  <script src="restaurant-chapter.js?v=20261017b"></script>
+  <script src="restaurant-scene.js?v=20261017b"></script>
+  <script src="harmonica-chapter.js?v=20261017b"></script>
+  <script src="harmonica-scene.js?v=20261017b"></script>
+  <script src="school-chapter.js?v=20261017b"></script>
+  <script src="school-scene.js?v=20261017b"></script>
+  <script src="realm-quests.js?v=20261017b"></script>
+  <script src="adventure-progress.js?v=20261017b"></script>
+  <script src="adventure-cloud.js?v=20261017b"></script>
+  <script src="adventure-assist.js?v=20261017b"></script>
+  <script src="game-diagnostics.js?v=20261017b"></script>
+  <script src="realm-presentation.js?v=20261017b"></script>
+  <script src="gept-kids-vocabulary.js?v=20261017b"></script>
+  <script src="vocab-data.js?v=20261017b"></script>
+  <script src="vocab-passport-bank.js?v=20261017b"></script>
+  <script src="learning-rewards.js?v=20261017b"></script>
+  <script src="learning-data.js?v=20261017b"></script>
+  <script src="learning-hub-scene.js?v=20261017b"></script>
+  <script src="learning-hub.js?v=20261017b"></script>
+  <script src="speech-manager.js?v=20261017b"></script>
+  <script src="scene-music.js?v=20261017b"></script>
+  <script src="audio-manager.js?v=20261017b"></script>
+  <script src="touch-controls.js?v=20261017b"></script>
+  <script src="record-outbox.js?v=20261017b"></script>
+  <script src="cloud-sync-manager.js?v=20261017b"></script>
+  <script src="spatial-zone-manager.js?v=20261017b"></script>
+  <script src="minimap-manager.js?v=20261017b"></script>
+  <script src="scavenger-hunt-manager.js?v=20261017b"></script>
+  <script src="world-3d.js?v=20261017b"></script>
 
   <script>
     let curLeaderboardTab = 'school';
@@ -2289,15 +2290,26 @@
     function completeOnboardingAndEnterGame() {
       closeStoryPrologue();
       closeInstructionsModal();
+      document.body?.classList?.add('game-entered');
 
       const cover = document.getElementById('gameCoverScreen');
       if (cover) {
         cover.classList.add('fade-out');
-        setTimeout(() => {
+        cover.inert = true;
+        cover.hidden = true;
+        if (cover.style && typeof cover.style.setProperty === 'function') {
+          cover.style.setProperty('display', 'none', 'important');
+        } else if (cover.style) {
           cover.style.display = 'none';
-          cover.inert = true;
-          document.querySelector('#worldCanvas, canvas')?.focus({ preventScroll: true });
-        }, 700);
+        }
+        document.querySelector('#renderCanvas, canvas')?.focus?.({ preventScroll: true });
+      }
+
+      if (!window.world3D && typeof World3D === 'function') {
+        try { window.world3D = new World3D(); } catch (_) {}
+      }
+      if (window.world3D?.isFallback2D) {
+        window.world3D.renderFallback2DPanel?.();
       }
 
       // 順暢解鎖背景音樂播放 (符合瀏覽器 Autoplay 規範)
@@ -2319,15 +2331,17 @@
         if (window.world3D?.zoneManager && window.world3D.zoneManager.zones[zoneId]) {
           if (zoneId === 'learningHub') {
             window.world3D.switchZone('learningHub', { directAccess: true });
-            setTimeout(() => window.LearningHub?.open?.(), 350);
+            setTimeout(() => window.LearningHub?.open?.(), 120);
           } else {
             window.world3D.switchZone(zoneId, { directAccess: true });
             if (zoneId === 'zone12') {
               window.world3D.showToast('🏫 已直達新港國小實境展館！請向左右環視探索校園。');
             }
           }
-        } else if (attempts < 50) {
-          setTimeout(() => tryJump(attempts + 1), 100);
+        } else if (zoneId === 'learningHub' && window.LearningHub?.open && attempts >= 5) {
+          window.LearningHub.open();
+        } else if (attempts < 30) {
+          setTimeout(() => tryJump(attempts + 1), 80);
         }
       };
       tryJump();
@@ -2428,7 +2442,7 @@
           badge.innerHTML = '<span>⚪</span> 單機體驗模式 (本機記錄)';
         } else {
           badge.className = 'cloud-status-pill mode-online';
-          badge.innerHTML = '<span>🟢</span> 官方試算表已連線同步';
+          badge.textContent = p.isGuest ? '訪客紀錄保存在此裝置' : csm.backendNeedsUpdate ? '本機已保存 · 等待後台更新' : csm.lastLoginSync?.state==='synced' ? '護照學籍已同步' : '雲端服務已設定 · 尚未確認同步';
         }
       }
 
@@ -2445,7 +2459,7 @@
       if (pendingInfo) {
         let qCount = 0;
         try {
-          qCount = JSON.parse(localStorage.getItem(csm.queueKey) || '[]').length;
+          qCount = csm.outbox?.entries().filter(e=>!String(e.studentId).startsWith('guest_')).length || 0;
         } catch (e) {}
         pendingInfo.textContent = `待補傳離線記錄：${qCount} 筆 (連線順暢時將自動背景同步)`;
       }
@@ -2471,10 +2485,10 @@
       panel.style.display = (panel.style.display === 'none') ? 'block' : 'none';
     }
 
-    function verifyTeacherAdminAuth() {
+    async function verifyTeacherAdminAuth() {
       const pwd = (document.getElementById('teacherAuthPassword').value || '').trim();
       const errEl = document.getElementById('teacherAuthError');
-      if (window.cloudSyncManager && window.cloudSyncManager.verifyTeacherPassword(pwd)) {
+      if (window.cloudSyncManager && await window.cloudSyncManager.verifyTeacherPassword(pwd)) {
         if (errEl) errEl.textContent = '';
         document.getElementById('teacherAuthBox').style.display = 'none';
         document.getElementById('teacherUrlBox').style.display = 'block';
@@ -2482,7 +2496,7 @@
       } else {
         if (errEl) {
           errEl.style.color = '#dc2626';
-          errEl.textContent = '❌ 密碼錯誤！僅授課教師可解鎖自訂試算表設定。';
+          errEl.textContent = window.cloudSyncManager?.teacherAuthError || '教師驗證未完成，請稍後重試。';
         }
       }
     }
@@ -2530,15 +2544,29 @@
       const classId = document.getElementById('loginClass').value;
       const seatNo = document.getElementById('loginSeat').value;
       const name = document.getElementById('loginName').value.trim();
+      const submitBtn = document.getElementById('btnSubmitStudentLogin');
+      const originalText = submitBtn ? submitBtn.innerHTML : '✨ 綁定護照並開始冒險';
 
-      if (window.cloudSyncManager) {
-        await window.cloudSyncManager.login(grade, classId, seatNo, name);
-        if (window.world3D) {
-          window.world3D.showToast(`✨ 歡迎魔法使 ${name}！已成功綁定英語護照。`);
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '⏳ 正在綁定護照並同步學籍...';
+      }
+      try {
+        if (window.cloudSyncManager) {
+          await window.cloudSyncManager.login(grade, classId, seatNo, name);
+          if (window.world3D) {
+            const cloud=window.cloudSyncManager.lastLoginSync;
+            window.world3D.showToast(cloud?.state==='synced' ? '護照已登入，雲端學籍已同步。' : '已在此裝置登入護照；雲端尚未確認，連線恢復後可重試。');
+          }
+        }
+        document.getElementById('studentLoginModal').style.display = 'none';
+        if (window.audioManager) window.audioManager.playSfx('magicSuccess');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalText;
         }
       }
-      document.getElementById('studentLoginModal').style.display = 'none';
-      if (window.audioManager) window.audioManager.playSfx('magicSuccess');
     }
 
     function loginAsGuest() {
@@ -2688,20 +2716,29 @@
       if (window.audioManager) window.audioManager.playSfx('click');
     }
 
+    // 取得空間星圖資料來源 (解耦 3D 場景狀態，即使 WebGL 未啟動亦能獨立渲染完整 14 區星圖)
+    function getEffectiveZoneManager() {
+      if (window.world3D && window.world3D.zoneManager) return window.world3D.zoneManager;
+      if (!window._fallbackZoneManager && typeof SpatialZoneManager === 'function') {
+        try { window._fallbackZoneManager=new SpatialZoneManager({gameState:{realmPuzzles:{}}},{metadataOnly:true}); }
+        catch(error){console.warn('Star map unavailable:',error);}
+      }
+      return window._fallbackZoneManager || null;
+    }
+
     // 渲染奇幻大陸串聯路網 (Overworld Route Layout)
     function renderWorldMapRoute() {
       const listEl = document.getElementById('worldMapRouteList');
-      if (!listEl || !window.world3D || !window.world3D.zoneManager) return;
-      const zm = window.world3D.zoneManager;
-      const curZone = zm.getCurrentZone();
+      const zm = getEffectiveZoneManager();
+      if (!listEl || !zm) return;
 
-      RealmPresentation.render(listEl,zm,window.cloudSyncManager?.profile,travelToZone);
+      RealmPresentation.render(listEl, zm, window.cloudSyncManager?.profile, travelToZone);
     }
 
     function renderWorldMapCards() {
       const grid = document.getElementById('worldMapGrid');
-      if (!grid || !window.world3D || !window.world3D.zoneManager) return;
-      const zm = window.world3D.zoneManager;
+      const zm = getEffectiveZoneManager();
+      if (!grid || !zm) return;
       const curZone = zm.getCurrentZone();
       grid.innerHTML = '';
 
@@ -2757,6 +2794,7 @@
     // ==========================================
     let currentGuardianZoneId = 'zone6';
     let currentGuardianTrial = null;
+    let guardianTrialSession=0,guardianSpeechVerified=false,guardianRewarded=false;
     let currentTrialStep = 0; // 0: intro, 1: Q1, 2: Q2, 3: Speech, 4: Victory
     let isCurrentTrialAnswered = false;
 
@@ -2772,6 +2810,7 @@
         return;
       }
       currentGuardianZoneId = zoneId;
+      guardianTrialSession++;guardianSpeechVerified=false;guardianRewarded=false;
       currentGuardianTrial = trialData;
       currentTrialStep = 0;
       isCurrentTrialAnswered = false;
@@ -2894,6 +2933,7 @@
     window.startGuardianTrial = startGuardianTrial;
 
     function closeGuardianTrialModal() {
+      guardianTrialSession++;guardianSpeechVerified=false;
       const modal = document.getElementById('guardianTrialModal');
       if (modal) modal.style.display = 'none';
       if (window.speechManager) window.speechManager.stopListening();
@@ -3034,6 +3074,8 @@
     }
 
     function startGuardianSpeechReading() {
+      if(currentTrialStep!==3)return;
+      const session=guardianTrialSession;
       if (!currentGuardianTrial || !currentGuardianTrial.questions) return;
       const q = currentGuardianTrial.questions[2];
       if (!q || !window.speechManager) return;
@@ -3043,7 +3085,9 @@
         q.targetKeywords,
         q.requiredAccuracy || 80,
         (result) => {
+          if(session!==guardianTrialSession || currentTrialStep!==3)return;
           if (result.passed) {
+            guardianSpeechVerified=true;
             const successRow = document.getElementById('guardianSpeechSuccessRow');
             if (successRow) successRow.style.display = 'flex';
           }
@@ -3055,8 +3099,6 @@
     function forcePassGuardianSpeech() {
       if (!window.speechManager) return;
       window.speechManager.forceSentencePass();
-      const successRow = document.getElementById('guardianSpeechSuccessRow');
-      if (successRow) successRow.style.display = 'flex';
     }
     window.forcePassGuardianSpeech = forcePassGuardianSpeech;
 
@@ -3081,20 +3123,16 @@
     window.playCurrentSpeechTargetVoice = playCurrentSpeechTargetVoice;
 
     function proceedToVictoryCelebration() {
-      showGuardianPanel('victory');
-      updateTrialStepper(4);
-
-      document.getElementById('guardianVictoryStarName').textContent = currentGuardianTrial.starName || '守護之星 🌟';
-      document.getElementById('guardianVictorySpeechText').textContent = currentGuardianTrial.victoryDialogue || '';
-
-      const xp = currentGuardianTrial.rewardXP || 200;
-      if (window.world3D) {
-        window.world3D.addXP(xp);
-      }
-      if (window.cloudSyncManager) {
-        window.cloudSyncManager.recordWordPass('GUARDIAN_' + currentGuardianZoneId.toUpperCase(), xp, false);
-      }
-      if (window.audioManager) window.audioManager.playSfx('magicSuccess');
+      if(!currentGuardianTrial || currentTrialStep!==3 || !guardianSpeechVerified || guardianRewarded)return;
+      const xp=currentGuardianTrial.rewardXP||200;
+      if(window.cloudSyncManager && !window.world3D?.devMode){
+        const reward=window.cloudSyncManager.recordWordPass('GUARDIAN_'+currentGuardianZoneId.toUpperCase(),xp,false,currentGuardianZoneId,{streak:false});
+        if(reward?.saved===false){window.world3D?.showToast('紀錄無法保存，請稍後重試結算。');return;}
+      }else window.world3D?.addXP(xp);
+      guardianRewarded=true;currentTrialStep=4;showGuardianPanel('victory');updateTrialStepper(4);
+      document.getElementById('guardianVictoryStarName').textContent=currentGuardianTrial.starName||'守護之星';
+      document.getElementById('guardianVictorySpeechText').textContent=currentGuardianTrial.victoryDialogue||'';
+      window.audioManager?.playSfx('magicSuccess');
     }
     window.proceedToVictoryCelebration = proceedToVictoryCelebration;
 
