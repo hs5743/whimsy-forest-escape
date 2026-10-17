@@ -1219,7 +1219,13 @@ class SpatialZoneManager {
     this.loadSceneTextures(group);
     this.world.scene.add(group);
     GamePolish.applySceneStyle(this.world, zoneId);
-    if (zoneId === "zone1") this.world.restoreStudyState();
+    if (zoneId === "zone1") {
+      this.world.restoreStudyState();
+      if (typeof window !== 'undefined' && window.ModelAssetManager && window.ModelAssetManager.isReady) {
+        window.ModelAssetManager.upgradeStudyRoom(this.world);
+        this.world.restoreStudyState();
+      }
+    }
     GamePolish.applyQuality(this.world);
 
     // 重設玩家生成點與朝向

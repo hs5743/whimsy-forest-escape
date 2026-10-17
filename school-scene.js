@@ -143,6 +143,15 @@
   group.updateMatrixWorld(true);const batches=new Map();for(const o of staticMeshes){const key=o.geometry.uuid+':'+o.material.uuid;if(!batches.has(key))batches.set(key,[]);batches.get(key).push(o);}for(const list of batches.values()){const first=list[0],inst=new T.InstancedMesh(first.geometry,first.material,list.length);list.forEach((o,i)=>inst.setMatrixAt(i,o.matrixWorld));inst.castShadow=inst.receiveShadow=true;group.add(inst);for(const o of list)o.parent.remove(o);}
   const sun=new T.DirectionalLight(0xfff7ed,1.1);sun.position.set(-7,16,8);sun.target.position.set(0,0,-6);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-24,right:24,top:26,bottom:-26,near:.5,far:55});sun.shadow.bias=-.0003;sun.shadow.normalBias=.03;group.add(sun,sun.target);for(const x of [-5,5]){const light=new T.PointLight(0xffefce,.45,10,2);light.position.set(x,3.1,-14);group.add(light);}
   w.animators.push(time=>{if(root.SchoolChapter.solved(w.gameState.realmPuzzles.zone12)&&!w.settings?.reducedMotion)head.rotation.x=Math.sin(time*2)*.08;else head.rotation.x=0;});w.schoolRefs={banner,card};root.HarmonicaScene?.buildEntrance?.(manager,group);root.SchoolChapter.sync?.();
+  if (root.ModelAssetManager && root.ModelAssetManager.isReady && root.ModelAssetManager.models.has('lion_head')) {
+    const lionModel = root.ModelAssetManager.cloneModel('lion_head');
+    if (lionModel) {
+      lionModel.scale.set(1.1, 1.1, 1.1);
+      lionModel.position.set(0, 0, 0);
+      head.add(lionModel);
+      head.children.forEach(c => { if (c !== lionModel) c.visible = false; });
+    }
+  }
  }
  function buildEntrance(manager,group){const T=root.THREE,w=manager.world;const entrance=new T.Group();entrance.position.set(-3,0,10);group.add(entrance);const wood=new T.MeshStandardMaterial({color:0xc7a46c,map:manager.tex.restaurantWood,roughness:.8});for(const x of [-1.4,1.4]){const p=new T.Mesh(new T.BoxGeometry(.18,3.4,.2),wood);p.position.set(x,1.7,0);entrance.add(p);}const label=sign(T,'新港國小 · 舞獅迎賓',4);label.position.set(0,3.25,.15);label.rotation.y=Math.PI;entrance.add(label);const hit=new T.Mesh(new T.BoxGeometry(2.7,2.8,1),new T.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));hit.position.y=1.4;hit.userData={id:'athletic_school_entry',name:'新港國小校園委託',label:'新港國小校園委託',hint:'完成操場任務後，協助校園舞獅迎賓',onClick:()=>{if(!root.RealmQuests.solved('zone4',w.gameState.realmPuzzles?.zone4)){w.showToast('先完成操場的運動任務，再沿林蔭小徑到新港國小協助迎賓！');return;}if(manager.switchZone('zone12'))w.adventureProgress?.save(true);}};entrance.add(hit);w.interactables.push(hit);}
  const api={build,buildEntrance,colliders:()=>[...walls,...furniture],bounds:{minX:-11.7,maxX:11.7,minZ:-17.7,maxZ:9.7}};root.SchoolScene=api;if(typeof module!=='undefined')module.exports=api;

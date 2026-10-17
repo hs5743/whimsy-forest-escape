@@ -149,6 +149,14 @@
   for(const p of [[-8,4.8,4],[8,4.8,4],[-8,4.8,-13],[8,4.8,-13],[0,4.8,-3],[0,4.8,8]]){const light=new T.PointLight(0xffe7bd,.7,13,2);light.position.set(...p);group.add(light);}
   w.harmonicaRefs={banner,slide:experiment.slide,restX:experiment.restX,reed};
   w.animators.push(time=>{reed.rotation.x=w.settings?.reducedMotion||Date.now()>(root.HarmonicaChapter.demoUntil||0)?0:Math.sin(time*22)*.035;});root.HarmonicaChapter.sync?.();
+  if (root.ModelAssetManager && root.ModelAssetManager.isReady && root.ModelAssetManager.models.has('chromatic_harmonica')) {
+    const heroM = root.ModelAssetManager.cloneModel('chromatic_harmonica');
+    if (heroM) {
+      heroM.position.set(0, 1.25, -2);
+      heroM.scale.set(1.5, 1.5, 1.5);
+      group.add(heroM);
+    }
+  }
  }
  function buildEntrance(manager,group){
   const T=root.THREE,w=manager.world,door=new T.Group();door.position.set(0,0,-9.3);group.add(door);
