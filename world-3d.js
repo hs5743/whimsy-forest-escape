@@ -803,12 +803,12 @@ class World3D {
     archTop.position.set(0, 3.1, 5.8);
     this.doorGroup.add(archTop);
 
-    // 左右門扇專用古老星芒與蒼月花符文雕刻材質
+    // 左右門扇專用古老星芒與蒼月花符文雕刻材質 (室內朝 +Z 南向觀看時，+X 為畫面左側、-X 為畫面右側)
     const doorTexLeft = this.zoneManager.getTexture('assets/textures/ancient-stone-door.jpg','door-left');
     doorTexLeft.encoding = THREE.sRGBEncoding;
     doorTexLeft.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy());
-    doorTexLeft.repeat.set(0.5, 1);
-    doorTexLeft.offset.set(0, 0);
+    doorTexLeft.repeat.set(0.30, 0.90);
+    doorTexLeft.offset.set(0.50, 0.02);
     const doorLeafMatLeft = new THREE.MeshStandardMaterial({
       map: doorTexLeft,
       roughness: 0.75,
@@ -818,8 +818,8 @@ class World3D {
     const doorTexRight = this.zoneManager.getTexture('assets/textures/ancient-stone-door.jpg','door-right');
     doorTexRight.encoding = THREE.sRGBEncoding;
     doorTexRight.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy());
-    doorTexRight.repeat.set(0.5, 1);
-    doorTexRight.offset.set(0.5, 0);
+    doorTexRight.repeat.set(0.30, 0.90);
+    doorTexRight.offset.set(0.20, 0.02);
     const doorLeafMatRight = new THREE.MeshStandardMaterial({
       map: doorTexRight,
       roughness: 0.75,
