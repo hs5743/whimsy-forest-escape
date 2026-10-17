@@ -2,6 +2,7 @@
 (function(root){
   'use strict';
   const profiles={
+    zone14:{sky:'landscapeDaySky',haze:0xc4ded0,ground:0x71835c,rock:0x9d9e82,inner:32,hills:15,trees:110},
     zone2:{sky:'landscapeDaySky',haze:0xc4dce3,ground:0x73845d,rock:0x9b9983,inner:30,hills:12,trees:85,town:26},
     zone3:{sky:'landscapeDaySky',haze:0xc3dfcf,ground:0x61764b,rock:0x888a71,inner:34,hills:18,trees:180},
     zone4:{sky:'landscapeDaySky',haze:0xcbdde5,ground:0x6d845d,rock:0x93998a,inner:37,hills:15,trees:95,town:8},

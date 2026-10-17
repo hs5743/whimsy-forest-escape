@@ -1,10 +1,10 @@
 # 英語魔法探險家：秘境逃脫任務
 
-國小英語學習與密室逃脫瀏覽器遊戲，版本 **2.5.1**。使用 Three.js、原生 JavaScript 與 Google Apps Script。正式網站：https://hs5743.github.io/whimsy-forest-escape/
+國小英語學習與密室逃脫瀏覽器遊戲，版本 **2.6.0**。使用 Three.js、原生 JavaScript 與 Google Apps Script。正式網站：https://hs5743.github.io/whimsy-forest-escape/
 
 ## 遊戲內容
 
-- 十個主線空間，加上魔法餐廳、新港國小、半音階口琴展示館，以及英語學習大廳，共十四個空間。
+- 十個主線空間，加上魔法餐廳、新港國小、半音階口琴展示館、玻璃溫室，以及英語學習大廳，共十五個空間。
 - 大廳可自由選擇 GEPT 參考範圍的 603 個單字、88 個句型，收藏、朗讀、字義練習與跨日複習；不是另開一套解謎關卡。
 - 新章節保留指定口說通關條件。WASD／方向鍵移動、拖曳環視、E 互動；觸控裝置另有操作控制。
 - WebGL 啟動失敗時自動改用圖卡互動。圖卡與 3D 共用物件可見性及解謎門檻；可在保留進度下重新嘗試 3D。
@@ -12,7 +12,7 @@
 
 ## 本次修正
 
-修正重複 XP、守護者試煉重複領獎、跨關尋寶攔截、圖卡提前通關、首頁遮罩與彈窗層級；以 SVG 取代主要功能符號，改善自然英語示範語音選擇並縮小四張角色圖。保留場景天穹備援及既有支線入口。
+新增「玻璃溫室：花園復甦任務」，從第三關花園照護任務接入。八個未使用於前章核心的新字：GARDEN、GREEN、BEE、BUTTERFLY、GROW、SMELL、PICK UP、BEAUTIFUL。每步需先解讀線索，再完成當前口說。玻璃骨架、曲面葉片與葉脈、盆栽、展示牌、石材步道與昆蟲均為可環視的場景物件，配有專屬音樂。沿用 v2.5.1 的事件防重、圖卡模式與存檔修復。
 
 GAS 新增持久事件回條，讓冒險與大廳共用可恢復總額；中途寫入失敗後能重試修復 Students 與 Passport_Logs。教師維護驗證改在後台執行。公開前端 token 只是應用標記，不能視為學生身分驗證或防作弊機制。
 
@@ -25,13 +25,13 @@ npm test
 npm run build:gas
 ```
 
-透過 HTTP 靜態伺服器開啟，不要直接開啟 file://。localhost 加上 ?dev=1 會啟用不傳成績的場景檢查，可巡檢十四空間三輪共 42 次切換。測試範圍與硬體驗收限制見 [tests/README.md](tests/README.md)。
+透過 HTTP 靜態伺服器開啟，不要直接開啟 file://。localhost 加上 ?dev=1 會啟用不傳成績的場景檢查，可巡檢十五空間三輪共 45 次切換。測試範圍與硬體驗收限制見 [tests/README.md](tests/README.md)。
 
 ## 部署與交接
 
 網站由 GitHub Pages 發布。GAS 需另行更新既有網頁應用程式的部署版本；發布網頁不會更新後台。完整可貼上主程式與操作方式見 [gas-release/README.md](gas-release/README.md)。舊後台未支援 record-v2 時，新版會保留原關卡待傳事件並顯示等待更新，不會假裝已同步。
 
-- [本次開發交接與驗收](docs/RELEASE_2_5_1_HANDOVER.md)
+- [本次開發交接與驗收](docs/RELEASE_2_6_0_HANDOVER.md)
 - [現行工程手冊](docs/ENGINEERING_HANDOVER_MANUAL.md)
 - [完整 GAS 主程式](gas-release/Code.gs)
 

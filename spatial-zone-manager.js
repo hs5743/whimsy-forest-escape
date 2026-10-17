@@ -138,6 +138,7 @@ class SpatialZoneManager {
     this.zones.zone13={id:'zone13',name:'半音階口琴：掌心音樂展示館',englishName:'Chromatic Harmonica Gallery',icon:'🎵',topic:'Harmonica, Sound & Playing',reqLevel:4,parentZone:'zone12',desc:'從新港校園音樂翼走進口琴展示館。探索完整口琴、分層簧片、滑鍵半音與吹吸練習，用八個新英語詞完成小小展演。',words:['SMALL','MOUTH','HAND','LEFT','RIGHT','HIGH','PLAY','SONG'],spawnPos:[0,1.6,9.4],spawnYaw:0};
     const learningHub={id:'learningHub',name:'英語探險家學習大廳',englishName:'Explorer Language Lounge',icon:'📚',topic:'自由選題 · 單字 · 句型 · 複習',reqLevel:1,isLearningHub:true,desc:'與狐狸館長、貓頭鷹老師和兔子教練反覆練習，收藏想學的單字，累積口說、句型與跨日複習紀錄。完成後返回原來的冒險。',words:[],spawnPos:[0,1.6,8],spawnYaw:0};
     this.zones.learningHub=learningHub;
+    this.zones.zone14={id:'zone14',name:'玻璃溫室：花園復甦任務',englishName:'Glass Conservatory',icon:'🌿',topic:'Garden, Insects & Caring',reqLevel:2,parentZone:'zone3',desc:'從守護獸花園走入透光的玻璃溫室。觀察蜜蜂與蝴蝶、調整幼苗生長條件並整理花園；每一步都要口說過關。',words:['GARDEN','GREEN','BEE','BUTTERFLY','GROW','SMELL','PICK UP','BEAUTIFUL'],spawnPos:[0,1.6,11.5],spawnYaw:0};
     if(!options.metadataOnly)this.initTextures();
     else {this.textureSources=new Map();this.textureStatus=new Map();}
     this.initColliders();
@@ -319,6 +320,7 @@ class SpatialZoneManager {
 
   // 取得各空間邊界限制
   getZoneBounds() {
+    if(this.currentZoneId==='zone14')return window.GreenhouseScene.bounds;
     if(this.currentZoneId==='learningHub')return window.LearningHubScene?.bounds || { minX: -15, maxX: 15, minZ: -15, maxZ: 15 };
     if(this.currentZoneId==='zone13')return window.HarmonicaScene?.bounds || { minX: -15, maxX: 15, minZ: -15, maxZ: 15 };
     if(this.currentZoneId==='zone12')return window.SchoolScene?.bounds || { minX: -15, maxX: 15, minZ: -15, maxZ: 15 };
@@ -341,6 +343,7 @@ class SpatialZoneManager {
 
   // 取得目前空間所有障礙物碰撞體
   getColliders() {
+    if(this.currentZoneId==='zone14')return window.GreenhouseScene.colliders();
     if(this.currentZoneId==='learningHub')return window.LearningHubScene.colliders();
     if(this.currentZoneId==='zone13')return window.HarmonicaScene.colliders();
     if(this.currentZoneId==='zone12')return window.SchoolScene.colliders();
@@ -1063,6 +1066,7 @@ class SpatialZoneManager {
     const userLevel = (window.cloudSyncManager && window.cloudSyncManager.profile) 
       ? Math.max(window.cloudSyncManager.profile.level, window.cloudSyncManager.profile.accessLevel || 1)
       : 1;
+    if(zoneId==='zone14')return userLevel>=zone.reqLevel && !!window.GreenhouseChapter && !!window.RealmQuests?.solved('zone3',this.world.gameState.realmPuzzles?.zone3);
     if(zoneId==='zone13')return userLevel>=zone.reqLevel && !!window.HarmonicaChapter && !!window.SchoolChapter?.solved(this.world.gameState.realmPuzzles?.zone12);
     if(zoneId==='zone12')return userLevel>=zone.reqLevel && !!window.RealmQuests?.solved('zone4',this.world.gameState.realmPuzzles?.zone4);
     if(zoneId==='zone11')return userLevel>=zone.reqLevel && !!window.RealmQuests?.solved('zone2',this.world.gameState.realmPuzzles?.zone2);
@@ -1165,7 +1169,7 @@ class SpatialZoneManager {
       this.world.scene.remove(this.world.activeZoneGroup);
       GamePolish.releaseGroup(this.world.activeZoneGroup, shared);
       window.HarmonicaChapter?.stopTones?.();
-      for (const key of ['bookGroup','bookCoverHinge','starStone','flowerStone','candleFlame','candleLight','keyMesh','drawerMesh','mimicLid','mimicGroup','flaskLiquid','socketStar','socketFlower','doorLeft','doorRight','restaurantRefs','schoolRefs','harmonicaRefs']) this.world[key] = null;
+      for (const key of ['bookGroup','bookCoverHinge','starStone','flowerStone','candleFlame','candleLight','keyMesh','drawerMesh','mimicLid','mimicGroup','flaskLiquid','socketStar','socketFlower','doorLeft','doorRight','restaurantRefs','schoolRefs','harmonicaRefs','greenhouseRefs']) this.world[key] = null;
     }
     this.world.interactables = [];
     this.world.animators = [];
@@ -1190,6 +1194,7 @@ class SpatialZoneManager {
       this.buildZone2_Market(group);
     } else if (zoneId === 'zone3') {
       this.buildZone3_Garden(group);
+      window.GreenhouseScene.buildEntrance(this,group);
     } else if (zoneId === 'zone4') {
       this.buildZone4_Athletic(group);
     } else if (zoneId === 'zone5') {
@@ -1204,6 +1209,7 @@ class SpatialZoneManager {
       this.buildZone9_AstralPantheon(group);
     } else if (zoneId === 'zone10') {
       this.buildZone10_PrismaticSkyIsles(group);
+    } else if(zoneId==='zone14'){window.GreenhouseScene.build(this,group);
     } else if(zoneId==='learningHub'){window.LearningHubScene.build(this,group);
     } else if(zoneId==='zone13'){window.HarmonicaScene.build(this,group);
     } else if(zoneId==='zone12'){window.SchoolScene.build(this,group);
@@ -1353,6 +1359,8 @@ class SpatialZoneManager {
       skyColorTop = 0x090d16;
       fogColor = 0x111827;
       fogDensity = 0.008;
+    } else if (zoneId === 'zone14') {
+      skyColorTop=0xb9d8d0;fogColor=0xc4ded0;fogDensity=.003;
     } else if (zoneId === 'zone3') {
       // 守護獸花園：晨曦天藍與清透薄霧
       skyColorTop = 0x7dd3fc;

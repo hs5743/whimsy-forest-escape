@@ -28,7 +28,7 @@
     const panel = root.document.getElementById('devZonePanel');
     const section = root.document.createElement('section');
     section.className = 'acceptance-tools';
-    section.innerHTML = '<h3>穩定性檢查</h3><p>僅限本機預覽，不寫入學習成績。幀時間統計僅納入可見遊戲畫面。</p><output id="acceptanceStatus" aria-live="polite">尚未開始場景巡檢</output><div><button type="button" id="startSceneSoak">暖機＋巡檢十四空間兩輪</button><button type="button" id="stopSceneSoak" hidden>停止巡檢</button><button type="button" id="exportAcceptance">下載檢查紀錄</button></div>';
+    section.innerHTML = '<h3>穩定性檢查</h3><p>僅限本機預覽，不寫入學習成績。幀時間統計僅納入可見遊戲畫面。</p><output id="acceptanceStatus" aria-live="polite">尚未開始場景巡檢</output><div><button type="button" id="startSceneSoak">暖機＋巡檢十五空間兩輪</button><button type="button" id="stopSceneSoak" hidden>停止巡檢</button><button type="button" id="exportAcceptance">下載檢查紀錄</button></div>';
     panel.append(section);
     const status = section.querySelector('output');
     const start = section.querySelector('#startSceneSoak'), stop = section.querySelector('#stopSceneSoak');

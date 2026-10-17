@@ -1,5 +1,5 @@
 /**
- * 《英語魔法探險家：秘境逃脫任務》v2.5.1 GAS source module.
+ * 《英語魔法探險家：秘境逃脫任務》v2.6.0 GAS source module.
  * Existing service: paste the complete generated gas-release/Code.gs into Code.gs,
  * then update the existing Web App deployment version. Keep its URL and permissions.
  * Never run initSpreadsheet against an existing student database.
@@ -99,7 +99,7 @@ function doGet(e) {
 
     // 1. 健康檢查 Ping (允許無 Token 偵測伺服器存活)
     if (action === "ping") {
-      return makeJsonResponse({ status: "success", message: "Whimsy Forest GAS API is active!", learningProtocol: "learning-v1", learningWords: LEARNING_WORDS.length, learningSentences: LEARNING_SENTENCES.length, recordProtocol: "record-v2", teacherProtocol: "teacher-v1", build: "20261017-v2.5.1", timestamp: new Date() });
+      return makeJsonResponse({ status: "success", message: "Whimsy Forest GAS API is active!", learningProtocol: "learning-v1", learningWords: LEARNING_WORDS.length, learningSentences: LEARNING_SENTENCES.length, recordProtocol: "record-v2", teacherProtocol: "teacher-v1", adventureZones:Object.keys(ADVENTURE_CHECKPOINT_ZONES), build: "20261017-v2.6.0", timestamp: new Date() });
     }
 
     // 安全性 Token 驗證 (除 ping 外，其餘操作皆需檢驗校本密鑰)

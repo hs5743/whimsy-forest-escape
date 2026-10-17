@@ -1,4 +1,4 @@
-# 完整後台更新檔 — v2.5.1
+# 完整後台更新檔 — v2.6.0
 
 此資料夾的 Code.gs 與「完整主程式_直接貼上.txt」內容完全相同，已包含七個必要模組。gas/Code.gs 是開發來源模組，不能單獨拿它更新。
 
@@ -8,7 +8,7 @@
 2. 開啟既有 Apps Script 專案，在原本 Code.gs 中全選，以本資料夾的完整檔案全部取代並儲存。舊的獨立 helper 檔案可留存；完整檔的模組包在私人命名空間內，已測試不與它們衝突。勿另外新增第二份完整主程式，避免重複 doGet／doPost。
 3. **不要執行 initSpreadsheet**，現有學生、分數、收藏、句型與續玩資料不需重設。新欄位／LearningProfiles 會在合法學習請求時補建。
 4. 點「部署 → 管理部署作業」，選取目前使用的網頁應用程式，按編輯，版本選「新版本」，再部署。保留原網址、執行身分與存取權限。Library 的 /library/.../版本 號不代表網頁應用程式已更新。
-5. 用原 /exec 網址加 ?action=ping 檢查回應，必須包含 build: 20261017-v2.5.1、recordProtocol: record-v2、learningProtocol: learning-v1、learningWords: 603、learningSentences: 88。
+5. 用原 /exec 網址加 ?action=ping 檢查回應，必須包含 build: 20261017-v2.6.0、recordProtocol: record-v2、learningProtocol: learning-v1、learningWords: 603、learningSentences: 88，且 adventureZones 包含 zone14。
 6. 如需教師維護驗證，在編輯器選 configureTeacherAccess 執行，由你在試算表提示框設定至少 12 字的密碼。不要貼給開發者。更新這項設定會使舊工作階段失效；無需把密碼寫進程式或 Config 分頁。
 7. 回到遊戲重新整理，使用既有測試學生確認原分數與收藏仍在，再完成一筆口說並確認待傳數下降、Students 與 Passport_Logs 各只入帳一次。請用你指定的測試身分操作，不要直接修改正式學生分數來驗收。
 
@@ -23,3 +23,5 @@
 - 使用單檔更新後，下次修改仍應從 gas/ 與來源規則產生，不要只改發布檔。執行 npm run build:gas 可重建。
 
 本版改善防重、並行與教師維護驗證，學生仍沿用課堂班級座號登入，並不是強身分驗證或正式考試防作弊系統。
+
+玻璃溫室需要本版的檢查點規則。後台未更新時，新關卡仍可在同一裝置遊玩與保存，但跨裝置上傳會停等，避免舊後台漏存溫室進度。八個新核心字是既有 603 字參考範圍的關卡化內容，不是把總字庫從 603 改成 611。

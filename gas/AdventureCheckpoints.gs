@@ -5,7 +5,7 @@ function adventureDigest(value){
 }
 function adventureOwnerValid(owner){return typeof owner==='string'&&(owner==='guest'||(/^student:.+/.test(owner)&&owner.length<=108&&!/[\x00-\x1f]/.test(owner)));}
 function adventureCheckpointAction(payload,ss){
-  if(payload.action==='adventureCapabilities')return {status:'success',protocol:'adventure-v1',maxSnapshotChars:20000};
+  if(payload.action==='adventureCapabilities')return {status:'success',protocol:'adventure-v1',maxSnapshotChars:20000,schemaZones:Object.keys(ADVENTURE_CHECKPOINT_ZONES)};
   var id=payload.checkpointId,secret=payload.secret,owner=payload.owner;
   if(typeof id!=='string'||!/^[a-f0-9]{32}$/.test(id)||typeof secret!=='string'||!/^[a-f0-9]{64}$/.test(secret)||!adventureOwnerValid(owner))return {status:'error',code:'invalid',message:'Invalid checkpoint request'};
   var isSave=payload.action==='saveAdventure';

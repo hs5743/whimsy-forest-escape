@@ -1,13 +1,13 @@
-/** GENERATED complete v2.5.1 backend. Replace Code.gs; retain the existing deployment URL.
+/** GENERATED complete v2.6.0 backend. Replace Code.gs; retain the existing deployment URL.
  * Do not run initSpreadsheet on an existing database. Old separate helper files may remain.
  * Every module below is private so it cannot collide with old helper declarations.
  */
 var WHIMSY_BACKEND_20261017=(function(){
-var window={};
+var window={},globalThis=window;
 
 // --- Code.gs ---
 /**
- * 《英語魔法探險家：秘境逃脫任務》v2.5.1 GAS source module.
+ * 《英語魔法探險家：秘境逃脫任務》v2.6.0 GAS source module.
  * Existing service: paste the complete generated gas-release/Code.gs into Code.gs,
  * then update the existing Web App deployment version. Keep its URL and permissions.
  * Never run initSpreadsheet against an existing student database.
@@ -107,7 +107,7 @@ function doGet(e) {
 
     // 1. 健康檢查 Ping (允許無 Token 偵測伺服器存活)
     if (action === "ping") {
-      return makeJsonResponse({ status: "success", message: "Whimsy Forest GAS API is active!", learningProtocol: "learning-v1", learningWords: LEARNING_WORDS.length, learningSentences: LEARNING_SENTENCES.length, recordProtocol: "record-v2", teacherProtocol: "teacher-v1", build: "20261017-v2.5.1", timestamp: new Date() });
+      return makeJsonResponse({ status: "success", message: "Whimsy Forest GAS API is active!", learningProtocol: "learning-v1", learningWords: LEARNING_WORDS.length, learningSentences: LEARNING_SENTENCES.length, recordProtocol: "record-v2", teacherProtocol: "teacher-v1", adventureZones:Object.keys(ADVENTURE_CHECKPOINT_ZONES), build: "20261017-v2.6.0", timestamp: new Date() });
     }
 
     // 安全性 Token 驗證 (除 ping 外，其餘操作皆需檢驗校本密鑰)
@@ -527,6 +527,44 @@ function teacherReportResponse(params,ss){
  function hint(raw){const s=validate(raw)||initial();return {key:'zone13:'+JSON.stringify(s),word:null,targetId:'harmonica_'+(places[s.stage]||'exit'),clues:clues[s.stage]};}
  const api={words,initial,validate,solved,transition,hint,canSpeak,note,noteName,melody};root.HarmonicaChapter=api;if(typeof module!=='undefined')module.exports=api;
 })(globalThis);
+/* Garden branch: observed clues plus fresh oral recognition, never click-only completion. */
+(function(root){
+ 'use strict';
+ const words=['GARDEN','GREEN','BEE','BUTTERFLY','GROW','SMELL','PICK UP','BEAUTIFUL'];
+ const places=['garden','green','bee','butterfly','grow','smell','pickup','beautiful'];
+ const correct=['GARDEN','GREEN','BEE','BUTTERFLY','','GENTLY','','BEAUTIFUL'];
+ const choices=[['','GARDEN'],['','GREEN','BLUE','PURPLE'],['','BEE','SPIDER','BIRD'],['','BUTTERFLY','BEE','BIRD'],[''],['','GENTLY','PULL'],[''],['','BEAUTIFUL','DIRTY']];
+ const initial=()=>({stage:0,spoken:[],choices:['','','','','','','',''],water:0,light:0,collected:[]});
+ const proof=(s,n)=>n===4?s.water===2&&s.light===2:n===6?s.collected.length===3:s.choices[n]===correct[n];
+ function validate(raw){
+  if(!raw||!Number.isInteger(raw.stage)||raw.stage<0||raw.stage>8||!Array.isArray(raw.spoken)||raw.spoken.length>8||raw.spoken.some((v,i)=>v!==words[i])||!Array.isArray(raw.choices)||raw.choices.length!==8||raw.choices.some((v,i)=>!choices[i].includes(v))||![0,1,2,3].includes(raw.water)||![0,1,2,3].includes(raw.light)||!Array.isArray(raw.collected)||raw.collected.length>3||new Set(raw.collected).size!==raw.collected.length||raw.collected.some(v=>![0,1,2].includes(v)))return null;
+  const s={stage:Math.min(raw.stage,raw.spoken.length),spoken:raw.spoken.slice(),choices:raw.choices.slice(),water:raw.water,light:raw.light,collected:raw.collected.slice()};
+  for(let n=0;n<s.stage;n++)if(!proof(s,n)){s.stage=n;break;}s.spoken=s.spoken.slice(0,s.stage);return s;
+ }
+ const solved=raw=>validate(raw)?.stage===8;
+ function canSpeak(raw,word){const s=validate(raw)||initial();return s.stage<8&&word===words[s.stage]&&proof(s,s.stage);}
+ function transition(raw,a){
+  const s=validate(raw)||initial();let message='先觀察展品、完成線索，再口說完成步驟。';
+  if(s.stage===8)return {state:s,message:'花園已復甦！可返回守護獸花園，或再聽單字示範。'};
+  if(a?.type==='choice'&&a.index===s.stage&&a.value!==''&&choices[s.stage].includes(a.value)){s.choices[s.stage]=a.value;message=proof(s,s.stage)?'線索正確！接著口說 '+words[s.stage]+'。':'再觀察圖示與英文線索，試另一個答案。';}
+  else if(a?.type==='condition'&&s.stage===4&&['water','light'].includes(a.key)&&[0,1,2,3].includes(a.value)){s[a.key]=a.value;message=proof(s,4)?'水分與光線都在 2 格；口說 GROW，讓幼苗長大。':'照護卡：兩格水分、兩格光線。調好後還要口說 GROW。';}
+  else if(a?.type==='collect'&&s.stage===6&&[0,1,2].includes(a.index)){if(!s.collected.includes(a.index))s.collected.push(a.index);message=s.collected.length===3?'三件遺落物已分類，口說 PICK UP 才完成整理。':'已分類 '+s.collected.length+' / 3 件。';}
+  else if(a?.type==='speak'){if(!canSpeak(s,a.word))message='先完成當前線索，不能跳過前面的步驟。';else if(a.verifiedWord!==a.word)message='請先口說 '+a.word+' 並通過辨識。';else{s.spoken.push(a.word);s.stage++;message=s.stage===8?'The garden is beautiful! 溫室復甦完成。':'口說通過！下一步：'+words[s.stage]+'。';}}
+  return {state:s,message};
+ }
+ const lessons=[
+  ['入口委託','This is our garden.','歡迎來到玻璃溫室。花園照護員請你觀察昆蟲、照顧幼苗，最後整理環境。先接下委託。'],
+  ['葉片的顏色','The leaves are green.','觀察左側植栽台。選出與葉片相同的顏色，再口說 GREEN。'],
+  ['訪花的小幫手','A bee visits the flower.','蜜蜂有六隻腳與觸角，飛到花朵間採集花蜜與花粉。選出黃色、黑色條紋的小昆蟲。'],
+  ['花間的翅膀','Look at the butterfly.','看右側昆蟲展示：寬大的對稱翅膀上有斑點。找出蝴蝶，再口說 BUTTERFLY。'],
+  ['讓幼苗長大','Plants need water and light to grow.','這盆魔法幼苗的照護卡標示：水分 2 格、光線 2 格。數值是本關的解謎設定，不是所有植物共同的澆水標準。調好後口說 GROW。'],
+  ['溫柔聞花香','I can smell the flowers.','看香草台的小圖卡：輕輕靠近聞花香，讓花朵留在枝上。選出溫柔觀察的方法，再口說 SMELL。'],
+  ['整理花園','Pick up the litter.','地上有三件遺落物：紙張、空瓶與包裝。逐一分類，再完整說出 PICK UP；只說 PICK 或 UP 不會完成。'],
+  ['留一張花園明信片','The garden is beautiful.','選出形容整理後花園的句子，再口說 BEAUTIFUL。恭喜你讓溫室重新綻放！']
+ ];
+ function hint(raw){const s=validate(raw)||initial();return {key:'zone14:'+JSON.stringify(s),word:null,targetId:'greenhouse_'+(places[s.stage]||'exit'),clues:s.stage===8?['溫室任務完成，由入口返回守護獸花園。','也可以回大廳複習八個新字。']:[lessons[s.stage][2],'先完成線索，再口說 '+words[s.stage]+'。']};}
+ const api={words,places,initial,validate,solved,canSpeak,transition,hint};root.GreenhouseChapter=api;if(typeof module!=='undefined')module.exports=api;
+})(globalThis);
 /* Realm-specific mechanisms. Puzzle actions never write grades or award XP. */
 (function(root){
   'use strict';
@@ -541,10 +579,12 @@ function teacherReportResponse(params,ss){
     zone9:{title:'智慧殿堂：修復故事卷軸',english:'Read first. Think next. Write last.',brief:'卷軸的步驟散開了。依英文線索把三張卡依序放回；放錯可以取回重排。',clues:['First、next、last 告訴你先後順序。','先 READ，再 THINK，最後 WRITE；排好後蓋上印章。']},
     zone10:{title:'虹光空島：奏響回家之歌',english:'Listen to the music. Sing the song.',brief:'彩虹琴譜：C → E → G → C。先聽四個音，再用琴鍵重現旋律，讓回家的虹橋亮起。',clues:['聽示範旋律，留意最後一個音與第一個音相同。','依序按 C、E、G、C；按錯可以清空琴譜重來。']}
   };
+  specs.zone14={title:'玻璃溫室：花園復甦任務',english:'The garden is beautiful.',brief:'觀察昆蟲、照護幼苗與整理環境；每一步要口說完成。',clues:['先在入口接下花園委託。','探索線索後，口說完成每一步。']};
   specs.zone13={title:'半音階口琴：掌心音樂展示館',english:'Play a song on the harmonica.',brief:'造型、簧片、滑鍵與吹吸練習。',clues:['找到完整口琴。','探索線索後，口說完成每一步。']};
   specs.zone12={title:'新港國小：舞獅迎賓任務',english:'Welcome to our school!',brief:'校史尋寶、迎賓圖卡、鼓點與舞獅口說任務。',clues:['到校門迎賓桌接下任務。','口說辨識通過才完成步驟。']};
   specs.zone11={title:'魔法餐廳：一碗熱湯的冒險',english:'Two eggs and one pumpkin, please.',brief:'穿梭三個房間，依訂單準備食材並送餐。',clues:['先到訂單台接單。','依英語線索找鑰匙、取食材、料理與送餐。']};
   const defaults={zone2:{cart:[0,0,0],paid:false},zone3:{tool:'WATER',care:[false,false,false]},zone4:{equipment:'',stage:0},zone5:{hour:6,minute:0,platform:1,boarded:false},zone6:{x:0,y:2},zone7:{object:'STAR',angle:0,aligned:false},zone8:{gear:[],heat:0,ready:false},zone9:{order:[],sealed:false},zone10:{notes:[],played:false}};
+  defaults.zone14={stage:0,spoken:[],choices:['','','','','','','',''],water:0,light:0,collected:[]};
   defaults.zone13={stage:0,spoken:[],choices:['','','','','',''],explored:[],melody:[]};
   defaults.zone12={stage:0,spoken:[],history:null,drawing:null,rhythm:[]};
   defaults.zone11={accepted:false,key:false,pantryOpen:false,ingredients:[0,0,0],step:0,cooked:false,served:false};
@@ -553,6 +593,7 @@ function teacherReportResponse(params,ss){
   const eq=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
   function initial(id){return defaults[id]?clone(defaults[id]):null;}
   function solved(id,s){
+    if(id==='zone14')return root.GreenhouseChapter?.solved(s)||false;
     if(id==='zone13')return root.HarmonicaChapter?.solved(s)||false;
     if(id==='zone12')return root.SchoolChapter?.solved(s)||false;
     if(id==='zone11')return root.RestaurantChapter?.solved(s)||false;
@@ -571,6 +612,7 @@ function teacherReportResponse(params,ss){
     }
   }
   function validateState(id,raw){
+    if(id==='zone14')return root.GreenhouseChapter?.validate(raw)||null;
     if(id==='zone13')return root.HarmonicaChapter?.validate(raw)||null;
     if(id==='zone12')return root.SchoolChapter?.validate(raw)||null;
     if(id==='zone11')return root.RestaurantChapter?.validate(raw)||null;
@@ -595,6 +637,7 @@ function teacherReportResponse(params,ss){
   }
   function sanitizeMap(map){const result={};if(!map||typeof map!=='object')return result;for(const id of Object.keys(defaults)){const state=validateState(id,map[id]);if(state)result[id]=state;}return result;}
   function transition(id,raw,action){
+    if(id==='zone14')return root.GreenhouseChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入溫室。'};
     if(id==='zone13')return root.HarmonicaChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入口琴展示館。'};
     if(id==='zone12')return root.SchoolChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入校園任務。'};
     if(id==='zone11')return root.RestaurantChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入餐廳章節。'};
@@ -637,7 +680,7 @@ function teacherReportResponse(params,ss){
     }
     return {state:s,message:solved(id,s)?'秘境任務完成！ '+message:message};
   }
-  function canTravel(from,to,map,{restore=false,dev=false}={}){if(restore||dev)return true;if(to==='learningHub'||from==='learningHub')return true;if(to==='zone13')return solved('zone12',map?.zone12);if(from==='zone13')return to==='zone12';if(to==='zone12')return solved('zone4',map?.zone4);if(from==='zone12')return to==='zone4';if(to==='zone11')return solved('zone2',map?.zone2);if(from==='zone11')return to==='zone2';return !specs[from]||Number(to.slice(4))<=Number(from.slice(4))||solved(from,map?.[from]);}
+  function canTravel(from,to,map,{restore=false,dev=false}={}){if(restore||dev)return true;if(to==='learningHub'||from==='learningHub')return true;if(to==='zone14')return solved('zone3',map?.zone3);if(from==='zone14')return to==='zone3';if(to==='zone13')return solved('zone12',map?.zone12);if(from==='zone13')return to==='zone12';if(to==='zone12')return solved('zone4',map?.zone4);if(from==='zone12')return to==='zone4';if(to==='zone11')return solved('zone2',map?.zone2);if(from==='zone11')return to==='zone2';return !specs[from]||Number(to.slice(4))<=Number(from.slice(4))||solved(from,map?.[from]);}
   const api={specs,initial,solved,validateState,sanitizeMap,transition,canTravel};root.RealmQuests=api;if(typeof module!=='undefined')module.exports=api;
 })(globalThis);
 /* Puzzle checkpoints are separate from the learning-record service. */
@@ -695,9 +738,9 @@ function teacherReportResponse(params,ss){
   const api={flags,ownerKey,validate,capture,applySavedPosition,CheckpointStore};root.AdventureProgress=api;
   if(typeof module!=='undefined')module.exports=api;
 })(globalThis);
-var ADVENTURE_CHECKPOINT_ZONES={"zone1":{"id":"zone1","words":["LIGHT","BOOK","KEY","RED","BLUE","STAR","CAT","FISH","DOOR","FLOWER","OPEN","SUN"]},"zone2":{"id":"zone2","words":["APPLE","BANANA","BREAD","MILK","SWEET","OPEN"]},"zone3":{"id":"zone3","words":["RABBIT","BIRD","TREE","WATER","OPEN"]},"zone4":{"id":"zone4","words":["SOCCER","BALL","RUN","JUMP","OPEN"]},"zone5":{"id":"zone5","words":["TIME","CLOCK","TRAIN","MORNING","OPEN"]},"zone6":{"id":"zone6","words":["SHIP","BOAT","WIND","FISH","WATER","OPEN"]},"zone7":{"id":"zone7","words":["STAR","MOON","CLOUD","SUN","SKY","OPEN"]},"zone8":{"id":"zone8","words":["SNOW","COLD","WINTER","WHITE","WARM","CLIMB"]},"zone9":{"id":"zone9","words":["LIBRARY","READ","WRITE","THINK","SMART","FLY"]},"zone10":{"id":"zone10","words":["ISLAND","RAINBOW","MUSIC","SING","DANCE","DREAM"]},"zone11":{"id":"zone11","words":["EGG","PUMPKIN","LEMON","SOUP","WASH","PUT","COOK","SPOON"]},"zone12":{"id":"zone12","words":["SCHOOL","CLASSROOM","PAPER","DRAW","LISTEN","DRUM","LION","WELCOME"]},"zone13":{"id":"zone13","words":["SMALL","MOUTH","HAND","LEFT","RIGHT","HIGH","PLAY","SONG"]},"learningHub":{"id":"learningHub","words":[]}};
+var ADVENTURE_CHECKPOINT_ZONES={"zone1":{"id":"zone1","words":["LIGHT","BOOK","KEY","RED","BLUE","STAR","CAT","FISH","DOOR","FLOWER","OPEN","SUN"]},"zone2":{"id":"zone2","words":["APPLE","BANANA","BREAD","MILK","SWEET","OPEN"]},"zone3":{"id":"zone3","words":["RABBIT","BIRD","TREE","WATER","OPEN"]},"zone4":{"id":"zone4","words":["SOCCER","BALL","RUN","JUMP","OPEN"]},"zone5":{"id":"zone5","words":["TIME","CLOCK","TRAIN","MORNING","OPEN"]},"zone6":{"id":"zone6","words":["SHIP","BOAT","WIND","FISH","WATER","OPEN"]},"zone7":{"id":"zone7","words":["STAR","MOON","CLOUD","SUN","SKY","OPEN"]},"zone8":{"id":"zone8","words":["SNOW","COLD","WINTER","WHITE","WARM","CLIMB"]},"zone9":{"id":"zone9","words":["LIBRARY","READ","WRITE","THINK","SMART","FLY"]},"zone10":{"id":"zone10","words":["ISLAND","RAINBOW","MUSIC","SING","DANCE","DREAM"]},"zone11":{"id":"zone11","words":["EGG","PUMPKIN","LEMON","SOUP","WASH","PUT","COOK","SPOON"]},"zone12":{"id":"zone12","words":["SCHOOL","CLASSROOM","PAPER","DRAW","LISTEN","DRUM","LION","WELCOME"]},"zone13":{"id":"zone13","words":["SMALL","MOUTH","HAND","LEFT","RIGHT","HIGH","PLAY","SONG"]},"learningHub":{"id":"learningHub","words":[]},"zone14":{"id":"zone14","words":["GARDEN","GREEN","BEE","BUTTERFLY","GROW","SMELL","PICK UP","BEAUTIFUL"]}};
 
-var RestaurantChapter=window.RestaurantChapter,SchoolChapter=window.SchoolChapter,HarmonicaChapter=window.HarmonicaChapter,RealmQuests=window.RealmQuests,AdventureProgress=window.AdventureProgress;
+var GreenhouseChapter=window.GreenhouseChapter,RestaurantChapter=window.RestaurantChapter,SchoolChapter=window.SchoolChapter,HarmonicaChapter=window.HarmonicaChapter,RealmQuests=window.RealmQuests,AdventureProgress=window.AdventureProgress;
 
 // --- AdventureCheckpoints.gs ---
 /* Private capability checkpoints, separate from Students and Logs. */
@@ -707,7 +750,7 @@ function adventureDigest(value){
 }
 function adventureOwnerValid(owner){return typeof owner==='string'&&(owner==='guest'||(/^student:.+/.test(owner)&&owner.length<=108&&!/[\x00-\x1f]/.test(owner)));}
 function adventureCheckpointAction(payload,ss){
-  if(payload.action==='adventureCapabilities')return {status:'success',protocol:'adventure-v1',maxSnapshotChars:20000};
+  if(payload.action==='adventureCapabilities')return {status:'success',protocol:'adventure-v1',maxSnapshotChars:20000,schemaZones:Object.keys(ADVENTURE_CHECKPOINT_ZONES)};
   var id=payload.checkpointId,secret=payload.secret,owner=payload.owner;
   if(typeof id!=='string'||!/^[a-f0-9]{32}$/.test(id)||typeof secret!=='string'||!/^[a-f0-9]{64}$/.test(secret)||!adventureOwnerValid(owner))return {status:'error',code:'invalid',message:'Invalid checkpoint request'};
   var isSave=payload.action==='saveAdventure';
