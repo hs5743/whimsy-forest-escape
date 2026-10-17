@@ -119,7 +119,7 @@ button:focus-visible, [role=button]:focus-visible, select:focus-visible, input:f
 .world-map-header {margin-bottom:12px !important;padding-bottom:12px !important;}
 .overworld-map-nav {margin-bottom:10px !important;}
 
-#toastNotice {z-index:40 !important;pointer-events:none;}
+#toastNotice {z-index:10200 !important;pointer-events:none;}
 
 /* Cover screen & HUD isolation state machine + 2D Fallback Panel */
 body:not(.game-entered) #hudBar,
