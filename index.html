@@ -2785,7 +2785,12 @@
 
     function travelToZone(zoneId) {
       if (!window.world3D) return;
-      const success = window.world3D.switchZone(zoneId);
+      const zm = window.world3D.zoneManager;
+      if (zm && !window.world3D.devMode && !zm.isZoneUnlocked(zoneId)) {
+        window.world3D.showToast(`🔒 冒險者等級未達 Lv.${zm.zones[zoneId]?.reqLevel || 1}，請先完成前序空間！`);
+        return;
+      }
+      const success = window.world3D.switchZone(zoneId, { directAccess: true });
       if (success) {
         document.getElementById('worldMapModal').style.display = 'none';
       }

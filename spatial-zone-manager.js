@@ -1141,7 +1141,7 @@ class SpatialZoneManager {
     if (!this.zones[zoneId]) return false;
     const leavingHub=this.currentZoneId==='learningHub'&&zoneId!=='learningHub';
     const hubReturn=leavingHub?window.LearningHub.returnTarget():null;
-    if(leavingHub&&!options.restore&&zoneId!==hubReturn.zone){this.world.showToast('請先返回原本的冒險，再沿秘境路線前進。');return false;}
+    if(leavingHub&&!options.restore&&!options.directAccess&&zoneId!==hubReturn.zone){this.world.showToast('請先返回原本的冒險，再沿秘境路線前進。');return false;}
     if(zoneId==='learningHub'&&this.currentZoneId!=='learningHub'&&!options.restore&&!window.LearningHub.remember(this.world))return false;
     window.LearningHub?.close();
     if (!options.directAccess && window.RealmQuests && !window.RealmQuests.canTravel(this.currentZoneId, zoneId, this.world.gameState.realmPuzzles, {restore:options.restore===true,dev:this.world.devMode})) {
