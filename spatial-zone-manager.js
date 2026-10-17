@@ -2599,6 +2599,9 @@ class SpatialZoneManager {
     this.world.interactables.push(hitBox);
 
     group.add(stall);
+    if (typeof window !== 'undefined' && window.ModelAssetManager) {
+      window.ModelAssetManager.upgradeMarketStall(stall, fruitType);
+    }
   }
 
   // [市集] 擬真雙輪木造推車
@@ -2649,6 +2652,9 @@ class SpatialZoneManager {
     this.world.interactables.push(hitBox);
 
     group.add(cart);
+    if (typeof window !== 'undefined' && window.ModelAssetManager) {
+      window.ModelAssetManager.upgradeMarketCart(cart, cartType);
+    }
   }
 
   // [市集] 節慶吊旗
@@ -2843,6 +2849,9 @@ class SpatialZoneManager {
     this.world.interactables.push(hitBox);
 
     group.add(fountain);
+    if (typeof window !== 'undefined' && window.ModelAssetManager) {
+      window.ModelAssetManager.upgradeGardenFountain(fountain);
+    }
   }
 
   // [花園] 兔子 (RABBIT)
@@ -3447,6 +3456,9 @@ class SpatialZoneManager {
     });
 
     group.add(tower);
+    if (typeof window !== 'undefined' && window.ModelAssetManager) {
+      window.ModelAssetManager.upgradeClockTower(tower);
+    }
   }
 
   // [車站] 蒸汽火車頭 (TRAIN)
@@ -3557,6 +3569,9 @@ class SpatialZoneManager {
     });
 
     group.add(train);
+    if (typeof window !== 'undefined' && window.ModelAssetManager) {
+      window.ModelAssetManager.upgradeSteamLocomotive(train);
+    }
   }
 
   // [車站] 煤氣路燈與長椅 (MORNING)
@@ -4444,6 +4459,9 @@ class SpatialZoneManager {
     });
 
     group.add(ship);
+    if (typeof window !== 'undefined' && window.ModelAssetManager) {
+      window.ModelAssetManager.upgradeGalleonShip(ship);
+    }
   }
 
   // 4. 海岸導航燈塔 (Coastal Lighthouse, WIND POI)
@@ -4567,6 +4585,9 @@ class SpatialZoneManager {
     });
 
     group.add(lighthouse);
+    if (typeof window !== 'undefined' && window.ModelAssetManager) {
+      window.ModelAssetManager.upgradeHarborLighthouse(lighthouse);
+    }
   }
 
   // 5. 碼頭巡邏小艇 (BOAT POI)
@@ -5846,6 +5867,9 @@ class SpatialZoneManager {
     });
 
     group.add(telescope);
+    if (typeof window !== 'undefined' && window.ModelAssetManager) {
+      window.ModelAssetManager.upgradeTelescope(telescope);
+    }
   }
 
   // 5. 遠古星辰渾天儀 / 渾象儀 (STAR POI) - 多軸嵌套黃銅刻度環與齒輪傳動
@@ -5970,6 +5994,9 @@ class SpatialZoneManager {
     });
 
     group.add(astrolabe);
+    if (typeof window !== 'undefined' && window.ModelAssetManager) {
+      window.ModelAssetManager.upgradeAstrolabe(astrolabe);
+    }
   }
 
   // 6. 蒼月潮汐日晷與月相儀 (MOON POI) - 月相盈虧、銀質水銀潮汐盆與星盤刻度
@@ -7211,6 +7238,9 @@ class SpatialZoneManager {
     });
 
     group.add(obeliskGroup);
+    if (typeof window !== 'undefined' && window.ModelAssetManager) {
+      window.ModelAssetManager.upgradeGlacialObelisk(obeliskGroup);
+    }
   }
 
   // 7. 冬之永凍遠古常青松 (WINTER POI) - 蒼勁樹皮、厚雪壓枝、冰錐與鍛鐵風燈
