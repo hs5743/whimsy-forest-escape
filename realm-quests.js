@@ -12,11 +12,13 @@
     zone9:{title:'智慧殿堂：修復故事卷軸',english:'Read first. Think next. Write last.',brief:'卷軸的步驟散開了。依英文線索把三張卡依序放回；放錯可以取回重排。',clues:['First、next、last 告訴你先後順序。','先 READ，再 THINK，最後 WRITE；排好後蓋上印章。']},
     zone10:{title:'虹光空島：奏響回家之歌',english:'Listen to the music. Sing the song.',brief:'彩虹琴譜：C → E → G → C。先聽四個音，再用琴鍵重現旋律，讓回家的虹橋亮起。',clues:['聽示範旋律，留意最後一個音與第一個音相同。','依序按 C、E、G、C；按錯可以清空琴譜重來。']}
   };
+  specs.zone15={title:'星光國際機場：啟航任務',english:'Welcome to the airport.',brief:'確認飛機、機票、行李與登機時刻表；每一步要口說完成。',clues:['先在航廈迎賓櫃檯接下啟航任務。','觀察線索後，口說完成每一步。']};
   specs.zone14={title:'玻璃溫室：花園復甦任務',english:'The garden is beautiful.',brief:'觀察昆蟲、照護幼苗與整理環境；每一步要口說完成。',clues:['先在入口接下花園委託。','探索線索後，口說完成每一步。']};
   specs.zone13={title:'半音階口琴：掌心音樂展示館',english:'Play a song on the harmonica.',brief:'造型、簧片、滑鍵與吹吸練習。',clues:['找到完整口琴。','探索線索後，口說完成每一步。']};
   specs.zone12={title:'新港國小：舞獅迎賓任務',english:'Welcome to our school!',brief:'校史尋寶、迎賓圖卡、鼓點與舞獅口說任務。',clues:['到校門迎賓桌接下任務。','口說辨識通過才完成步驟。']};
   specs.zone11={title:'魔法餐廳：一碗熱湯的冒險',english:'Two eggs and one pumpkin, please.',brief:'穿梭三個房間，依訂單準備食材並送餐。',clues:['先到訂單台接單。','依英語線索找鑰匙、取食材、料理與送餐。']};
   const defaults={zone2:{cart:[0,0,0],paid:false},zone3:{tool:'WATER',care:[false,false,false]},zone4:{equipment:'',stage:0},zone5:{hour:6,minute:0,platform:1,boarded:false},zone6:{x:0,y:2},zone7:{object:'STAR',angle:0,aligned:false},zone8:{gear:[],heat:0,ready:false},zone9:{order:[],sealed:false},zone10:{notes:[],played:false}};
+  defaults.zone15={stage:0,spoken:[],choices:['','','','','','','',''],gate:0,call:0,collected:[]};
   defaults.zone14={stage:0,spoken:[],choices:['','','','','','','',''],water:0,light:0,collected:[]};
   defaults.zone13={stage:0,spoken:[],choices:['','','','','',''],explored:[],melody:[]};
   defaults.zone12={stage:0,spoken:[],history:null,drawing:null,rhythm:[]};
@@ -26,6 +28,7 @@
   const eq=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
   function initial(id){return defaults[id]?clone(defaults[id]):null;}
   function solved(id,s){
+    if(id==='zone15')return root.AirportChapter?.solved(s)||false;
     if(id==='zone14')return root.GreenhouseChapter?.solved(s)||false;
     if(id==='zone13')return root.HarmonicaChapter?.solved(s)||false;
     if(id==='zone12')return root.SchoolChapter?.solved(s)||false;
@@ -45,6 +48,7 @@
     }
   }
   function validateState(id,raw){
+    if(id==='zone15')return root.AirportChapter?.validate(raw)||null;
     if(id==='zone14')return root.GreenhouseChapter?.validate(raw)||null;
     if(id==='zone13')return root.HarmonicaChapter?.validate(raw)||null;
     if(id==='zone12')return root.SchoolChapter?.validate(raw)||null;
@@ -70,6 +74,7 @@
   }
   function sanitizeMap(map){const result={};if(!map||typeof map!=='object')return result;for(const id of Object.keys(defaults)){const state=validateState(id,map[id]);if(state)result[id]=state;}return result;}
   function transition(id,raw,action){
+    if(id==='zone15')return root.AirportChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入國際機場。'};
     if(id==='zone14')return root.GreenhouseChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入溫室。'};
     if(id==='zone13')return root.HarmonicaChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入口琴展示館。'};
     if(id==='zone12')return root.SchoolChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入校園任務。'};
@@ -113,7 +118,7 @@
     }
     return {state:s,message:solved(id,s)?'秘境任務完成！ '+message:message};
   }
-  function canTravel(from,to,map,{restore=false,dev=false}={}){if(restore||dev)return true;if(to==='learningHub'||from==='learningHub')return true;if(to==='zone14')return solved('zone3',map?.zone3);if(from==='zone14')return to==='zone3';if(to==='zone13')return solved('zone12',map?.zone12);if(from==='zone13')return to==='zone12';if(to==='zone12')return solved('zone4',map?.zone4);if(from==='zone12')return to==='zone4';if(to==='zone11')return solved('zone2',map?.zone2);if(from==='zone11')return to==='zone2';return !specs[from]||Number(to.slice(4))<=Number(from.slice(4))||solved(from,map?.[from]);}
+  function canTravel(from,to,map,{restore=false,dev=false}={}){if(restore||dev)return true;if(to==='learningHub'||from==='learningHub')return true;if(to==='zone15')return from==='zone5'&&solved('zone5',map?.zone5);if(from==='zone15')return to==='zone5';if(to==='zone14')return solved('zone3',map?.zone3);if(from==='zone14')return to==='zone3';if(to==='zone13')return solved('zone12',map?.zone12);if(from==='zone13')return to==='zone12';if(to==='zone12')return solved('zone4',map?.zone4);if(from==='zone12')return to==='zone4';if(to==='zone11')return solved('zone2',map?.zone2);if(from==='zone11')return to==='zone2';return !specs[from]||Number(to.slice(4))<=Number(from.slice(4))||solved(from,map?.[from]);}
   const api={specs,initial,solved,validateState,sanitizeMap,transition,canTravel};root.RealmQuests=api;if(typeof module!=='undefined')module.exports=api;
   if(!root.document)return;
   root.addEventListener('load',()=>{
@@ -124,7 +129,8 @@
     function state(id){return states()[id]||(states()[id]=initial(id));}
     function button(text,action,pressed){const b=root.document.createElement('button');b.type='button';b.textContent=text;if(pressed!==undefined)b.setAttribute('aria-pressed',String(pressed));b.addEventListener('click',()=>act(action));return b;}
     function row(...children){const r=root.document.createElement('div');r.className='quest-row';r.append(...children);area.append(r);return r;}
-    function text(value,cls='quest-readout'){const el=root.document.createElement('p');el.className=cls;el.textContent=value;area.append(el);return el;}
+    function text(value,cls='quest-readout'){const el=root.document.createElement('p');el.className=cls;textContent(el,value);area.append(el);return el;}
+    function textContent(el,value){el.textContent=value;}
     function select(label,values,current,action){const wrap=root.document.createElement('label');wrap.textContent=label;const control=root.document.createElement('select');for(const [value,name]of values){const option=root.document.createElement('option');option.value=value;option.textContent=name;option.selected=String(value)===String(current);control.append(option);}control.addEventListener('change',()=>act(action(control.value)));wrap.append(control);area.append(wrap);}
     function svg(markup){const panel=root.document.createElement('div');panel.className='quest-diagram';panel.innerHTML=markup;area.append(panel);}
     function render(){
@@ -142,7 +148,7 @@
         case 'zone5':{
           const minute=s.minute*6,hour=(s.hour%12)*30+s.minute*.5;
           svg('<svg viewBox="0 0 160 160" role="img" aria-label="鐘面 '+s.hour+' 點 '+s.minute+' 分"><circle cx="80" cy="80" r="70" fill="#fff7df" stroke="#297d79" stroke-width="4"/><text x="72" y="27">12</text><text x="135" y="86">3</text><text x="76" y="145">6</text><text x="17" y="86">9</text><line x1="80" y1="80" x2="80" y2="40" stroke="#183f3a" stroke-width="6" transform="rotate('+hour+' 80 80)"/><line x1="80" y1="80" x2="80" y2="24" stroke="#ba7137" stroke-width="3" transform="rotate('+minute+' 80 80)"/></svg>');
-          for(const [key,label,values]of [['hour','時',[6,8,10]],['minute','分',[0,30,45]],['platform','月台',[1,2,3]]])select(label,values.map(n=>[n,String(n).padStart(2,'0')]),s[key],v=>({type:'set',key,value:Number(v)}));row(button('驗票上車',{type:'board'}));break;
+          for(const [key,label,values]of [['hour','時',[6,8,10]],['minute','分',[0,30,45]],['platform','月台',[1,2,3]]])select(label,values.map(n=>[n,String(n).padStart(2,'0')]),s[key],v=>({type:'set',key,value:Number(v)}));row(button('驗票上車',{type:'board'}));if(done)text('驗票完成！西南側的星光機場快線已開放，可前往星光國際機場展開啟航任務；也可以往海港前進。');break;
         }
         case 'zone6':{
           const grid=root.document.createElement('div');grid.className='quest-sea';grid.setAttribute('role','img');grid.setAttribute('aria-label','海圖：船在第 '+(s.y+1)+' 排、第 '+(s.x+1)+' 欄；燈塔在右上方，礁石在第二排第二欄與第三排第三欄。');
@@ -190,11 +196,11 @@
       if(solved(active,result.state))$('realmQuestExplore').focus({preventScroll:true});
       else area.querySelectorAll('button,select')[Math.max(0,focusIndex)]?.focus({preventScroll:true});
       if(action.type==='note')playNotes([action.value]);
-      if(solved(active,result.state)){root.audioManager?.playSfx('magicSuccess');reward('秘境任務完成：'+specs[active].title,active==='zone10'?'回家的虹橋亮起了！':active==='zone2'?'微風餐廳店主在西南側等你；花園出口也已準備好。':active==='zone4'?'新港國小的舞獅迎賓委託已開放，入口在南側林蔭小徑。':'出口已準備好，回到場景繼續探索。');world.hintController?.clear();$('realmQuestBtn').textContent='✓ 秘境任務完成';if(board)board.material.color.setHex(0x68c9a7);}
+      if(solved(active,result.state)){root.audioManager?.playSfx('magicSuccess');reward('秘境任務完成：'+specs[active].title,active==='zone10'?'回家的虹橋亮起了！':active==='zone2'?'微風餐廳店主在西南側等你；花園出口也已準備好。':active==='zone4'?'新港國小的舞獅迎賓委託已開放，入口在南側林蔭小徑。':active==='zone5'?'星光國際機場快線已開放，入口在月台西南側。':'出口已準備好，回到場景繼續探索。');world.hintController?.clear();$('realmQuestBtn').textContent='✓ 秘境任務完成';if(board)board.material.color.setHex(0x68c9a7);}
       updateMechanism();
       world.adventureProgress?.save(true);
     }
-    function open(){if(world.zoneManager.currentZoneId==='zone14'){root.GreenhouseChapter.open();return;}if(world.zoneManager.currentZoneId==='zone13'){root.HarmonicaChapter.open();return;}if(world.zoneManager.currentZoneId==='zone12'){root.SchoolChapter.open();return;}if(world.zoneManager.currentZoneId==='zone11'){root.RestaurantChapter.open();return;}if(world.isAnyModalOpen())return;active=world.zoneManager.currentZoneId;if(!specs[active])return;returnFocus=root.document.activeElement;$('realmQuestKicker').textContent='秘境 '+active.slice(4)+' · 生活英語解謎';$('realmQuestTitle').textContent=specs[active].title;$('realmQuestEnglish').textContent=specs[active].english;$('realmQuestBrief').textContent=specs[active].brief;$('realmQuestResult').textContent='';render();modal.style.display='flex';root.touchControls?.reset();world.targetFocus?.select(null);}
+    function open(){if(world.zoneManager.currentZoneId==='zone15'){root.AirportChapter.open();return;}if(world.zoneManager.currentZoneId==='zone14'){root.GreenhouseChapter.open();return;}if(world.zoneManager.currentZoneId==='zone13'){root.HarmonicaChapter.open();return;}if(world.zoneManager.currentZoneId==='zone12'){root.SchoolChapter.open();return;}if(world.zoneManager.currentZoneId==='zone11'){root.RestaurantChapter.open();return;}if(world.isAnyModalOpen())return;active=world.zoneManager.currentZoneId;if(!specs[active])return;returnFocus=root.document.activeElement;$('realmQuestKicker').textContent='秘境 '+active.slice(4)+' · 生活英語解謎';$('realmQuestTitle').textContent=specs[active].title;$('realmQuestEnglish').textContent=specs[active].english;$('realmQuestBrief').textContent=specs[active].brief;$('realmQuestResult').textContent='';render();modal.style.display='flex';root.touchControls?.reset();world.targetFocus?.select(null);}
     function close(){modal.style.display='none';stopNotes();root.speechManager?.stopVoice();returnFocus?.isConnected&&returnFocus.focus({preventScroll:true});}
     function sync(){
       const id=world.zoneManager.currentZoneId;$('realmQuestBtn').hidden=!specs[id];
@@ -202,6 +208,7 @@
       clearTimeout(rewardTimer);$('adventureReward').hidden=true;
       if(!specs[id])return;
       root.HarmonicaChapter?.stopTones?.();
+      if(id==='zone15'){root.AirportChapter.sync();return;}
       if(id==='zone14'){root.GreenhouseChapter.sync();return;}
       if(id==='zone13'){root.HarmonicaChapter.sync();return;}
       if(id==='zone12'){root.SchoolChapter.sync();return;}
@@ -211,10 +218,11 @@
       const p=world.player.pos;const offset=[[2,0],[-2,0],[0,-2]].find(([x,z])=>!world.isPositionBlocked(p.x+x,p.z+z,.35));if(!offset)return;
       const ring=new root.THREE.Mesh(new root.THREE.TorusGeometry(.35,.07,8,24),new root.THREE.MeshStandardMaterial({color:solved(id,state(id))?0x68c9a7:0xe9b768,emissive:0x483118,roughness:.4}));ring.position.set(p.x+offset[0],1.25,p.z+offset[1]);ring.userData={id:'quest_'+id,name:specs[id].title,label:'秘境任務 · '+specs[id].title,hint:'互動以閱讀英語線索、操作解謎',onClick:open};world.activeZoneGroup.add(ring);world.interactables.push(ring);board=ring;
     }
-    $('realmQuestBtn').addEventListener('click',open);$('realmQuestClose').addEventListener('click',close);$('realmQuestExplore').addEventListener('click',close);$('realmQuestListen').addEventListener('click',()=>world.zoneManager.currentZoneId==='zone14'?root.GreenhouseChapter.listen():world.zoneManager.currentZoneId==='zone13'?root.HarmonicaChapter.listen():world.zoneManager.currentZoneId==='zone12'?root.SchoolChapter.listen():world.zoneManager.currentZoneId==='zone11'?root.RestaurantChapter.listen():root.speechManager?.playSentenceVoice(specs[active]?.english||''));
+    $('realmQuestBtn').addEventListener('click',open);$('realmQuestClose').addEventListener('click',close);$('realmQuestExplore').addEventListener('click',close);$('realmQuestListen').addEventListener('click',()=>world.zoneManager.currentZoneId==='zone15'?root.AirportChapter.listen():world.zoneManager.currentZoneId==='zone14'?root.GreenhouseChapter.listen():world.zoneManager.currentZoneId==='zone13'?root.HarmonicaChapter.listen():world.zoneManager.currentZoneId==='zone12'?root.SchoolChapter.listen():world.zoneManager.currentZoneId==='zone11'?root.RestaurantChapter.listen():root.speechManager?.playSentenceVoice(specs[active]?.english||''));
     $('devQuestReset').addEventListener('click',()=>{
       const id=world.zoneManager.currentZoneId;if(!world.devMode||!specs[id])return;
       states()[id]=initial(id);$('realmQuestBtn').textContent='秘境任務';if(board)board.material.color.setHex(0xe9b768);
+      if(id==='zone15')root.AirportChapter.sync();
       if(id==='zone14')root.GreenhouseChapter.sync();
       if(id==='zone13')root.HarmonicaChapter.sync();
       if(id==='zone12')root.SchoolChapter.sync();

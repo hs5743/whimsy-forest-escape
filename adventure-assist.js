@@ -29,6 +29,7 @@
   function hintPlan(state,zone,completed=[]) {
     if(zone.id==='learningHub')return {title:'英語學習大廳',clues:['找狐狸館長，選主題與想學的單字。','找貓頭鷹老師，練完整句型；兔子教練陪你跨日複習。','在收藏牆整理喜歡的字；點出口返回原本的冒險。'],targetIds:['hub_fox','hub_owl','hub_rabbit','hub_collection','hub_exit']};
     if(!zone || !Array.isArray(zone.words)) return null;
+    if(zone.id==='zone15'&&root.AirportChapter)return root.AirportChapter.hint(state.realmPuzzles?.zone15);
     if(zone.id==='zone14'&&root.GreenhouseChapter)return root.GreenhouseChapter.hint(state.realmPuzzles?.zone14);
     if(zone.id==='zone13'&&root.HarmonicaChapter)return root.HarmonicaChapter.hint(state.realmPuzzles?.zone13);
     if(zone.id==='zone12'&&root.SchoolChapter)return root.SchoolChapter.hint(state.realmPuzzles?.zone12);

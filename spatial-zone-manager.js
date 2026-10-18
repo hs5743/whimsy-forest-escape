@@ -139,6 +139,7 @@ class SpatialZoneManager {
     const learningHub={id:'learningHub',name:'英語探險家學習大廳',englishName:'Explorer Language Lounge',icon:'📚',topic:'自由選題 · 單字 · 句型 · 複習',reqLevel:1,isLearningHub:true,desc:'與狐狸館長、貓頭鷹老師和兔子教練反覆練習，收藏想學的單字，累積口說、句型與跨日複習紀錄。完成後返回原來的冒險。',words:[],spawnPos:[0,1.6,8],spawnYaw:0};
     this.zones.learningHub=learningHub;
     this.zones.zone14={id:'zone14',name:'玻璃溫室：花園復甦任務',englishName:'Glass Conservatory',icon:'🌿',topic:'Garden, Insects & Caring',reqLevel:2,parentZone:'zone3',desc:'從守護獸花園走入透光的玻璃溫室。觀察蜜蜂與蝴蝶、調整幼苗生長條件並整理花園；每一步都要口說過關。',words:['GARDEN','GREEN','BEE','BUTTERFLY','GROW','SMELL','PICK UP','BEAUTIFUL'],spawnPos:[0,1.6,11.5],spawnYaw:0};
+    this.zones.zone15={id:'zone15',name:'星光國際機場：啟航任務',englishName:'Starlight Airport',icon:'✈️',topic:'Airport, Travel & Time',reqLevel:5,parentZone:'zone5',desc:'從星光鐘樓車站轉乘前往國際機場。確認飛機、登機證、行李與時刻表，用八個新英語詞完成啟航任務。',words:['AIRPORT','PLANE','TICKET','BAG','WAIT','HURRY','TAXI','LATE'],spawnPos:[0,1.6,11.5],spawnYaw:0};
     if(!options.metadataOnly)this.initTextures();
     else {this.textureSources=new Map();this.textureStatus=new Map();}
     this.initColliders();
@@ -320,6 +321,7 @@ class SpatialZoneManager {
 
   // 取得各空間邊界限制
   getZoneBounds() {
+    if(this.currentZoneId==='zone15')return window.AirportScene.bounds;
     if(this.currentZoneId==='zone14')return window.GreenhouseScene.bounds;
     if(this.currentZoneId==='learningHub')return window.LearningHubScene?.bounds || { minX: -15, maxX: 15, minZ: -15, maxZ: 15 };
     if(this.currentZoneId==='zone13')return window.HarmonicaScene?.bounds || { minX: -15, maxX: 15, minZ: -15, maxZ: 15 };
@@ -343,6 +345,7 @@ class SpatialZoneManager {
 
   // 取得目前空間所有障礙物碰撞體
   getColliders() {
+    if(this.currentZoneId==='zone15')return window.AirportScene.colliders();
     if(this.currentZoneId==='zone14')return window.GreenhouseScene.colliders();
     if(this.currentZoneId==='learningHub')return window.LearningHubScene.colliders();
     if(this.currentZoneId==='zone13')return window.HarmonicaScene.colliders();
@@ -1066,6 +1069,7 @@ class SpatialZoneManager {
     const userLevel = (window.cloudSyncManager && window.cloudSyncManager.profile) 
       ? Math.max(window.cloudSyncManager.profile.level, window.cloudSyncManager.profile.accessLevel || 1)
       : 1;
+    if(zoneId==='zone15')return userLevel>=zone.reqLevel && !!window.AirportChapter && !!window.RealmQuests?.solved('zone5',this.world.gameState.realmPuzzles?.zone5);
     if(zoneId==='zone14')return userLevel>=zone.reqLevel && !!window.GreenhouseChapter && !!window.RealmQuests?.solved('zone3',this.world.gameState.realmPuzzles?.zone3);
     if(zoneId==='zone13')return userLevel>=zone.reqLevel && !!window.HarmonicaChapter && !!window.SchoolChapter?.solved(this.world.gameState.realmPuzzles?.zone12);
     if(zoneId==='zone12')return userLevel>=zone.reqLevel && !!window.RealmQuests?.solved('zone4',this.world.gameState.realmPuzzles?.zone4);
@@ -1169,7 +1173,7 @@ class SpatialZoneManager {
       this.world.scene.remove(this.world.activeZoneGroup);
       GamePolish.releaseGroup(this.world.activeZoneGroup, shared);
       window.HarmonicaChapter?.stopTones?.();
-      for (const key of ['bookGroup','bookCoverHinge','starStone','flowerStone','candleFlame','candleLight','keyMesh','drawerMesh','mimicLid','mimicGroup','flaskLiquid','socketStar','socketFlower','doorLeft','doorRight','restaurantRefs','schoolRefs','harmonicaRefs','greenhouseRefs']) this.world[key] = null;
+      for (const key of ['bookGroup','bookCoverHinge','starStone','flowerStone','candleFlame','candleLight','keyMesh','drawerMesh','mimicLid','mimicGroup','flaskLiquid','socketStar','socketFlower','doorLeft','doorRight','restaurantRefs','schoolRefs','harmonicaRefs','greenhouseRefs','airportRefs']) this.world[key] = null;
     }
     this.world.interactables = [];
     this.world.animators = [];
@@ -1199,6 +1203,7 @@ class SpatialZoneManager {
       this.buildZone4_Athletic(group);
     } else if (zoneId === 'zone5') {
       this.buildZone5_Station(group);
+      window.AirportScene?.buildEntrance(this,group);
     } else if (zoneId === 'zone6') {
       this.buildZone6_Harbor(group);
     } else if (zoneId === 'zone7') {
@@ -1209,6 +1214,7 @@ class SpatialZoneManager {
       this.buildZone9_AstralPantheon(group);
     } else if (zoneId === 'zone10') {
       this.buildZone10_PrismaticSkyIsles(group);
+    } else if(zoneId==='zone15'){window.AirportScene.build(this,group);
     } else if(zoneId==='zone14'){window.GreenhouseScene.build(this,group);
     } else if(zoneId==='learningHub'){window.LearningHubScene.build(this,group);
     } else if(zoneId==='zone13'){window.HarmonicaScene.build(this,group);
@@ -1365,6 +1371,8 @@ class SpatialZoneManager {
       skyColorTop = 0x090d16;
       fogColor = 0x111827;
       fogDensity = 0.008;
+    } else if (zoneId === 'zone15') {
+      skyColorTop=0x0c192c;fogColor=0x1e293b;fogDensity=.003;
     } else if (zoneId === 'zone14') {
       skyColorTop=0xb9d8d0;fogColor=0xc4ded0;fogDensity=.003;
     } else if (zoneId === 'zone3') {

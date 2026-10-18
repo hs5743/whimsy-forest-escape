@@ -1951,18 +1951,20 @@
   <script src="title-screen.js?v=20261017d"></script>
   <script src="restaurant-chapter.js?v=20261017d"></script>
   <script src="restaurant-scene.js?v=20261018a"></script>
-  <script src="greenhouse-chapter.js?v=20261017d"></script>
-  <script src="greenhouse-scene.js?v=20261017d"></script>
-  <script src="harmonica-chapter.js?v=20261017d"></script>
-  <script src="harmonica-scene.js?v=20261017d"></script>
-  <script src="school-chapter.js?v=20261017d"></script>
-  <script src="school-scene.js?v=20261017d"></script>
-  <script src="realm-quests.js?v=20261017d"></script>
-  <script src="adventure-progress.js?v=20261017d"></script>
-  <script src="adventure-cloud.js?v=20261017d"></script>
-  <script src="adventure-assist.js?v=20261017d"></script>
-  <script src="game-diagnostics.js?v=20261017d"></script>
-  <script src="realm-presentation.js?v=20261017d"></script>
+  <script src="greenhouse-chapter.js?v=20261018b"></script>
+  <script src="greenhouse-scene.js?v=20261018b"></script>
+  <script src="airport-chapter.js?v=20261018b"></script>
+  <script src="airport-scene.js?v=20261018b"></script>
+  <script src="harmonica-chapter.js?v=20261018b"></script>
+  <script src="harmonica-scene.js?v=20261018b"></script>
+  <script src="school-chapter.js?v=20261018b"></script>
+  <script src="school-scene.js?v=20261018b"></script>
+  <script src="realm-quests.js?v=20261018b"></script>
+  <script src="adventure-progress.js?v=20261018b"></script>
+  <script src="adventure-cloud.js?v=20261018b"></script>
+  <script src="adventure-assist.js?v=20261018b"></script>
+  <script src="game-diagnostics.js?v=20261018b"></script>
+  <script src="realm-presentation.js?v=20261018b"></script>
   <script src="gept-kids-vocabulary.js?v=20261017d"></script>
   <script src="vocab-data.js?v=20261017d"></script>
   <script src="vocab-passport-bank.js?v=20261017d"></script>
@@ -2746,42 +2748,58 @@
       const curZone = zm.getCurrentZone();
       grid.innerHTML = '';
 
-      Object.values(zm.zones).forEach(z => {
-        const isUnlocked = zm.isZoneUnlocked(z.id);
-        const isCurrent = (z.id === curZone.id);
+      const regionGroups = [
+        { title: '🌲 第一大區：林野與城鎮', sub: 'Zone 1–4 主線與四大生活支線', ids: ['zone1', 'learningHub', 'zone2', 'zone11', 'zone3', 'zone14', 'zone4', 'zone12', 'zone13'] },
+        { title: '🚂 第二大區：鐵道與遠洋', sub: 'Zone 5–6 鐵道海港與國際機場支線', ids: ['zone5', 'zone15', 'zone6'] },
+        { title: '🔭 第三大區：雲海與星穹', sub: 'Zone 7–10 蒼穹觀測、極光、神殿與空島', ids: ['zone7', 'zone8', 'zone9', 'zone10'] }
+      ];
 
-        const card = document.createElement('div');
-        card.className = `realm-card ${isCurrent ? 'current' : ''} ${isUnlocked ? 'unlocked' : 'locked'}`;
+      regionGroups.forEach(group => {
+        const heading = document.createElement('div');
+        heading.className = 'realm-region-heading';
+        heading.innerHTML = `<span>${group.title}</span><small>${group.sub}</small>`;
+        grid.appendChild(heading);
 
-        const wordsChips = z.isLearningHub ? '<span class="realm-word-chip">八個主題 · 單字 · 句型 · 複習 · 收藏</span>' : z.words.slice(0, 5).map(w => `<span class="realm-word-chip">${w}</span>`).join('');
+        group.ids.forEach(id => {
+          const z = zm.zones[id];
+          if (!z) return;
+          const isUnlocked = zm.isZoneUnlocked(z.id);
+          const isCurrent = (z.id === curZone.id);
+          const lockText = z.parentZone === 'zone5' ? '完成車站驗票任務解鎖' : z.parentZone === 'zone3' ? '完成花園照護任務解鎖' : z.parentZone === 'zone12' ? '完成新港迎賓任務解鎖' : z.parentZone === 'zone4' ? '完成操場任務解鎖' : z.parentZone === 'zone2' ? '完成市集採買解鎖' : `Lv.${z.reqLevel} 解鎖`;
 
-        card.innerHTML = `
-          <div class="realm-card-top">
-            <div class="realm-icon-box">${z.icon}</div>
-            <div class="realm-meta">
-              <div class="realm-name">${z.name}</div>
-              <div class="realm-sub">${z.englishName} • <span class="realm-topic-tag">${z.topic}</span></div>
+          const card = document.createElement('div');
+          card.className = `realm-card ${isCurrent ? 'current' : ''} ${isUnlocked ? 'unlocked' : 'locked'}`;
+
+          const wordsChips = z.isLearningHub ? '<span class="realm-word-chip">八個主題 · 單字 · 句型 · 複習 · 收藏</span>' : z.words.map(w => `<span class="realm-word-chip">${w}</span>`).join('');
+
+          card.innerHTML = `
+            <div class="realm-card-top">
+              <div class="realm-icon-box">${z.icon}</div>
+              <div class="realm-meta">
+                <div class="realm-name">${z.name}</div>
+                <div class="realm-sub">${z.englishName} • <span class="realm-topic-tag">${z.topic}</span></div>
+              </div>
+              <div class="realm-badge ${isUnlocked ? 'badge-open' : 'badge-lock'}">
+                ${isUnlocked ? '已解鎖' : lockText}
+              </div>
             </div>
-            <div class="realm-badge ${isUnlocked ? 'badge-open' : 'badge-lock'}">
-              ${isUnlocked ? '已解鎖' : z.parentZone ? z.parentZone==='zone3' ? '完成花園照護任務解鎖' : z.parentZone==='zone12' ? '完成新港迎賓任務解鎖' : z.parentZone==='zone4' ? '完成操場任務解鎖' : '完成市集採買解鎖' : `Lv.${z.reqLevel} 解鎖`}
+            <div class="realm-desc-text">${z.desc}</div>
+            <div class="realm-words-row">
+              <span style="font-size: 11px; color: #8c7361; font-weight: 700;">空間詞彙：</span>
+              ${wordsChips}
             </div>
-          </div>
-          <div class="realm-desc-text">${z.desc}</div>
-          <div class="realm-words-row">
-            <span style="font-size: 11px; color: #8c7361; font-weight: 700;">空間詞彙：</span>
-            ${wordsChips}
-          </div>
-          <div class="realm-btn-wrap">
-            ${isCurrent ? `
-              <button type="button" class="realm-action-btn btn-here" disabled>📍 目前冒險中</button>
-            ` : isUnlocked ? `
-              <button type="button" class="realm-action-btn btn-teleport" onclick="travelToZone('${z.id}')">🚀 施法傳送前往</button>
-            ` : `
-              <button type="button" class="realm-action-btn btn-locked" disabled>🔒 等級未達 Lv.${z.reqLevel}</button>
-            `}
-          </div>
-        `;
-        grid.appendChild(card);
+            <div class="realm-btn-wrap">
+              ${isCurrent ? `
+                <button type="button" class="realm-action-btn btn-here" disabled>📍 目前冒險中</button>
+              ` : isUnlocked ? `
+                <button type="button" class="realm-action-btn btn-teleport" onclick="travelToZone('${z.id}')">🚀 施法傳送前往</button>
+              ` : `
+                <button type="button" class="realm-action-btn btn-locked" disabled>🔒 ${lockText}</button>
+              `}
+            </div>
+          `;
+          grid.appendChild(card);
+        });
       });
     }
 

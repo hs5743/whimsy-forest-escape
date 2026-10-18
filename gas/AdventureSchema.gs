@@ -146,6 +146,44 @@
  function hint(raw){const s=validate(raw)||initial();return {key:'zone14:'+JSON.stringify(s),word:null,targetId:'greenhouse_'+(places[s.stage]||'exit'),clues:s.stage===8?['溫室任務完成，由入口返回守護獸花園。','也可以回大廳複習八個新字。']:[lessons[s.stage][2],'先完成線索，再口說 '+words[s.stage]+'。']};}
  const api={words,places,initial,validate,solved,canSpeak,transition,hint};root.GreenhouseChapter=api;if(typeof module!=='undefined')module.exports=api;
 })(globalThis);
+/* Station branch: observed airport clues plus fresh oral recognition, never click-only completion. */
+(function(root){
+ 'use strict';
+ const words=['AIRPORT','PLANE','TICKET','BAG','WAIT','HURRY','TAXI','LATE'];
+ const places=['airport','plane','ticket','bag','wait','hurry','taxi','late'];
+ const correct=['AIRPORT','PLANE','TICKET','','WAIT','','TAXI','LATE'];
+ const choices=[['','AIRPORT'],['','PLANE','TRAIN','BOAT'],['','TICKET','BOOK','PAPER'],[''],['','WAIT','RUN','JUMP'],[''],['','TAXI','SHIP','BICYCLE'],['','LATE','WRONG']];
+ const initial=()=>({stage:0,spoken:[],choices:['','','','','','','',''],gate:0,call:0,collected:[]});
+ const proof=(s,n)=>n===3?s.collected.length===3:n===5?s.gate===2&&s.call===2:s.choices[n]===correct[n];
+ function validate(raw){
+  if(!raw||!Number.isInteger(raw.stage)||raw.stage<0||raw.stage>8||!Array.isArray(raw.spoken)||raw.spoken.length>8||raw.spoken.some((v,i)=>v!==words[i])||!Array.isArray(raw.choices)||raw.choices.length!==8||raw.choices.some((v,i)=>!choices[i].includes(v))||![0,1,2,3].includes(raw.gate)||![0,1,2,3].includes(raw.call)||!Array.isArray(raw.collected)||raw.collected.length>3||new Set(raw.collected).size!==raw.collected.length||raw.collected.some(v=>![0,1,2].includes(v)))return null;
+  const s={stage:Math.min(raw.stage,raw.spoken.length),spoken:raw.spoken.slice(),choices:raw.choices.slice(),gate:raw.gate,call:raw.call,collected:raw.collected.slice()};
+  for(let n=0;n<s.stage;n++)if(!proof(s,n)){s.stage=n;break;}s.spoken=s.spoken.slice(0,s.stage);return s;
+ }
+ const solved=raw=>validate(raw)?.stage===8;
+ function canSpeak(raw,word){const s=validate(raw)||initial();return s.stage<8&&word===words[s.stage]&&proof(s,s.stage);}
+ function transition(raw,a){
+  const s=validate(raw)||initial();let message='先觀察航廈線索、完成步驟，再口說完成任務。';
+  if(s.stage===8)return {state:s,message:'啟航任務已完成！可返回星光鐘樓車站，或再聽單字示範。'};
+  if(a?.type==='choice'&&a.index===s.stage&&a.value!==''&&choices[s.stage].includes(a.value)){s.choices[s.stage]=a.value;message=proof(s,s.stage)?'線索正確！接著口說 '+words[s.stage]+'。':'再觀察航廈標示與英文線索，試另一個答案。';}
+  else if(a?.type==='collect'&&s.stage===3&&[0,1,2].includes(a.index)){if(!s.collected.includes(a.index))s.collected.push(a.index);message=s.collected.length===3?'三件隨身與託運行李已確認，口說 BAG 完成行李託運。':'已確認 '+s.collected.length+' / 3 件行李。';}
+  else if(a?.type==='condition'&&s.stage===5&&['gate','call'].includes(a.key)&&[0,1,2,3].includes(a.value)){s[a.key]=a.value;message=proof(s,5)?'登機門 2 號與廣播召集 2 格已對齊；口說 HURRY 前往登機。':'航班卡：登機門 2 號、召集燈 2 格。調好後還要口說 HURRY。';}
+  else if(a?.type==='speak'){if(!canSpeak(s,a.word))message='先完成當前線索，不能跳過前面的步驟。';else if(a.verifiedWord!==a.word)message='請先口說 '+a.word+' 並通過辨識。';else{s.spoken.push(a.word);s.stage++;message=s.stage===8?'We are not late for the flight! 機場啟航任務完成。':'口說通過！下一步：'+words[s.stage]+'。';}}
+  return {state:s,message};
+ }
+ const lessons=[
+  ['航廈迎賓櫃檯','Welcome to the airport.','歡迎來到星光國際機場。地勤人員請你依序確認飛機、登機證、行李與時刻表。先接下啟航任務。'],
+  ['停機坪觀景窗','Look at the big plane.','透過大片落地窗望向跑道，找找擁有雙翼與噴射引擎的客機，選出正確交通工具再口說 PLANE。'],
+  ['自助報到機','Show your ticket at the gate.','登機前要出示印有座位與登機門編號的機票。選出正確憑證，再口說 TICKET。'],
+  ['行李輸送帶','Put your bag on the belt.','依序點選登機箱、隨身包與行李名牌完成三件行李確認，再口說 BAG。'],
+  ['候機室指示燈','Please wait by the gate.','候機室亮起琥珀色等待燈號時，請在座位區安靜等候。選出正確行動，再口說 WAIT。'],
+  ['登機門廣播台','Hurry to the boarding gate.','航班看板顯示：登機門 2 號、召集進度 2 格。將兩項設定都調到 2，再口說 HURRY。'],
+  ['航廈計程車乘車處','Take a yellow taxi.','航廈外排班區停著黃色計程車，能接送旅客往返市區。選出計程車，再口說 TAXI。'],
+  ['航班準點電子鐘','We are not late for the flight.','核對出發時刻表，選出準時抵達不遲到的句子，再口說 LATE 完成啟航任務！']
+ ];
+ function hint(raw){const s=validate(raw)||initial();return {key:'zone15:'+JSON.stringify(s),word:null,targetId:'airport_'+(places[s.stage]||'exit'),clues:s.stage===8?['機場任務完成，由航廈南門返回星光鐘樓車站。','也可以回大廳複習八個機場旅遊單字。']:[lessons[s.stage][2],'先完成線索，再口說 '+words[s.stage]+'。']};}
+ const api={words,places,initial,validate,solved,canSpeak,transition,hint};root.AirportChapter=api;if(typeof module!=='undefined')module.exports=api;
+})(globalThis);
 /* Realm-specific mechanisms. Puzzle actions never write grades or award XP. */
 (function(root){
   'use strict';
@@ -160,11 +198,13 @@
     zone9:{title:'智慧殿堂：修復故事卷軸',english:'Read first. Think next. Write last.',brief:'卷軸的步驟散開了。依英文線索把三張卡依序放回；放錯可以取回重排。',clues:['First、next、last 告訴你先後順序。','先 READ，再 THINK，最後 WRITE；排好後蓋上印章。']},
     zone10:{title:'虹光空島：奏響回家之歌',english:'Listen to the music. Sing the song.',brief:'彩虹琴譜：C → E → G → C。先聽四個音，再用琴鍵重現旋律，讓回家的虹橋亮起。',clues:['聽示範旋律，留意最後一個音與第一個音相同。','依序按 C、E、G、C；按錯可以清空琴譜重來。']}
   };
+  specs.zone15={title:'星光國際機場：啟航任務',english:'Welcome to the airport.',brief:'確認飛機、機票、行李與登機時刻表；每一步要口說完成。',clues:['先在航廈迎賓櫃檯接下啟航任務。','觀察線索後，口說完成每一步。']};
   specs.zone14={title:'玻璃溫室：花園復甦任務',english:'The garden is beautiful.',brief:'觀察昆蟲、照護幼苗與整理環境；每一步要口說完成。',clues:['先在入口接下花園委託。','探索線索後，口說完成每一步。']};
   specs.zone13={title:'半音階口琴：掌心音樂展示館',english:'Play a song on the harmonica.',brief:'造型、簧片、滑鍵與吹吸練習。',clues:['找到完整口琴。','探索線索後，口說完成每一步。']};
   specs.zone12={title:'新港國小：舞獅迎賓任務',english:'Welcome to our school!',brief:'校史尋寶、迎賓圖卡、鼓點與舞獅口說任務。',clues:['到校門迎賓桌接下任務。','口說辨識通過才完成步驟。']};
   specs.zone11={title:'魔法餐廳：一碗熱湯的冒險',english:'Two eggs and one pumpkin, please.',brief:'穿梭三個房間，依訂單準備食材並送餐。',clues:['先到訂單台接單。','依英語線索找鑰匙、取食材、料理與送餐。']};
   const defaults={zone2:{cart:[0,0,0],paid:false},zone3:{tool:'WATER',care:[false,false,false]},zone4:{equipment:'',stage:0},zone5:{hour:6,minute:0,platform:1,boarded:false},zone6:{x:0,y:2},zone7:{object:'STAR',angle:0,aligned:false},zone8:{gear:[],heat:0,ready:false},zone9:{order:[],sealed:false},zone10:{notes:[],played:false}};
+  defaults.zone15={stage:0,spoken:[],choices:['','','','','','','',''],gate:0,call:0,collected:[]};
   defaults.zone14={stage:0,spoken:[],choices:['','','','','','','',''],water:0,light:0,collected:[]};
   defaults.zone13={stage:0,spoken:[],choices:['','','','','',''],explored:[],melody:[]};
   defaults.zone12={stage:0,spoken:[],history:null,drawing:null,rhythm:[]};
@@ -174,6 +214,7 @@
   const eq=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
   function initial(id){return defaults[id]?clone(defaults[id]):null;}
   function solved(id,s){
+    if(id==='zone15')return root.AirportChapter?.solved(s)||false;
     if(id==='zone14')return root.GreenhouseChapter?.solved(s)||false;
     if(id==='zone13')return root.HarmonicaChapter?.solved(s)||false;
     if(id==='zone12')return root.SchoolChapter?.solved(s)||false;
@@ -193,6 +234,7 @@
     }
   }
   function validateState(id,raw){
+    if(id==='zone15')return root.AirportChapter?.validate(raw)||null;
     if(id==='zone14')return root.GreenhouseChapter?.validate(raw)||null;
     if(id==='zone13')return root.HarmonicaChapter?.validate(raw)||null;
     if(id==='zone12')return root.SchoolChapter?.validate(raw)||null;
@@ -218,6 +260,7 @@
   }
   function sanitizeMap(map){const result={};if(!map||typeof map!=='object')return result;for(const id of Object.keys(defaults)){const state=validateState(id,map[id]);if(state)result[id]=state;}return result;}
   function transition(id,raw,action){
+    if(id==='zone15')return root.AirportChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入國際機場。'};
     if(id==='zone14')return root.GreenhouseChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入溫室。'};
     if(id==='zone13')return root.HarmonicaChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入口琴展示館。'};
     if(id==='zone12')return root.SchoolChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入校園任務。'};
@@ -261,7 +304,7 @@
     }
     return {state:s,message:solved(id,s)?'秘境任務完成！ '+message:message};
   }
-  function canTravel(from,to,map,{restore=false,dev=false}={}){if(restore||dev)return true;if(to==='learningHub'||from==='learningHub')return true;if(to==='zone14')return solved('zone3',map?.zone3);if(from==='zone14')return to==='zone3';if(to==='zone13')return solved('zone12',map?.zone12);if(from==='zone13')return to==='zone12';if(to==='zone12')return solved('zone4',map?.zone4);if(from==='zone12')return to==='zone4';if(to==='zone11')return solved('zone2',map?.zone2);if(from==='zone11')return to==='zone2';return !specs[from]||Number(to.slice(4))<=Number(from.slice(4))||solved(from,map?.[from]);}
+  function canTravel(from,to,map,{restore=false,dev=false}={}){if(restore||dev)return true;if(to==='learningHub'||from==='learningHub')return true;if(to==='zone15')return from==='zone5'&&solved('zone5',map?.zone5);if(from==='zone15')return to==='zone5';if(to==='zone14')return solved('zone3',map?.zone3);if(from==='zone14')return to==='zone3';if(to==='zone13')return solved('zone12',map?.zone12);if(from==='zone13')return to==='zone12';if(to==='zone12')return solved('zone4',map?.zone4);if(from==='zone12')return to==='zone4';if(to==='zone11')return solved('zone2',map?.zone2);if(from==='zone11')return to==='zone2';return !specs[from]||Number(to.slice(4))<=Number(from.slice(4))||solved(from,map?.[from]);}
   const api={specs,initial,solved,validateState,sanitizeMap,transition,canTravel};root.RealmQuests=api;if(typeof module!=='undefined')module.exports=api;
 })(globalThis);
 /* Puzzle checkpoints are separate from the learning-record service. */
@@ -319,4 +362,4 @@
   const api={flags,ownerKey,validate,capture,applySavedPosition,CheckpointStore};root.AdventureProgress=api;
   if(typeof module!=='undefined')module.exports=api;
 })(globalThis);
-var ADVENTURE_CHECKPOINT_ZONES={"zone1":{"id":"zone1","words":["LIGHT","BOOK","KEY","RED","BLUE","STAR","CAT","FISH","DOOR","FLOWER","OPEN","SUN"]},"zone2":{"id":"zone2","words":["APPLE","BANANA","BREAD","MILK","SWEET","OPEN"]},"zone3":{"id":"zone3","words":["RABBIT","BIRD","TREE","WATER","OPEN"]},"zone4":{"id":"zone4","words":["SOCCER","BALL","RUN","JUMP","OPEN"]},"zone5":{"id":"zone5","words":["TIME","CLOCK","TRAIN","MORNING","OPEN"]},"zone6":{"id":"zone6","words":["SHIP","BOAT","WIND","FISH","WATER","OPEN"]},"zone7":{"id":"zone7","words":["STAR","MOON","CLOUD","SUN","SKY","OPEN"]},"zone8":{"id":"zone8","words":["SNOW","COLD","WINTER","WHITE","WARM","CLIMB"]},"zone9":{"id":"zone9","words":["LIBRARY","READ","WRITE","THINK","SMART","FLY"]},"zone10":{"id":"zone10","words":["ISLAND","RAINBOW","MUSIC","SING","DANCE","DREAM"]},"zone11":{"id":"zone11","words":["EGG","PUMPKIN","LEMON","SOUP","WASH","PUT","COOK","SPOON"]},"zone12":{"id":"zone12","words":["SCHOOL","CLASSROOM","PAPER","DRAW","LISTEN","DRUM","LION","WELCOME"]},"zone13":{"id":"zone13","words":["SMALL","MOUTH","HAND","LEFT","RIGHT","HIGH","PLAY","SONG"]},"learningHub":{"id":"learningHub","words":[]},"zone14":{"id":"zone14","words":["GARDEN","GREEN","BEE","BUTTERFLY","GROW","SMELL","PICK UP","BEAUTIFUL"]}};
+var ADVENTURE_CHECKPOINT_ZONES={"zone1":{"id":"zone1","words":["LIGHT","BOOK","KEY","RED","BLUE","STAR","CAT","FISH","DOOR","FLOWER","OPEN","SUN"]},"zone2":{"id":"zone2","words":["APPLE","BANANA","BREAD","MILK","SWEET","OPEN"]},"zone3":{"id":"zone3","words":["RABBIT","BIRD","TREE","WATER","OPEN"]},"zone4":{"id":"zone4","words":["SOCCER","BALL","RUN","JUMP","OPEN"]},"zone5":{"id":"zone5","words":["TIME","CLOCK","TRAIN","MORNING","OPEN"]},"zone6":{"id":"zone6","words":["SHIP","BOAT","WIND","FISH","WATER","OPEN"]},"zone7":{"id":"zone7","words":["STAR","MOON","CLOUD","SUN","SKY","OPEN"]},"zone8":{"id":"zone8","words":["SNOW","COLD","WINTER","WHITE","WARM","CLIMB"]},"zone9":{"id":"zone9","words":["LIBRARY","READ","WRITE","THINK","SMART","FLY"]},"zone10":{"id":"zone10","words":["ISLAND","RAINBOW","MUSIC","SING","DANCE","DREAM"]},"zone11":{"id":"zone11","words":["EGG","PUMPKIN","LEMON","SOUP","WASH","PUT","COOK","SPOON"]},"zone12":{"id":"zone12","words":["SCHOOL","CLASSROOM","PAPER","DRAW","LISTEN","DRUM","LION","WELCOME"]},"zone13":{"id":"zone13","words":["SMALL","MOUTH","HAND","LEFT","RIGHT","HIGH","PLAY","SONG"]},"learningHub":{"id":"learningHub","words":[]},"zone14":{"id":"zone14","words":["GARDEN","GREEN","BEE","BUTTERFLY","GROW","SMELL","PICK UP","BEAUTIFUL"]},"zone15":{"id":"zone15","words":["AIRPORT","PLANE","TICKET","BAG","WAIT","HURRY","TAXI","LATE"]}};

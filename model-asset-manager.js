@@ -57,7 +57,10 @@
         chromatic_harmonica: 'assets/models/chromatic_harmonica.glb',
 
         // Zone 14: Glass Conservatory (玻璃溫室奇幻蘭花與蜜蜂)
-        greenhouse_botanical: 'assets/models/greenhouse_botanical.glb'
+        greenhouse_botanical: 'assets/models/greenhouse_botanical.glb',
+
+        // Zone 15: Starlight Airport (星光國際機場噴射客機)
+        airport_plane: 'assets/models/airport_plane.glb'
       };
     }
 
@@ -548,6 +551,21 @@
           botGltf.scale.set(1.4, 1.4, 1.4);
           group.add(botGltf);
           console.log('[ModelAssetManager] Greenhouse Orchid & Bumblebee upgraded!');
+        }
+      }
+    }
+
+    /**
+     * 升級 Zone 15 星光國際機場噴射客機
+     */
+    upgradeAirportScene(group) {
+      if (group && this.models.has('airport_plane')) {
+        const planeGltf = this.cloneModel('airport_plane');
+        if (planeGltf) {
+          planeGltf.position.set(0, 0.25, -10);
+          planeGltf.scale.set(1.15, 1.15, 1.15);
+          group.add(planeGltf);
+          console.log('[ModelAssetManager] Starlight Airport Airliner upgraded!');
         }
       }
     }
