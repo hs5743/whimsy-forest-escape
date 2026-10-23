@@ -4,7 +4,7 @@
  const bounds={minX:-10.65,maxX:10.65,minZ:-13.65,maxZ:13.65};
  const obstacles=[{minX:-9.8,maxX:-8.7,minZ:-1,maxZ:1},{minX:8.7,maxX:9.8,minZ:-1,maxZ:1},{minX:-8,maxX:-6,minZ:-.8,maxZ:1.5},{minX:6,maxX:8,minZ:-8.7,maxZ:-6.8},{minX:-7.5,maxX:-5.5,minZ:-8.5,maxZ:-6.5}];
  function build(manager,group){
-  const T=root.THREE,w=manager.world,sky=manager.tex.weatherYardSky||manager.tex.landscapeDaySky;if(sky&&root.RealmLandscape)root.RealmLandscape.build(manager,group,'zone15',sky);
+  const T=root.THREE,w=manager.world,sky=manager.tex.weatherYardSky||manager.tex.landscapeDaySky;if(sky&&root.RealmLandscape)root.RealmLandscape.build(manager,group,'zone21',sky);
   const geo={box:new T.BoxGeometry(1,1,1),cyl:new T.CylinderGeometry(1,1,1,16),sphere:new T.SphereGeometry(1,16,12),cone:new T.ConeGeometry(1,1,12),ring:new T.TorusGeometry(1,.055,7,28)};
   const color={concrete:0xffffff,gravel:0xffffff,grass:0xffffff,steel:0x89938f,wire:0x7b8581,brass:0xb89c67,blue:0x4c929f,deep:0x344a4c,white:0xf0f1e8,cloud:0xe2e7e3,yellow:0xd4ae54,red:0xaa6255,green:0x657653,dark:0x434b47,glass:0xaac6c2,wood:0x776652};
   const texFor={concrete:manager.tex.coastalConcrete,gravel:manager.tex.weatherGravel,grass:manager.tex.weatherYardGrass};

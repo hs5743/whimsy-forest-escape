@@ -110,7 +110,7 @@
   clue('position','架高賞蟹步道',-.9,1.1,3.2,2.5,2.2,3.1);
   clue('look','觀察望遠鏡',1.7,1.8,-11.15,4.2,2.5,2.8);
   clue('trash','海岸守護分類桶',3.82,1.25,-10.02,2.8,2.2,2.1);
-  const back=clue('exit','返回雲雨氣象觀測台',0,1.2,12.65,3.4,2.4,1.1);back.userData.onClick=()=>{if(manager.switchZone('zone15'))w.adventureProgress?.save(true);};
+  const back=clue('exit','返回雲雨氣象觀測台',0,1.2,12.65,3.4,2.4,1.1);back.userData.onClick=()=>{if(manager.switchZone('zone21'))w.adventureProgress?.save(true);};
   group.updateMatrixWorld(true);const batches=new Map();for(const o of staticMeshes){const key=o.geometry.uuid+':'+o.material.uuid;if(!batches.has(key))batches.set(key,[]);batches.get(key).push(o);}for(const items of batches.values()){if(items.length<2)continue;const inst=new T.InstancedMesh(items[0].geometry,items[0].material,items.length);items.forEach((o,i)=>inst.setMatrixAt(i,o.matrix));inst.castShadow=inst.receiveShadow=true;group.add(inst);for(const o of items)o.parent.remove(o);}
   const hemi=new T.HemisphereLight(0xe9f1ed,0x5b6252,.18);group.add(hemi);const sun=new T.DirectionalLight(0xffe5bb,.28);sun.position.set(-12,18,7);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-22,right:22,top:22,bottom:-22,near:.5,far:64});group.add(sun,sun.target);
   w.coastRefs={crabs:[],route};root.CoastChapter?.sync?.();

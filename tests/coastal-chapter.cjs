@@ -26,15 +26,15 @@ test('coast checkpoints reject malformed claims and trim progress without matchi
 });
 
 test('the new coastal branch follows the completed weather chapter and returns to it',()=>{
- assert.equal(Q.canTravel('zone15','zone16',{zone15:weatherAt(7)}),false);
- assert.equal(Q.canTravel('zone15','zone16',{zone15:weatherAt(8)}),true);
- assert.equal(Q.canTravel('zone16','zone15',{}),true);
+ assert.equal(Q.canTravel('zone21','zone16',{zone21:weatherAt(7)}),false);
+ assert.equal(Q.canTravel('zone21','zone16',{zone21:weatherAt(8)}),true);
+ assert.equal(Q.canTravel('zone16','zone21',{}),true);
  assert.equal(Q.canTravel('zone16','zone7',{zone16:at(8)}),false);
  assert.equal(Q.sanitizeMap({zone16:at(5)}).zone16.stage,5);
  const context=vm.createContext({window:{}});
  for(const file of ['spatial-zone-manager.js'])vm.runInContext(fs.readFileSync(path.join(base,file),'utf8')+';window.Manager=SpatialZoneManager;',context);
  context.window.Manager.prototype.initTextures=()=>{};const zones=new context.window.Manager({}).zones;
- assert.equal(zones.zone16.parentZone,'zone15');assert.deepEqual(Array.from(zones.zone16.words),C.words);
+ assert.equal(zones.zone16.parentZone,'zone21');assert.deepEqual(Array.from(zones.zone16.words),C.words);
 });
 
 test('the eight coast words are in the supplied GEPT list, unique across chapter cores and add five learning entries',()=>{

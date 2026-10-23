@@ -604,7 +604,7 @@ function teacherReportResponse(params,ss){
   ['溫度讀值','It is hot today.','溫度計停在 31°C。依照牌上的圖例，這個讀值是 HOT，不是 COLD。'],
   ['雨滴觸感','The raincoat is wet.','觀察雨衣表面的水珠。摸起來有水、不是乾燥的，選 WET 並口說 WET。']
  ];
- function hint(raw){const s=validate(raw)||initial();return {key:'zone15:'+JSON.stringify(s),word:null,targetId:'weather_'+(places[s.stage]||'exit'),clues:s.stage===8?['今日天氣紀錄已完成。','沿南側出口返回雲頂觀測站，或回大廳複習八個新字。']:[lessons[s.stage][2],'觀測完成後，還要口說 '+words[s.stage]+'。']};}
+ function hint(raw){const s=validate(raw)||initial();return {key:'zone21:'+JSON.stringify(s),word:null,targetId:'weather_'+(places[s.stage]||'exit'),clues:s.stage===8?['今日天氣紀錄已完成。','沿南側出口返回雲頂觀測站，或回大廳複習八個新字。']:[lessons[s.stage][2],'觀測完成後，還要口說 '+words[s.stage]+'。']};}
  const api={words,places,choices,lessons,initial,validate,solved,canSpeak,transition,hint};root.WeatherChapter=api;if(typeof module!=='undefined')module.exports=api;
  })(globalThis);
 /* Xiangshan wetland chapter: interpret a field clue, then pass fresh oral recognition. */
@@ -814,7 +814,7 @@ function teacherReportResponse(params,ss){
     zone10:{title:'虹光空島：奏響回家之歌',english:'Listen to the music. Sing the song.',brief:'彩虹琴譜：C → E → G → C。先聽四個音，再用琴鍵重現旋律，讓回家的虹橋亮起。',clues:['聽示範旋律，留意最後一個音與第一個音相同。','依序按 C、E、G、C；按錯可以清空琴譜重來。']}
   };
   specs.zone14={title:'玻璃溫室：花園復甦任務',english:'The garden is beautiful.',brief:'觀察昆蟲、照護幼苗與整理環境；每一步要口說完成。',clues:['先在入口接下花園委託。','探索線索後，口說完成每一步。']};
-  specs.zone15={title:'雲雨氣象觀測台：尋回天氣紀錄',english:'We study the weather.',brief:'讀取雲況、雨量、日照、風力與溫度儀器；每一站都要先解讀線索，再口說過關。',clues:['先到工作單接下觀測任務。','查看目前儀器線索，再口說目標單字。']};
+  specs.zone21={title:'雲雨氣象觀測台：尋回天氣紀錄',english:'We study the weather.',brief:'讀取雲況、雨量、日照、風力與溫度儀器；每一站都要先解讀線索，再口說過關。',clues:['先到工作單接下觀測任務。','查看目前儀器線索，再口說目標單字。']};
   specs.zone16={title:'香山潮間帶：沿著步道觀察海岸',english:'Walk and look. Keep the coast clean.',brief:'沿架高步道觀察海岸地景與泥灘棲地；尊重潮間帶生物，只在安全步道上觀察。',clues:['先在入口領取濕地觀察卡。','讀取每個現場線索，再口說新詞。']};
   specs.zone17={title:'新港國小圖書館：故事階梯尋書任務',english:'Choose a book and enjoy the story.',brief:'走進挑高圖書館，探索階梯書架、閱讀座位與故事心情卡；每一步都要口說完成。',clues:['沿著橘色階梯找到圖書館線索。','觀察空間線索，再口說目標單字。']};
   specs.zone18={title:'新港國小創客工坊：小小機器人任務',english:'We make a robot.',brief:'在遊戲化科技創作工坊裡組裝小車、比較速度與測試轉向；先看實物線索，再口說完成每一步。',clues:['先完成新港國小迎賓任務，校園工坊才會開放。','依工作桌上的零件線索完成英語口說。']};
@@ -825,7 +825,7 @@ function teacherReportResponse(params,ss){
   specs.zone11={title:'魔法餐廳：一碗熱湯的冒險',english:'Two eggs and one pumpkin, please.',brief:'穿梭三個房間，依訂單準備食材並送餐。',clues:['先到訂單台接單。','依英語線索找鑰匙、取食材、料理與送餐。']};
   const defaults={zone2:{cart:[0,0,0],paid:false},zone3:{tool:'WATER',care:[false,false,false]},zone4:{equipment:'',stage:0},zone5:{hour:6,minute:0,platform:1,boarded:false},zone6:{x:0,y:2},zone7:{object:'STAR',angle:0,aligned:false},zone8:{gear:[],heat:0,ready:false},zone9:{order:[],sealed:false},zone10:{notes:[],played:false}};
   defaults.zone14={stage:0,spoken:[],choices:['','','','','','','',''],water:0,light:0,collected:[]};
-  defaults.zone15={stage:0,spoken:[],choices:['','','','','','','','']};
+  defaults.zone21={stage:0,spoken:[],choices:['','','','','','','','']};
   defaults.zone16={stage:0,spoken:[],choices:['','','','','','','','']};
   defaults.zone17={stage:0,spoken:[],choices:['','','','','','','','']};
   defaults.zone18={stage:0,spoken:[],choices:['','','','','','','','']};
@@ -837,14 +837,14 @@ function teacherReportResponse(params,ss){
   const clone=x=>JSON.parse(JSON.stringify(x));
   const isInt=(x,a,b)=>Number.isInteger(x)&&x>=a&&x<=b;
   const eq=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
-  function initial(id){if(id==='zone20')return root.ArtWorkshopChapter?.initial()||clone(defaults.zone20);if(id==='zone19')return root.CarnivalChapter?.initial()||clone(defaults.zone19);if(id==='zone18')return root.MakerspaceChapter?.initial()||clone(defaults.zone18);if(id==='zone17')return root.LibraryChapter?.initial()||clone(defaults.zone17);if(id==='zone16')return root.CoastChapter?.initial()||clone(defaults.zone16);if(id==='zone15')return root.WeatherChapter?.initial()||clone(defaults.zone15);return defaults[id]?clone(defaults[id]):null;}
+  function initial(id){if(id==='zone20')return root.ArtWorkshopChapter?.initial()||clone(defaults.zone20);if(id==='zone19')return root.CarnivalChapter?.initial()||clone(defaults.zone19);if(id==='zone18')return root.MakerspaceChapter?.initial()||clone(defaults.zone18);if(id==='zone17')return root.LibraryChapter?.initial()||clone(defaults.zone17);if(id==='zone16')return root.CoastChapter?.initial()||clone(defaults.zone16);if(id==='zone21')return root.WeatherChapter?.initial()||clone(defaults.zone21);return defaults[id]?clone(defaults[id]):null;}
   function solved(id,s){
     if(id==='zone20')return root.ArtWorkshopChapter?.solved(s)||false;
     if(id==='zone19')return root.CarnivalChapter?.solved(s)||false;
     if(id==='zone18')return root.MakerspaceChapter?.solved(s)||false;
     if(id==='zone17')return root.LibraryChapter?.solved(s)||false;
     if(id==='zone16')return root.CoastChapter?.solved(s)||false;
-    if(id==='zone15')return root.WeatherChapter?.solved(s)||false;
+    if(id==='zone21')return root.WeatherChapter?.solved(s)||false;
     if(id==='zone14')return root.GreenhouseChapter?.solved(s)||false;
     if(id==='zone13')return root.HarmonicaChapter?.solved(s)||false;
     if(id==='zone12')return root.SchoolChapter?.solved(s)||false;
@@ -869,7 +869,7 @@ function teacherReportResponse(params,ss){
     if(id==='zone18')return root.MakerspaceChapter?.validate(raw)||null;
     if(id==='zone17')return root.LibraryChapter?.validate(raw)||null;
     if(id==='zone16')return root.CoastChapter?.validate(raw)||null;
-    if(id==='zone15')return root.WeatherChapter?.validate(raw)||null;
+    if(id==='zone21')return root.WeatherChapter?.validate(raw)||null;
     if(id==='zone14')return root.GreenhouseChapter?.validate(raw)||null;
     if(id==='zone13')return root.HarmonicaChapter?.validate(raw)||null;
     if(id==='zone12')return root.SchoolChapter?.validate(raw)||null;
@@ -900,7 +900,7 @@ function teacherReportResponse(params,ss){
     if(id==='zone18')return root.MakerspaceChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入創客工坊。'};
     if(id==='zone17')return root.LibraryChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入圖書館任務。'};
     if(id==='zone16')return root.CoastChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入香山潮間帶。'};
-    if(id==='zone15')return root.WeatherChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入氣象觀測台。'};
+    if(id==='zone21')return root.WeatherChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入氣象觀測台。'};
     if(id==='zone14')return root.GreenhouseChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入溫室。'};
     if(id==='zone13')return root.HarmonicaChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入口琴展示館。'};
     if(id==='zone12')return root.SchoolChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入校園任務。'};
@@ -944,7 +944,7 @@ function teacherReportResponse(params,ss){
     }
     return {state:s,message:solved(id,s)?'秘境任務完成！ '+message:message};
   }
-  function canTravel(from,to,map,{restore=false,dev=false}={}){if(restore||dev)return true;if(to==='learningHub'||from==='learningHub')return true;if(to==='zone19')return solved('zone2',map?.zone2);if(from==='zone19')return to==='zone2';if(to==='zone20'||to==='zone18'||to==='zone17')return solved('zone12',map?.zone12);if(from==='zone20'||from==='zone18'||from==='zone17')return to==='zone12';if(to==='zone16')return solved('zone15',map?.zone15);if(from==='zone16')return to==='zone15';if(to==='zone15')return solved('zone7',map?.zone7);if(from==='zone15')return to==='zone7'||(to==='zone16'&&solved('zone15',map?.zone15));if(to==='zone14')return solved('zone3',map?.zone3);if(from==='zone14')return to==='zone3';if(to==='zone13')return solved('zone12',map?.zone12);if(from==='zone13')return to==='zone12';if(to==='zone12')return solved('zone4',map?.zone4);if(from==='zone12')return to==='zone4'||(['zone17','zone18','zone20'].includes(to)&&solved('zone12',map?.zone12));if(to==='zone11')return solved('zone2',map?.zone2);if(from==='zone11')return to==='zone2';return !specs[from]||Number(to.slice(4))<=Number(from.slice(4))||solved(from,map?.[from]);}
+  function canTravel(from,to,map,{restore=false,dev=false}={}){if(restore||dev)return true;if(to==='learningHub'||from==='learningHub')return true;if(to==='zone19')return solved('zone2',map?.zone2);if(from==='zone19')return to==='zone2';if(to==='zone20'||to==='zone18'||to==='zone17')return solved('zone12',map?.zone12);if(from==='zone20'||from==='zone18'||from==='zone17')return to==='zone12';if(to==='zone16')return solved('zone21',map?.zone21);if(from==='zone16')return to==='zone21';if(to==='zone21')return solved('zone7',map?.zone7);if(from==='zone21')return to==='zone7'||(to==='zone16'&&solved('zone21',map?.zone21));if(to==='zone14')return solved('zone3',map?.zone3);if(from==='zone14')return to==='zone3';if(to==='zone13')return solved('zone12',map?.zone12);if(from==='zone13')return to==='zone12';if(to==='zone12')return solved('zone4',map?.zone4);if(from==='zone12')return to==='zone4'||(['zone17','zone18','zone20'].includes(to)&&solved('zone12',map?.zone12));if(to==='zone11')return solved('zone2',map?.zone2);if(from==='zone11')return to==='zone2';return !specs[from]||Number(to.slice(4))<=Number(from.slice(4))||solved(from,map?.[from]);}
   const api={specs,initial,solved,validateState,sanitizeMap,transition,canTravel};root.RealmQuests=api;if(typeof module!=='undefined')module.exports=api;
   })(globalThis);
 /* Puzzle checkpoints are separate from the learning-record service. */
@@ -1002,7 +1002,7 @@ function teacherReportResponse(params,ss){
   const api={flags,ownerKey,validate,capture,applySavedPosition,CheckpointStore};root.AdventureProgress=api;
   if(typeof module!=='undefined')module.exports=api;
   })(globalThis);
-var ADVENTURE_CHECKPOINT_ZONES={"zone1":{"id":"zone1","words":["LIGHT","BOOK","KEY","RED","BLUE","STAR","CAT","FISH","DOOR","FLOWER","OPEN","SUN"]},"zone2":{"id":"zone2","words":["APPLE","BANANA","BREAD","MILK","SWEET","OPEN"]},"zone3":{"id":"zone3","words":["RABBIT","BIRD","TREE","WATER","OPEN"]},"zone4":{"id":"zone4","words":["SOCCER","BALL","RUN","JUMP","OPEN"]},"zone5":{"id":"zone5","words":["TIME","CLOCK","TRAIN","MORNING","OPEN"]},"zone6":{"id":"zone6","words":["SHIP","BOAT","WIND","FISH","WATER","OPEN"]},"zone7":{"id":"zone7","words":["STAR","MOON","CLOUD","SUN","SKY","OPEN"]},"zone8":{"id":"zone8","words":["SNOW","COLD","WINTER","WHITE","WARM","CLIMB"]},"zone9":{"id":"zone9","words":["LIBRARY","READ","WRITE","THINK","SMART","FLY"]},"zone10":{"id":"zone10","words":["ISLAND","RAINBOW","MUSIC","SING","DANCE","DREAM"]},"zone11":{"id":"zone11","words":["EGG","PUMPKIN","LEMON","SOUP","WASH","PUT","COOK","SPOON"]},"zone12":{"id":"zone12","words":["SCHOOL","CLASSROOM","PAPER","DRAW","LISTEN","DRUM","LION","WELCOME"]},"zone13":{"id":"zone13","words":["SMALL","MOUTH","HAND","LEFT","RIGHT","HIGH","PLAY","SONG"]},"learningHub":{"id":"learningHub","words":[]},"zone14":{"id":"zone14","words":["GARDEN","GREEN","BEE","BUTTERFLY","GROW","SMELL","PICK UP","BEAUTIFUL"]},"zone15":{"id":"zone15","words":["WEATHER","CLOUDY","RAIN","RAINY","SUNNY","WINDY","HOT","WET"]},"zone16":{"id":"zone16","words":["BEACH","SEA","SCIENCE","DIFFERENT","INTERESTING","IN FRONT OF","LOOK","TRASH"]},"zone17":{"id":"zone17","words":["SHELF","STORY","STUDENT","TEACHER","STUDY","QUIET","BORING","EXCITING"]},"zone18":{"id":"zone18","words":["ROBOT","MAKE","FAST","SLOW","TURN","WORK","READY","START"]},"zone19":{"id":"zone19","words":["THIRTEEN","FOURTEEN","FIFTEEN","SIXTEEN","SEVENTEEN","EIGHTEEN","NINETEEN","TWENTY"]},"zone20":{"id":"zone20","words":["BLACKBOARD","PICTURE","PENCIL","RULER","GLUE","MARKER","ART","ENGLISH"]}};
+var ADVENTURE_CHECKPOINT_ZONES={"zone1":{"id":"zone1","words":["LIGHT","BOOK","KEY","RED","BLUE","STAR","CAT","FISH","DOOR","FLOWER","OPEN","SUN"]},"zone2":{"id":"zone2","words":["APPLE","BANANA","BREAD","MILK","SWEET","OPEN"]},"zone3":{"id":"zone3","words":["RABBIT","BIRD","TREE","WATER","OPEN"]},"zone4":{"id":"zone4","words":["SOCCER","BALL","RUN","JUMP","OPEN"]},"zone5":{"id":"zone5","words":["TIME","CLOCK","TRAIN","MORNING","OPEN"]},"zone6":{"id":"zone6","words":["SHIP","BOAT","WIND","FISH","WATER","OPEN"]},"zone7":{"id":"zone7","words":["STAR","MOON","CLOUD","SUN","SKY","OPEN"]},"zone8":{"id":"zone8","words":["SNOW","COLD","WINTER","WHITE","WARM","CLIMB"]},"zone9":{"id":"zone9","words":["LIBRARY","READ","WRITE","THINK","SMART","FLY"]},"zone10":{"id":"zone10","words":["ISLAND","RAINBOW","MUSIC","SING","DANCE","DREAM"]},"zone11":{"id":"zone11","words":["EGG","PUMPKIN","LEMON","SOUP","WASH","PUT","COOK","SPOON"]},"zone12":{"id":"zone12","words":["SCHOOL","CLASSROOM","PAPER","DRAW","LISTEN","DRUM","LION","WELCOME"]},"zone13":{"id":"zone13","words":["SMALL","MOUTH","HAND","LEFT","RIGHT","HIGH","PLAY","SONG"]},"learningHub":{"id":"learningHub","words":[]},"zone14":{"id":"zone14","words":["GARDEN","GREEN","BEE","BUTTERFLY","GROW","SMELL","PICK UP","BEAUTIFUL"]},"zone21":{"id":"zone21","words":["WEATHER","CLOUDY","RAIN","RAINY","SUNNY","WINDY","HOT","WET"]},"zone16":{"id":"zone16","words":["BEACH","SEA","SCIENCE","DIFFERENT","INTERESTING","IN FRONT OF","LOOK","TRASH"]},"zone17":{"id":"zone17","words":["SHELF","STORY","STUDENT","TEACHER","STUDY","QUIET","BORING","EXCITING"]},"zone18":{"id":"zone18","words":["ROBOT","MAKE","FAST","SLOW","TURN","WORK","READY","START"]},"zone19":{"id":"zone19","words":["THIRTEEN","FOURTEEN","FIFTEEN","SIXTEEN","SEVENTEEN","EIGHTEEN","NINETEEN","TWENTY"]},"zone20":{"id":"zone20","words":["BLACKBOARD","PICTURE","PENCIL","RULER","GLUE","MARKER","ART","ENGLISH"]}};
 
 var GreenhouseChapter=window.GreenhouseChapter,WeatherChapter=window.WeatherChapter,RestaurantChapter=window.RestaurantChapter,SchoolChapter=window.SchoolChapter,HarmonicaChapter=window.HarmonicaChapter,LibraryChapter=window.LibraryChapter,MakerspaceChapter=window.MakerspaceChapter,RealmQuests=window.RealmQuests,AdventureProgress=window.AdventureProgress;
 

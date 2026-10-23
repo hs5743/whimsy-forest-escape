@@ -13,7 +13,7 @@
     zone10:{title:'虹光空島：奏響回家之歌',english:'Listen to the music. Sing the song.',brief:'彩虹琴譜：C → E → G → C。先聽四個音，再用琴鍵重現旋律，讓回家的虹橋亮起。',clues:['聽示範旋律，留意最後一個音與第一個音相同。','依序按 C、E、G、C；按錯可以清空琴譜重來。']}
   };
   specs.zone14={title:'玻璃溫室：花園復甦任務',english:'The garden is beautiful.',brief:'觀察昆蟲、照護幼苗與整理環境；每一步要口說完成。',clues:['先在入口接下花園委託。','探索線索後，口說完成每一步。']};
-  specs.zone15={title:'雲雨氣象觀測台：尋回天氣紀錄',english:'We study the weather.',brief:'讀取雲況、雨量、日照、風力與溫度儀器；每一站都要先解讀線索，再口說過關。',clues:['先到工作單接下觀測任務。','查看目前儀器線索，再口說目標單字。']};
+  specs.zone21={title:'雲雨氣象觀測台：尋回天氣紀錄',english:'We study the weather.',brief:'讀取雲況、雨量、日照、風力與溫度儀器；每一站都要先解讀線索，再口說過關。',clues:['先到工作單接下觀測任務。','查看目前儀器線索，再口說目標單字。']};
   specs.zone16={title:'香山潮間帶：沿著步道觀察海岸',english:'Walk and look. Keep the coast clean.',brief:'沿架高步道觀察海岸地景與泥灘棲地；尊重潮間帶生物，只在安全步道上觀察。',clues:['先在入口領取濕地觀察卡。','讀取每個現場線索，再口說新詞。']};
   specs.zone17={title:'新港國小圖書館：故事階梯尋書任務',english:'Choose a book and enjoy the story.',brief:'走進挑高圖書館，探索階梯書架、閱讀座位與故事心情卡；每一步都要口說完成。',clues:['沿著橘色階梯找到圖書館線索。','觀察空間線索，再口說目標單字。']};
   specs.zone18={title:'新港國小創客工坊：小小機器人任務',english:'We make a robot.',brief:'在遊戲化科技創作工坊裡組裝小車、比較速度與測試轉向；先看實物線索，再口說完成每一步。',clues:['先完成新港國小迎賓任務，校園工坊才會開放。','依工作桌上的零件線索完成英語口說。']};
@@ -24,7 +24,7 @@
   specs.zone11={title:'魔法餐廳：一碗熱湯的冒險',english:'Two eggs and one pumpkin, please.',brief:'穿梭三個房間，依訂單準備食材並送餐。',clues:['先到訂單台接單。','依英語線索找鑰匙、取食材、料理與送餐。']};
   const defaults={zone2:{cart:[0,0,0],paid:false},zone3:{tool:'WATER',care:[false,false,false]},zone4:{equipment:'',stage:0},zone5:{hour:6,minute:0,platform:1,boarded:false},zone6:{x:0,y:2},zone7:{object:'STAR',angle:0,aligned:false},zone8:{gear:[],heat:0,ready:false},zone9:{order:[],sealed:false},zone10:{notes:[],played:false}};
   defaults.zone14={stage:0,spoken:[],choices:['','','','','','','',''],water:0,light:0,collected:[]};
-  defaults.zone15={stage:0,spoken:[],choices:['','','','','','','','']};
+  defaults.zone21={stage:0,spoken:[],choices:['','','','','','','','']};
   defaults.zone16={stage:0,spoken:[],choices:['','','','','','','','']};
   defaults.zone17={stage:0,spoken:[],choices:['','','','','','','','']};
   defaults.zone18={stage:0,spoken:[],choices:['','','','','','','','']};
@@ -36,14 +36,14 @@
   const clone=x=>JSON.parse(JSON.stringify(x));
   const isInt=(x,a,b)=>Number.isInteger(x)&&x>=a&&x<=b;
   const eq=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
-  function initial(id){if(id==='zone20')return root.ArtWorkshopChapter?.initial()||clone(defaults.zone20);if(id==='zone19')return root.CarnivalChapter?.initial()||clone(defaults.zone19);if(id==='zone18')return root.MakerspaceChapter?.initial()||clone(defaults.zone18);if(id==='zone17')return root.LibraryChapter?.initial()||clone(defaults.zone17);if(id==='zone16')return root.CoastChapter?.initial()||clone(defaults.zone16);if(id==='zone15')return root.WeatherChapter?.initial()||clone(defaults.zone15);return defaults[id]?clone(defaults[id]):null;}
+  function initial(id){if(id==='zone20')return root.ArtWorkshopChapter?.initial()||clone(defaults.zone20);if(id==='zone19')return root.CarnivalChapter?.initial()||clone(defaults.zone19);if(id==='zone18')return root.MakerspaceChapter?.initial()||clone(defaults.zone18);if(id==='zone17')return root.LibraryChapter?.initial()||clone(defaults.zone17);if(id==='zone16')return root.CoastChapter?.initial()||clone(defaults.zone16);if(id==='zone21')return root.WeatherChapter?.initial()||clone(defaults.zone21);return defaults[id]?clone(defaults[id]):null;}
   function solved(id,s){
     if(id==='zone20')return root.ArtWorkshopChapter?.solved(s)||false;
     if(id==='zone19')return root.CarnivalChapter?.solved(s)||false;
     if(id==='zone18')return root.MakerspaceChapter?.solved(s)||false;
     if(id==='zone17')return root.LibraryChapter?.solved(s)||false;
     if(id==='zone16')return root.CoastChapter?.solved(s)||false;
-    if(id==='zone15')return root.WeatherChapter?.solved(s)||false;
+    if(id==='zone21')return root.WeatherChapter?.solved(s)||false;
     if(id==='zone14')return root.GreenhouseChapter?.solved(s)||false;
     if(id==='zone13')return root.HarmonicaChapter?.solved(s)||false;
     if(id==='zone12')return root.SchoolChapter?.solved(s)||false;
@@ -68,7 +68,7 @@
     if(id==='zone18')return root.MakerspaceChapter?.validate(raw)||null;
     if(id==='zone17')return root.LibraryChapter?.validate(raw)||null;
     if(id==='zone16')return root.CoastChapter?.validate(raw)||null;
-    if(id==='zone15')return root.WeatherChapter?.validate(raw)||null;
+    if(id==='zone21')return root.WeatherChapter?.validate(raw)||null;
     if(id==='zone14')return root.GreenhouseChapter?.validate(raw)||null;
     if(id==='zone13')return root.HarmonicaChapter?.validate(raw)||null;
     if(id==='zone12')return root.SchoolChapter?.validate(raw)||null;
@@ -99,7 +99,7 @@
     if(id==='zone18')return root.MakerspaceChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入創客工坊。'};
     if(id==='zone17')return root.LibraryChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入圖書館任務。'};
     if(id==='zone16')return root.CoastChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入香山潮間帶。'};
-    if(id==='zone15')return root.WeatherChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入氣象觀測台。'};
+    if(id==='zone21')return root.WeatherChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入氣象觀測台。'};
     if(id==='zone14')return root.GreenhouseChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入溫室。'};
     if(id==='zone13')return root.HarmonicaChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入口琴展示館。'};
     if(id==='zone12')return root.SchoolChapter?.transition(raw,action)||{state:initial(id),message:'請重新載入校園任務。'};
@@ -143,7 +143,7 @@
     }
     return {state:s,message:solved(id,s)?'秘境任務完成！ '+message:message};
   }
-  function canTravel(from,to,map,{restore=false,dev=false}={}){if(restore||dev)return true;if(to==='learningHub'||from==='learningHub')return true;if(to==='zone19')return solved('zone2',map?.zone2);if(from==='zone19')return to==='zone2';if(to==='zone20'||to==='zone18'||to==='zone17')return solved('zone12',map?.zone12);if(from==='zone20'||from==='zone18'||from==='zone17')return to==='zone12';if(to==='zone16')return solved('zone15',map?.zone15);if(from==='zone16')return to==='zone15';if(to==='zone15')return solved('zone7',map?.zone7);if(from==='zone15')return to==='zone7'||(to==='zone16'&&solved('zone15',map?.zone15));if(to==='zone14')return solved('zone3',map?.zone3);if(from==='zone14')return to==='zone3';if(to==='zone13')return solved('zone12',map?.zone12);if(from==='zone13')return to==='zone12';if(to==='zone12')return solved('zone4',map?.zone4);if(from==='zone12')return to==='zone4'||(['zone17','zone18','zone20'].includes(to)&&solved('zone12',map?.zone12));if(to==='zone11')return solved('zone2',map?.zone2);if(from==='zone11')return to==='zone2';return !specs[from]||Number(to.slice(4))<=Number(from.slice(4))||solved(from,map?.[from]);}
+  function canTravel(from,to,map,{restore=false,dev=false}={}){if(restore||dev)return true;if(to==='learningHub'||from==='learningHub')return true;if(to==='zone19')return solved('zone2',map?.zone2);if(from==='zone19')return to==='zone2';if(to==='zone20'||to==='zone18'||to==='zone17')return solved('zone12',map?.zone12);if(from==='zone20'||from==='zone18'||from==='zone17')return to==='zone12';if(to==='zone16')return solved('zone21',map?.zone21);if(from==='zone16')return to==='zone21';if(to==='zone21')return solved('zone7',map?.zone7);if(from==='zone21')return to==='zone7'||(to==='zone16'&&solved('zone21',map?.zone21));if(to==='zone14')return solved('zone3',map?.zone3);if(from==='zone14')return to==='zone3';if(to==='zone13')return solved('zone12',map?.zone12);if(from==='zone13')return to==='zone12';if(to==='zone12')return solved('zone4',map?.zone4);if(from==='zone12')return to==='zone4'||(['zone17','zone18','zone20'].includes(to)&&solved('zone12',map?.zone12));if(to==='zone11')return solved('zone2',map?.zone2);if(from==='zone11')return to==='zone2';return !specs[from]||Number(to.slice(4))<=Number(from.slice(4))||solved(from,map?.[from]);}
   const api={specs,initial,solved,validateState,sanitizeMap,transition,canTravel};root.RealmQuests=api;if(typeof module!=='undefined')module.exports=api;
   if(!root.document)return;
   root.addEventListener('load',()=>{
@@ -224,7 +224,7 @@
       updateMechanism();
       world.adventureProgress?.save(true);
     }
-    function open(){if(world.zoneManager.currentZoneId==='zone20'){root.ArtWorkshopChapter.open();return;}if(world.zoneManager.currentZoneId==='zone19'){root.CarnivalChapter.open();return;}if(world.zoneManager.currentZoneId==='zone18'){root.MakerspaceChapter.open();return;}if(world.zoneManager.currentZoneId==='zone17'){root.LibraryChapter.open();return;}if(world.zoneManager.currentZoneId==='zone16'){root.CoastChapter.open();return;}if(world.zoneManager.currentZoneId==='zone15'){root.WeatherChapter.open();return;}if(world.zoneManager.currentZoneId==='zone14'){root.GreenhouseChapter.open();return;}if(world.zoneManager.currentZoneId==='zone13'){root.HarmonicaChapter.open();return;}if(world.zoneManager.currentZoneId==='zone12'){root.SchoolChapter.open();return;}if(world.zoneManager.currentZoneId==='zone11'){root.RestaurantChapter.open();return;}if(world.isAnyModalOpen())return;active=world.zoneManager.currentZoneId;if(!specs[active])return;returnFocus=root.document.activeElement;$('realmQuestKicker').textContent='秘境 '+active.slice(4)+' · 生活英語解謎';$('realmQuestTitle').textContent=specs[active].title;$('realmQuestEnglish').textContent=specs[active].english;$('realmQuestBrief').textContent=specs[active].brief;$('realmQuestResult').textContent='';render();modal.style.display='flex';root.touchControls?.reset();world.targetFocus?.select(null);}
+    function open(){if(world.zoneManager.currentZoneId==='zone20'){root.ArtWorkshopChapter.open();return;}if(world.zoneManager.currentZoneId==='zone19'){root.CarnivalChapter.open();return;}if(world.zoneManager.currentZoneId==='zone18'){root.MakerspaceChapter.open();return;}if(world.zoneManager.currentZoneId==='zone17'){root.LibraryChapter.open();return;}if(world.zoneManager.currentZoneId==='zone16'){root.CoastChapter.open();return;}if(world.zoneManager.currentZoneId==='zone21'){root.WeatherChapter.open();return;}if(world.zoneManager.currentZoneId==='zone14'){root.GreenhouseChapter.open();return;}if(world.zoneManager.currentZoneId==='zone13'){root.HarmonicaChapter.open();return;}if(world.zoneManager.currentZoneId==='zone12'){root.SchoolChapter.open();return;}if(world.zoneManager.currentZoneId==='zone11'){root.RestaurantChapter.open();return;}if(world.isAnyModalOpen())return;active=world.zoneManager.currentZoneId;if(!specs[active])return;returnFocus=root.document.activeElement;$('realmQuestKicker').textContent='秘境 '+active.slice(4)+' · 生活英語解謎';$('realmQuestTitle').textContent=specs[active].title;$('realmQuestEnglish').textContent=specs[active].english;$('realmQuestBrief').textContent=specs[active].brief;$('realmQuestResult').textContent='';render();modal.style.display='flex';root.touchControls?.reset();world.targetFocus?.select(null);}
     function close(){modal.style.display='none';stopNotes();root.speechManager?.stopVoice();returnFocus?.isConnected&&returnFocus.focus({preventScroll:true});}
     function sync(){
       const id=world.zoneManager.currentZoneId;$('realmQuestBtn').hidden=!specs[id];
@@ -236,7 +236,7 @@
       if(id==='zone18'){root.MakerspaceChapter.sync();return;}
       root.HarmonicaChapter?.stopTones?.();
       if(id==='zone14'){root.GreenhouseChapter.sync();return;}
-      if(id==='zone15'){root.WeatherChapter.sync();return;}
+      if(id==='zone21'){root.WeatherChapter.sync();return;}
       if(id==='zone16'){root.CoastChapter.sync();return;}
       if(id==='zone17'){root.LibraryChapter.sync();return;}
       if(id==='zone13'){root.HarmonicaChapter.sync();return;}
@@ -247,7 +247,7 @@
       const p=world.player.pos;const offset=[[2,0],[-2,0],[0,-2]].find(([x,z])=>!world.isPositionBlocked(p.x+x,p.z+z,.35));if(!offset)return;
       const ring=new root.THREE.Mesh(new root.THREE.TorusGeometry(.35,.07,8,24),new root.THREE.MeshStandardMaterial({color:solved(id,state(id))?0x68c9a7:0xe9b768,emissive:0x483118,roughness:.4}));ring.position.set(p.x+offset[0],1.25,p.z+offset[1]);ring.userData={id:'quest_'+id,name:specs[id].title,label:'秘境任務 · '+specs[id].title,hint:'互動以閱讀英語線索、操作解謎',onClick:open};world.activeZoneGroup.add(ring);world.interactables.push(ring);board=ring;
     }
-    $('realmQuestBtn').addEventListener('click',open);$('realmQuestClose').addEventListener('click',close);$('realmQuestExplore').addEventListener('click',close);$('realmQuestListen').addEventListener('click',()=>world.zoneManager.currentZoneId==='zone20'?root.ArtWorkshopChapter.listen():world.zoneManager.currentZoneId==='zone19'?root.CarnivalChapter.listen():world.zoneManager.currentZoneId==='zone18'?root.MakerspaceChapter.listen():world.zoneManager.currentZoneId==='zone17'?root.LibraryChapter.listen():world.zoneManager.currentZoneId==='zone16'?root.CoastChapter.listen():world.zoneManager.currentZoneId==='zone15'?root.WeatherChapter.listen():world.zoneManager.currentZoneId==='zone14'?root.GreenhouseChapter.listen():world.zoneManager.currentZoneId==='zone13'?root.HarmonicaChapter.listen():world.zoneManager.currentZoneId==='zone12'?root.SchoolChapter.listen():world.zoneManager.currentZoneId==='zone11'?root.RestaurantChapter.listen():root.speechManager?.playSentenceVoice(specs[active]?.english||''));
+    $('realmQuestBtn').addEventListener('click',open);$('realmQuestClose').addEventListener('click',close);$('realmQuestExplore').addEventListener('click',close);$('realmQuestListen').addEventListener('click',()=>world.zoneManager.currentZoneId==='zone20'?root.ArtWorkshopChapter.listen():world.zoneManager.currentZoneId==='zone19'?root.CarnivalChapter.listen():world.zoneManager.currentZoneId==='zone18'?root.MakerspaceChapter.listen():world.zoneManager.currentZoneId==='zone17'?root.LibraryChapter.listen():world.zoneManager.currentZoneId==='zone16'?root.CoastChapter.listen():world.zoneManager.currentZoneId==='zone21'?root.WeatherChapter.listen():world.zoneManager.currentZoneId==='zone14'?root.GreenhouseChapter.listen():world.zoneManager.currentZoneId==='zone13'?root.HarmonicaChapter.listen():world.zoneManager.currentZoneId==='zone12'?root.SchoolChapter.listen():world.zoneManager.currentZoneId==='zone11'?root.RestaurantChapter.listen():root.speechManager?.playSentenceVoice(specs[active]?.english||''));
     $('devQuestReset').addEventListener('click',()=>{
       const id=world.zoneManager.currentZoneId;if(!world.devMode||!specs[id])return;
       states()[id]=initial(id);$('realmQuestBtn').textContent='秘境任務';if(board)board.material.color.setHex(0xe9b768);
@@ -255,7 +255,7 @@
       if(id==='zone20')root.ArtWorkshopChapter.sync();
       if(id==='zone18')root.MakerspaceChapter.sync();
       if(id==='zone14')root.GreenhouseChapter.sync();
-      if(id==='zone15')root.WeatherChapter.sync();
+      if(id==='zone21')root.WeatherChapter.sync();
       if(id==='zone16')root.CoastChapter.sync();
       if(id==='zone17')root.LibraryChapter.sync();
       if(id==='zone13')root.HarmonicaChapter.sync();

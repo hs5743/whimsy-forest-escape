@@ -139,8 +139,8 @@ class SpatialZoneManager {
     const learningHub={id:'learningHub',name:'英語探險家學習大廳',englishName:'Explorer Language Lounge',icon:'📚',topic:'自由選題 · 單字 · 句型 · 複習',reqLevel:1,isLearningHub:true,desc:'與狐狸館長、貓頭鷹老師和兔子教練反覆練習，收藏想學的單字，累積口說、句型與跨日複習紀錄。完成後返回原來的冒險。',words:[],spawnPos:[0,1.6,8],spawnYaw:0};
     this.zones.learningHub=learningHub;
     this.zones.zone14={id:'zone14',name:'玻璃溫室：花園復甦任務',englishName:'Glass Conservatory',icon:'🌿',topic:'Garden, Insects & Caring',reqLevel:2,parentZone:'zone3',desc:'從守護獸花園走入透光的玻璃溫室。觀察蜜蜂與蝴蝶、調整幼苗生長條件並整理花園；每一步都要口說過關。',words:['GARDEN','GREEN','BEE','BUTTERFLY','GROW','SMELL','PICK UP','BEAUTIFUL'],spawnPos:[0,1.6,11.5],spawnYaw:0};
-    this.zones.zone15={id:'zone15',name:'雲雨氣象觀測台：尋回天氣紀錄',englishName:'Cloudtop Weather Station',icon:'🌦️',topic:'Weather, Sky & Temperature',reqLevel:2,parentZone:'zone7',desc:'從雲頂觀測站的氣象星盤延伸到戶外觀測台。讀取雲況、雨量、日照、風力與溫度儀器；每個新字都要先看線索，再口說通過。',words:['WEATHER','CLOUDY','RAIN','RAINY','SUNNY','WINDY','HOT','WET'],spawnPos:[0,1.6,11.2],spawnYaw:0};
-    this.zones.zone16={id:'zone16',name:'香山潮間帶：尋找海岸生命',englishName:'Xiangshan Tidal Wetland',icon:'🦀',topic:'Coast, Field Science & Nature Care',reqLevel:2,parentZone:'zone15',desc:'沿著架高賞蟹步道觀察潮間帶泥灘與海岸地景，練習比較、定位、仔細觀察與守護棲地；每個新詞都要先讀線索再口說通過。',words:['BEACH','SEA','SCIENCE','DIFFERENT','INTERESTING','IN FRONT OF','LOOK','TRASH'],spawnPos:[0,1.6,11.2],spawnYaw:0};
+    this.zones.zone21={id:'zone21',name:'雲雨氣象觀測台：尋回天氣紀錄',englishName:'Cloudtop Weather Station',icon:'🌦️',topic:'Weather, Sky & Temperature',reqLevel:2,parentZone:'zone7',desc:'從雲頂觀測站的氣象星盤延伸到戶外觀測台。讀取雲況、雨量、日照、風力與溫度儀器；每個新字都要先看線索，再口說通過。',words:['WEATHER','CLOUDY','RAIN','RAINY','SUNNY','WINDY','HOT','WET'],spawnPos:[0,1.6,11.2],spawnYaw:0};
+    this.zones.zone16={id:'zone16',name:'香山潮間帶：尋找海岸生命',englishName:'Xiangshan Tidal Wetland',icon:'🦀',topic:'Coast, Field Science & Nature Care',reqLevel:2,parentZone:'zone21',desc:'沿著架高賞蟹步道觀察潮間帶泥灘與海岸地景，練習比較、定位、仔細觀察與守護棲地；每個新詞都要先讀線索再口說通過。',words:['BEACH','SEA','SCIENCE','DIFFERENT','INTERESTING','IN FRONT OF','LOOK','TRASH'],spawnPos:[0,1.6,11.2],spawnYaw:0};
     this.zones.zone17={id:'zone17',name:'新港國小圖書館：故事階梯尋書任務',englishName:'Xin-gang School Library',icon:'📖',topic:'Library, Reading & Story Feelings',reqLevel:2,parentZone:'zone12',desc:'從舞獅迎賓任務走上校園圖書館的橘色階梯。探索挑高閱讀空間、藍色欄板、階梯下書架、木桌與彩色閱讀座；先看線索，再口說完成每一步。',words:['SHELF','STORY','STUDENT','TEACHER','STUDY','QUIET','BORING','EXCITING'],spawnPos:[0,1.6,10.6],spawnYaw:0};
     this.zones.zone18={id:'zone18',name:'新港國小創客工坊：小小機器人任務',englishName:'Xin-gang School Makerspace',icon:'🤖',topic:'Robots, Making & Movement',reqLevel:2,parentZone:'zone12',desc:'從校園教學樓走進遊戲化的科技創作工坊。組裝小車、比較速度、試轉向與確認啟動；每個步驟都要先看實物線索，再口說通過。此工坊為教學想像場景，並非學校實景復刻。',words:['ROBOT','MAKE','FAST','SLOW','TURN','WORK','READY','START'],spawnPos:[0,1.6,10.8],spawnYaw:0};
     this.zones.zone19={id:'zone19',name:'魔法數字嘉年華：星環計數任務',englishName:'Number Carnival',icon:'🎪',topic:'Numbers, Counting & Carnival Games',reqLevel:2,parentZone:'zone2',desc:'完成陽光微風市集採買後，從冒險星圖前往夜色嘉年華支線。數清燈環、星星籌碼與遊戲攤位，依序學會 THIRTEEN 到 TWENTY；每一步都要先看實物數量，再口說通過。',words:['THIRTEEN','FOURTEEN','FIFTEEN','SIXTEEN','SEVENTEEN','EIGHTEEN','NINETEEN','TWENTY'],spawnPos:[0,1.6,10.5],spawnYaw:0};
@@ -331,7 +331,7 @@ class SpatialZoneManager {
     if(this.currentZoneId==='zone18')return window.MakerspaceScene.bounds;
     if(this.currentZoneId==='zone19')return window.CarnivalScene.bounds;
     if(this.currentZoneId==='zone20')return window.ArtWorkshopScene.bounds;
-    if(this.currentZoneId==='zone15')return window.WeatherScene.bounds;
+    if(this.currentZoneId==='zone21')return window.WeatherScene.bounds;
     if(this.currentZoneId==='zone14')return window.GreenhouseScene.bounds;
     if(this.currentZoneId==='learningHub')return window.LearningHubScene?.bounds || { minX: -15, maxX: 15, minZ: -15, maxZ: 15 };
     if(this.currentZoneId==='zone13')return window.HarmonicaScene?.bounds || { minX: -15, maxX: 15, minZ: -15, maxZ: 15 };
@@ -360,7 +360,7 @@ class SpatialZoneManager {
     if(this.currentZoneId==='zone18')return window.MakerspaceScene.colliders();
     if(this.currentZoneId==='zone19')return window.CarnivalScene.colliders();
     if(this.currentZoneId==='zone20')return window.ArtWorkshopScene.colliders();
-    if(this.currentZoneId==='zone15')return window.WeatherScene.colliders();
+    if(this.currentZoneId==='zone21')return window.WeatherScene.colliders();
     if(this.currentZoneId==='zone14')return window.GreenhouseScene.colliders();
     if(this.currentZoneId==='learningHub')return window.LearningHubScene.colliders();
     if(this.currentZoneId==='zone13')return window.HarmonicaScene.colliders();
@@ -1170,8 +1170,8 @@ class SpatialZoneManager {
       ? Math.max(window.cloudSyncManager.profile.level, window.cloudSyncManager.profile.accessLevel || 1)
       : 1;
     if(zoneId==='zone14')return userLevel>=zone.reqLevel && !!window.GreenhouseChapter && !!window.RealmQuests?.solved('zone3',this.world.gameState.realmPuzzles?.zone3);
-    if(zoneId==='zone15')return userLevel>=zone.reqLevel && !!window.WeatherChapter && !!window.RealmQuests?.solved('zone7',this.world.gameState.realmPuzzles?.zone7);
-    if(zoneId==='zone16')return userLevel>=zone.reqLevel && !!window.CoastChapter && !!window.RealmQuests?.solved('zone15',this.world.gameState.realmPuzzles?.zone15);
+    if(zoneId==='zone21')return userLevel>=zone.reqLevel && !!window.WeatherChapter && !!window.RealmQuests?.solved('zone7',this.world.gameState.realmPuzzles?.zone7);
+    if(zoneId==='zone16')return userLevel>=zone.reqLevel && !!window.CoastChapter && !!window.RealmQuests?.solved('zone21',this.world.gameState.realmPuzzles?.zone21);
     if(zoneId==='zone17')return userLevel>=zone.reqLevel && !!window.LibraryChapter && !!window.SchoolChapter?.solved(this.world.gameState.realmPuzzles?.zone12);
     if(zoneId==='zone18')return userLevel>=zone.reqLevel && !!window.MakerspaceChapter && !!window.SchoolChapter?.solved(this.world.gameState.realmPuzzles?.zone12);
     if(zoneId==='zone19')return userLevel>=zone.reqLevel && !!window.CarnivalChapter && !!window.RealmQuests?.solved('zone2',this.world.gameState.realmPuzzles?.zone2);
@@ -1372,7 +1372,7 @@ class SpatialZoneManager {
     } else if(zoneId==='zone18'){window.MakerspaceScene.build(this,group);
     } else if(zoneId==='zone19'){window.CarnivalScene.build(this,group);
     } else if(zoneId==='zone20'){window.ArtWorkshopScene.build(this,group);
-    } else if(zoneId==='zone15'){window.WeatherScene.build(this,group);
+    } else if(zoneId==='zone21'){window.WeatherScene.build(this,group);
     } else if(zoneId==='zone14'){window.GreenhouseScene.build(this,group);
     } else if(zoneId==='learningHub'){window.LearningHubScene.build(this,group);
     } else if(zoneId==='zone13'){window.HarmonicaScene.build(this,group);
@@ -1534,7 +1534,7 @@ class SpatialZoneManager {
       skyColorTop=0x303b58;fogColor=0x53566a;fogDensity=.0065;
     } else if(zoneId==='zone20'){
       skyColorTop=0xbab9ad;fogColor=0xe2d9c5;fogDensity=.007;
-    } else if (zoneId === 'zone15') {
+    } else if (zoneId === 'zone21') {
       skyColorTop = 0xa9c0cc; fogColor = 0xc1d0d1; fogDensity = 0.004;
     } else if (zoneId === 'zone14') {
       skyColorTop=0xb9d8d0;fogColor=0xc4ded0;fogDensity=.003;
@@ -5433,9 +5433,9 @@ class SpatialZoneManager {
 
     // 10b. 雲頂東南側支線：天氣站接續氣象星盤，完成月亮觀測後開放。
     this.buildObservatoryWeatherGate(group, 8.8, 0, 7.4, '🌦️ 雲雨氣象觀測台 · WEATHER', () => {
-      if(!this.isZoneUnlocked('zone15')){this.world.showToast('先完成雲頂觀測站的月亮方向觀測，天氣支線就會開放。');return;}
+      if(!this.isZoneUnlocked('zone21')){this.world.showToast('先完成雲頂觀測站的月亮方向觀測，天氣支線就會開放。');return;}
       this.world.showToast('穿過雲間步道，開始記錄今日天氣。');
-      this.switchZone('zone15');
+      this.switchZone('zone21');
     });
 
     // 11. 👑 關卡主 NPC：星象總監・艾瑟爾賢者 (Astrologer Aethel, x: 1.5, z: -3.5)
@@ -5457,7 +5457,7 @@ class SpatialZoneManager {
     const field=new T.Mesh(new T.PlaneGeometry(2.45,2.55),glow);field.position.set(0,1.85,0);gate.add(field);
     const plate=document.createElement('canvas');plate.width=768;plate.height=192;const ctx=plate.getContext('2d');ctx.fillStyle='#203e52';ctx.fillRect(0,0,768,192);ctx.strokeStyle='#b4d9cf';ctx.lineWidth=5;ctx.strokeRect(8,8,752,176);ctx.fillStyle='#fff8e7';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 50px sans-serif';ctx.fillText('WEATHER STATION',384,96,720);
     const sign=new T.Mesh(new T.PlaneGeometry(2.5,.62),new T.MeshBasicMaterial({map:new THREE.CanvasTexture(plate)}));sign.position.set(0,3.85,.08);gate.add(sign);
-    const hit=new T.Mesh(new T.BoxGeometry(3.35,4.2,2.1),new T.MeshBasicMaterial({visible:false}));hit.position.y=2.05;hit.userData={id:'travel_portal_zone15_from_observatory',name:label,label,hint:'完成雲頂觀測站任務後開放天氣支線',onClick:()=>onTravel?.()};gate.add(hit);this.world.interactables.push(hit);
+    const hit=new T.Mesh(new T.BoxGeometry(3.35,4.2,2.1),new T.MeshBasicMaterial({visible:false}));hit.position.y=2.05;hit.userData={id:'travel_portal_zone21_from_observatory',name:label,label,hint:'完成雲頂觀測站任務後開放天氣支線',onClick:()=>onTravel?.()};gate.add(hit);this.world.interactables.push(hit);
     this.world.animators.push(time=>{field.material.opacity=.2+(.08*Math.sin(time*1.4));});group.add(gate);
   }
 

@@ -37,15 +37,15 @@
   ['溫度讀值','It is hot today.','溫度計停在 31°C。依照牌上的圖例，這個讀值是 HOT，不是 COLD。'],
   ['雨滴觸感','The raincoat is wet.','觀察雨衣表面的水珠。摸起來有水、不是乾燥的，選 WET 並口說 WET。']
  ];
- function hint(raw){const s=validate(raw)||initial();return {key:'zone15:'+JSON.stringify(s),word:null,targetId:'weather_'+(places[s.stage]||'exit'),clues:s.stage===8?['今日天氣紀錄已完成。','沿南側出口返回雲頂觀測站，或回大廳複習八個新字。']:[lessons[s.stage][2],'觀測完成後，還要口說 '+words[s.stage]+'。']};}
+ function hint(raw){const s=validate(raw)||initial();return {key:'zone21:'+JSON.stringify(s),word:null,targetId:'weather_'+(places[s.stage]||'exit'),clues:s.stage===8?['今日天氣紀錄已完成。','沿南側出口返回雲頂觀測站，或回大廳複習八個新字。']:[lessons[s.stage][2],'觀測完成後，還要口說 '+words[s.stage]+'。']};}
  const api={words,places,choices,lessons,initial,validate,solved,canSpeak,transition,hint};root.WeatherChapter=api;if(typeof module!=='undefined')module.exports=api;
  if(!root.document)return;
  const $=id=>root.document.getElementById(id),world=()=>root.world3D;let place='journal',focus=null,english='',session=0;
- function state(){const w=world();w.gameState.realmPuzzles||={};return w.gameState.realmPuzzles.zone15||(w.gameState.realmPuzzles.zone15=initial());}
+ function state(){const w=world();w.gameState.realmPuzzles||={};return w.gameState.realmPuzzles.zone21||(w.gameState.realmPuzzles.zone21=initial());}
  function close(){session++;$('realmQuestModal').style.display='none';root.speechManager?.stopVoice();if(focus?.isConnected)focus.focus({preventScroll:true});}
- function sync(){const w=world();if(w?.zoneManager.currentZoneId!=='zone15')return;const s=validate(state())||initial();$('realmQuestBtn').hidden=false;$('realmQuestBtn').textContent=s.stage===8?'✓ 天氣紀錄完成':'天氣觀測任務';if(w.weatherRefs){w.weatherRefs.vane.rotation.y=w.settings?.reducedMotion?0:Math.sin((w.clock?.elapsedTime||0)*.35)*.18;}}
- function commit(action){if(world()?.zoneManager.currentZoneId!=='zone15')return;const r=transition(state(),action);world().gameState.realmPuzzles.zone15=r.state;sync();world().hintController?.clear();world().adventureProgress?.save(true);render(r.message);}
- function beginSpeech(word){const w=world();if(!w||w.zoneManager.currentZoneId!=='zone15'||!canSpeak(state(),word))return;const before=JSON.stringify(validate(state())),group=w.activeZoneGroup,back=place;close();const own=++session;let used=false;w.openSpeechCard(word,()=>{if(used||own!==session||w.zoneManager.currentZoneId!=='zone15'||w.activeZoneGroup!==group||JSON.stringify(validate(state()))!==before)return;used=true;commit({type:'speak',word,verifiedWord:word});open(back);},{requireRecognition:true});}
+ function sync(){const w=world();if(w?.zoneManager.currentZoneId!=='zone21')return;const s=validate(state())||initial();$('realmQuestBtn').hidden=false;$('realmQuestBtn').textContent=s.stage===8?'✓ 天氣紀錄完成':'天氣觀測任務';if(w.weatherRefs){w.weatherRefs.vane.rotation.y=w.settings?.reducedMotion?0:Math.sin((w.clock?.elapsedTime||0)*.35)*.18;}}
+ function commit(action){if(world()?.zoneManager.currentZoneId!=='zone21')return;const r=transition(state(),action);world().gameState.realmPuzzles.zone21=r.state;sync();world().hintController?.clear();world().adventureProgress?.save(true);render(r.message);}
+ function beginSpeech(word){const w=world();if(!w||w.zoneManager.currentZoneId!=='zone21'||!canSpeak(state(),word))return;const before=JSON.stringify(validate(state())),group=w.activeZoneGroup,back=place;close();const own=++session;let used=false;w.openSpeechCard(word,()=>{if(used||own!==session||w.zoneManager.currentZoneId!=='zone21'||w.activeZoneGroup!==group||JSON.stringify(validate(state()))!==before)return;used=true;commit({type:'speak',word,verifiedWord:word});open(back);},{requireRecognition:true});}
  function button(text,fn){const b=root.document.createElement('button');b.type='button';b.textContent=text;b.onclick=fn;return b;}
  function render(message=''){
   const s=validate(state())||initial(),area=$('realmQuestControls'),n=places.indexOf(place),lesson=lessons[n];area.replaceChildren();$('realmQuestKicker').textContent='雲頂觀測站支線 · 雲雨氣象觀測台';$('realmQuestTitle').textContent=lesson?.[0]||'雲雨氣象觀測台：找回天氣紀錄';english=lesson?.[1]||'We study the weather.';$('realmQuestEnglish').textContent=english;$('realmQuestBrief').textContent=(lesson?.[2]||hint(s).clues.join(' '))+' 口說完成 '+s.stage+' / 8。';$('realmQuestResult').textContent=message;$('realmQuestWin').hidden=s.stage!==8;$('realmQuestNext').textContent='八個天氣新字都完成了！從南側出口回雲頂觀測站。';
@@ -56,7 +56,7 @@
   area.append(button(s.stage===8?'查看返程出口':'查看目前任務',()=>{place=s.stage===8?'journal':places[s.stage];render();}));
   if(place==='journal'||s.stage===8)area.append(button('返回雲頂觀測站',()=>{close();if(world().zoneManager.switchZone('zone7'))world().adventureProgress?.save(true);}));
  }
- function open(p='journal'){const w=world();if(!w||w.zoneManager.currentZoneId!=='zone15'||w.isAnyModalOpen())return;place=p;focus=root.document.activeElement;render();$('realmQuestModal').style.display='flex';root.touchControls?.reset();w.targetFocus?.select(null);$('realmQuestClose').focus();}
+ function open(p='journal'){const w=world();if(!w||w.zoneManager.currentZoneId!=='zone21'||w.isAnyModalOpen())return;place=p;focus=root.document.activeElement;render();$('realmQuestModal').style.display='flex';root.touchControls?.reset();w.targetFocus?.select(null);$('realmQuestClose').focus();}
  Object.assign(api,{open,close,sync,beginSpeech,listen:()=>root.speechManager?.playSentenceVoice(english)});
- root.addEventListener('load',()=>{for(const id of ['realmQuestClose','realmQuestExplore'])$(id).addEventListener('click',()=>{if(world()?.zoneManager.currentZoneId==='zone15')close();});});
+ root.addEventListener('load',()=>{for(const id of ['realmQuestClose','realmQuestExplore'])$(id).addEventListener('click',()=>{if(world()?.zoneManager.currentZoneId==='zone21')close();});});
 })(typeof window!=='undefined'?window:globalThis);

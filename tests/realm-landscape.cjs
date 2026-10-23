@@ -7,8 +7,8 @@ test('every outdoor realm uses the appropriate new sky and a fully closed dome',
  assert.equal(L.skyKey('zone5'),'landscapeNightSky');assert.equal(L.skyKey('zone8'),'landscapeAuroraSky');assert.equal(L.skyKey('zone1'),null);
 });
 test('the weather yard and Xiangshan wetland use their site-specific panoramas and an open wetland horizon',()=>{
- const weather=fixture('zone15'),coast=fixture('zone16');
- assert.equal(L.skyKey('zone15'),'weatherYardSky');assert.equal(L.skyKey('zone16'),'xiangshanWetlandSky');
+ const weather=fixture('zone21'),coast=fixture('zone16');
+ assert.equal(L.skyKey('zone21'),'weatherYardSky');assert.equal(L.skyKey('zone16'),'xiangshanWetlandSky');
  assert.equal(weather.landscape.getObjectByName('ContinuousSky').material.uniforms.skyMap.value,weather.manager.tex.weatherYardSky);
  assert.equal(coast.landscape.getObjectByName('ContinuousSky').material.uniforms.skyMap.value,coast.manager.tex.xiangshanWetlandSky);
  assert.equal(coast.landscape.getObjectByName('HorizonTerrain'),undefined);assert.equal(coast.landscape.children.some(o=>o.name==='HorizonTerrain'),false);

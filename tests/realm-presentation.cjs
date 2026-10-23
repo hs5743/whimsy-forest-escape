@@ -20,7 +20,7 @@ test('selecting a region or locked chapter never travels, and travel rechecks th
  s.node('zone12').onclick();const action=s.all().find(n=>n.className==='atlas-travel');assert.equal(action.disabled,false);s.open.delete('zone12');action.onclick();assert.equal(s.travel.length,0);s.open.add('zone12');action.onclick();assert.deepEqual(s.travel,['zone12']);
 });
 test('cross-region entrances and mainline links select the correct destination without bypassing travel confirmation',()=>{
- const s=setup();s.named('森林海岸').onclick();s.node('zone15').onclick();s.named('入口：星空觀測站 →').onclick();assert.equal(s.node('zone7').attrs['aria-pressed'],'true');assert.ok(s.node('zone7').focused);
+ const s=setup();s.named('森林海岸').onclick();s.node('zone21').onclick();s.named('入口：星空觀測站 →').onclick();assert.equal(s.node('zone7').attrs['aria-pressed'],'true');assert.ok(s.node('zone7').focused);
  s.named('新港校園').onclick();s.node('zone4').onclick();s.named('下一站：鐘樓車站 →').onclick();assert.equal(s.node('zone5').attrs['aria-pressed'],'true');assert.equal(s.travel.length,0);
  s.named('定位：舞獅彩繪').onclick();assert.equal(s.node('zone20').attrs['aria-pressed'],'true');
 });
