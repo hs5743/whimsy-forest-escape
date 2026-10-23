@@ -139,6 +139,9 @@
   function taskText(state,zone) {
     if(zone==='learningHub')return '與狐狸館長、貓頭鷹老師或兔子教練互動，自由選題學習。';
     if(zone==='zone14'&&root.GreenhouseChapter)return root.GreenhouseChapter.hint(state.realmPuzzles?.zone14).clues[0];
+    if(zone==='zone19'&&root.CarnivalChapter)return root.CarnivalChapter.hint(state.realmPuzzles?.zone19).clues[0];
+    if(zone==='zone15'&&root.WeatherChapter)return root.WeatherChapter.hint(state.realmPuzzles?.zone15).clues[0];
+    if(zone==='zone16'&&root.CoastChapter)return root.CoastChapter.hint(state.realmPuzzles?.zone16).clues[0];
     if(zone==='zone13'&&root.HarmonicaChapter)return root.HarmonicaChapter.hint(state.realmPuzzles?.zone13).clues[0];
     if(zone==='zone12'&&root.SchoolChapter)return root.SchoolChapter.hint(state.realmPuzzles?.zone12).clues[0];
     if(zone==='zone11'&&root.RestaurantChapter)return root.RestaurantChapter.hint(state.realmPuzzles?.zone11).clues[0];
@@ -154,6 +157,9 @@
   function isLocalPreview() { return typeof location !== 'undefined' && ['localhost','127.0.0.1','[::1]'].includes(location.hostname) && new URLSearchParams(location.search).get('dev') === '1'; }
   const sceneProfiles={
     zone14:{exposure:1.02,key:0xffefd7,intensity:1.22,sky:0xe2f1e4,ground:0x59654b,fill:.68},
+    zone15:{exposure:1,key:0xfff4e7,intensity:1.05,sky:0xb7c9d1,ground:0x63795f,fill:.78},
+    zone16:{exposure:.88,key:0xe0d3b3,intensity:.65,sky:0x9db2b3,ground:0x48584e,fill:.38},
+    zone19:{exposure:.94,key:0xffd89a,intensity:.84,sky:0x302d43,ground:0x262434,fill:.55},
     zone1:{exposure:1.08,key:0xfffaed,intensity:1.15,sky:0xfff6e8,ground:0x8f7259,fill:.65},
     zone2:{exposure:1,key:0xffedce,intensity:1.25,sky:0xffedd5,ground:0x65513b,fill:.75},
     zone3:{exposure:1,key:0xfff2ce,intensity:1.2,sky:0xd9f2f4,ground:0x425c3f,fill:.75},

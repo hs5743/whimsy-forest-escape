@@ -81,8 +81,8 @@ test('Escape ignores a speech dialog that is initially hidden by CSS',()=>{const
 function textureFixture() {
  const c=context(),Manager=load(c,'spatial-zone-manager.js','SpatialZoneManager');
  const zm=Object.create(Manager.prototype);
- Object.assign(zm,{textureSources:new Map(),textureStatus:new Map(),textureManager:{},activeTextures:new Set(),world:{renderer:{capabilities:{getMaxAnisotropy:()=>8}}},refreshZoneEnvironment:()=>{}});
- c.document.createElement=()=>({width:2,height:2,getContext:()=>({fillRect:()=>{}})});
+ Object.assign(zm,{textureSources:new Map(),textureStatus:new Map(),textureManager:{},textureVariants:new Map(),atlasTextureVariants:new Map(),atlasTextureRegions:new Map(),activeTextures:new Set(),world:{renderer:{capabilities:{getMaxAnisotropy:()=>8}}},refreshZoneEnvironment:()=>{}});
+ c.document.createElement=()=>({width:2,height:2,getContext:()=>({fillRect:()=>{},drawImage:()=>{}})});
  const requests=[];vm.runInContext('THREE=Object.create(THREE)',c.ctx);
  c.ctx.THREE.ImageLoader=class {load(url,success,progress,error){requests.push({url,success,error});}};
  c.elements.assetLoadStatus={textContent:''};c.elements.sceneLoadNotice={hidden:true};c.elements.sceneLoadLabel={textContent:''};c.elements.sceneLoadRetry={hidden:true};
@@ -97,6 +97,12 @@ test('only scene textures are requested and duplicate requests are suppressed',(
  const {zm,requests}=textureFixture(),active=zm.getTexture('active.jpg'),unused=zm.getTexture('unused.jpg');
  const group=new THREE.Group();group.add(new THREE.Mesh(new THREE.BoxGeometry(),new THREE.MeshStandardMaterial({map:active})));
  zm.loadSceneTextures(group);zm.ensureTexture(active);assert.equal(requests.length,1);assert.equal(requests[0].url,'active.jpg');assert.equal(zm.textureStatus.has(unused),false);
+});
+test('atlas material crops share one image request and populate the selected physical quadrant',()=>{
+ const f=textureFixture(),{zm,requests}=f,source=new THREE.Texture(),draws=[];f.document.createElement=()=>({width:2,height:2,getContext:()=>({fillRect:()=>{},drawImage:(...args)=>draws.push(args)})});
+ zm.tex={makerAtlas:source};zm.textureSources.set(source,'maker-atlas.png');const crop=zm.getAtlasTexture('makerAtlas',1,0),group=new THREE.Group();group.add(new THREE.Mesh(new THREE.BoxGeometry(),new THREE.MeshStandardMaterial({map:crop})));
+ zm.loadSceneTextures(group);assert.equal(requests.length,1);assert.equal(requests[0].url,'maker-atlas.png');requests[0].success({width:8,height:8,naturalWidth:8,naturalHeight:8});
+ assert.equal(zm.textureStatus.get(crop),'ready');assert.equal(crop.image.width,4);assert.equal(crop.image.height,4);assert.equal(draws.length,1);assert.deepEqual(draws[0].slice(1),[0,4,4,4,0,0,4,4]);
 });
 test('texture timeout remains retryable and late callbacks cannot overwrite retry',()=>{
  const {zm,requests,timers,elements}=textureFixture(),texture=zm.getTexture('late.jpg');zm.activeTextures.add(texture);zm.ensureTexture(texture);
@@ -259,8 +265,9 @@ test('frame statistics report p95 and lifetime long frames without growing their
 
 test('scene acceptance plans one warmup and two complete measured passes',()=>{
  const {sweepPlan}=require('../game-diagnostics.js');
- const zones=Array.from({length:10},(_,i)=>'zone'+(i+1));
- const plan=sweepPlan(zones);assert.equal(plan.length,30);
+ const c=vm.createContext({window:{}});vm.runInContext(fs.readFileSync(path.join(base,'spatial-zone-manager.js'),'utf8')+';window.Manager=SpatialZoneManager;',c);c.window.Manager.prototype.initTextures=()=>{};
+ const zones=Object.keys(new c.window.Manager(null,{metadataOnly:true}).zones);assert.equal(zones.length,21);assert.ok(zones.includes('zone19'));assert.ok(zones.includes('zone20'));assert.ok(zones.includes('learningHub'));
+ const plan=sweepPlan(zones);assert.equal(plan.length,63);
  for(const round of [0,1,2]) {
   const pass=plan.filter(row=>row.round===round);
   assert.deepEqual(pass.map(row=>row.zone),zones);
@@ -339,7 +346,7 @@ test('study hint sequence follows all twelve live puzzle steps without skipping 
 test('each later realm receives contextual hints and tracks its own unfinished word',()=>{
  const c=context(),Manager=load(c,'spatial-zone-manager.js','SpatialZoneManager');
  Manager.prototype.initTextures=()=>{};const m=new Manager({});
- for(const zone of Object.values(m.zones).filter(z=>!z.isLearningHub&&z.id!=='zone1'&&z.id!=='zone11'&&z.id!=='zone12'&&z.id!=='zone13'&&z.id!=='zone14')){
+ for(const zone of Object.values(m.zones).filter(z=>!z.isLearningHub&&z.id!=='zone1'&&z.id!=='zone11'&&z.id!=='zone12'&&z.id!=='zone13'&&z.id!=='zone14'&&z.id!=='zone15'&&z.id!=='zone16'&&z.id!=='zone17'&&z.id!=='zone18'&&z.id!=='zone19'&&z.id!=='zone20')){
   const plan=Assist.hintPlan({realmPuzzles:questDoneStates},zone,[]);assert.equal(plan.word,zone.words[0]);assert.ok(plan.clues[0].length>10);
   assert.notEqual(plan.clues[0],Assist.hintPlan({},m.zones.zone1).clues[0]);
   assert.equal(Assist.hintPlan({},zone,zone.words).word,null);
@@ -511,7 +518,7 @@ test('scavenger hunt streak, all and branch-zone modes resolve unlocked clues wi
  assert.ok(zm.getUnlockedZoneIds().includes('zone1'));
  assert.equal(zm.getUnlockedZoneIds().includes('learningHub'),false);
  const hunt=new Scavenger(world);
- for(const z of ['zone11','zone12','zone13','zone14','learningHub']){
+ for(const z of ['zone11','zone12','zone13','zone14','zone15','learningHub']){
   zm.currentZoneId=z;
   assert.equal(hunt.startHunt('zone'),true);
   assert.equal(hunt.isQuestActive(),true);

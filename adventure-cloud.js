@@ -18,7 +18,7 @@
     async push(raw,force=false){
       if(!this.supported||!this.link||this.busy||this.conflictRevision!==null)return false;
       const snapshot=root.AdventureProgress.validate(raw,this.owner,this.zones);if(!snapshot||JSON.stringify(snapshot).length>20000){this.state='invalid_snapshot';return false;}
-      if((snapshot.zone==='zone14'||snapshot.state.realmPuzzles?.zone14)&&!this.schemaZones.includes('zone14')){this.state='schema_unsupported';return false;}
+      for(const id of ['zone14','zone15','zone16','zone17','zone18'])if((snapshot.zone===id||snapshot.state.realmPuzzles?.[id])&&!this.schemaZones.includes(id)){this.state='schema_unsupported';return false;}
       if(!force&&!this.link.pending&&this.lastSignature===signature(snapshot))return true;
       this.busy=true;this.state='uploading';
       try{
@@ -61,7 +61,7 @@
   root.addEventListener('load',()=>{
     const world=root.world3D;if(!world?.adventureProgress)return;
     const $=id=>root.document.getElementById(id);let client=null,preview=null,previewClient=null;
-    const copy={schema_unsupported:'此後台尚未支援玻璃溫室，溫室進度已留在本機；更新後台後再上傳，避免舊格式遺失新關卡。',busy:'雲端正在忙碌，請稍後再檢查。',connection_error:'雲端服務無法接受請求，請確認連接設定或稍後重試。',unchecked:'目前為本機自動存檔模式（請使用同一台裝置與瀏覽器繼續冒險；如需跨裝置轉移可點下方檢查雲端服務）。',available:'雲端服務已支援。啟用後即可取得續玩代碼。',connected:'續玩代碼已連接，等待下一次保存。',uploading:'正在上傳冒險進度…',synced:'機關、道具與位置已保存至雲端。',unsupported:'目前後端尚未支援跨裝置冒險存檔；此裝置存檔仍正常使用。',offline:'暫時無法連接雲端，進度保留在此裝置，可稍後重試。',conflict:'另一台裝置已有較新的存檔。請選擇從雲端續玩，或明確保存這台的版本。',storage_error:'此瀏覽器無法保存續玩代碼或重試資料，請確認網站儲存權限。',unavailable:'此瀏覽器無法產生安全的續玩代碼。',invalid_snapshot:'這份存檔格式無法使用；本機進度不受影響。',invalid_code:'請輸入完整的 EME1 續玩代碼。',access_error:'代碼或登入學生與這份存檔不同，請確認後重試。',missing:'尚未找到此代碼的雲端存檔。請先在原裝置完成上傳。',link_invalid:'此裝置的續玩連接資訊無法讀取，請使用原續玩代碼重新連接。',preview:'雲端存檔已讀取，請確認是否接續。'};
+    const copy={schema_unsupported:'此後台尚未支援目前的新關卡；新關卡進度已保留在本機。更新後台格式後再上傳，避免舊格式遺失進度。',busy:'雲端正在忙碌，請稍後再檢查。',connection_error:'雲端服務無法接受請求，請確認連接設定或稍後重試。',unchecked:'目前為本機自動存檔模式（請使用同一台裝置與瀏覽器繼續冒險；如需跨裝置轉移可點下方檢查雲端服務）。',available:'雲端服務已支援。啟用後即可取得續玩代碼。',connected:'續玩代碼已連接，等待下一次保存。',uploading:'正在上傳冒險進度…',synced:'機關、道具與位置已保存至雲端。',unsupported:'目前後端尚未支援跨裝置冒險存檔；此裝置存檔仍正常使用。',offline:'暫時無法連接雲端，進度保留在此裝置，可稍後重試。',conflict:'另一台裝置已有較新的存檔。請選擇從雲端續玩，或明確保存這台的版本。',storage_error:'此瀏覽器無法保存續玩代碼或重試資料，請確認網站儲存權限。',unavailable:'此瀏覽器無法產生安全的續玩代碼。',invalid_snapshot:'這份存檔格式無法使用；本機進度不受影響。',invalid_code:'請輸入完整的 EME1 續玩代碼。',access_error:'代碼或登入學生與這份存檔不同，請確認後重試。',missing:'尚未找到此代碼的雲端存檔。請先在原裝置完成上傳。',link_invalid:'此裝置的續玩連接資訊無法讀取，請使用原續玩代碼重新連接。',preview:'雲端存檔已讀取，請確認是否接續。'};
     function paint(){
       if(world.devMode){$('adventureCloudStatus').textContent='本機場景檢查不連接雲端存檔。';for(const control of $('adventureCloudPanel').querySelectorAll('button,input'))control.disabled=true;return;}
       $('adventureCloudStatus').textContent=client.busy?(client.state==='uploading'?copy.uploading:'正在檢查或讀取雲端存檔…'):client.conflictRevision!==null&&client.supported?copy.conflict:client.state==='local_restored'?'已回復本機備份，這次變更尚未上傳。':copy[client.state]||copy.unchecked;

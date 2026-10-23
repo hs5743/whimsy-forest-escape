@@ -3,6 +3,8 @@
   'use strict';
   const profiles={
     zone14:{sky:'landscapeDaySky',haze:0xc4ded0,ground:0x71835c,rock:0x9d9e82,inner:32,hills:15,trees:110},
+    zone15:{sky:'weatherYardSky',haze:0xb9ccd0,ground:0x63795f,rock:0x919b98,inner:32,hills:12,trees:22,town:2,horizonBlend:.46},
+    zone16:{sky:'xiangshanWetlandSky',haze:0xb8c8c8,ground:0x849188,rock:0x8d9992,inner:31,hills:.8,trees:0,town:0,noHorizonTerrain:true,horizonBlend:.28},
     zone2:{sky:'landscapeDaySky',haze:0xc4dce3,ground:0x73845d,rock:0x9b9983,inner:30,hills:12,trees:85,town:26},
     zone3:{sky:'landscapeDaySky',haze:0xc3dfcf,ground:0x61764b,rock:0x888a71,inner:34,hills:18,trees:180},
     zone4:{sky:'landscapeDaySky',haze:0xcbdde5,ground:0x6d845d,rock:0x93998a,inner:37,hills:15,trees:95,town:8},
@@ -25,9 +27,9 @@
   function skyKey(zoneId){return profiles[zoneId]?.sky||null;}
   function makeSky(T,texture,profile){
     const material=new T.ShaderMaterial({
-      uniforms:{skyMap:{value:texture},haze:{value:new T.Color(profile.haze).convertSRGBToLinear()}},
+      uniforms:{skyMap:{value:texture},haze:{value:new T.Color(profile.haze).convertSRGBToLinear()},horizonBlend:{value:profile.horizonBlend??.72}},
       vertexShader:'varying vec3 direction; void main(){direction=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
-      fragmentShader:`uniform sampler2D skyMap;uniform vec3 haze;varying vec3 direction;
+      fragmentShader:`uniform sampler2D skyMap;uniform vec3 haze;uniform float horizonBlend;varying vec3 direction;
         void main(){
           vec3 d=normalize(direction);float u=atan(d.z,d.x)/6.28318530718+0.5;
           float v=asin(clamp(d.y,-1.0,1.0))/3.14159265359+0.5;
@@ -38,7 +40,7 @@
           image=mix(image,pole,smoothstep(0.96,1.0,abs(d.y)));
           vec3 color=pow(image,vec3(2.2));
           float horizon=1.0-smoothstep(0.0,0.15,abs(d.y));
-          color=mix(color,haze,horizon*0.72);if(d.y<0.0)color=mix(color,haze,smoothstep(0.0,0.35,-d.y));
+          color=mix(color,haze,horizon*horizonBlend);if(d.y<0.0)color=mix(color,haze,smoothstep(0.0,0.35,-d.y));
           gl_FragColor=vec4(color,1.0);
           #include <tonemapping_fragment>
           #include <encodings_fragment>
@@ -196,7 +198,7 @@
     world.animators.push(()=>{sky.position.x=world.player.pos.x;sky.position.z=world.player.pos.z;});
     if(profile.islands||profile.floating)islands(T,surroundings,profile,rng,manager);
     else{
-      surroundings.add(terrain(T,profile));const locations=[];
+      if(!profile.noHorizonTerrain)surroundings.add(terrain(T,profile));const locations=[];
       for(let i=0;i<profile.trees;i++){const a=rng()*Math.PI*2,r=profile.inner+9+rng()*78,x=Math.cos(a)*r,z=Math.sin(a)*r;locations.push({x,z,y:heightAt(profile,x,z)});}
       trees(T,surroundings,profile,rng,locations,manager);town(T,surroundings,profile,rng,manager);
     }

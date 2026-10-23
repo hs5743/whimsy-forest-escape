@@ -4,19 +4,28 @@
  'use strict';
  const box=(x,z,w,d)=>({type:'box',minX:x-w/2,maxX:x+w/2,minZ:z-d/2,maxZ:z+d/2});
  const walls=[box(-12,-4,.3,28),box(12,-4,.3,28),box(0,-18,24,.3),box(-9.25,-10,5.5,.25),box(0,-10,7,.25),box(9.25,-10,5.5,.25),box(0,-16.8,.25,2.4),box(0,-11.2,.25,2.4)];
- const furniture=[box(-7,-15,2,1.3),box(-2,-15,2,1.3),box(7,-15,2,1.3),box(2,-15,2,1.3),box(7,-5,3.8,2.4),box(-10.3,-14,2,6),box(-4,-5,4.6,2.4),box(0,6.8,2.4,1),box(-5.6,-17.25,4.4,1.5),box(-9,7.5,4,2.4)];
+ const furniture=[box(-7,-15,2,1.3),box(-2,-15,2,1.3),box(7,-15,2,1.3),box(2,-15,2,1.3),box(7,-5,3.8,2.4),box(-10.3,-14,2,6),box(-4,-5,4.6,2.4),box(-6.5,4.8,1.55,.9),box(-5.6,-17.25,4.4,1.5),box(-9,7.5,4,2.4)];
  function sign(T,text,w=3,plain=false){const c=root.document.createElement('canvas');c.width=1024;c.height=256;const ctx=c.getContext('2d');if(!plain){ctx.fillStyle='#1c4b59';ctx.fillRect(0,0,1024,256);ctx.strokeStyle='#e4c17a';ctx.lineWidth=10;ctx.strokeRect(12,12,1000,232);}ctx.fillStyle=plain?'#e9bd56':'#fff8df';ctx.font='bold '+(plain?(text.length<9?100:/[一-鿿]/.test(text)?44:26):66)+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,512,128,950);const tex=new T.CanvasTexture(c);tex.encoding=T.sRGBEncoding;return new T.Mesh(new T.PlaneGeometry(w,w/4),new T.MeshBasicMaterial({map:tex,transparent:plain,depthWrite:!plain}));}
  function build(manager,group){
-  const T=root.THREE,w=manager.world,geo={box:new T.BoxGeometry(1,1,1),sphere:new T.SphereGeometry(1,16,12),cylinder:new T.CylinderGeometry(1,1,1,20),torus:new T.TorusGeometry(1,.1,8,24)};
-  const mat={wall:new T.MeshStandardMaterial({color:0xf1e8d9,map:manager.tex.restaurantPlaster,roughness:.94}),brick:new T.MeshStandardMaterial({color:0x84433d,roughness:.9}),wood:new T.MeshStandardMaterial({color:0xc8a77d,map:manager.tex.restaurantWood,roughness:.72}),stone:new T.MeshStandardMaterial({color:0xe0ded4,map:manager.tex.marbleFountain,roughness:.7}),blue:new T.MeshStandardMaterial({color:0x265766,roughness:.55}),green:new T.MeshStandardMaterial({color:0x42794c,roughness:.9}),white:new T.MeshStandardMaterial({color:0xfff7e6,roughness:.65}),gold:new T.MeshStandardMaterial({color:0xe6b850,metalness:.4,roughness:.42}),red:new T.MeshStandardMaterial({color:0xb73d3d,roughness:.65}),black:new T.MeshStandardMaterial({color:0x202b32,roughness:.55}),glass:new T.MeshStandardMaterial({color:0x95c8d2,metalness:.2,roughness:.28}),floor:new T.MeshStandardMaterial({color:0xa72e3c,roughness:.98}),concrete:new T.MeshStandardMaterial({color:0xa5a6a2,roughness:.92}),aluminum:new T.MeshStandardMaterial({color:0xdce3e4,metalness:.55,roughness:.42}),coral:new T.MeshStandardMaterial({color:0xcb8987,roughness:.86}),cyan:new T.MeshStandardMaterial({color:0x42bad0,roughness:.65}),stageGreen:new T.MeshStandardMaterial({color:0x164b40,roughness:.85}),orange:new T.MeshStandardMaterial({color:0xf4823b,roughness:.8}),purple:new T.MeshStandardMaterial({color:0x777aac,roughness:.78}),yellow:new T.MeshStandardMaterial({color:0xdec855,roughness:.78})};
+  const T=root.THREE,w=manager.world,geo={box:new T.BoxGeometry(1,1,1),sphere:new T.SphereGeometry(1,16,12),cylinder:new T.CylinderGeometry(1,1,1,20),cone:new T.ConeGeometry(1,1,12),torus:new T.TorusGeometry(1,.1,8,24)};
+  const mat={wall:new T.MeshStandardMaterial({color:0xf1e8d9,map:manager.tex.schoolConcrete||manager.tex.restaurantPlaster,roughness:.94}),brick:new T.MeshStandardMaterial({color:0x84433d,roughness:.9}),wood:new T.MeshStandardMaterial({color:0xc8a77d,map:manager.tex.restaurantWood,roughness:.72}),stone:new T.MeshStandardMaterial({color:0xffffff,map:manager.tex.schoolTerrazzo||manager.tex.marbleFountain,roughness:.86}),blue:new T.MeshStandardMaterial({color:0x265766,roughness:.55}),green:new T.MeshStandardMaterial({color:0x42794c,roughness:.9}),lawn:new T.MeshStandardMaterial({color:0xffffff,map:manager.tex.schoolLawn||null,roughness:1}),white:new T.MeshStandardMaterial({color:0xfff7e6,roughness:.65}),gold:new T.MeshStandardMaterial({color:0xe6b850,metalness:.4,roughness:.42}),red:new T.MeshStandardMaterial({color:0xb73d3d,roughness:.65}),black:new T.MeshStandardMaterial({color:0x202b32,roughness:.55}),glass:new T.MeshStandardMaterial({color:0x95c8d2,metalness:.2,roughness:.28}),floor:new T.MeshStandardMaterial({color:0xffffff,map:manager.tex.schoolTrack||null,roughness:.98}),concrete:new T.MeshStandardMaterial({color:0xffffff,map:manager.tex.schoolConcrete||null,roughness:.92}),aluminum:new T.MeshStandardMaterial({color:0xdce3e4,metalness:.55,roughness:.42}),coral:new T.MeshStandardMaterial({color:0xcb8987,roughness:.86}),cyan:new T.MeshStandardMaterial({color:0x42bad0,roughness:.65}),stageGreen:new T.MeshStandardMaterial({color:0x164b40,roughness:.85}),orange:new T.MeshStandardMaterial({color:0xf4823b,roughness:.8}),purple:new T.MeshStandardMaterial({color:0x777aac,roughness:.78}),yellow:new T.MeshStandardMaterial({color:0xdec855,roughness:.78})};
   // Material colours are authored in sRGB; linear conversion prevents pastel washout.
   for(const material of Object.values(mat))material.color.convertSRGBToLinear();
   const staticMeshes=[];function mesh(kind,m,x,y,z,a,b,c,dynamic=false){const o=new T.Mesh(geo[kind],mat[m]);o.position.set(x,y,z);o.scale.set(a,b,c);o.castShadow=o.receiveShadow=true;group.add(o);if(!dynamic)staticMeshes.push(o);return o;}const b=(m,x,y,z,a,c,d,dyn=false)=>mesh('box',m,x,y,z,a,c,d,dyn);
   function label(text,x,y,z,width=3,rotation=0,plain=false){const o=sign(T,text,width,plain);o.position.set(x,y,z);o.rotation.y=rotation;group.add(o);return o;}
   function target(id,text,x,y,z,a=2,c=1.4,d=1){const o=new T.Mesh(new T.BoxGeometry(a,c,d),new T.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));o.position.set(x,y,z);o.userData={id:'school_'+id,name:text,label:text,hint:'口說辨識通過才完成步驟',onClick:()=>root.SchoolChapter.open(id)};group.add(o);w.interactables.push(o);return o;}
 
-  // Red forecourt and a three-storey grey school; ground-floor passages stay open.
-  b('floor',0,-.12,-4,24,.22,28);b('stone',0,-.06,-14,24,.12,8);
+  function ovalBand(cx,cz,outerX,outerZ,innerX,innerZ,material){
+   const positions=[],uvs=[],indices=[],segments=192;
+   for(let i=0;i<=segments;i++){const a=i/segments*Math.PI*2,co=Math.cos(a),si=Math.sin(a);positions.push(cx+co*outerX,.014,cz+si*outerZ,cx+co*innerX,.014,cz+si*innerZ);const u=i/segments;uvs.push(u,0,u,1);if(i<segments){const n=i*2;indices.push(n,n+1,n+2,n+1,n+3,n+2);}}
+   const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.Float32BufferAttribute(positions,3));geometry.setAttribute('uv',new T.Float32BufferAttribute(uvs,2));geometry.setIndex(indices);geometry.computeVertexNormals();
+   const mesh=new T.Mesh(geometry,material);mesh.material.side=T.DoubleSide;mesh.receiveShadow=true;group.add(mesh);staticMeshes.push(mesh);return mesh;
+  }
+  function ovalLane(cx,cz,rx,rz,width){return ovalBand(cx,cz,rx+width,rz+width,rx-width,rz-width,mat.white);}
+
+  // Grass fills the school field; the red track is a rounded loop with real curved lane markings.
+  b('lawn',0,-.12,-4,24,.22,28);b('stone',0,-.06,-14,24,.12,8);
+  ovalBand(0,-7.2,10.7,7.15,8.75,5.35,mat.floor);ovalLane(0,-7.2,10.24,6.69,.035);ovalLane(0,-7.2,9.76,6.21,.035);ovalLane(0,-7.2,9.28,5.73,.035);
   b('wall',6,3.75,-14,12,.2,8);b('wall',-6,7.15,-14,12,.2,8);
   for(const c of walls){const x=(c.minX+c.maxX)/2,z=(c.minZ+c.maxZ)/2,a=c.maxX-c.minX,d=c.maxZ-c.minZ;
    if(d>20){b('wall',x,3.45,-14,a,6.9,8);b('stone',x,.32,0,a,.64,20);b('aluminum',x,1.0,0,.08,.07,20);for(let zz=-9;zz<=9;zz+=1)b('aluminum',x,.66,zz,.045,.66,.045);}
@@ -60,16 +69,25 @@
   mesh('sphere','white',8.6,3.52,-8.27,.7,.25,.14);b('white',8.6,3.52,-8.25,.35,1.1,.16).rotation.z=.65;
   b('red',8.42,3.88,-8.13,.35,.18,.1).rotation.z=.65;b('red',8.81,3.18,-8.13,.35,.18,.1).rotation.z=.65;
   b('white',9.15,3.8,-8.3,.17,.45,.1).rotation.z=-.5;
-  // Athletics-side wing: open corridors, colourful parapets and the tall stair tower.
-  b('concrete',-27,5.1,-14,5,10.2,8);
-  for(let y=1.8;y<=8.2;y+=3.2){windowBay(-27,y,-9.91,2,2.1);for(const x of [-28.4,-27.5,-26.6,-25.7])b(['green','yellow','purple','coral'][Math.round((x+28.4)/.9)],x,5.1,-9.8,.13,8.8,.12);}
+  // A distinct stair tower and narrow colored fins reproduce the campus silhouette in the reference photo.
+  b('concrete',-9.7,5.1,-13.85,4.6,10.2,8.25);
+  for(let y=1.8;y<=8.2;y+=3.2){windowBay(-9.7,y,-9.66,1.35,2.1);for(const [i,x]of [-11.35,-10.25,-9.15,-8.05].entries())b(['green','yellow','purple','coral'][i],x,5.1,-9.54,.13,8.8,.12);}
   for(const y of [3.25,6.45,9.65]){
-   b('concrete',-19.5,y,-14,10,.24,8);
-   for(const x of [-23.5,-20,-16.5]){b('concrete',x,y-1.5,-9.8,.22,3,.24);b('concrete',x+1.5,y-2.1,-9.8,2.8,.75,.22);
+   b('concrete',-4.2,y,-14,10,.24,8);
+   for(const x of [-8.2,-4.7,-1.2]){b('concrete',x,y-1.5,-9.8,.22,3,.24);b('concrete',x+1.5,y-2.1,-9.8,2.8,.75,.22);
     b(y===3.25?'green':y===6.45?'coral':'yellow',x+1.5,y-2.08,-9.66,2.55,.54,.06);windowBay(x+1.5,y-1.3,-15.3,2.5,1.1);}
   }
-  // Running track bordering the field; long uninterrupted surfaces avoid image seams.
-  b('floor',-24,-.1,3,20,.12,2.8);for(const z of [1.7,2.8,4.3])b('white',-24,-.025,z,20,.015,.035);
+  // A short blue/red school court sits beside the stage, leaving the entry lawn visible.
+  b('red',-4,.005,-1.45,7,.025,2.2);b('blue',-4,.022,-1.45,6.55,.018,1.72);
+  for(const z of [-2.28,-.62])b('white',-4,.034,z,7.05,.018,.045);
+  b('white',-4,.034,-1.45,.045,.018,1.72);b('white',-4,.035,-1.45,6.55,.018,.045);
+  // Taiwan's flag and a tall conifer add the small, unmistakable landmarks from the school photograph.
+  mesh('cylinder','aluminum',-.25,4.3,-8.65,.055,8.6,.055);mesh('sphere','gold',-.25,8.66,-8.65,.11,.11,.11);
+  const flagCanvas=root.document.createElement('canvas');flagCanvas.width=720;flagCanvas.height=480;const flagCtx=flagCanvas.getContext('2d');flagCtx.fillStyle='#df2f35';flagCtx.fillRect(0,0,720,480);flagCtx.fillStyle='#183a78';flagCtx.fillRect(0,0,300,200);flagCtx.save();flagCtx.translate(150,100);flagCtx.fillStyle='#fff';for(let i=0;i<12;i++){flagCtx.save();flagCtx.rotate(i*Math.PI/6);flagCtx.beginPath();flagCtx.moveTo(0,-48);flagCtx.lineTo(-15,-94);flagCtx.lineTo(15,-94);flagCtx.closePath();flagCtx.fill();flagCtx.restore();}flagCtx.beginPath();flagCtx.arc(0,0,45,0,Math.PI*2);flagCtx.fill();flagCtx.fillStyle='#183a78';flagCtx.beginPath();flagCtx.arc(0,0,27,0,Math.PI*2);flagCtx.fill();flagCtx.restore();const flagTex=new T.CanvasTexture(flagCanvas);flagTex.encoding=T.sRGBEncoding;const flag=new T.Mesh(new T.PlaneGeometry(1.75,1.16),new T.MeshBasicMaterial({map:flagTex,side:T.DoubleSide,depthWrite:false}));flag.position.set(.7,7.9,-8.61);group.add(flag);
+  mesh('cylinder','brick',13.25,2.7,-8.8,.24,5.4,.24);for(let i=0;i<8;i++)mesh('cone','green',13.25,5.15+i*.47,-8.8,1.45-i*.13,1.42,.95-i*.08);
+  mesh('cone','green',13.25,9.25,-8.8,.48,.98,.36);
+  // Low planted borders soften the track edge and connect the field to the teaching building.
+  for(const x of [-10.8,-8.6,4.7,6.9]){b('stone',x,.2,-8.7,1.8,.38,.58);for(let i=0;i<5;i++)mesh('sphere','green',x-.66+i*.33,.47,-8.72,.25,.34,.23);}
   for(const z of [-16.8,-11.2])b('brick',0,1.7,z,.35,3.4,.24);b('wood',0,3.12,-14,.4,.2,3.2);
   // Bookshelves and low desks, physical room entrances and natural window frames.
   for(const x of [-10.7,-9.7]){b('wood',x,1.4,-16.5,.12,2.8,2);for(const yy of [.35,1.15,1.95,2.7])b('wood',-10.2,yy,-16.5,1.1,.09,2);}
@@ -98,6 +116,23 @@
    b('wood',-9.13,top/2,z,.11,top,.5);b('wood',-8.78,top,z,.75,.08,.5);
    for(let j=0;j<4;j++)b(['red','blue','gold','green'][j],-8.84,.32+n*.18,z-.16+j*.1,.34,.4,.065);
   }
+  // A clear, physically located branch sign lets the photo-matched stair lead to its own room.
+  b('wood',-7.15,1.58,-12.0,.12,3.1,.18);b('wood',-7.15,3.08,-12.0,2.75,.13,.18);b('wood',-7.15,.08,-12.0,2.75,.13,.18);
+  label('二樓圖書館 · LIBRARY',-7.15,2.45,-11.88,2.55,0,false);
+  const libraryEntry=new T.Mesh(new T.BoxGeometry(2.8,2.8,1.25),new T.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));
+  libraryEntry.position.set(-7.15,1.58,-12.0);libraryEntry.userData={id:'school_library_stairs',name:'二樓圖書館 · LIBRARY',label:'二樓圖書館 · LIBRARY',hint:'完成新港國小迎賓任務，沿橘色階梯走進二樓圖書館。',onClick:()=>{if(manager.switchZone('zone17')){w.player.pos.set(0,1.6,10.6);w.player.yaw=0;w.adventureProgress?.save(true);}}};group.add(libraryEntry);w.interactables.push(libraryEntry);
+  // The makerspace is a fictional classroom extension: a real door, narrow safety glass and a small room plaque establish the branch without claiming an existing school facility.
+  b('wood',7.15,1.58,-12.0,.12,3.1,.18);b('wood',7.15,3.08,-12.0,2.75,.13,.18);b('wood',7.15,.08,-12.0,2.75,.13,.18);
+  b('blue',7.15,1.55,-12.08,2.35,2.8,.08);b('glass',6.68,2.0,-12.14,.63,.95,.035);b('aluminum',7.92,1.52,-12.18,.08,.22,.07);
+  label('科技創作室 · MAKER',7.15,2.52,-11.87,2.38,0,false);
+  const makerEntry=new T.Mesh(new T.BoxGeometry(2.8,2.8,1.25),new T.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));
+  makerEntry.position.set(7.15,1.58,-12.0);makerEntry.userData={id:'school_makerspace',name:'科技創作室 · MAKER',label:'科技創作室 · MAKER',hint:'完成新港國小迎賓任務後，打開遊戲化創客工坊支線。',onClick:()=>{if(!root.SchoolChapter?.solved(w.gameState.realmPuzzles?.zone12)){w.showToast('先完成新港國小迎賓任務，再到校園創客工坊組裝小車。');return;}if(manager.switchZone('zone18')){w.player.pos.set(0,1.6,10.8);w.player.yaw=0;w.adventureProgress?.save(true);}}};group.add(makerEntry);w.interactables.push(makerEntry);
+  // The school-festival art-room doorway is a physical branch unlocked by the welcome quest.
+  b('wood',10.15,1.45,-8.72,.16,2.9,.22);b('wood',11.45,1.45,-8.72,.16,2.9,.22);b('wood',10.8,2.92,-8.72,1.45,.14,.22);
+  b('purple',10.8,1.42,-8.76,1.08,2.62,.09);b('glass',10.5,2.05,-8.67,.4,.42,.045);b('gold',11.2,1.4,-8.64,.055,.24,.07);
+  label('校慶彩繪工坊 · ART',10.8,3.25,-8.57,2.2,0,false);
+  const artEntry=new T.Mesh(new T.BoxGeometry(2.8,2.8,1.5),new T.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));
+  artEntry.position.set(10.8,1.52,-8.55);artEntry.userData={id:'school_art_workshop_entry',name:'校慶彩繪工坊 · ART',label:'校慶彩繪工坊 · ART',hint:'完成新港國小舞獅迎賓後，進入校慶彩繪工坊。',onClick:()=>{if(!root.SchoolChapter?.solved(w.gameState.realmPuzzles?.zone12)){w.showToast('先完成新港國小舞獅迎賓任務，再走進校慶彩繪工坊。');return;}if(manager.switchZone('zone20')){w.player.pos.set(0,1.6,9.2);w.player.yaw=0;w.adventureProgress?.save(true);}}};group.add(artEntry);w.interactables.push(artEntry);
   // Exposed mesh catwalk and high beams of the actual double-height reading room.
   for(const z of [-17,-12]){b('aluminum',-10.6,6.15,z,2.2,.1,.12);}
   for(let z=-17;z<=-11.5;z+=.3)b('aluminum',-10.6,6.13,z,2.2,.04,.035);
@@ -114,7 +149,8 @@
   for(const x of [-7.7,-5.6,-3.5])b('wood',x,1.05,-17.65,.08,2.1,.35);
   for(const y of [.25,.9,1.75,2.1])b('wood',-5.6,y,-17.65,4.3,.08,.35);
   for(let i=0;i<48;i++)b(['red','blue','gold','white'][i%4],-7.5+(i%24)*.165,i<24?.56:1.35,-17.62,.12,.48,.22);
-  b('wood',0,.62,6.8,2.4,1.2,1);b('white',0,1.25,6.8,1.2,.04,.6);label('SCHOOL · 校園任務',0,1.7,6.7,1.5);target('school','校門迎賓桌 · SCHOOL',0,1.6,6.8,2.6,1.4,1.2);
+  // Keep the central arrival axis open; the quest is a small welcome counter beside the gate.
+  b('wood',-6.5,.42,4.8,1.55,.84,.9);b('white',-6.5,.86,4.8,1.48,.06,.84);label('SCHOOL',-6.5,.6,5.27,.78,0,true);target('school','校門迎賓桌 · SCHOOL',-6.5,1.1,4.8,1.9,1.5,1.2);
   // Lion-dance props: painted head, curled brows, mouth, teeth and soft tassel beard.
   b('wood',7,.2,-5,3.8,.35,2.4);const head=new T.Group();head.position.set(7,1.65,-5);group.add(head);
   function part(kind,m,x,y,z,a,c,d){const o=mesh(kind,m,x,y,z,a,c,d,true);group.remove(o);head.add(o);return o;}

@@ -1,10 +1,18 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const T=require('../three.min.js');globalThis.THREE=T;const L=require('../realm-landscape.js'),P=require('../game-polish.js');
 const base=path.resolve(__dirname,'..');
-function fixture(zone){const group=new T.Group(),world={scene:new T.Scene(),animators:[],player:{pos:new T.Vector3(0,1.6,0)}};const tex={landscapeDaySky:new T.Texture(),landscapeNightSky:new T.Texture(),landscapeAuroraSky:new T.Texture(),landscapeTree:new T.Texture(),landscapeStone:new T.Texture()};const manager={world,tex,textureStatus:new Map([[tex.landscapeTree,'ready']]),ensureTexture(){}};const landscape=L.build(manager,group,zone,tex[L.skyKey(zone)]);return {group,world,manager,landscape};}
+function fixture(zone){const group=new T.Group(),world={scene:new T.Scene(),animators:[],player:{pos:new T.Vector3(0,1.6,0)}};const tex={landscapeDaySky:new T.Texture(),landscapeNightSky:new T.Texture(),landscapeAuroraSky:new T.Texture(),weatherYardSky:new T.Texture(),xiangshanWetlandSky:new T.Texture(),landscapeTree:new T.Texture(),landscapeStone:new T.Texture()};const manager={world,tex,textureStatus:new Map([[tex.landscapeTree,'ready']]),ensureTexture(){}};const landscape=L.build(manager,group,zone,tex[L.skyKey(zone)]);return {group,world,manager,landscape};}
 test('every outdoor realm uses the appropriate new sky and a fully closed dome',()=>{
  for(let i=2;i<=10;i++){const id='zone'+i,f=fixture(id),sky=f.landscape.getObjectByName('ContinuousSky');assert.equal(sky.geometry.type,'SphereGeometry');assert.equal(sky.material.side,T.BackSide);assert.equal(sky.material.uniforms.skyMap.value,f.manager.tex[L.skyKey(id)]);assert.equal(sky.geometry.parameters.phiLength,Math.PI*2);assert.equal(sky.geometry.parameters.thetaLength,Math.PI);}
  assert.equal(L.skyKey('zone5'),'landscapeNightSky');assert.equal(L.skyKey('zone8'),'landscapeAuroraSky');assert.equal(L.skyKey('zone1'),null);
+});
+test('the weather yard and Xiangshan wetland use their site-specific panoramas and an open wetland horizon',()=>{
+ const weather=fixture('zone15'),coast=fixture('zone16');
+ assert.equal(L.skyKey('zone15'),'weatherYardSky');assert.equal(L.skyKey('zone16'),'xiangshanWetlandSky');
+ assert.equal(weather.landscape.getObjectByName('ContinuousSky').material.uniforms.skyMap.value,weather.manager.tex.weatherYardSky);
+ assert.equal(coast.landscape.getObjectByName('ContinuousSky').material.uniforms.skyMap.value,coast.manager.tex.xiangshanWetlandSky);
+ assert.equal(coast.landscape.getObjectByName('HorizonTerrain'),undefined);assert.equal(coast.landscape.children.some(o=>o.name==='HorizonTerrain'),false);
+ assert.equal(coast.landscape.getObjectByName('ContinuousSky').material.uniforms.horizonBlend.value,.28);
 });
 test('the terrain loop closes at identical positions and normals without a lighting seam',()=>{
  const f=fixture('zone3'),g=f.landscape.getObjectByName('HorizonTerrain').geometry,segments=160;

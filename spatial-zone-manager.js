@@ -139,6 +139,12 @@ class SpatialZoneManager {
     const learningHub={id:'learningHub',name:'英語探險家學習大廳',englishName:'Explorer Language Lounge',icon:'📚',topic:'自由選題 · 單字 · 句型 · 複習',reqLevel:1,isLearningHub:true,desc:'與狐狸館長、貓頭鷹老師和兔子教練反覆練習，收藏想學的單字，累積口說、句型與跨日複習紀錄。完成後返回原來的冒險。',words:[],spawnPos:[0,1.6,8],spawnYaw:0};
     this.zones.learningHub=learningHub;
     this.zones.zone14={id:'zone14',name:'玻璃溫室：花園復甦任務',englishName:'Glass Conservatory',icon:'🌿',topic:'Garden, Insects & Caring',reqLevel:2,parentZone:'zone3',desc:'從守護獸花園走入透光的玻璃溫室。觀察蜜蜂與蝴蝶、調整幼苗生長條件並整理花園；每一步都要口說過關。',words:['GARDEN','GREEN','BEE','BUTTERFLY','GROW','SMELL','PICK UP','BEAUTIFUL'],spawnPos:[0,1.6,11.5],spawnYaw:0};
+    this.zones.zone15={id:'zone15',name:'雲雨氣象觀測台：尋回天氣紀錄',englishName:'Cloudtop Weather Station',icon:'🌦️',topic:'Weather, Sky & Temperature',reqLevel:2,parentZone:'zone7',desc:'從雲頂觀測站的氣象星盤延伸到戶外觀測台。讀取雲況、雨量、日照、風力與溫度儀器；每個新字都要先看線索，再口說通過。',words:['WEATHER','CLOUDY','RAIN','RAINY','SUNNY','WINDY','HOT','WET'],spawnPos:[0,1.6,11.2],spawnYaw:0};
+    this.zones.zone16={id:'zone16',name:'香山潮間帶：尋找海岸生命',englishName:'Xiangshan Tidal Wetland',icon:'🦀',topic:'Coast, Field Science & Nature Care',reqLevel:2,parentZone:'zone15',desc:'沿著架高賞蟹步道觀察潮間帶泥灘與海岸地景，練習比較、定位、仔細觀察與守護棲地；每個新詞都要先讀線索再口說通過。',words:['BEACH','SEA','SCIENCE','DIFFERENT','INTERESTING','IN FRONT OF','LOOK','TRASH'],spawnPos:[0,1.6,11.2],spawnYaw:0};
+    this.zones.zone17={id:'zone17',name:'新港國小圖書館：故事階梯尋書任務',englishName:'Xin-gang School Library',icon:'📖',topic:'Library, Reading & Story Feelings',reqLevel:2,parentZone:'zone12',desc:'從舞獅迎賓任務走上校園圖書館的橘色階梯。探索挑高閱讀空間、藍色欄板、階梯下書架、木桌與彩色閱讀座；先看線索，再口說完成每一步。',words:['SHELF','STORY','STUDENT','TEACHER','STUDY','QUIET','BORING','EXCITING'],spawnPos:[0,1.6,10.6],spawnYaw:0};
+    this.zones.zone18={id:'zone18',name:'新港國小創客工坊：小小機器人任務',englishName:'Xin-gang School Makerspace',icon:'🤖',topic:'Robots, Making & Movement',reqLevel:2,parentZone:'zone12',desc:'從校園教學樓走進遊戲化的科技創作工坊。組裝小車、比較速度、試轉向與確認啟動；每個步驟都要先看實物線索，再口說通過。此工坊為教學想像場景，並非學校實景復刻。',words:['ROBOT','MAKE','FAST','SLOW','TURN','WORK','READY','START'],spawnPos:[0,1.6,10.8],spawnYaw:0};
+    this.zones.zone19={id:'zone19',name:'魔法數字嘉年華：星環計數任務',englishName:'Number Carnival',icon:'🎪',topic:'Numbers, Counting & Carnival Games',reqLevel:2,parentZone:'zone2',desc:'完成陽光微風市集採買後，從冒險星圖前往夜色嘉年華支線。數清燈環、星星籌碼與遊戲攤位，依序學會 THIRTEEN 到 TWENTY；每一步都要先看實物數量，再口說通過。',words:['THIRTEEN','FOURTEEN','FIFTEEN','SIXTEEN','SEVENTEEN','EIGHTEEN','NINETEEN','TWENTY'],spawnPos:[0,1.6,10.5],spawnYaw:0};
+    this.zones.zone20={id:'zone20',name:'新港校慶：舞獅彩繪工坊',englishName:'Xin-gang School Art Workshop',icon:'🦁',topic:'School, Art Tools & Lion Dance',reqLevel:4,parentZone:'zone12',desc:'完成新港國小舞獅迎賓後，走進校慶彩繪工坊。探索黑板、鉛筆、量尺、膠水與色彩工具，完成一幅龍鳳舞獅作品；每一步都要先找到實物，再口說通過。工坊是依學校舞獅特色設計的遊戲支線，不是校舍實景復刻。',words:['BLACKBOARD','PICTURE','PENCIL','RULER','GLUE','MARKER','ART','ENGLISH'],spawnPos:[0,1.6,10.2],spawnYaw:0};
     if(!options.metadataOnly)this.initTextures();
     else {this.textureSources=new Map();this.textureStatus=new Map();}
     this.initColliders();
@@ -320,6 +326,12 @@ class SpatialZoneManager {
 
   // 取得各空間邊界限制
   getZoneBounds() {
+    if(this.currentZoneId==='zone16')return window.CoastalScene.bounds;
+    if(this.currentZoneId==='zone17')return window.LibraryScene.bounds;
+    if(this.currentZoneId==='zone18')return window.MakerspaceScene.bounds;
+    if(this.currentZoneId==='zone19')return window.CarnivalScene.bounds;
+    if(this.currentZoneId==='zone20')return window.ArtWorkshopScene.bounds;
+    if(this.currentZoneId==='zone15')return window.WeatherScene.bounds;
     if(this.currentZoneId==='zone14')return window.GreenhouseScene.bounds;
     if(this.currentZoneId==='learningHub')return window.LearningHubScene?.bounds || { minX: -15, maxX: 15, minZ: -15, maxZ: 15 };
     if(this.currentZoneId==='zone13')return window.HarmonicaScene?.bounds || { minX: -15, maxX: 15, minZ: -15, maxZ: 15 };
@@ -343,6 +355,12 @@ class SpatialZoneManager {
 
   // 取得目前空間所有障礙物碰撞體
   getColliders() {
+    if(this.currentZoneId==='zone16')return window.CoastalScene.colliders();
+    if(this.currentZoneId==='zone17')return window.LibraryScene.colliders();
+    if(this.currentZoneId==='zone18')return window.MakerspaceScene.colliders();
+    if(this.currentZoneId==='zone19')return window.CarnivalScene.colliders();
+    if(this.currentZoneId==='zone20')return window.ArtWorkshopScene.colliders();
+    if(this.currentZoneId==='zone15')return window.WeatherScene.colliders();
     if(this.currentZoneId==='zone14')return window.GreenhouseScene.colliders();
     if(this.currentZoneId==='learningHub')return window.LearningHubScene.colliders();
     if(this.currentZoneId==='zone13')return window.HarmonicaScene.colliders();
@@ -356,6 +374,8 @@ class SpatialZoneManager {
     if (this.texturesLoaded) return;
     this.textureSources = new Map();
     this.textureStatus = new Map();
+    this.atlasTextureVariants = new Map();
+    this.atlasTextureRegions = new Map();
     this.textureManager = new THREE.LoadingManager();
     this.textureManager.onLoad = () => this.refreshZoneEnvironment();
     this.textureManager.onProgress = () => this.updateLoadStatus();
@@ -375,11 +395,46 @@ class SpatialZoneManager {
       landscapeDaySky: loader.load('assets/textures/sky-day-v2.jpg'),
       landscapeNightSky: loader.load('assets/textures/sky-night-v2.jpg'),
       landscapeAuroraSky: loader.load('assets/textures/sky-aurora-v2.jpg'),
+      weatherYardSky: loader.load('assets/textures/weather-yard-sky-v1.webp'),
+      xiangshanWetlandSky: loader.load('assets/textures/xiangshan-wetland-sky-v2.webp'),
       landscapeTree: loader.load('assets/textures/tree-oak-v2.webp'),
       naturalBark: loader.load('assets/textures/natural-bark-v3.jpg'),
       nearLeaves: loader.load('assets/textures/near-leaves-v3.webp'),
       snowNeedles: loader.load('assets/textures/snow-needles-v4.webp'),
       landscapeStone: loader.load('assets/textures/ground-limestone-v2.jpg'),
+      greenhouseFloor: loader.load('assets/textures/greenhouse-floor-v1.webp'),
+      greenhouseBrick: loader.load('assets/textures/greenhouse-brick-v1.webp'),
+      greenhouseGlass: loader.load('assets/textures/greenhouse-glass-v1.webp'),
+      greenhouseLeaf: loader.load('assets/textures/greenhouse-leaf-v1.webp'),
+      greenhouseFrame: loader.load('assets/textures/greenhouse-frame-v1.webp'),
+      schoolConcrete: loader.load('assets/textures/school-concrete-v1.webp'),
+      schoolTrack: loader.load('assets/textures/school-track-v1.webp'),
+      schoolTerrazzo: loader.load('assets/textures/school-terrazzo-v1.webp'),
+      schoolLawn: loader.load('assets/textures/school-lawn-v1.webp'),
+      schoolLionMural: loader.load('assets/textures/school-lion-mural-v1.webp'),
+      libraryWall: loader.load('assets/textures/library-wall-plaster-v1.webp'),
+      libraryTerrazzo: loader.load('assets/textures/library-terrazzo-v2.webp'),
+      libraryWood: loader.load('assets/textures/library-wood-veneer-v1.webp'),
+      artStudioWall: loader.load('assets/textures/art-studio-plaster-v1.webp'),
+      artStudioTerrazzo: loader.load('assets/textures/art-studio-terrazzo-v1.webp'),
+      artStudioMaple: loader.load('assets/textures/art-studio-maple-v1.webp'),
+      libraryBookSpines: loader.load('assets/textures/library-book-spines-v1.webp'),
+      libraryMaterialAtlas: loader.load('assets/textures/library-material-atlas-v1.png'),
+      libraryCourtyardWindow: loader.load('assets/textures/library-courtyard-window-v1.png'),
+      makerspacePegboard: loader.load('assets/textures/makerspace-pegboard-v1.webp'),
+      makerspaceWorkMat: loader.load('assets/textures/makerspace-work-mat-v1.webp'),
+      makerspaceMaterialAtlas: loader.load('assets/textures/makerspace-material-atlas-v1.png'),
+      carnivalFloor: loader.load('assets/textures/carnival-floor-v2.webp'),
+      carnivalCanopy: loader.load('assets/textures/carnival-canopy-v2.webp'),
+      carnivalBooth: loader.load('assets/textures/carnival-booth-v2.webp'),
+      carnivalStarTray: loader.load('assets/textures/carnival-star-tray-v1.webp'),
+      weatherGravel: loader.load('assets/textures/weather-gravel-v1.webp'),
+      weatherYardGrass: loader.load('assets/textures/weather-yard-grass-v2.webp'),
+      tidalMudflat: loader.load('assets/textures/tidal-mudflat-v3.webp'),
+      tidalWater: loader.load('assets/textures/tidal-water-v1.webp'),
+      coastalConcrete: loader.load('assets/textures/coastal-concrete-v3.webp'),
+      xiangshanSaltmarsh: loader.load('assets/textures/xiangshan-saltmarsh-cutout-v1.webp'),
+      fiddlerCrabCutout: loader.load('assets/textures/fiddler-crab-cutout-v1.webp'),
       marketCobble: loader.load('assets/textures/ground-limestone-v2.jpg'),
       marketAwning: loader.load('assets/textures/tex-market-awning.jpg'),
       townFacade: loader.load('assets/textures/tex-town-facade.jpg'),
@@ -434,7 +489,9 @@ class SpatialZoneManager {
       'steamStationPanorama',
       'athleticParkPanorama',
       'enchantedForestPanorama',
-      'sunbreezeMarketPanorama'
+      'sunbreezeMarketPanorama',
+      'weatherYardSky',
+      'xiangshanWetlandSky'
     ];
     panoramaKeys.forEach(k => {
       if (this.tex[k]) {
@@ -446,6 +503,52 @@ class SpatialZoneManager {
     this.tex.marketCobble.wrapS = THREE.RepeatWrapping;
     this.tex.marketCobble.wrapT = THREE.RepeatWrapping;
     this.tex.marketCobble.repeat.set(10, 10);
+
+    for (const key of ['greenhouseFloor','greenhouseBrick','greenhouseGlass','greenhouseLeaf','greenhouseFrame']) {
+      this.tex[key].wrapS = this.tex[key].wrapT = THREE.RepeatWrapping;
+    }
+    this.tex.greenhouseFloor.repeat.set(4, 5);
+    this.tex.greenhouseBrick.repeat.set(2, 2);
+    this.tex.greenhouseGlass.repeat.set(3, 4);
+    this.tex.greenhouseLeaf.repeat.set(1, 1);
+    this.tex.greenhouseFrame.repeat.set(1, 1);
+
+    for (const key of ['schoolConcrete','schoolTrack','schoolTerrazzo']) {
+      this.tex[key].wrapS = this.tex[key].wrapT = THREE.RepeatWrapping;
+    }
+    this.tex.schoolConcrete.repeat.set(2, 2);
+    this.tex.schoolTrack.repeat.set(8, 10);
+    this.tex.schoolTerrazzo.repeat.set(4, 2);
+    for (const key of ['libraryWall','libraryTerrazzo','libraryWood']) {
+      this.tex[key].wrapS = this.tex[key].wrapT = THREE.RepeatWrapping;
+    }
+    this.tex.libraryWall.repeat.set(2, 2);
+    for(const key of ['schoolConcrete','schoolTrack','schoolLawn'])this.tex[key].wrapS=this.tex[key].wrapT=THREE.RepeatWrapping;
+    this.tex.schoolConcrete.repeat.set(3,2);
+    this.tex.schoolTrack.repeat.set(8,1);
+    this.tex.schoolLawn.repeat.set(9,11);
+    this.tex.libraryWood.wrapS=this.tex.libraryWood.wrapT=THREE.RepeatWrapping;
+    // Tight terrazzo joints match the school library tile scale; veneer repeats keep table grain understated.
+    this.tex.libraryTerrazzo.repeat.set(12, 12);
+    this.tex.libraryWood.repeat.set(4, 2);
+    for (const key of ['makerspacePegboard','makerspaceWorkMat']) {
+      this.tex[key].wrapS = this.tex[key].wrapT = THREE.RepeatWrapping;
+    }
+    this.tex.makerspacePegboard.repeat.set(4, 2);
+    this.tex.makerspaceWorkMat.repeat.set(2, 1);
+    for(const key of ['carnivalFloor','carnivalCanopy','carnivalBooth'])this.tex[key].wrapS=this.tex[key].wrapT=THREE.RepeatWrapping;
+    this.tex.carnivalFloor.repeat.set(18,18);
+    this.tex.carnivalCanopy.repeat.set(1.2,1.0);
+    this.tex.carnivalBooth.repeat.set(1,1);
+    for (const key of ['weatherGravel','tidalMudflat','tidalWater','coastalConcrete','weatherYardGrass']) {
+      this.tex[key].wrapS = this.tex[key].wrapT = THREE.RepeatWrapping;
+    }
+    this.tex.weatherGravel.repeat.set(7, 9);
+    // Large uninterrupted ground surfaces use the full texture once, avoiding visible tiling seams.
+    this.tex.tidalMudflat.repeat.set(1, 1);
+    this.tex.coastalConcrete.repeat.set(1, 1);
+    this.tex.weatherYardGrass.repeat.set(1, 1);
+    this.tex.tidalWater.repeat.set(1, 1);
 
     this.tex.marketAwning.wrapS = THREE.RepeatWrapping;
     this.tex.marketAwning.wrapT = THREE.RepeatWrapping;
@@ -1067,6 +1170,12 @@ class SpatialZoneManager {
       ? Math.max(window.cloudSyncManager.profile.level, window.cloudSyncManager.profile.accessLevel || 1)
       : 1;
     if(zoneId==='zone14')return userLevel>=zone.reqLevel && !!window.GreenhouseChapter && !!window.RealmQuests?.solved('zone3',this.world.gameState.realmPuzzles?.zone3);
+    if(zoneId==='zone15')return userLevel>=zone.reqLevel && !!window.WeatherChapter && !!window.RealmQuests?.solved('zone7',this.world.gameState.realmPuzzles?.zone7);
+    if(zoneId==='zone16')return userLevel>=zone.reqLevel && !!window.CoastChapter && !!window.RealmQuests?.solved('zone15',this.world.gameState.realmPuzzles?.zone15);
+    if(zoneId==='zone17')return userLevel>=zone.reqLevel && !!window.LibraryChapter && !!window.SchoolChapter?.solved(this.world.gameState.realmPuzzles?.zone12);
+    if(zoneId==='zone18')return userLevel>=zone.reqLevel && !!window.MakerspaceChapter && !!window.SchoolChapter?.solved(this.world.gameState.realmPuzzles?.zone12);
+    if(zoneId==='zone19')return userLevel>=zone.reqLevel && !!window.CarnivalChapter && !!window.RealmQuests?.solved('zone2',this.world.gameState.realmPuzzles?.zone2);
+    if(zoneId==='zone20')return userLevel>=zone.reqLevel && !!window.ArtWorkshopChapter && !!window.RealmQuests?.solved('zone12',this.world.gameState.realmPuzzles?.zone12);
     if(zoneId==='zone13')return userLevel>=zone.reqLevel && !!window.HarmonicaChapter && !!window.SchoolChapter?.solved(this.world.gameState.realmPuzzles?.zone12);
     if(zoneId==='zone12')return userLevel>=zone.reqLevel && !!window.RealmQuests?.solved('zone4',this.world.gameState.realmPuzzles?.zone4);
     if(zoneId==='zone11')return userLevel>=zone.reqLevel && !!window.RealmQuests?.solved('zone2',this.world.gameState.realmPuzzles?.zone2);
@@ -1093,16 +1202,61 @@ class SpatialZoneManager {
     this.textureVariants.set(key,texture);return texture;
   }
 
+  getAtlasTexture(atlasKey, row, column) {
+    const source=this.tex?.[atlasKey];
+    if(!source || !Number.isInteger(row) || !Number.isInteger(column) || row<0 || row>1 || column<0 || column>1) return null;
+    const key=atlasKey+':'+row+':'+column;
+    if(this.atlasTextureVariants.has(key)) return this.atlasTextureVariants.get(key);
+    const canvas=document.createElement('canvas');canvas.width=canvas.height=2;
+    const context=canvas.getContext('2d');context.fillStyle='#b8a080';context.fillRect(0,0,2,2);
+    const texture=new THREE.CanvasTexture(canvas);
+    texture.encoding=THREE.sRGBEncoding;
+    texture.wrapS=texture.wrapT=THREE.RepeatWrapping;
+    texture.anisotropy=Math.min(4,this.world?.renderer?.capabilities?.getMaxAnisotropy?.()||1);
+    texture.name=key;
+    this.atlasTextureRegions.set(texture,{source,row,column});
+    this.atlasTextureVariants.set(key,texture);
+    return texture;
+  }
+
+  finishAtlasTextureVariants(source, success) {
+    for(const [texture,region] of this.atlasTextureRegions || []) {
+      if(region.source!==source || this.textureStatus.get(texture)!=='loading') continue;
+      try {
+        if(!success) throw new Error('atlas source unavailable');
+        const image=source.image,width=Math.floor((image.naturalWidth||image.width)/2),height=Math.floor((image.naturalHeight||image.height)/2);
+        const canvas=texture.image,context=canvas.getContext('2d');
+        canvas.width=width;canvas.height=height;
+        context.drawImage(image,region.column*width,region.row*height,width,height,0,0,width,height);
+        texture.needsUpdate=true;this.textureStatus.set(texture,'ready');
+      } catch(error) {
+        this.textureStatus.set(texture,'failed');
+      }
+      this.textureRequests?.delete(texture);
+    }
+  }
+
   ensureTexture(texture) {
-    if(!texture || !this.textureSources?.has(texture) || ['loading','ready'].includes(this.textureStatus.get(texture))) return;
+    if(!texture || (!this.textureSources?.has(texture) && !this.atlasTextureRegions?.has(texture)) || ['loading','ready'].includes(this.textureStatus.get(texture))) return;
+    const atlasRegion=this.atlasTextureRegions?.get(texture);
+    if(atlasRegion) {
+      this.textureRequests ||= new Map();
+      this.textureStatus.set(texture,'loading');
+      this.textureRequests.set(texture,Symbol('atlas-texture'));
+      this.ensureTexture(atlasRegion.source);
+      if(this.textureStatus.get(atlasRegion.source)==='ready') this.finishAtlasTextureVariants(atlasRegion.source,true);
+      else if(this.textureStatus.get(atlasRegion.source)==='failed') this.finishAtlasTextureVariants(atlasRegion.source,false);
+      this.updateLoadStatus();
+      return;
+    }
     this.textureRequests ||= new Map();
     const token=Symbol('texture');this.textureRequests.set(texture,token);
     this.textureStatus.set(texture,'loading');this.updateLoadStatus();
     const finish=(image)=>{
       if(this.textureRequests.get(texture)!==token) return;
       this.textureRequests.delete(texture);clearTimeout(timeout);
-      if(image) {texture.image=image;texture.needsUpdate=true;this.textureStatus.set(texture,'ready');this.refreshZoneEnvironment();}
-      else this.textureStatus.set(texture,'failed');
+      if(image) {texture.image=image;texture.needsUpdate=true;this.textureStatus.set(texture,'ready');this.finishAtlasTextureVariants(texture,true);this.refreshZoneEnvironment();}
+      else {this.textureStatus.set(texture,'failed');this.finishAtlasTextureVariants(texture,false);}
       this.updateLoadStatus();
     };
     const timeout=setTimeout(()=>finish(null),15000);
@@ -1112,8 +1266,8 @@ class SpatialZoneManager {
     const active=new Set();
     group.traverse(object=>{
       for(const material of (Array.isArray(object.material)?object.material:[object.material])) if(material) {
-        for(const value of Object.values(material)) if(value?.isTexture && this.textureSources.has(value)) active.add(value);
-        if(material.uniforms) for(const u of Object.values(material.uniforms)) if(u.value?.isTexture && this.textureSources.has(u.value)) active.add(u.value);
+        for(const value of Object.values(material)) if(value?.isTexture && (this.textureSources.has(value) || this.atlasTextureRegions?.has(value))) active.add(value);
+        if(material.uniforms) for(const u of Object.values(material.uniforms)) if(u.value?.isTexture && (this.textureSources.has(u.value) || this.atlasTextureRegions?.has(u.value))) active.add(u.value);
       }
     });
     this.activeTextures=active;
@@ -1158,6 +1312,10 @@ class SpatialZoneManager {
     const sceneBuildStarted=performance.now();
     this.currentZoneId = zoneId;
     const zone = this.zones[zoneId];
+    // Keep the open tidal-flat palette legible under the shared renderer lights,
+    // then restore the standard adventure lighting as soon as the player leaves.
+    if(this.world.hemiLight)this.world.hemiLight.intensity=zoneId==='zone16'?.32:zoneId==='zone17'?.42:zoneId==='zone18'?.58:zoneId==='zone19'?.72:zoneId==='zone20'?.48:.65;
+    if(this.world.sunLight)this.world.sunLight.intensity=zoneId==='zone16'?.55:zoneId==='zone17'?.62:zoneId==='zone18'?.92:zoneId==='zone19'?.9:zoneId==='zone20'?.58:1.25;
 
     // 清空現有場景物件與互動清單
     if (this.world.activeZoneGroup) {
@@ -1169,7 +1327,7 @@ class SpatialZoneManager {
       this.world.scene.remove(this.world.activeZoneGroup);
       GamePolish.releaseGroup(this.world.activeZoneGroup, shared);
       window.HarmonicaChapter?.stopTones?.();
-      for (const key of ['bookGroup','bookCoverHinge','starStone','flowerStone','candleFlame','candleLight','keyMesh','drawerMesh','mimicLid','mimicGroup','flaskLiquid','socketStar','socketFlower','doorLeft','doorRight','restaurantRefs','schoolRefs','harmonicaRefs','greenhouseRefs']) this.world[key] = null;
+      for (const key of ['bookGroup','bookCoverHinge','starStone','flowerStone','candleFlame','candleLight','keyMesh','drawerMesh','mimicLid','mimicGroup','flaskLiquid','socketStar','socketFlower','doorLeft','doorRight','restaurantRefs','schoolRefs','harmonicaRefs','greenhouseRefs','artWorkshopRefs']) this.world[key] = null;
     }
     this.world.interactables = [];
     this.world.animators = [];
@@ -1209,6 +1367,12 @@ class SpatialZoneManager {
       this.buildZone9_AstralPantheon(group);
     } else if (zoneId === 'zone10') {
       this.buildZone10_PrismaticSkyIsles(group);
+    } else if(zoneId==='zone16'){window.CoastalScene.build(this,group);
+    } else if(zoneId==='zone17'){window.LibraryScene.build(this,group);
+    } else if(zoneId==='zone18'){window.MakerspaceScene.build(this,group);
+    } else if(zoneId==='zone19'){window.CarnivalScene.build(this,group);
+    } else if(zoneId==='zone20'){window.ArtWorkshopScene.build(this,group);
+    } else if(zoneId==='zone15'){window.WeatherScene.build(this,group);
     } else if(zoneId==='zone14'){window.GreenhouseScene.build(this,group);
     } else if(zoneId==='learningHub'){window.LearningHubScene.build(this,group);
     } else if(zoneId==='zone13'){window.HarmonicaScene.build(this,group);
@@ -1359,6 +1523,19 @@ class SpatialZoneManager {
       skyColorTop = 0x090d16;
       fogColor = 0x111827;
       fogDensity = 0.008;
+    } else if (zoneId === 'zone16') {
+      skyColorTop = 0xb8cdd0; fogColor = 0xc3d0c8; fogDensity = 0.0024;
+    } else if(zoneId==='zone17'){
+      skyColorTop=0xb7cbd8;fogColor=0xe1e3dd;fogDensity=.0018;
+    } else if(zoneId==='zone18'){
+      skyColorTop=0xc3d3d1;fogColor=0xd6d8cf;fogDensity=.0022;
+    } else if(zoneId==='zone19'){
+      // Open-air fair at blue hour: keep the sky visible and let warm stall lights shape the scene.
+      skyColorTop=0x303b58;fogColor=0x53566a;fogDensity=.0065;
+    } else if(zoneId==='zone20'){
+      skyColorTop=0xbab9ad;fogColor=0xe2d9c5;fogDensity=.007;
+    } else if (zoneId === 'zone15') {
+      skyColorTop = 0xa9c0cc; fogColor = 0xc1d0d1; fogDensity = 0.004;
     } else if (zoneId === 'zone14') {
       skyColorTop=0xb9d8d0;fogColor=0xc4ded0;fogDensity=.003;
     } else if (zoneId === 'zone3') {
@@ -5254,11 +5431,34 @@ class SpatialZoneManager {
       this.switchZone('zone6');
     });
 
+    // 10b. 雲頂東南側支線：天氣站接續氣象星盤，完成月亮觀測後開放。
+    this.buildObservatoryWeatherGate(group, 8.8, 0, 7.4, '🌦️ 雲雨氣象觀測台 · WEATHER', () => {
+      if(!this.isZoneUnlocked('zone15')){this.world.showToast('先完成雲頂觀測站的月亮方向觀測，天氣支線就會開放。');return;}
+      this.world.showToast('穿過雲間步道，開始記錄今日天氣。');
+      this.switchZone('zone15');
+    });
+
     // 11. 👑 關卡主 NPC：星象總監・艾瑟爾賢者 (Astrologer Aethel, x: 1.5, z: -3.5)
     this.buildObservatoryGuardianNPC(group, 1.5, 0, -3.5);
 
     // 12. 飄浮星塵微粒 (Celestial Stardust)
     this.addFloatingParticles(group, 0xfde047, 220, 36, 7);
+  }
+
+  buildObservatoryWeatherGate(group,x,y,z,label,onTravel){
+    const T=THREE,gate=new T.Group();gate.position.set(x,y,z);gate.rotation.y=-.35;
+    const brass=new T.MeshStandardMaterial({map:this.tex.astrolabeBrass,metalness:.78,roughness:.3});
+    const stone=new T.MeshStandardMaterial({map:this.tex.celestialMarble,roughness:.48,metalness:.08});
+    const glow=new T.MeshBasicMaterial({color:0x67d5d5,transparent:true,opacity:.26,side:T.DoubleSide,depthWrite:false});
+    const base=new T.Mesh(new T.CylinderGeometry(1.8,2,.26,32),stone);base.position.y=.13;gate.add(base);
+    const rim=new T.Mesh(new T.TorusGeometry(1.55,.075,8,48),brass);rim.rotation.x=Math.PI/2;rim.position.y=.31;gate.add(rim);
+    for(const px of [-1.32,1.32]){const post=new T.Mesh(new T.CylinderGeometry(.12,.18,3.25,10),brass);post.position.set(px,1.82,0);gate.add(post);const cap=new T.Mesh(new T.SphereGeometry(.2,12,8),stone);cap.position.set(px,3.49,0);gate.add(cap);}
+    const arch=new T.Mesh(new T.TorusGeometry(1.32,.12,10,36,Math.PI),brass);arch.position.y=3.2;gate.add(arch);
+    const field=new T.Mesh(new T.PlaneGeometry(2.45,2.55),glow);field.position.set(0,1.85,0);gate.add(field);
+    const plate=document.createElement('canvas');plate.width=768;plate.height=192;const ctx=plate.getContext('2d');ctx.fillStyle='#203e52';ctx.fillRect(0,0,768,192);ctx.strokeStyle='#b4d9cf';ctx.lineWidth=5;ctx.strokeRect(8,8,752,176);ctx.fillStyle='#fff8e7';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 50px sans-serif';ctx.fillText('WEATHER STATION',384,96,720);
+    const sign=new T.Mesh(new T.PlaneGeometry(2.5,.62),new T.MeshBasicMaterial({map:new THREE.CanvasTexture(plate)}));sign.position.set(0,3.85,.08);gate.add(sign);
+    const hit=new T.Mesh(new T.BoxGeometry(3.35,4.2,2.1),new T.MeshBasicMaterial({visible:false}));hit.position.y=2.05;hit.userData={id:'travel_portal_zone15_from_observatory',name:label,label,hint:'完成雲頂觀測站任務後開放天氣支線',onClick:()=>onTravel?.()};gate.add(hit);this.world.interactables.push(hit);
+    this.world.animators.push(time=>{field.material.opacity=.2+(.08*Math.sin(time*1.4));});group.add(gate);
   }
 
   // 1. 光照系統 (深邃星夜與古典列柱暖燈)

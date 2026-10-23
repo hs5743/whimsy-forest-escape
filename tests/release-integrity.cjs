@@ -55,7 +55,7 @@ test('unregistered students and invalid tokens cannot create history',()=>{
 
 test('complete single-file backend is generated from modules and retains every protocol',()=>{
  const generator=require('../scripts/build-gas-bundle.cjs');assert.equal(fs.readFileSync(path.join(base,'gas-release/Code.gs'),'utf8'),generator.generate());
- const f=backend({bundle:true});assert.equal(f.get({action:'ping'}).recordProtocol,'record-v2');assert.equal(f.get({action:'ping'}).learningWords,603);
+ const f=backend({bundle:true});assert.equal(f.get({action:'ping'}).recordProtocol,'record-v2');assert.equal(f.get({action:'ping'}).learningWords,622);assert.equal(f.get({action:'ping'}).learningSentences,140);
  assert.equal(f.post({action:'adventureCapabilities'}).protocol,'adventure-v1');assert.equal(f.post(pass()).updatedProfile.xp,150);assert.equal(f.post(hall()).student.xp,200);
 });
 test('single-file backend remains private beside existing separate helper modules',()=>{
