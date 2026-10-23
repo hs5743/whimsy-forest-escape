@@ -188,6 +188,13 @@
             world3D.candleGroup.remove(world3D.candleGroup.children[0]);
           }
           candleGltf.scale.set(1.0, 1.0, 1.0);
+          // The PBR asset contains its own round table. Keep the original
+          // procedural candle anchor, but remove the standalone fallback table.
+          world3D.candleGroup.position.set(-3.2, 0, -3.5);
+          if (world3D.candleTableMesh) {
+            world3D.candleTableMesh.parent?.remove(world3D.candleTableMesh);
+            world3D.candleTableMesh = null;
+          }
           world3D.candleGroup.add(candleGltf);
 
           const flame = candleGltf.getObjectByName('CandleFlame');
@@ -210,6 +217,9 @@
             world3D.alchemyGroup.remove(world3D.alchemyGroup.children[0]);
           }
           tableGltf.scale.set(1.0, 1.0, 1.0);
+          // Procedural props stored their room coordinates in each child;
+          // the imported model is authored around a local origin instead.
+          world3D.alchemyGroup.position.set(-4.5, 0, 0);
           world3D.alchemyGroup.add(tableGltf);
 
           const liquid = tableGltf.getObjectByName('FlaskLiquid');
@@ -235,17 +245,19 @@
             world3D.deskGroup.remove(world3D.deskGroup.children[0]);
           }
           deskGltf.scale.set(1.0, 1.0, 1.0);
+          deskGltf.position.set(0, 0, -3.8);
           world3D.deskGroup.add(deskGltf);
 
           const drawer = deskGltf.getObjectByName('DrawerMesh');
           if (drawer) {
             world3D.drawerMesh = drawer;
             drawer.userData = { id: 'drawer', name: '上鎖的書桌抽屜', hint: '需要黃銅鑰匙 (KEY)' };
+            world3D.drawerTravel = { closedZ: 0, openZ: 0.5 };
             if (!world3D.interactables.includes(drawer)) {
               world3D.interactables.push(drawer);
             }
             if (world3D.gameState.drawerOpened) {
-              drawer.position.y = -0.5;
+              drawer.position.z = world3D.drawerTravel.openZ;
             }
           }
         }
@@ -259,6 +271,7 @@
             world3D.doorGroup.remove(world3D.doorGroup.children[0]);
           }
           doorGltf.scale.set(1.0, 1.0, 1.0);
+          doorGltf.position.set(0, 0, 5.8);
           world3D.doorGroup.add(doorGltf);
 
           const dLeft = doorGltf.getObjectByName('DoorLeft');

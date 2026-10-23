@@ -562,6 +562,7 @@ class World3D {
       new THREE.MeshStandardMaterial({ map: deskWoodTex, roughness: 0.5, metalness: 0.1 })
     );
     tableMesh.position.set(-3.2, 0.42, -3.5);
+    this.candleTableMesh = tableMesh;
     container.add(tableMesh);
 
     // 燭台底座
@@ -605,6 +606,7 @@ class World3D {
     // ==========================================
     const deskGroup = new THREE.Group();
     this.deskGroup = deskGroup;
+    this.drawerTravel = { closedZ: -3.8, openZ: -3.3 };
     // 書桌面板 (AI 精緻深木雕花邊框皮膚)
     const deskTop = new THREE.Mesh(
       new THREE.BoxGeometry(2.4, 0.1, 1.2),
@@ -1251,11 +1253,13 @@ class World3D {
         }
         if (!this.gameState.drawerOpened) {
           this.gameState.drawerOpened = true;
-          if(this.settings.reducedMotion) this.drawerMesh.position.z=-3.3;
+          const drawerTargetZ = this.drawerTravel?.openZ ?? -3.3;
+          if(this.settings.reducedMotion) this.drawerMesh.position.z=drawerTargetZ;
           else this.animators.push({
             update: (dt) => {
-              if (this.drawerMesh.position.z < -3.3) {
+              if (this.drawerMesh.position.z < drawerTargetZ) {
                 this.drawerMesh.position.z += 1.2 * dt;
+                if (this.drawerMesh.position.z > drawerTargetZ) this.drawerMesh.position.z = drawerTargetZ;
                 return true;
               }
               return false;
@@ -1966,7 +1970,7 @@ class World3D {
     }
     if (this.starStone) this.starStone.visible = s.alchemyMixed && !s.hasStarStone;
     if (this.flowerStone) this.flowerStone.visible = s.mimicFed && !s.hasFlowerStone;
-    if (s.drawerOpened && this.drawerMesh) this.drawerMesh.position.z = -3.3;
+    if (s.drawerOpened && this.drawerMesh) this.drawerMesh.position.z = this.drawerTravel?.openZ ?? -3.3;
     if (s.hasBluePotion && this.flaskLiquid && this.flaskLiquid.material && this.flaskLiquid.material.color) {
       this.flaskLiquid.material.color.setHex(0x9955ff);
     }
