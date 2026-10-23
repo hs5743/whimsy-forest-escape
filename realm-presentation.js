@@ -68,7 +68,10 @@
       summary.append(el('span','',region?region.name+' · 選擇地標查看任務':'探索世界 · '+zones.length+' 個地點'));
       summary.append(button('atlas-next','定位：'+short(current),()=>{draw(regionFor(current,zones),current);buttons.get(current.id)?.focus?.();}));
       legend.textContent=region?'金框：目前位置　虛線：尚未解鎖　數字：已學單字':'金框：所在區域　數字：已開放地點 / 全區地點';
-      const visible=region?zones.filter(z=>regionFor(z,zones).id===region.id):regions;
+      const visible=region?[
+        ...region.ids.map(id=>zones.find(z=>z.id===id)).filter(Boolean),
+        ...zones.filter(z=>regionFor(z,zones).id===region.id&&!region.ids.includes(z.id))
+      ]:regions;
       const points=layout(visible.length),small=layout(visible.length,true);
       map.style.setProperty('--atlas-rows',Math.ceil(visible.length/3));map.style.setProperty('--atlas-mobile-rows',Math.ceil(visible.length/2));
       const links=[];if(region){const main=zones.filter(z=>!z.parentZone&&!z.isLearningHub);for(const z of visible){const parent=z.parentZone||main[main.indexOf(z)-1]?.id;if(parent&&visible.some(v=>v.id===parent))links.push([visible.findIndex(v=>v.id===parent),visible.indexOf(z)]);}}

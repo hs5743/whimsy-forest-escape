@@ -15,6 +15,15 @@ test('regional and mobile layouts retain distinct coordinates and enough room fo
  const {api}=setup();for(const compact of [false,true])for(const count of [1,4,5,6,12]){const pts=api.layout(count,compact),width=compact?280:620,height=Math.max(340,Math.ceil(count/(compact?2:3))*(compact?154:170));
  for(let i=0;i<pts.length;i++){const [x,y]=pts[i];assert.ok(x>0&&x<100&&y>0&&y<100);for(let j=0;j<i;j++)assert.ok(Math.abs(x-pts[j][0])*width/100>=130||Math.abs(y-pts[j][1])*height/100>=112,'map markers overlap');}}
 });
+test('regional route follows the designed chapter order and still appends future child chapters',()=>{
+ const s=setup();s.named('雲海星穹').onclick();
+ const markerLabels=s.all().filter(n=>String(n.className||'').includes('atlas-node')&&n.attrs['aria-label']).map(n=>n.attrs['aria-label'].split('，')[0]);
+ assert.deepEqual(markerLabels,['星光鐘樓車站','星光國際機場：啟航任務','雲頂星空觀測站','極光冰雪聖域','星界萬神殿堂','蒼穹虹光空島']);
+ const future={id:'zone22',parentZone:'zone12',name:'新港延伸館：第二期',desc:'',words:[],topic:'',reqLevel:1};
+ assert.equal(s.api.regionFor(future,[...Object.values(s.manager.zones),future]).id,'school');s.manager.zones.zone22=future;
+ s.api.render(s.root,s.manager,{completedWords:['SCHOOL']},()=>{});s.named('新港校園').onclick();
+ assert.ok(s.all().some(n=>n.attrs['aria-label']==='新港延伸館：第二期，未解鎖'));
+});
 test('selecting a region or locked chapter never travels, and travel rechecks the live unlock gate',()=>{
  const s=setup();s.named('新港校園').onclick();s.node('zone13').onclick();assert.equal(s.travel.length,0);assert.equal(s.all().find(n=>n.className==='atlas-travel').disabled,true);
  s.node('zone12').onclick();const action=s.all().find(n=>n.className==='atlas-travel');assert.equal(action.disabled,false);s.open.delete('zone12');action.onclick();assert.equal(s.travel.length,0);s.open.add('zone12');action.onclick();assert.deepEqual(s.travel,['zone12']);
