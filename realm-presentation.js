@@ -29,7 +29,7 @@
     {id:'town',name:'城鎮慶典',caption:'採買・料理・數字',ids:['zone1','zone2','zone11','zone19'],color:'#527b70'},
     {id:'nature',name:'森林海岸',caption:'花園・航海・自然觀測',ids:['zone3','zone14','zone6','zone21','zone16'],color:'#537a5e'},
     {id:'school',name:'新港校園',caption:'運動・閱讀・音樂・創作',ids:['zone4','zone12','zone13','zone17','zone18','zone20'],color:'#957354'},
-    {id:'sky',name:'雲海星穹',caption:'鐵道・星空・冰雪・虹光',ids:['zone15','zone5','zone7','zone8','zone9','zone10'],color:'#657a9c'},
+    {id:'sky',name:'雲海星穹',caption:'鐵道・星空・冰雪・虹光',ids:['zone5','zone15','zone7','zone8','zone9','zone10'],color:'#657a9c'},
     {id:'lounge',name:'學習大廳',caption:'自由選題・反覆練習',ids:['learningHub'],color:'#846d98'}
   ];
   const names={zone15:'星光機場',zone1:'魔法書齋',zone2:'陽光市集',zone3:'守護獸花園',zone4:'冒險操場',zone5:'鐘樓車站',zone6:'蔚藍海港',zone7:'星空觀測站',zone8:'極光冰雪',zone9:'星界殿堂',zone10:'虹光空島',zone11:'魔法餐廳',zone12:'新港迎賓',zone13:'口琴展館',zone14:'玻璃溫室',zone21:'氣象觀測台',zone16:'香山潮間帶',zone17:'故事圖書館',zone18:'機器人工坊',zone19:'數字嘉年華',zone20:'舞獅彩繪',learningHub:'學習大廳'};
@@ -93,3 +93,4 @@
   }
   root.RealmPresentation={model,render,regions,regionFor,layout};if(typeof module!=='undefined') module.exports=root.RealmPresentation;
 })(typeof window!=='undefined'?window:globalThis);
+

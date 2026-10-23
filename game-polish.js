@@ -280,8 +280,13 @@
     if(world.devMode) {
       const panel=root.document.getElementById('devZonePanel'); panel.hidden=false;
       const zones=root.document.getElementById('devZoneSelect');
-      for(const [id,zone] of Object.entries(world.zoneManager.zones)) zones.add(new Option(zone.name,id));
+      const orderedZones=Object.values(world.zoneManager.zones).sort((a,b)=>{
+        if(a.isLearningHub)return 1;if(b.isLearningHub)return -1;
+        return Number(a.id.slice(4))-Number(b.id.slice(4));
+      });
+      for(const zone of orderedZones) zones.add(new Option(zone.name,zone.id));
       zones.addEventListener('change',()=>world.switchZone(zones.value));
     }
   });
 })(typeof window!=='undefined'?window:globalThis);
+
