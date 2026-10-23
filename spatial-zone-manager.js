@@ -145,6 +145,7 @@ class SpatialZoneManager {
     this.zones.zone18={id:'zone18',name:'新港國小創客工坊：小小機器人任務',englishName:'Xin-gang School Makerspace',icon:'🤖',topic:'Robots, Making & Movement',reqLevel:2,parentZone:'zone12',desc:'從校園教學樓走進遊戲化的科技創作工坊。組裝小車、比較速度、試轉向與確認啟動；每個步驟都要先看實物線索，再口說通過。此工坊為教學想像場景，並非學校實景復刻。',words:['ROBOT','MAKE','FAST','SLOW','TURN','WORK','READY','START'],spawnPos:[0,1.6,10.8],spawnYaw:0};
     this.zones.zone19={id:'zone19',name:'魔法數字嘉年華：星環計數任務',englishName:'Number Carnival',icon:'🎪',topic:'Numbers, Counting & Carnival Games',reqLevel:2,parentZone:'zone2',desc:'完成陽光微風市集採買後，從冒險星圖前往夜色嘉年華支線。數清燈環、星星籌碼與遊戲攤位，依序學會 THIRTEEN 到 TWENTY；每一步都要先看實物數量，再口說通過。',words:['THIRTEEN','FOURTEEN','FIFTEEN','SIXTEEN','SEVENTEEN','EIGHTEEN','NINETEEN','TWENTY'],spawnPos:[0,1.6,10.5],spawnYaw:0};
     this.zones.zone20={id:'zone20',name:'新港校慶：舞獅彩繪工坊',englishName:'Xin-gang School Art Workshop',icon:'🦁',topic:'School, Art Tools & Lion Dance',reqLevel:4,parentZone:'zone12',desc:'完成新港國小舞獅迎賓後，走進校慶彩繪工坊。探索黑板、鉛筆、量尺、膠水與色彩工具，完成一幅龍鳳舞獅作品；每一步都要先找到實物，再口說通過。工坊是依學校舞獅特色設計的遊戲支線，不是校舍實景復刻。',words:['BLACKBOARD','PICTURE','PENCIL','RULER','GLUE','MARKER','ART','ENGLISH'],spawnPos:[0,1.6,10.2],spawnYaw:0};
+    this.zones.zone15={id:'zone15',name:'星光國際機場：啟航任務',englishName:'Starlight Airport',icon:'✈️',topic:'Airport, Travel & Time',reqLevel:5,parentZone:'zone5',desc:'從星光鐘樓車站轉乘前往國際機場。確認飛機、登機證、行李與時刻表，用八個新英語詞完成啟航任務。',words:['AIRPORT','PLANE','TICKET','BAG','WAIT','HURRY','TAXI','LATE'],spawnPos:[0,1.6,11.5],spawnYaw:0};
     if(!options.metadataOnly)this.initTextures();
     else {this.textureSources=new Map();this.textureStatus=new Map();}
     this.initColliders();
@@ -332,6 +333,7 @@ class SpatialZoneManager {
     if(this.currentZoneId==='zone19')return window.CarnivalScene.bounds;
     if(this.currentZoneId==='zone20')return window.ArtWorkshopScene.bounds;
     if(this.currentZoneId==='zone21')return window.WeatherScene.bounds;
+    if(this.currentZoneId==='zone15')return window.AirportScene.bounds;
     if(this.currentZoneId==='zone14')return window.GreenhouseScene.bounds;
     if(this.currentZoneId==='learningHub')return window.LearningHubScene?.bounds || { minX: -15, maxX: 15, minZ: -15, maxZ: 15 };
     if(this.currentZoneId==='zone13')return window.HarmonicaScene?.bounds || { minX: -15, maxX: 15, minZ: -15, maxZ: 15 };
@@ -361,6 +363,7 @@ class SpatialZoneManager {
     if(this.currentZoneId==='zone19')return window.CarnivalScene.colliders();
     if(this.currentZoneId==='zone20')return window.ArtWorkshopScene.colliders();
     if(this.currentZoneId==='zone21')return window.WeatherScene.colliders();
+    if(this.currentZoneId==='zone15')return window.AirportScene.colliders();
     if(this.currentZoneId==='zone14')return window.GreenhouseScene.colliders();
     if(this.currentZoneId==='learningHub')return window.LearningHubScene.colliders();
     if(this.currentZoneId==='zone13')return window.HarmonicaScene.colliders();
@@ -1169,6 +1172,7 @@ class SpatialZoneManager {
     const userLevel = (window.cloudSyncManager && window.cloudSyncManager.profile) 
       ? Math.max(window.cloudSyncManager.profile.level, window.cloudSyncManager.profile.accessLevel || 1)
       : 1;
+    if(zoneId==='zone15')return userLevel>=zone.reqLevel && !!window.AirportChapter && !!window.RealmQuests?.solved('zone5',this.world.gameState.realmPuzzles?.zone5);
     if(zoneId==='zone14')return userLevel>=zone.reqLevel && !!window.GreenhouseChapter && !!window.RealmQuests?.solved('zone3',this.world.gameState.realmPuzzles?.zone3);
     if(zoneId==='zone21')return userLevel>=zone.reqLevel && !!window.WeatherChapter && !!window.RealmQuests?.solved('zone7',this.world.gameState.realmPuzzles?.zone7);
     if(zoneId==='zone16')return userLevel>=zone.reqLevel && !!window.CoastChapter && !!window.RealmQuests?.solved('zone21',this.world.gameState.realmPuzzles?.zone21);
@@ -1327,7 +1331,7 @@ class SpatialZoneManager {
       this.world.scene.remove(this.world.activeZoneGroup);
       GamePolish.releaseGroup(this.world.activeZoneGroup, shared);
       window.HarmonicaChapter?.stopTones?.();
-      for (const key of ['bookGroup','bookCoverHinge','starStone','flowerStone','candleFlame','candleLight','keyMesh','drawerMesh','mimicLid','mimicGroup','flaskLiquid','socketStar','socketFlower','doorLeft','doorRight','restaurantRefs','schoolRefs','harmonicaRefs','greenhouseRefs','artWorkshopRefs']) this.world[key] = null;
+      for (const key of ['bookGroup','bookCoverHinge','starStone','flowerStone','candleFlame','candleLight','keyMesh','drawerMesh','mimicLid','mimicGroup','flaskLiquid','socketStar','socketFlower','doorLeft','doorRight','restaurantRefs','schoolRefs','harmonicaRefs','greenhouseRefs','artWorkshopRefs','airportRefs']) this.world[key] = null;
     }
     this.world.interactables = [];
     this.world.animators = [];
@@ -1357,6 +1361,7 @@ class SpatialZoneManager {
       this.buildZone4_Athletic(group);
     } else if (zoneId === 'zone5') {
       this.buildZone5_Station(group);
+      window.AirportScene?.buildEntrance(this,group);
     } else if (zoneId === 'zone6') {
       this.buildZone6_Harbor(group);
     } else if (zoneId === 'zone7') {
@@ -1373,6 +1378,7 @@ class SpatialZoneManager {
     } else if(zoneId==='zone19'){window.CarnivalScene.build(this,group);
     } else if(zoneId==='zone20'){window.ArtWorkshopScene.build(this,group);
     } else if(zoneId==='zone21'){window.WeatherScene.build(this,group);
+    } else if(zoneId==='zone15'){window.AirportScene.build(this,group);
     } else if(zoneId==='zone14'){window.GreenhouseScene.build(this,group);
     } else if(zoneId==='learningHub'){window.LearningHubScene.build(this,group);
     } else if(zoneId==='zone13'){window.HarmonicaScene.build(this,group);
@@ -1383,7 +1389,13 @@ class SpatialZoneManager {
     this.loadSceneTextures(group);
     this.world.scene.add(group);
     GamePolish.applySceneStyle(this.world, zoneId);
-    if (zoneId === "zone1") this.world.restoreStudyState();
+    if (zoneId === "zone1") {
+      this.world.restoreStudyState();
+      if (typeof window !== 'undefined' && window.ModelAssetManager && window.ModelAssetManager.isReady) {
+        window.ModelAssetManager.upgradeStudyRoom(this.world);
+        this.world.restoreStudyState();
+      }
+    }
     GamePolish.applyQuality(this.world);
 
     // 重設玩家生成點與朝向
@@ -1536,6 +1548,8 @@ class SpatialZoneManager {
       skyColorTop=0xbab9ad;fogColor=0xe2d9c5;fogDensity=.007;
     } else if (zoneId === 'zone21') {
       skyColorTop = 0xa9c0cc; fogColor = 0xc1d0d1; fogDensity = 0.004;
+    } else if (zoneId === 'zone15') {
+      skyColorTop=0x0c192c;fogColor=0x1e293b;fogDensity=.003;
     } else if (zoneId === 'zone14') {
       skyColorTop=0xb9d8d0;fogColor=0xc4ded0;fogDensity=.003;
     } else if (zoneId === 'zone3') {
@@ -2770,6 +2784,9 @@ class SpatialZoneManager {
     this.world.interactables.push(hitBox);
 
     group.add(stall);
+    if (typeof window !== 'undefined' && window.ModelAssetManager) {
+      window.ModelAssetManager.upgradeMarketStall(stall, fruitType);
+    }
   }
 
   // [市集] 擬真雙輪木造推車
@@ -2820,6 +2837,9 @@ class SpatialZoneManager {
     this.world.interactables.push(hitBox);
 
     group.add(cart);
+    if (typeof window !== 'undefined' && window.ModelAssetManager) {
+      window.ModelAssetManager.upgradeMarketCart(cart, cartType);
+    }
   }
 
   // [市集] 節慶吊旗
@@ -3014,6 +3034,9 @@ class SpatialZoneManager {
     this.world.interactables.push(hitBox);
 
     group.add(fountain);
+    if (typeof window !== 'undefined' && window.ModelAssetManager) {
+      window.ModelAssetManager.upgradeGardenFountain(fountain);
+    }
   }
 
   // [花園] 兔子 (RABBIT)
@@ -3618,6 +3641,9 @@ class SpatialZoneManager {
     });
 
     group.add(tower);
+    if (typeof window !== 'undefined' && window.ModelAssetManager) {
+      window.ModelAssetManager.upgradeClockTower(tower);
+    }
   }
 
   // [車站] 蒸汽火車頭 (TRAIN)
@@ -3728,6 +3754,9 @@ class SpatialZoneManager {
     });
 
     group.add(train);
+    if (typeof window !== 'undefined' && window.ModelAssetManager) {
+      window.ModelAssetManager.upgradeSteamLocomotive(train);
+    }
   }
 
   // [車站] 煤氣路燈與長椅 (MORNING)
@@ -4615,6 +4644,9 @@ class SpatialZoneManager {
     });
 
     group.add(ship);
+    if (typeof window !== 'undefined' && window.ModelAssetManager) {
+      window.ModelAssetManager.upgradeGalleonShip(ship);
+    }
   }
 
   // 4. 海岸導航燈塔 (Coastal Lighthouse, WIND POI)
@@ -4738,6 +4770,9 @@ class SpatialZoneManager {
     });
 
     group.add(lighthouse);
+    if (typeof window !== 'undefined' && window.ModelAssetManager) {
+      window.ModelAssetManager.upgradeHarborLighthouse(lighthouse);
+    }
   }
 
   // 5. 碼頭巡邏小艇 (BOAT POI)
@@ -6040,6 +6075,9 @@ class SpatialZoneManager {
     });
 
     group.add(telescope);
+    if (typeof window !== 'undefined' && window.ModelAssetManager) {
+      window.ModelAssetManager.upgradeTelescope(telescope);
+    }
   }
 
   // 5. 遠古星辰渾天儀 / 渾象儀 (STAR POI) - 多軸嵌套黃銅刻度環與齒輪傳動
@@ -6164,6 +6202,9 @@ class SpatialZoneManager {
     });
 
     group.add(astrolabe);
+    if (typeof window !== 'undefined' && window.ModelAssetManager) {
+      window.ModelAssetManager.upgradeAstrolabe(astrolabe);
+    }
   }
 
   // 6. 蒼月潮汐日晷與月相儀 (MOON POI) - 月相盈虧、銀質水銀潮汐盆與星盤刻度
@@ -7405,6 +7446,9 @@ class SpatialZoneManager {
     });
 
     group.add(obeliskGroup);
+    if (typeof window !== 'undefined' && window.ModelAssetManager) {
+      window.ModelAssetManager.upgradeGlacialObelisk(obeliskGroup);
+    }
   }
 
   // 7. 冬之永凍遠古常青松 (WINTER POI) - 蒼勁樹皮、厚雪壓枝、冰錐與鍛鐵風燈

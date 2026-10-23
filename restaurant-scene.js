@@ -55,6 +55,7 @@
   group.updateMatrixWorld(true);const batches=new Map();for(const o of staticMeshes){const k=o.geometry.uuid+':'+o.material.uuid;if(!batches.has(k))batches.set(k,[]);batches.get(k).push(o);}for(const list of batches.values()){const o=list[0],inst=new T.InstancedMesh(o.geometry,o.material,list.length);list.forEach((m,i)=>inst.setMatrixAt(i,m.matrixWorld));inst.castShadow=inst.receiveShadow=true;group.add(inst);for(const m of list)m.parent.remove(m);inst.instanceMatrix.needsUpdate=true;}
   const sun=new T.DirectionalLight(0xffedcf,1.05);sun.position.set(-6,3.7,7);sun.target.position.set(2,.2,-4);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-18,right:18,top:16,bottom:-16,near:.2,far:40});sun.shadow.bias=-.0003;sun.shadow.normalBias=.03;group.add(sun,sun.target);
   w.restaurantRefs={door,key,soup,delivery};root.RestaurantChapter.sync?.();
+  if(root.ModelAssetManager)root.ModelAssetManager.upgradeRestaurantScene(group,w.restaurantRefs);
  }
  function buildMarketEntrance(manager,group){
   const T=root.THREE,w=manager.world,shop=new T.Group();shop.position.set(-9.25,0,6);shop.rotation.y=Math.PI/2;group.add(shop);

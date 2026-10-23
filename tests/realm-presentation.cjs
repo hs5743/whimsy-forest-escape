@@ -7,9 +7,9 @@ function setup(){
  const all=(node=root)=>[node,...node.children.flatMap(n=>all(n))];const named=text=>all().find(n=>n.textContent===text);const node=id=>all().find(n=>n.attrs['aria-label']?.startsWith(manager.zones[id].name+'，'));
  return {api,manager,root,all,named,node,travel,open};
 }
-test('all 21 destinations belong to one region and future child chapters inherit their parent region',()=>{
- const {api,manager}=setup(),zones=Object.values(manager.zones),ids=api.regions.flatMap(r=>Array.from(r.ids));assert.equal(ids.length,21);assert.equal(new Set(ids).size,21);
- for(const z of zones)assert.ok(ids.includes(z.id));assert.equal(api.regionFor({id:'zone21',parentZone:'zone12'},zones).id,'school');
+test('all 22 destinations belong to one region and future child chapters inherit their parent region',()=>{
+ const {api,manager}=setup(),zones=Object.values(manager.zones),ids=api.regions.flatMap(r=>Array.from(r.ids));assert.equal(ids.length,22);assert.equal(new Set(ids).size,22);
+ for(const z of zones)assert.ok(ids.includes(z.id));assert.equal(api.regionFor({id:'zone22',parentZone:'zone12'},zones).id,'school');
 });
 test('regional and mobile layouts retain distinct coordinates and enough room for every marker as regions grow',()=>{
  const {api}=setup();for(const compact of [false,true])for(const count of [1,4,5,6,12]){const pts=api.layout(count,compact),width=compact?280:620,height=Math.max(340,Math.ceil(count/(compact?2:3))*(compact?154:170));

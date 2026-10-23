@@ -266,8 +266,8 @@ test('frame statistics report p95 and lifetime long frames without growing their
 test('scene acceptance plans one warmup and two complete measured passes',()=>{
  const {sweepPlan}=require('../game-diagnostics.js');
  const c=vm.createContext({window:{}});vm.runInContext(fs.readFileSync(path.join(base,'spatial-zone-manager.js'),'utf8')+';window.Manager=SpatialZoneManager;',c);c.window.Manager.prototype.initTextures=()=>{};
- const zones=Object.keys(new c.window.Manager(null,{metadataOnly:true}).zones);assert.equal(zones.length,21);assert.ok(zones.includes('zone19'));assert.ok(zones.includes('zone20'));assert.ok(zones.includes('learningHub'));
- const plan=sweepPlan(zones);assert.equal(plan.length,63);
+ const zones=Object.keys(new c.window.Manager(null,{metadataOnly:true}).zones);assert.equal(zones.length,22);assert.ok(zones.includes('zone19'));assert.ok(zones.includes('zone20'));assert.ok(zones.includes('learningHub'));
+ const plan=sweepPlan(zones);assert.equal(plan.length,66);
  for(const round of [0,1,2]) {
   const pass=plan.filter(row=>row.round===round);
   assert.deepEqual(pass.map(row=>row.zone),zones);
@@ -346,7 +346,7 @@ test('study hint sequence follows all twelve live puzzle steps without skipping 
 test('each later realm receives contextual hints and tracks its own unfinished word',()=>{
  const c=context(),Manager=load(c,'spatial-zone-manager.js','SpatialZoneManager');
  Manager.prototype.initTextures=()=>{};const m=new Manager({});
- for(const zone of Object.values(m.zones).filter(z=>!z.isLearningHub&&z.id!=='zone1'&&z.id!=='zone11'&&z.id!=='zone12'&&z.id!=='zone13'&&z.id!=='zone14'&&z.id!=='zone21'&&z.id!=='zone16'&&z.id!=='zone17'&&z.id!=='zone18'&&z.id!=='zone19'&&z.id!=='zone20')){
+ for(const zone of Object.values(m.zones).filter(z=>!z.isLearningHub&&z.id!=='zone1'&&z.id!=='zone11'&&z.id!=='zone12'&&z.id!=='zone13'&&z.id!=='zone14'&&z.id!=='zone15'&&z.id!=='zone21'&&z.id!=='zone16'&&z.id!=='zone17'&&z.id!=='zone18'&&z.id!=='zone19'&&z.id!=='zone20')){
   const plan=Assist.hintPlan({realmPuzzles:questDoneStates},zone,[]);assert.equal(plan.word,zone.words[0]);assert.ok(plan.clues[0].length>10);
   assert.notEqual(plan.clues[0],Assist.hintPlan({},m.zones.zone1).clues[0]);
   assert.equal(Assist.hintPlan({},zone,zone.words).word,null);

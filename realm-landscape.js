@@ -2,6 +2,7 @@
 (function(root){
   'use strict';
   const profiles={
+    zone15:{sky:'landscapeNightSky',haze:0x0f172a,ground:0x1e293b,rock:0x334155,inner:45,hills:6,trees:0,town:0,night:true},
     zone14:{sky:'landscapeDaySky',haze:0xc4ded0,ground:0x71835c,rock:0x9d9e82,inner:32,hills:15,trees:110},
     zone21:{sky:'weatherYardSky',haze:0xb9ccd0,ground:0x63795f,rock:0x919b98,inner:32,hills:12,trees:22,town:2,horizonBlend:.46},
     zone16:{sky:'xiangshanWetlandSky',haze:0xb8c8c8,ground:0x849188,rock:0x8d9992,inner:31,hills:.8,trees:0,town:0,noHorizonTerrain:true,horizonBlend:.28},

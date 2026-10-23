@@ -20,7 +20,7 @@
   symbols.push('<path d="M3 21V8l9-6 9 6v13H3ZM12 2v19M3 8h18M7 21v-6m10 6v-6M8 12h8"/>');
   symbols.push('<path d="M3 17h18M5 14h14l-2-4H7l-2 4Zm3 0v4m8-4v4m-7-9 2-3 2 3m2-5v3m-7-2-2-2m11 0 2-2"/>','<path d="M4 17c3-7 5-7 8 0s5 7 8 0M3 20h18M7 8l5-5 5 5M12 3v7"/>');
   symbols.push('<path d="M4 20V9l8-6 8 6v11M3 9h18M8 20v-5h8v5M12 3V1m-5 4-2-2m12 2 2-2"/>');
-  const lockLabel=zone=>zone.parentZone==='zone3'?'完成花園照護任務解鎖':zone.parentZone==='zone12'?'完成新港迎賓任務解鎖':zone.parentZone==='zone4'?'完成操場任務解鎖':zone.parentZone==='zone7'?'完成雲頂觀測任務解鎖':zone.parentZone==='zone21'?'完成氣象觀測任務解鎖':'完成市集採買解鎖';
+  const lockLabel=zone=>zone.parentZone==='zone5'?'完成車站驗票任務解鎖':zone.parentZone==='zone3'?'完成花園照護任務解鎖':zone.parentZone==='zone12'?'完成新港迎賓任務解鎖':zone.parentZone==='zone4'?'完成操場任務解鎖':zone.parentZone==='zone7'?'完成雲頂觀測任務解鎖':zone.parentZone==='zone21'?'完成氣象觀測任務解鎖':'完成市集採買解鎖';
   function model(zm,profile) {
     const completed=new Set((profile?.completedWords || []).map(w=>String(w).toUpperCase()));
     return Object.values(zm.zones).map((zone,i)=>({...zone,position:positions[i] || [50,50],current:zone.id===zm.currentZoneId,unlocked:zm.isZoneUnlocked(zone.id),done:zone.words.filter(w=>completed.has(w.toUpperCase())).length,total:zone.words.length}));
@@ -29,10 +29,10 @@
     {id:'town',name:'城鎮慶典',caption:'採買・料理・數字',ids:['zone1','zone2','zone11','zone19'],color:'#527b70'},
     {id:'nature',name:'森林海岸',caption:'花園・航海・自然觀測',ids:['zone3','zone14','zone6','zone21','zone16'],color:'#537a5e'},
     {id:'school',name:'新港校園',caption:'運動・閱讀・音樂・創作',ids:['zone4','zone12','zone13','zone17','zone18','zone20'],color:'#957354'},
-    {id:'sky',name:'雲海星穹',caption:'鐵道・星空・冰雪・虹光',ids:['zone5','zone7','zone8','zone9','zone10'],color:'#657a9c'},
+    {id:'sky',name:'雲海星穹',caption:'鐵道・星空・冰雪・虹光',ids:['zone15','zone5','zone7','zone8','zone9','zone10'],color:'#657a9c'},
     {id:'lounge',name:'學習大廳',caption:'自由選題・反覆練習',ids:['learningHub'],color:'#846d98'}
   ];
-  const names={zone1:'魔法書齋',zone2:'陽光市集',zone3:'守護獸花園',zone4:'冒險操場',zone5:'鐘樓車站',zone6:'蔚藍海港',zone7:'星空觀測站',zone8:'極光冰雪',zone9:'星界殿堂',zone10:'虹光空島',zone11:'魔法餐廳',zone12:'新港迎賓',zone13:'口琴展館',zone14:'玻璃溫室',zone21:'氣象觀測台',zone16:'香山潮間帶',zone17:'故事圖書館',zone18:'機器人工坊',zone19:'數字嘉年華',zone20:'舞獅彩繪',learningHub:'學習大廳'};
+  const names={zone15:'星光機場',zone1:'魔法書齋',zone2:'陽光市集',zone3:'守護獸花園',zone4:'冒險操場',zone5:'鐘樓車站',zone6:'蔚藍海港',zone7:'星空觀測站',zone8:'極光冰雪',zone9:'星界殿堂',zone10:'虹光空島',zone11:'魔法餐廳',zone12:'新港迎賓',zone13:'口琴展館',zone14:'玻璃溫室',zone21:'氣象觀測台',zone16:'香山潮間帶',zone17:'故事圖書館',zone18:'機器人工坊',zone19:'數字嘉年華',zone20:'舞獅彩繪',learningHub:'學習大廳'};
   function regionFor(zone,zones,seen=new Set()) {
     const known=regions.find(r=>r.ids.includes(zone.id));if(known)return known;
     if(zone.parentZone&&!seen.has(zone.id)){seen.add(zone.id);const parent=zones.find(z=>z.id===zone.parentZone);if(parent)return regionFor(parent,zones,seen);}
@@ -78,7 +78,7 @@
         const node=button('atlas-node'+(!region?' atlas-region-node':'')+(item.current?' is-current':'')+(region&&!item.unlocked?' is-locked':''),'',()=>region?select(item):draw(item));
         for(const [key,value] of [['--atlas-x',points[i][0]],['--atlas-y',points[i][1]],['--compact-x',small[i][0]],['--compact-y',small[i][1]]])node.style.setProperty(key,value+'%');
         const iconIndex=region?zones.indexOf(item):[1,2,11,6,13][i];
-        const custom={zone17:'<path d="M3 5h7l2 3 2-3h7v15h-7l-2 2-2-2H3V5Zm9 3v14"/>',zone18:'<rect x="4" y="6" width="16" height="14" rx="3"/><path d="M12 2v4M8 11h1m6 0h1M8 16h8"/>',zone19:'<path d="m3 10 9-8 9 8H3Zm2 0v12m14-12v12M2 22h20M10 22v-7h4v7"/>',zone20:'<path d="m4 20 12-16 4 3L8 22H3v-5M14 7l4 3M3 5h7"/>'};
+        const custom={zone15:'<path d="m3 14 8-5V3h2v6l8 5v2l-8-2v5l3 2H8l3-2v-5l-8 2Z"/>',zone17:'<path d="M3 5h7l2 3 2-3h7v15h-7l-2 2-2-2H3V5Zm9 3v14"/>',zone18:'<rect x="4" y="6" width="16" height="14" rx="3"/><path d="M12 2v4M8 11h1m6 0h1M8 16h8"/>',zone19:'<path d="m3 10 9-8 9 8H3Zm2 0v12m14-12v12M2 22h20M10 22v-7h4v7"/>',zone20:'<path d="m4 20 12-16 4 3L8 22H3v-5M14 7l4 3M3 5h7"/>'};
         node.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'+(custom[item.id]||symbols[iconIndex]||symbols[0])+'</svg>';
         node.append(el('span','',region?short(item):item.name));
         const members=region?[]:zones.filter(z=>regionFor(z,zones).id===item.id);

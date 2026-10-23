@@ -88,6 +88,9 @@
   group.updateMatrixWorld(true);const batches=new Map();for(const o of statics){const key=o.geometry.uuid+':'+o.material.uuid;if(!batches.has(key))batches.set(key,[]);batches.get(key).push(o);}for(const items of batches.values()){const inst=new T.InstancedMesh(items[0].geometry,items[0].material,items.length);items.forEach((o,i)=>inst.setMatrixAt(i,o.matrix));inst.castShadow=inst.receiveShadow=true;group.add(inst);for(const o of items)o.parent.remove(o);}
   const hemi=new T.HemisphereLight(0xe8f1dd,0x5b6045,.56);group.add(hemi);const sun=new T.DirectionalLight(0xffedcf,.86);sun.position.set(-10,18,12);sun.target.position.set(0,0,-3);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-18,right:18,top:22,bottom:-22,near:.5,far:65});sun.shadow.bias=-.0002;sun.shadow.normalBias=.035;group.add(sun,sun.target);
   w.greenhouseRefs={sapling,bloom,litter};w.animators.push(t=>{for(const [i,insect]of [bee,butterfly].entries()){const motion=w.settings?.reducedMotion?0:Math.sin(t*(i?3:5))*.08;insect.group.position.y=2.1+motion;for(const [wing,sign]of insect.wings)wing.rotation.z=sign*(.15+motion*3);}});root.GreenhouseChapter.sync?.();
+  if (root.ModelAssetManager && root.ModelAssetManager.isReady) {
+    root.ModelAssetManager.upgradeGreenhouseScene(group);
+  }
  }
  function buildEntrance(manager,group){
   const T=root.THREE,w=manager.world,g=new T.Group();g.position.set(-10.2,0,7);g.rotation.y=Math.PI/4;group.add(g);

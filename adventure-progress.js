@@ -4,7 +4,19 @@
   const flags=['candleLit','bookOpened','hasKey','drawerOpened','hasRedPotion','hasBluePotion','alchemyMixed','hasStarStone','hasFish','catPracticed','mimicFed','hasFlowerStone','doorSocketsFilled','doorStonePlaced','doorOpened','escaped'];
   const number=(n,min,max)=>typeof n==='number'&&Number.isFinite(n)&&n>=min&&n<=max;
   function ownerKey(profile,preview=false) {return preview?'preview':!profile||profile.isGuest?'guest':'student:'+String(profile.studentId||'').slice(0,100);}
+  // Live zone15 is the airport. Only the distinct legacy weather shape can migrate.
+  function migrateWeather(raw) {
+    const old=raw?.state?.realmPuzzles?.zone15;
+    if(!old||'gate' in old||'call' in old||'collected' in old||!root.WeatherChapter?.validate(old))return raw;
+    if(raw.state.realmPuzzles.zone21)return null; // Never overwrite another checkpoint.
+    const copy=JSON.parse(JSON.stringify(raw));
+    copy.state.realmPuzzles.zone21=old;delete copy.state.realmPuzzles.zone15;
+    if(copy.state.practicedWordsByZone?.zone15){copy.state.practicedWordsByZone.zone21=copy.state.practicedWordsByZone.zone15;delete copy.state.practicedWordsByZone.zone15;}
+    if(copy.zone==='zone15')copy.zone='zone21';
+    return copy;
+  }
   function validate(raw,owner,zones) {
+    raw=migrateWeather(raw);
     if(!raw||raw.version!==1||raw.owner!==owner||!zones[raw.zone]||!number(raw.savedAt,0,1e14))return null;
     const s=raw.state,p=raw.player;
     if(!s||!p||!number(s.xp,0,1000000)||!Array.isArray(s.inventory)||s.inventory.length>128)return null;
@@ -37,7 +49,7 @@
     load(){
       try{
         const text=this.storage.getItem(this.key);if(!text){this.status='empty';return null;}
-        let record=null;try{record=text.length<=256000?validate(JSON.parse(text),this.owner,this.zones):null;}catch(error){};
+        let record=null;try{const parsed=text.length<=256000?JSON.parse(text):null;if(parsed&&migrateWeather(parsed)!==parsed)this.storage.setItem(this.key+':before-zone21-migration',text);record=validate(parsed,this.owner,this.zones);}catch(error){};
         if(!record){this.unreadable=text.slice(0,256000);this.status='invalid';return null;}
         this.savedAt=record.savedAt;this.status='saved';return record;
       }catch(error){this.status='unavailable';return null;}
@@ -50,7 +62,7 @@
       }catch(error){this.status='unavailable';return false;}
     }
   }
-  const api={flags,ownerKey,validate,capture,applySavedPosition,CheckpointStore};root.AdventureProgress=api;
+  const api={migrateWeather,flags,ownerKey,validate,capture,applySavedPosition,CheckpointStore};root.AdventureProgress=api;
   if(typeof module!=='undefined')module.exports=api;
   if(!root.document)return;
   root.addEventListener('load',()=>{

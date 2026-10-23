@@ -66,6 +66,12 @@ class World3D {
     GamePolish.applySceneStyle(this,'zone1');
     this.targetFocus = new GamePolish.TargetFocus(this.scene);
     this.restoreStudyState();
+    if (typeof window !== 'undefined' && window.ModelAssetManager) {
+      window.ModelAssetManager.loadAll().then(() => {
+        window.ModelAssetManager.upgradeStudyRoom(this);
+        this.restoreStudyState();
+      }).catch((e) => console.warn('[ModelAssetManager] Model load notice:', e));
+    }
     this.setQualityPreference(this.settings.quality);
     this.setupEvents();
     this.initCloudSync();
@@ -547,6 +553,7 @@ class World3D {
     // 1. 銅燭台 (Candle -> LIGHT)
     // ==========================================
     const candleGroup = new THREE.Group();
+    this.candleGroup = candleGroup;
     const standMat = new THREE.MeshStandardMaterial({ color: 0xb8860b, metalness: 0.7, roughness: 0.25 });
 
     // 小圓茶几 (木紋皮膚)
@@ -597,6 +604,7 @@ class World3D {
     // 2. 書桌與漂浮古書 (Desk & Floating Book -> BOOK & KEY)
     // ==========================================
     const deskGroup = new THREE.Group();
+    this.deskGroup = deskGroup;
     // 書桌面板 (AI 精緻深木雕花邊框皮膚)
     const deskTop = new THREE.Mesh(
       new THREE.BoxGeometry(2.4, 0.1, 1.2),
@@ -688,6 +696,7 @@ class World3D {
     // 3. 元素煉金台 (Alchemy Table -> RED, BLUE, STAR)
     // ==========================================
     const alchemyGroup = new THREE.Group();
+    this.alchemyGroup = alchemyGroup;
     // 煉金石台面 (AI 黑色玄武岩黃金鍊金陣法石板皮膚)
     const tableA = new THREE.Mesh(
       new THREE.BoxGeometry(1.6, 0.85, 1.0),
@@ -1948,17 +1957,28 @@ class World3D {
   }
   restoreStudyState() {
     const s = this.gameState;
-    this.candleFlame.material.opacity = s.candleLit ? 1 : 0;
-    this.candleLight.intensity = s.candleLit ? 1.8 : 0;
-    this.bookCoverHinge.rotation.z = s.bookOpened ? 2.35 : 0;
-    this.keyMesh.position.y = s.bookOpened ? 1.5 : 1.15;
-    this.keyMesh.visible = s.bookOpened && !s.hasKey;
-    this.starStone.visible = s.alchemyMixed && !s.hasStarStone; this.flowerStone.visible = s.mimicFed && !s.hasFlowerStone;
-    if (s.drawerOpened) this.drawerMesh.position.z = -3.3;
-    if (s.hasBluePotion) this.flaskLiquid.material.color.setHex(0x9955ff);
-    if (s.mimicFed) this.mimicLid.rotation.x = -Math.PI / 3;
-    if (s.doorStonePlaced) { this.socketStar.material.color.setHex(0xffe600); this.socketFlower.material.color.setHex(0x4da6ff); }
-    if (s.doorOpened) { this.doorLeft.position.x=-1.7; this.doorRight.position.x=1.7; }
+    if (this.candleFlame && this.candleFlame.material) this.candleFlame.material.opacity = s.candleLit ? 1 : 0;
+    if (this.candleLight) this.candleLight.intensity = s.candleLit ? 1.8 : 0;
+    if (this.bookCoverHinge) this.bookCoverHinge.rotation.z = s.bookOpened ? 2.35 : 0;
+    if (this.keyMesh) {
+      this.keyMesh.position.y = s.bookOpened ? 1.5 : 1.15;
+      this.keyMesh.visible = s.bookOpened && !s.hasKey;
+    }
+    if (this.starStone) this.starStone.visible = s.alchemyMixed && !s.hasStarStone;
+    if (this.flowerStone) this.flowerStone.visible = s.mimicFed && !s.hasFlowerStone;
+    if (s.drawerOpened && this.drawerMesh) this.drawerMesh.position.z = -3.3;
+    if (s.hasBluePotion && this.flaskLiquid && this.flaskLiquid.material && this.flaskLiquid.material.color) {
+      this.flaskLiquid.material.color.setHex(0x9955ff);
+    }
+    if (s.mimicFed && this.mimicLid) this.mimicLid.rotation.x = -Math.PI / 3;
+    if (s.doorStonePlaced) {
+      if (this.socketStar && this.socketStar.material && this.socketStar.material.color) this.socketStar.material.color.setHex(0xffe600);
+      if (this.socketFlower && this.socketFlower.material && this.socketFlower.material.color) this.socketFlower.material.color.setHex(0x4da6ff);
+    }
+    if (s.doorOpened && this.doorLeft && this.doorRight) {
+      this.doorLeft.position.x = -1.7;
+      this.doorRight.position.x = 1.7;
+    }
   }
 
   getGraphicQuality() {
@@ -1979,7 +1999,7 @@ class World3D {
     if (task) {
       const id=this.zoneManager?.currentZoneId || 'zone1',quest=window.RealmQuests?.specs[id];
       let text=GamePolish.taskText(this.gameState,id);
-      if(quest&&id!=='zone11'&&id!=='zone12'&&id!=='zone13'&&id!=='zone14'&&id!=='zone21'&&id!=='zone16'&&id!=='zone17'&&id!=='zone18'){
+      if(quest&&id!=='zone11'&&id!=='zone12'&&id!=='zone13'&&id!=='zone14'&&id!=='zone15'&&id!=='zone21'&&id!=='zone16'&&id!=='zone17'&&id!=='zone18'){
         const done=window.RealmQuests.solved(id,this.gameState.realmPuzzles?.[id]);
         const next=this.zoneManager.zones[id].words.find(word=>!this.gameState.practicedWordsByZone?.[id]?.includes(word));
         text=!done?'秘境任務 · '+quest.title:next?'機關已解開 · 探索並練習 '+next:'任務與英語線索完成 · 探索守護者或下一個出口';

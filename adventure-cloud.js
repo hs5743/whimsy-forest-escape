@@ -18,7 +18,7 @@
     async push(raw,force=false){
       if(!this.supported||!this.link||this.busy||this.conflictRevision!==null)return false;
       const snapshot=root.AdventureProgress.validate(raw,this.owner,this.zones);if(!snapshot||JSON.stringify(snapshot).length>20000){this.state='invalid_snapshot';return false;}
-      for(const id of ['zone14','zone21','zone16','zone17','zone18'])if((snapshot.zone===id||snapshot.state.realmPuzzles?.[id])&&!this.schemaZones.includes(id)){this.state='schema_unsupported';return false;}
+      for(const id of ['zone14','zone15','zone16','zone17','zone18','zone19','zone20','zone21'])if((snapshot.zone===id||snapshot.state.realmPuzzles?.[id])&&!this.schemaZones.includes(id)){this.state='schema_unsupported';return false;}
       if(!force&&!this.link.pending&&this.lastSignature===signature(snapshot))return true;
       this.busy=true;this.state='uploading';
       try{
