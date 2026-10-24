@@ -55,4 +55,10 @@ zone1–zone10、zone13、zone15、zone16、zone18、zone19、zone21 是前輪�
 - `node scripts/check-vocabulary.cjs`：通過，新關卡核心字仍符合參考範圍且沒有新增跨關卡重複詞。
 - `git diff --check`：通過；Git 只提示工作目錄的 LF／CRLF 正規化訊息。
 - 仍需在使用者目前最新本機版本瀏覽 zone11、zone14、zone17、zone20 與 learningHub，確認鏡頭下物件不互相遮擋、標籤尺寸合宜、移動與點擊範圍直覺。此項目屬視覺驗收，不能以幾何測試代替。
-- 本輪沒有修改正式網站、GitHub 遠端或 Apps Script；是否部署由後續明確部署作業處理。
+- 報告初次撰寫時僅檢查本機原始碼，尚未部署；部署完成後的線上驗收補記如下。
+
+## 部署驗收補記
+
+- 場景修改提交 `a7a2fc4` 已推送至 `origin/main`；GitHub Pages 工作 `40093295696`（run 78）建置與部署成功。
+- 正式站 `https://hs5743.github.io/whimsy-forest-escape/?release=a7a2fc4` 回應 HTTP 200，標題為「英語魔法探險家：秘境逃脫任務」，並載入本輪潮間帶、口琴館及學習大廳場景版本。
+- 此次只部署 GitHub Pages 網站與交接文件；Google Apps Script 後台未在此作業中更新。
