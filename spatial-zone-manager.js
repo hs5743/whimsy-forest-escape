@@ -134,7 +134,7 @@ class SpatialZoneManager {
     };
 
     this.zones.zone11={id:'zone11',name:'魔法餐廳：一碗熱湯的冒險',englishName:'Magic Restaurant',icon:'🍲',topic:'Food, Actions & Prepositions',reqLevel:2,parentZone:'zone2',desc:'陽光微風市集的街角餐廳。完成採買後接受店主委託，穿梭餐廳、廚房與儲藏室，準備熱湯，再回市集繼續冒險。',words:['EGG','PUMPKIN','LEMON','SOUP','WASH','PUT','COOK','SPOON'],spawnPos:[0,1.6,7],spawnYaw:0};
-    this.zones.zone12={id:'zone12',name:'新港國小：舞獅迎賓任務',englishName:'Xin-gang School Adventure',icon:'🏫',topic:'School, Art & Lion Dance',reqLevel:4,parentZone:'zone4',desc:'以新竹縣竹北市新港國小的校史與龍鳳舞獅特色改編。從閱讀角到教室與迎賓庭院，口說解鎖圖卡、鼓點與舞獅任務。',words:['SCHOOL','CLASSROOM','PAPER','DRAW','LISTEN','DRUM','LION','WELCOME'],spawnPos:[0,1.6,8.4],spawnYaw:0};
+    this.zones.zone12={id:'zone12',name:'新港國小：舞獅迎賓任務',englishName:'Xin-gang School Adventure',icon:'🏫',topic:'School, Art & Lion Dance',reqLevel:4,parentZone:'zone4',desc:'以新竹縣竹北市新港國小的校史與龍鳳舞獅特色改編。走訪閱讀角、校史展示、繪畫桌與鼓台，觀察舞獅壁畫，並在迎賓庭院完成口說任務。',words:['SCHOOL','CLASSROOM','PAPER','DRAW','LISTEN','DRUM','LION','WELCOME'],spawnPos:[0,1.6,8.4],spawnYaw:0};
     this.zones.zone13={id:'zone13',name:'半音階口琴：掌心音樂展示館',englishName:'Chromatic Harmonica Gallery',icon:'🎵',topic:'Harmonica, Sound & Playing',reqLevel:4,parentZone:'zone12',desc:'從新港校園音樂翼走進口琴展示館。探索完整口琴、分層簧片、滑鍵半音與吹吸練習，用八個新英語詞完成小小展演。',words:['SMALL','MOUTH','HAND','LEFT','RIGHT','HIGH','PLAY','SONG'],spawnPos:[0,1.6,9.4],spawnYaw:0};
     const learningHub={id:'learningHub',name:'英語探險家學習大廳',englishName:'Explorer Language Lounge',icon:'📚',topic:'自由選題 · 單字 · 句型 · 複習',reqLevel:1,isLearningHub:true,desc:'與狐狸館長、貓頭鷹老師和兔子教練反覆練習，收藏想學的單字，累積口說、句型與跨日複習紀錄。完成後返回原來的冒險。',words:[],spawnPos:[0,1.6,8],spawnYaw:0};
     this.zones.learningHub=learningHub;
@@ -436,8 +436,6 @@ class SpatialZoneManager {
       tidalMudflat: loader.load('assets/textures/tidal-mudflat-v3.webp'),
       tidalWater: loader.load('assets/textures/tidal-water-v1.webp'),
       coastalConcrete: loader.load('assets/textures/coastal-concrete-v3.webp'),
-      xiangshanSaltmarsh: loader.load('assets/textures/xiangshan-saltmarsh-cutout-v1.webp'),
-      fiddlerCrabCutout: loader.load('assets/textures/fiddler-crab-cutout-v1.webp'),
       marketCobble: loader.load('assets/textures/ground-limestone-v2.jpg'),
       marketAwning: loader.load('assets/textures/tex-market-awning.jpg'),
       townFacade: loader.load('assets/textures/tex-town-facade.jpg'),

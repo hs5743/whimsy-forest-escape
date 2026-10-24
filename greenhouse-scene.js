@@ -76,9 +76,27 @@
    for(const sign of [-1,1]){mesh('stem','black',sign*.11,.13,.36,.012,.2,.012,0,0,-sign*.5,g);for(let i=0;i<3;i++)mesh('stem','black',sign*.13,-.1,(i-1)*.16,.01,.22,.01,0,0,sign*.7,g);}
    return {group:g,wings};}
   const bee=insect(-6.8,2.1,-2,false),butterfly=insect(6.8,2.1,-2,true);
-  // Small observation cards and finely framed signs stay readable at exploration distance.
-  const stations=[['garden','入口委託 · GARDEN',0,1.7,10.7],['green','葉片觀察 · GREEN',-6.8,1.7,8],['bee','訪花昆蟲 · BEE',-6.8,1.8,.1],['butterfly','翅膀觀察 · BUTTERFLY',6.8,1.8,.1],['grow','幼苗照護 · GROW',0,1.8,-7.8],['smell','香草氣味 · SMELL',6.8,1.7,8],['pickup','花園整理 · PICK UP',-6.8,1.7,-7.8],['beautiful','花園明信片 · BEAUTIFUL',6.8,1.7,-7.8]];
-  for(const [id,title,x,y,z]of stations){const sx=id==='garden'?-0.75:x,sz=id==='garden'?10.25:z-.45;const tagY=id==='garden'?.65:.78;b('bench',sx,tagY,sz,.86,.055,.28);plaque(title,'',sx,tagY+.035,sz+.15,.78,.22);target(id,title,x,y,z,2.8,1.8,.8);}
+  // A planted wooden arch makes BEAUTIFUL a place in the conservatory, not a postcard.
+  const flowerArchX=6.8,flowerArchZ=-7.8,archY=1.22;
+  for(const side of [-1,1])mesh('stem','wood',flowerArchX+side*.88,archY,flowerArchZ,.085,2.44,.085);
+  const archCurve=new T.TorusGeometry(.88,.075,8,32,Math.PI);
+  staticMesh(archCurve,mat.wood,flowerArchX,archY,flowerArchZ,1,1,1);
+  for(let i=0;i<=8;i++){
+   const angle=Math.PI*i/8,x=flowerArchX+Math.cos(angle)*.88,y=archY+Math.sin(angle)*.88;
+   flower(x,y,flowerArchZ,'flower',.23);
+   if(i%2===0)mesh('leaf','lightLeaf',x+(i<4?.16:-.16),y-.16,flowerArchZ+.035,.12,.22,.06,0,0,(i<4?-.45:.45));
+  }
+  const stations=[['garden','入口委託 · GARDEN',0,1.7,10.7],['green','葉片觀察 · GREEN',-6.8,1.7,8],['bee','訪花昆蟲 · BEE',-6.8,1.8,.1],['butterfly','翅膀觀察 · BUTTERFLY',6.8,1.8,.1],['grow','幼苗照護 · GROW',0,1.8,-7.8],['smell','香草氣味 · SMELL',6.8,1.7,8],['pickup','花園整理 · PICK UP',-6.8,1.7,-7.8],['beautiful','花拱門 · BEAUTIFUL',flowerArchX,1.7,flowerArchZ]];
+  for(const [id,title,x,y,z]of stations){
+   if(id==='beautiful'){
+    plaque('FLOWER ARCH','BEAUTIFUL',flowerArchX,2.42,flowerArchZ,1.65,.38);
+    target(id,title,x,y,z,2.8,2.6,.8);
+    continue;
+   }
+   const sx=id==='garden'?-0.75:x,sz=id==='garden'?10.25:z-.45,tagY=id==='garden'?.65:.78;
+   b('bench',sx,tagY,sz,.86,.055,.28);plaque(title,'',sx,tagY+.035,sz+.15,.78,.22);target(id,title,x,y,z,2.8,1.8,.8);
+  }
+  group.userData.greenhousePhysicalExhibits={beautiful:{kind:'flowering-arch',flowers:9,leafClusters:5,targetId:'greenhouse_beautiful'}};
   const litter=[];for(let i=0;i<3;i++){const m=mat[i===1?'water':'cream'].clone();m.transparent=true;const o=new T.Mesh(i===1?geo.stem:geo.box,m);o.position.set(-5.6-i*.7,.15,-7.7);o.scale.set(.24,.18,i===1?.24:.38);o.rotation.y=i*.7;group.add(o);litter.push(o);}
   // A low sorting basket and reusable gloves make the clean-up task legible through its objects.
   b('frame',-9.35,.47,-8.2,.82,.82,.7);b('black',-9.35,.9,-8.2,.88,.08,.76);for(let x=-9.63;x<=-9.07;x+=.28)b('cream',x,.48,-7.83,.11,.62,.035);

@@ -86,16 +86,32 @@
   for(const x of [-10,-5,0,5,10])for(const z of [-12,-2,7]){
    mesh('cylinder','gold',x,5.25,z,.12,.18,.12);const bulb=mesh('sphere','white',x,5.12,z,.1,.05,.1);bulb.material=materials.white;
   }
-  // Original graphic murals with informative diagrams, not blank classroom walls.
+  // Keep one small gallery identity plaque. The instrument, its cutaway layers,
+  // airflow and note direction are demonstrated by the exhibits below instead
+  // of being repeated as large wall cards.
   panel('ornament','掌心裡的音樂祕境','CHROMATIC HARMONICA GALLERY',0,4.85,-18.7,7,1.45);
-  panel('structure','簧片的祕密','COVER / REED PLATE / COMB / SLIDE',-8,3.05,-18.73,6.6,3.9);
-  panel('slide','半音階實驗室','C → C♯ / D → D♯',8,3.05,-18.73,6.6,3.9);
-  panel('mouth','吹嘴與氣流','BLOW 吹氣 / DRAW 吸氣',-13.6,3.08,4,5,3.5,Math.PI/2);
-  panel('score','我的五音練習','C D E F G · 滑鍵放開',13.6,3.08,4,5,3.5,-Math.PI/2);
-  panel('direction','從左到右的音高地圖','演奏者視角 · C 調獨奏排列',-13.6,3.1,-3,5,3.2,Math.PI/2);
-  panel('direction','方向與放鬆的握法','LEFT / RIGHT · 手握琴身',13.6,3.1,-3,5,3.2,-Math.PI/2);
-  panel('hero','小小口琴 · 大大世界','12 孔 / 48 簧片 / 3 個八度',-7.2,3.1,10.75,7,3,Math.PI);
-  panel('ornament','聲音的線條','用眼睛探索，用耳朵比較',7.2,3.1,10.75,7,3,Math.PI);
+  // Brass and enamel sound-wave reliefs add patterned wall detail while the
+  // nearby playable models carry the lesson content.
+  const waveGold=new T.MeshStandardMaterial({color:0xd4b171,metalness:.52,roughness:.38});
+  const waveCyan=new T.MeshStandardMaterial({color:0x68b7bc,metalness:.2,roughness:.42});
+  function wallWave(side,centerZ,centerY=3.05){
+   const points=[];for(let i=0;i<=36;i++){const u=i/36,z=centerZ+(u-.5)*5.8,y=centerY+Math.sin(u*Math.PI*4)*.48;points.push(new T.Vector3(side*13.53,y,z));}
+   const curve=new T.CatmullRomCurve3(points);const line=new T.Mesh(new T.TubeGeometry(curve,68,.052,8,false),waveCyan);line.userData.sceneRole='gallery-wall-sound-wave';line.castShadow=true;line.receiveShadow=true;group.add(line);
+   for(let i=2;i<35;i+=4){const p=points[i];const bead=mesh('sphere','gold',p.x,p.y,p.z,.12,.12,.12);bead.material=waveGold;}
+  }
+  for(const side of [-1,1]){wallWave(side,-3.1,3.12);wallWave(side,4.1,3.22);}
+  // A twelve-hole wall installation mirrors the real instrument and adds a
+  // tactile focal point where the large instructional posters used to hang.
+  b('teal',0,3.18,-18.39,10.5,1.05,.16);
+  for(const y of [2.66,3.70])b('gold',0,y,-18.28,10.62,.055,.08);
+  for(const x of [-5.28,5.28])b('gold',x,3.18,-18.28,.055,1.08,.08);
+  const holeInlays=[];
+  for(let n=0;n<12;n++){
+   const x=-4.4+n*.8;
+   mesh('cylinder','black',x,3.18,-18.27,.19,.07,.19,Math.PI/2,0,0);
+   const ring=mesh('torus',n%2?'cyan':'gold',x,3.18,-18.22,.22,.22,.055);ring.material=n%2?waveCyan:waveGold;ring.userData.sceneRole='gallery-harmonica-wall-inlay';holeInlays.push(ring);
+   for(const y of [2.83,3.53])mesh('sphere',n%2?'gold':'cyan',x,y,-18.22,.045,.045,.045);
+  }
   // A central polished instrument on a dark, rounded stone pedestal.
   function pedestal(x,z,width=4,depth=1.5){mesh('round','teal',x,.6,z,width,1.2,depth);b('gold',x,1.22,z,width+.05,.055,depth+.04);}
   pedestal(0,-2,7.5,2.4);pedestal(-8,4);pedestal(8,4);pedestal(-8,-13,4.6,2.2);pedestal(8,-13,4.6,2.2);
@@ -120,12 +136,17 @@
   for(const [x,z]of [[-8,4],[8,4],[-8,-13],[8,-13]])for(const dx of [-.8,.8]){b('silver',x+dx,1.39,z,.045,.33,.12);mesh('round','black',x+dx,1.53,z,.21,.09,.33);}
   harmonica(-8,1.62,4,.42);harmonica(8,1.62,4,.42);
   harmonica(-8,1.83,-13,.6,.86);const experiment=harmonica(8,1.85,-13,.6,0,true);
-  // Enlarged vibrating reed, rivet, windsaver and air paths beside the exploded instrument.
+  // Enlarged vibrating reed, rivet, windsaver and sculpted airflow beside the
+  // exploded model. These physical clues replace the old large structure card.
   const reedMaterial=materials.gold.clone();reedMaterial.emissive.setHex(0x14605d);
   const reed=mesh('box','gold',-7.55,2.42,-12.25,.19,.03,.7,true);reed.material=reedMaterial;
   mesh('sphere','silver',-7.55,2.45,-12.52,.055,.025,.055);
   b('white',-8.25,2.44,-12.25,.19,.025,.64);
-  for(let n=0;n<7;n++){const arrow=mesh('sphere','cyan',-8.8+n*.19,1.86,-12.4,.06,.03,.06);}
+  for(let n=0;n<9;n++){
+   const x=-9.45+n*.24,y=1.84+Math.sin(n*.48)*.075,z=-12.4;
+   const arrow=mesh('sphere','cyan',x,y,z,.07,.045,.07);
+   if(n<8){const nextX=x+.24,nextY=1.84+Math.sin((n+1)*.48)*.075,delta=new T.Vector3(nextX-x,nextY-y,0),bar=mesh('cylinder','cyan',(x+nextX)/2,(y+nextY)/2,z,.018,delta.length(),.018);bar.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),delta.normalize());}
+  }
   // Direction pedestals and an ascending twelve-note sculptural ribbon.
   for(const x of [-10,10]){pedestal(x,-2.8,2,2);mesh('torus','gold',x,2.15,-2.8,.52,.52,.2);b('cyan',x,2.15,-2.55,.8,.045,.03);b('cyan',x+(x<0?-.31:.31),2.26,-2.55,.35,.045,.03).rotation.z=x<0?-.65:.65;}
   for(let n=0;n<12;n++){const x=-5.5+n;mesh('sphere',n%2?'gold':'cyan',x,3.95+n*.055,-6.55,.12,.12,.08);b('gold',x,4.2+n*.055,-6.55,.026,.4,.026);}
@@ -143,11 +164,11 @@
   target('play','吹吸練習台 · PLAY',8,1.7,5,3,1.7,1);
   target('song','小小展演台 · SONG',0,1.8,-15.2,3,1.8,.7);
   const exit=target('exit','回新港校園',0,1.6,10.1,3,2,.8);exit.userData.onClick=()=>{if(manager.switchZone('zone12')){w.player.pos.set(0,1.6,-7.8);w.player.yaw=Math.PI;w.adventureProgress?.save(true);}};
-  group.updateMatrixWorld(true);const batches=new Map();for(const o of statics){const key=o.geometry.uuid+':'+o.material.uuid;if(!batches.has(key))batches.set(key,[]);batches.get(key).push(o);}for(const list of batches.values()){const inst=new T.InstancedMesh(list[0].geometry,list[0].material,list.length);list.forEach((o,i)=>inst.setMatrixAt(i,o.matrixWorld));inst.castShadow=inst.receiveShadow=true;group.add(inst);for(const o of list)o.parent.remove(o);}
+  group.updateMatrixWorld(true);const batches=new Map();for(const o of statics){const key=o.geometry.uuid+':'+o.material.uuid;if(!batches.has(key))batches.set(key,[]);batches.get(key).push(o);}for(const list of batches.values()){const inst=new T.InstancedMesh(list[0].geometry,list[0].material,list.length);list.forEach((o,i)=>inst.setMatrixAt(i,o.matrixWorld));if(list.some(o=>o.userData.sceneRole==='gallery-harmonica-wall-inlay'))inst.userData.sceneRole='gallery-harmonica-wall-inlay-batch';inst.castShadow=inst.receiveShadow=true;group.add(inst);for(const o of list)o.parent.remove(o);}
   const hemi=new T.HemisphereLight(0xe6eff2,0x665644,.58);group.add(hemi);
   const key=new T.DirectionalLight(0xffefd4,.9);key.position.set(4,10,5);key.target.position.set(0,0,-5);key.castShadow=true;key.shadow.mapSize.set(1024,1024);Object.assign(key.shadow.camera,{left:-20,right:20,top:25,bottom:-25,near:.5,far:45});key.shadow.bias=-.0003;key.shadow.normalBias=.035;group.add(key,key.target);
   for(const p of [[-8,4.8,4],[8,4.8,4],[-8,4.8,-13],[8,4.8,-13],[0,4.8,-3],[0,4.8,8]]){const light=new T.PointLight(0xffe7bd,.7,13,2);light.position.set(...p);group.add(light);}
-  w.harmonicaRefs={banner,slide:experiment.slide,restX:experiment.restX,reed};
+  w.harmonicaRefs={banner,slide:experiment.slide,restX:experiment.restX,reed,holeInlays};
   w.animators.push(time=>{reed.rotation.x=w.settings?.reducedMotion||Date.now()>(root.HarmonicaChapter.demoUntil||0)?0:Math.sin(time*22)*.035;});root.HarmonicaChapter.sync?.();
   if (root.ModelAssetManager && root.ModelAssetManager.isReady && root.ModelAssetManager.models.has('chromatic_harmonica')) {
     const heroM = root.ModelAssetManager.cloneModel('chromatic_harmonica');

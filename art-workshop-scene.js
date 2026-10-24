@@ -58,6 +58,7 @@
    const view=new T.Mesh(geometry,courtyardMaterial);view.name='art_studio_courtyard_window_'+(side<0?'west':'east')+'_'+index;view.scale.set(width,height,1);view.position.set(side*10.97,2.555,z);view.rotation.y=side>0?Math.PI/2:-Math.PI/2;view.renderOrder=-1;view.userData.artWorkshopExteriorBackdrop=true;group.add(view);windowViewCount++;
   }
   function target(id,name,x,y,z,sx=2,sy=1.8,sz=1.5){const o=new T.Mesh(new T.BoxGeometry(sx,sy,sz),new T.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));o.position.set(x,y,z);o.userData={id:'artwork_'+id,name,label:name,hint:'摸到工坊裡的對應物件，再口說辨識完成步驟',onClick:()=>root.ArtWorkshopChapter.open(id)};group.add(o);w.interactables.push(o);return o;}
+  function letterMaterial(letter){const canvas=root.document.createElement('canvas');canvas.width=96;canvas.height=96;const context=canvas.getContext('2d');context.fillStyle='#f4ead5';context.fillRect(0,0,96,96);context.fillStyle='#263d45';context.textAlign='center';context.textBaseline='middle';context.font='bold 68px sans-serif';context.fillText(letter,48,50);const map=new T.CanvasTexture(canvas);map.encoding=T.sRGBEncoding;return new T.MeshBasicMaterial({map,toneMapped:false});}
   // Warm timber floor, acoustic ceiling and a broad unobstructed circulation lane.
   box('floor',0,-.16,0,21.6,.32,24.2);
   box('wall',0,2.25,-12,21.6,4.5,.3);
@@ -156,14 +157,20 @@
   box('paper',7.85,2.18,4.0,1.75,2.15,.08);box('coral',7.85,2.38,3.94,.92,.12,.035);
   mesh('cylinder','yellow',8.98,.87,3.92,.24,.44,.24);mesh('cylinder','coral',8.98,1.11,3.92,.245,.08,.245);mesh('cylinder','teal',8.98,.66,3.92,.19,.04,.19);
   mesh('cylinder','teal',9.6,.83,4.12,.34,.1,.34);mesh('cylinder','yellow',9.6,.9,4.12,.28,.055,.28);mesh('sphere','coral',9.6,1.12,4.12,.19,.22,.19);
-  // A compact tabletop rack sits beside the entry lane so it never blocks the lion-dance mural.
-  box('darkWood',-7.65,1.3,7.25,1.95,.11,.52);box('paper',-7.65,1.79,7.25,1.72,.78,.055);
+  // An illustrated dictionary and wooden letter blocks make English a physical art-table activity.
+  const lexiconX=-7.65,lexiconZ=7.25;
+  box('darkWood',lexiconX,1.3,lexiconZ,1.95,.11,.72);
+  box('coral',lexiconX,1.39,lexiconZ,1.22,.07,.66);
+  box('paper',lexiconX-.29,1.45,lexiconZ,.55,.045,.58,0,0,-.035);
+  box('paper',lexiconX+.29,1.45,lexiconZ,.55,.045,.58,0,0,.035);
+  box('darkWood',lexiconX,1.46,lexiconZ,.045,.075,.63);
   for(let i=0;i<4;i++){
-   const x=-8.22+i*.38;
-   box(['blue','coral','green','purple'][i],x,1.83,7.297,.29,.55,.025);
-   box('paper',x,1.63,7.316,.19,.035,.018);
+   const x=lexiconX-.54+i*.36,y=1.68+(i%2)*.035;
+   box(['blue','coral','green','purple'][i],x,y,lexiconZ+.43,.28,.28,.28,0,(i-1.5)*.06,0);
+   box('paper',x,y+.145,lexiconZ+.43,.19,.025,.19);
+   const face=new T.Mesh(new T.PlaneGeometry(1,1),letterMaterial('ABCD'[i]));face.position.set(x,y,lexiconZ+.577);face.scale.set(.17,.17,1);group.add(face);
   }
-  for(const x of [-8.41,-6.89])box('metal',x,1.48,7.25,.055,.58,.08);
+  group.userData.artWorkshopPhysicalExhibits={english:{kind:'open-picture-dictionary-and-letter-blocks',bookPages:2,letterBlocks:4,visibleLetterFaces:4,targetId:'artwork_english'}};
   // Warm track heads illuminate the artwork while keeping the actual room geometry prominent.
   const muralLight=new T.SpotLight(0xffe6c4,.85,15,Math.PI/5,.48,1.3);muralLight.position.set(-1.5,4.12,-8.7);muralLight.target.position.set(0,2.8,-11.5);group.add(muralLight,muralLight.target);
   for(const x of [-7,7]){const fill=new T.PointLight(0xffeacb,.32,8,2);fill.position.set(x,3.6,4.5);group.add(fill);}
@@ -175,7 +182,7 @@
   target('glue','紙鱗片膠水 · GLUE',.05,1.48,-.75,1.4,1.2,1.3);
   target('marker','彩色筆盤 · MARKER',4.0,1.53,-.78,2.3,1.2,1.2);
   target('art','彩繪作品桌 · ART',7.85,2.0,4.15,3.2,3.2,2.1);
-  target('english','雙語作品卡 · ENGLISH',-7.65,1.78,7.25,2.45,1.55,1.0);
+  target('english','繪本與字母積木 · ENGLISH',-7.65,1.65,7.4,2.45,1.35,1.0);
   const exit=target('exit','校園走廊出口 · 回新港國小',0,1.45,10.8,3.1,2.4,1.1);
   exit.userData.onClick=()=>{if(manager.switchZone('zone12')){w.player.pos.set(8.1,1.6,8.2);w.player.yaw=Math.PI;w.adventureProgress?.save(true);}};
   group.userData.artWorkshopDetails={courtyardWindows:windowViewCount,stools:stoolCount,sinkBasins:2,dryingRackShelves:4};

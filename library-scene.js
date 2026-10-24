@@ -10,7 +10,7 @@
  ];
  function build(manager,group){
   const T=root.THREE,w=manager.world;
-  const geo={box:new T.BoxGeometry(1,1,1),panel:new T.PlaneGeometry(1,1),cylinder:new T.CylinderGeometry(1,1,1,12),sphere:new T.SphereGeometry(1,12,8),torus:new T.TorusGeometry(1,.07,6,20)};
+  const geo={box:new T.BoxGeometry(1,1,1),panel:new T.PlaneGeometry(1,1),cylinder:new T.CylinderGeometry(1,1,1,12),cone:new T.ConeGeometry(1,1,12),sphere:new T.SphereGeometry(1,12,8),torus:new T.TorusGeometry(1,.07,6,20)};
   const atlas=(key,row,column,fallback)=>manager.getAtlasTexture?.(key,row,column)||fallback||null;
   const terrazzoMap=atlas('libraryMaterialAtlas',0,0,manager.tex.libraryTerrazzo||manager.tex.schoolTerrazzo),oakMap=atlas('libraryMaterialAtlas',0,1,manager.tex.libraryWood||manager.tex.restaurantWood),orangeMap=atlas('libraryMaterialAtlas',1,0,null),screenMap=atlas('libraryMaterialAtlas',1,1,null);
   function repeat(texture,x,y){if(texture){texture.wrapS=texture.wrapT=T.RepeatWrapping;texture.repeat.set(x,y);}return texture;}
@@ -159,12 +159,42 @@
   for(const x of [-5,0,5])for(const z of [-2,4]){
    box('steel',x,7.02,z,.035,.62,.035);box('white',x,6.68,z,1.45,.11,.33);const lamp=new T.PointLight(0xffe5b9,.36,9,2);lamp.position.set(x,6.45,z);group.add(lamp);
   }
-  // Small illustrated reading panels add color to the tall room without competing with its real fixtures.
-  for(const [x,color,word]of [[-4.8,'orange','STORY'],[0,'teal','READ'],[4.8,'green','QUIET']]){
-   box('wood',x,2.55,-11.95,3.2,1.55,.13);box(color,x,2.55,-11.84,2.96,1.31,.06);
-   for(let i=0;i<5;i++)box(['bookRed','bookGold','bookBlue','bookGreen','white'][i],x-1.08+i*.54,2.4,-11.79,.34,.62,.035);
-   box('white',x,3.03,-11.78,2.45,.09,.04);
+  // A low physical display shelf adds real book spines in place of three wall panels.
+  for(const x of [-4.8,0,4.8]){
+   box('wood',x,2.34,-11.87,3.1,.12,.42);
+   for(let i=0;i<9;i++){
+    const height=.34+(i%3)*.08,depth=.13+(i%2)*.035;
+    box(['bookRed','bookGold','bookBlue','bookGreen'][i%4],x-1.22+i*.305,2.4+height/2,-11.79, .2,height,depth,0,0,(i%4===0?-.05:.025));
+   }
+   box('white',x,2.43,-11.68,.58,.07,.25);
   }
+  function storybookExhibit(kind,x,z){
+   const exhibit=new T.Group();exhibit.name='library-storybook-'+kind;exhibit.position.set(x,1.02,z);exhibit.userData.libraryExhibit={kind,physical:true};group.add(exhibit);
+   const part=(shape,key,px,py,pz,sx,sy,sz,rz=0)=>mesh(shape,key,px,py,pz,sx,sy,sz,0,0,rz,exhibit,true);
+   part('box','teal',0,.07,0,1.28,.1,.78);
+   part('box','white',-.3,.145,0,.58,.045,.68,-.035);part('box','white',.3,.145,0,.58,.045,.68,.035);
+   part('box','bookGold',0,.15,-.02,.035,.065,.7);
+   if(kind==='boring'){
+    // A reader dozes beside the open book; a tilted head and closed eyes carry the emotion.
+    part('sphere','bookRed',.02,.38,-.05,.24,.25,.2,-.38);
+    part('sphere','yellow',-.24,.53,-.09,.18,.18,.17,-.35);
+    part('box','dark',-.32,.56,.065,.09,.018,.018,-.18);
+    part('box','dark',-.19,.58,.065,.085,.018,.018,-.18);
+    part('sphere','bookGold',.35,.31,-.09,.09,.1,.08);
+   }else{
+    // A pop-up castle, story tree and glowing moon turn EXCITING into a tiny book scene.
+    part('box','bookBlue',-.24,.34,-.04,.22,.38,.2);
+    part('box','bookRed',-.24,.32,.09,.28,.08,.04);
+    part('cone','bookGold',-.24,.61,-.04,.18,.2,.18);
+    part('cylinder','bookGreen',.31,.31,-.06,.055,.34,.055);
+    part('sphere','bookGreen',.31,.52,-.06,.23,.24,.23);
+    const star=part('torus','yellow',.37,.52,.12,.12,.12,.12);star.rotation.x=Math.PI/2;
+    part('sphere','bookRed',-.02,.36,.13,.12,.12,.12);
+   }
+   return exhibit;
+  }
+  const boringStory=storybookExhibit('boring',-3.4,3.2),excitingStory=storybookExhibit('exciting',2,7.1);
+  group.userData.libraryPhysicalExhibits={boring:{kind:'sleepy-reader-open-storybook',object:boringStory.name},exciting:{kind:'pop-up-adventure-storybook',object:excitingStory.name}};
   // Eight targets correspond to real fixtures or clear reading areas in the room.
   target('shelf','階梯下故事書架',-8.95,1.35,-2.25,2.5,2.7,2.1);
   target('story','精選故事展示架',5.05,1.6,-8.35,2.8,2.5,2.1);
@@ -172,8 +202,8 @@
   target('teacher','圖書館服務桌',0,1.5,-9.2,3.2,2.3,1.8);
   target('study','共讀木桌',2,1.3,3.2,4.1,2.5,2.4);
   target('quiet','窗邊安靜閱讀角',8.7,1.6,-3.4,2.8,2.6,2.5);
-  target('boring','故事心情卡',-3.4,1.7,3.2,3.7,2.5,2.3);
-  target('exciting','彩色結局展示',2,1.5,7.1,4.4,2.5,2.6);
+  target('boring','睡眼故事書 · BORING',-3.4,1.55,3.2,2.2,1.5,1.25);
+  target('exciting','立體冒險繪本 · EXCITING',2,1.6,7.1,2.2,1.7,1.3);
   const exit=target('exit','回到新港國小校園',0,1.7,12.05,3.4,2.4,1.2);exit.userData.onClick=()=>{if(manager.switchZone('zone12'))w.adventureProgress?.save(true);};
   group.updateMatrixWorld(true);const batches=new Map();for(const o of staticMeshes){const key=o.geometry.uuid+':'+o.material.uuid;if(!batches.has(key))batches.set(key,[]);batches.get(key).push(o);}for(const items of batches.values()){if(items.length<3)continue;const inst=new T.InstancedMesh(items[0].geometry,items[0].material,items.length);items.forEach((o,i)=>inst.setMatrixAt(i,o.matrix));inst.castShadow=inst.receiveShadow=true;group.add(inst);for(const o of items)o.parent.remove(o);}
   const hemi=new T.HemisphereLight(0xeaf1ee,0x615c4c,.43);group.add(hemi);const sun=new T.DirectionalLight(0xffefd2,.56);sun.position.set(-8,11,5);sun.target.position.set(1,1,-6);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-18,right:18,top:18,bottom:-18,near:.5,far:40});group.add(sun,sun.target);
