@@ -103,8 +103,8 @@ zone12 校舍、zone14 溫室、zone15 氣象觀測台、zone16 潮間帶、zone
 
 ## 雲端發布追記（2026-10-26）
 
-- 已推送至 `main`：`3d6daba544084b82b8dd3f884810980937164709`（`fix: align mission gates and scene clues across realms`）。GitHub API 回讀的 `main` head 與本機提交一致。
-- GitHub Pages `pages build and deployment` 工作流程 run `40257956056` 對應上述提交，狀態 `completed / success`。
+- 已推送至 `main`：`1cb0d0afbe3f0a8f9287bd7d76fb99dc095111e0`（`fix: verify GEPT vocabulary source and level alignment`），包含原始 GEPT 字表校正、zone8 核心詞與延伸詞標示，以及 schoolCore/FIND 同步。
+- GitHub Pages `pages build and deployment` 工作流程 run `40259973412` 對應上述提交，狀態 `completed / success`；GitHub API 回讀的 `main` head 與本機提交一致。
 - 實際開啟正式網址 `https://hs5743.github.io/whimsy-forest-escape/`，頁面標題為「英語魔法探險家：秘境逃脫任務」，場景素材顯示已就緒並載入機場抵達提示。這證明首頁與主場景資源可載入；未走完 21 關，也未完成關卡內真實口說與存檔驗證。
 - `npm run build:gas` 已同步產生本機後台發布檔，但沒有修改 Apps Script 編輯器或建立新 Apps Script 部署；GitHub Pages 推送不會自動更新 GAS。後台驗收仍須讀取目前正式執行版本確認。
 - 本次自動化驗收為 `npm test` 352/352 通過、`git diff --check` 通過。測試不等同真實麥克風辨識。
