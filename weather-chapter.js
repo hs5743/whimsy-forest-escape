@@ -29,13 +29,13 @@
  }
  const lessons=[
   ['觀測任務','We study the weather.','氣象觀測員邀請你整理今天的紀錄。先查看觀測台工作單，認出本次任務主題，再口說 WEATHER。'],
-  ['雲況觀察','It is cloudy today.','觀察圓頂天窗：厚雲遮住大部分天空，陽光變得柔和。選 CLOUDY，然後口說 CLOUDY。'],
-  ['雨量紀錄','Rain falls into the gauge.','看雨量筒中落下的水滴。這裡觀察的是從天空落下的水，不是風，選 RAIN 再口說 RAIN。'],
-  ['今日天氣日誌','It is rainy today.','查看日誌上的句子。RAIN 是雨；RAINY 用來形容下雨的天氣。日誌要填入形容詞 RAINY。'],
-  ['日照觀測','It is sunny now.','日照板旁的天空轉晴，太陽照亮觀測台。選 SUNNY 描述晴朗的天氣。'],
+  ['雲況觀察','It is cloudy today.','觀察圓形雲況盤上的雲朵圖示；依圖選 CLOUDY，再口說 CLOUDY。此處辨認圖示，不代表即時天候。'],
+  ['雨量紀錄','Rain falls into the gauge.','觀察雨量筒與刻度，選出代表降雨的 RAIN，再口說 RAIN；場景沒有即時降雨動畫。'],
+  ['今日天氣日誌','It is rainy today.','在天氣日誌面板完成雨天詞彙練習。RAIN 是「雨」，RAINY 用來形容下雨的天氣；選 RAINY 再口說。'],
+  ['日照觀測','It is sunny today.','觀察日照感測器與面板上的日照標記，選 SUNNY 描述晴朗天氣；天空不會因答案改變。'],
   ['風力觀測','It is windy on the hill.','風杯正在旋轉，風向袋也被吹起。選 WINDY 描述風勢明顯的天氣。'],
-  ['溫度讀值','It is hot today.','溫度計停在 31°C。依照牌上的圖例，這個讀值是 HOT，不是 COLD。'],
-  ['雨滴觸感','The raincoat is wet.','觀察雨衣表面的水珠。摸起來有水、不是乾燥的，選 WET 並口說 WET。']
+  ['溫度讀值','It is hot today.','觀察百葉箱中的溫度感測器和紅色溫度標記，選 HOT；場景沒有可讀的 31°C 數字，因此不以特定溫度過關。'],
+  ['雨衣上的水珠標記','The raincoat is wet.','觀察雨衣上的藍色水珠標記，選 WET 並口說通過；這是詞彙提示，不模擬觸摸或真實濕度。']
  ];
  function hint(raw){const s=validate(raw)||initial();return {key:'zone21:'+JSON.stringify(s),word:null,targetId:'weather_'+(places[s.stage]||'exit'),clues:s.stage===8?['今日天氣紀錄已完成。','沿南側出口返回雲頂觀測站，或回大廳複習八個新字。']:[lessons[s.stage][2],'觀測完成後，還要口說 '+words[s.stage]+'。']};}
  const api={words,places,choices,lessons,initial,validate,solved,canSpeak,transition,hint};root.WeatherChapter=api;if(typeof module!=='undefined')module.exports=api;

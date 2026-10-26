@@ -415,47 +415,47 @@ test('restored study stones remain collectible before pickup and disappear after
 });
 
 const Q=require('../realm-quests.js');
-const questDoneStates={zone2:{cart:[2,1,0],paid:true},zone3:{tool:'WATER',care:[true,true,true]},zone4:{equipment:'BALL',stage:3},zone5:{hour:8,minute:30,platform:2,boarded:true},zone6:{x:3,y:0},zone7:{object:'MOON',angle:90,aligned:true},zone8:{gear:['COAT','GLOVES','BOOTS'],heat:2,ready:true},zone9:{order:['READ','THINK','WRITE'],sealed:true},zone10:{notes:['C','E','G','C'],played:true}};
+const questDoneStates={zone2:{cart:[2,1,0],paid:true,spoken:{APPLE:2,MILK:1}},zone3:{tool:'WATER',care:[true,true,true],spoken:['TREE','RABBIT','BIRD']},zone4:{equipment:'BALL',stage:3,ballSpoken:true},zone5:{hour:8,minute:30,platform:2,boarded:true,spoken:['TIME','TRAIN']},zone6:{x:3,y:0,boatSpoken:true,windSpoken:true},zone7:{object:'MOON',angle:90,aligned:true,moonSpoken:true},zone8:{gear:['COAT','GLOVES','BOOTS'],heat:2,ready:true,spokenGear:['COAT','GLOVES','BOOTS'],warmSpoken:true},zone9:{order:['READ','THINK','WRITE'],spoken:['READ','THINK','WRITE'],sealed:true},zone10:{notes:['C','E','G','C'],played:true,musicSpoken:true}};
 function solveQuest(id,actions){let s=Q.initial(id);for(const a of actions)s=Q.transition(id,s,a).state;return s;}
 test('market requires the exact shopping list, not just any four-coin basket',()=>{
  let s=solveQuest('zone2',[{type:'quantity',index:2,value:2},{type:'pay'}]);assert.equal(Q.solved('zone2',s),false);
- s=solveQuest('zone2',[{type:'quantity',index:0,value:2},{type:'quantity',index:1,value:1},{type:'pay'}]);assert.equal(Q.solved('zone2',s),true);
+ s=solveQuest('zone2',[{type:'quantity',index:0,value:2},{type:'quantity',index:1,value:1},{type:'speak',value:'APPLE'},{type:'speak',value:'APPLE'},{type:'speak',value:'MILK'},{type:'pay'}]);assert.equal(Q.solved('zone2',s),true);
 });
 test('garden care accepts partners in any order but rejects the wrong tool',()=>{
- let s=Q.transition('zone3',Q.initial('zone3'),{type:'care',index:1}).state;assert.equal(s.care[1],false);
- s=solveQuest('zone3',[{type:'tool',value:'SEEDS'},{type:'care',index:2},{type:'tool',value:'LEAF'},{type:'care',index:1},{type:'tool',value:'WATER'},{type:'care',index:0}]);assert.equal(Q.solved('zone3',s),true);
+ let s=Q.transition('zone3',Q.initial('zone3'),{type:'speak',value:'RABBIT'}).state;assert.equal(s.care[1],false);
+ s=solveQuest('zone3',[{type:'tool',value:'SEEDS'},{type:'speak',value:'BIRD'},{type:'tool',value:'LEAF'},{type:'speak',value:'RABBIT'},{type:'tool',value:'WATER'},{type:'speak',value:'TREE'}]);assert.equal(Q.solved('zone3',s),true);
 });
 test('sports relay needs the ball and ordered actions, with a retry after a mistake',()=>{
- let s=solveQuest('zone4',[{type:'move',value:'RUN'}]);assert.equal(s.stage,0);
- s=solveQuest('zone4',[{type:'equipment',value:'BALL'},{type:'move',value:'RUN'},{type:'move',value:'SOCCER'}]);assert.equal(s.stage,0);
- for(const value of ['RUN','JUMP','SOCCER'])s=Q.transition('zone4',s,{type:'move',value}).state;assert.equal(Q.solved('zone4',s),true);
+ let s=solveQuest('zone4',[{type:'speak',value:'RUN'}]);assert.equal(s.stage,0);
+ s=solveQuest('zone4',[{type:'equipment',value:'BALL'},{type:'speak',value:'BALL'},{type:'speak',value:'RUN'},{type:'speak',value:'SOCCER'}]);assert.equal(s.stage,0);
+ for(const value of ['RUN','JUMP','SOCCER'])s=Q.transition('zone4',s,{type:'speak',value}).state;assert.equal(Q.solved('zone4',s),true);
 });
 test('station validates both time and platform and preserves a partially adjusted clock',()=>{
  let s=solveQuest('zone5',[{type:'set',key:'hour',value:8},{type:'set',key:'minute',value:30},{type:'board'}]);assert.equal(Q.solved('zone5',s),false);assert.equal(Q.validateState('zone5',s).minute,30);
- s=Q.transition('zone5',s,{type:'set',key:'platform',value:2}).state;s=Q.transition('zone5',s,{type:'board'}).state;assert.equal(Q.solved('zone5',s),true);
+ s=Q.transition('zone5',s,{type:'set',key:'platform',value:2}).state;s=Q.transition('zone5',s,{type:'speak',value:'TIME'}).state;s=Q.transition('zone5',s,{type:'speak',value:'TRAIN'}).state;s=Q.transition('zone5',s,{type:'board'}).state;assert.equal(Q.solved('zone5',s),true);
 });
 test('harbor cannot sail through reefs or past shore and supports alternate valid routes',()=>{
  let s=Q.initial('zone6');assert.deepEqual(Q.transition('zone6',s,{type:'sail',value:'south'}).state,s);
  s=Q.transition('zone6',s,{type:'sail',value:'east'}).state;assert.deepEqual(Q.transition('zone6',s,{type:'sail',value:'north'}).state,s);
- for(const value of ['west','north','north','east','east','east'])s=Q.transition('zone6',s,{type:'sail',value}).state;assert.equal(Q.solved('zone6',s),true);
- const alternate=solveQuest('zone6',['north','north','east','east','south','east','north'].map(value=>({type:'sail',value})));assert.equal(Q.solved('zone6',alternate),true);
+ s=Q.transition('zone6',s,{type:'speak',value:'BOAT'}).state;for(const value of ['north','north','east','east','east'])s=Q.transition('zone6',s,{type:'sail',value}).state;s=Q.transition('zone6',s,{type:'speak',value:'WIND'}).state;assert.equal(Q.solved('zone6',s),true);
+ const alternate=solveQuest('zone6',[{type:'speak',value:'BOAT'},...['north','north','east','east','south','east','north'].map(value=>({type:'sail',value})),{type:'speak',value:'WIND'}]);assert.equal(Q.solved('zone6',alternate),true);
 });
 test('observatory requires moon plus east, not just a correct angle',()=>{
  let s=solveQuest('zone7',[{type:'rotate'},{type:'align'}]);assert.equal(Q.solved('zone7',s),false);
- s=Q.transition('zone7',s,{type:'object',value:'MOON'}).state;s=Q.transition('zone7',s,{type:'align'}).state;assert.equal(Q.solved('zone7',s),true);
+ s=Q.transition('zone7',s,{type:'object',value:'MOON'}).state;s=Q.transition('zone7',s,{type:'speak',value:'MOON'}).state;s=Q.transition('zone7',s,{type:'align'}).state;assert.equal(Q.solved('zone7',s),true);
 });
 test('ice preparation rejects extra summer gear and excessive heat',()=>{
- let s=solveQuest('zone8',['COAT','GLOVES','BOOTS','SHORTS'].map(value=>({type:'gear',value})).concat([{type:'heat',value:1},{type:'heat',value:1},{type:'depart'}]));assert.equal(Q.solved('zone8',s),false);
- s=Q.transition('zone8',s,{type:'gear',value:'SHORTS'}).state;s=Q.transition('zone8',s,{type:'heat',value:1}).state;s=Q.transition('zone8',s,{type:'depart'}).state;assert.equal(Q.solved('zone8',s),false);
- s=Q.transition('zone8',s,{type:'heat',value:-1}).state;s=Q.transition('zone8',s,{type:'depart'}).state;assert.equal(Q.solved('zone8',s),true);
+ let s=solveQuest('zone8',['COAT','GLOVES','BOOTS','SHORTS'].map(value=>({type:'speak',value})).concat([{type:'heat',value:1},{type:'heat',value:1},{type:'depart'}]));assert.equal(Q.solved('zone8',s),false);
+ s=Q.transition('zone8',s,{type:'speak',value:'SHORTS'}).state;s=Q.transition('zone8',s,{type:'heat',value:1}).state;s=Q.transition('zone8',s,{type:'depart'}).state;assert.equal(Q.solved('zone8',s),false);
+ s=Q.transition('zone8',s,{type:'speak',value:'WARM'}).state;s=Q.transition('zone8',s,{type:'heat',value:-1}).state;s=Q.transition('zone8',s,{type:'depart'}).state;assert.equal(Q.solved('zone8',s),true);
 });
 test('library seal checks first-next-last and allows cards to be retrieved',()=>{
- let s=solveQuest('zone9',['WRITE','THINK','READ'].map(value=>({type:'card',value})).concat([{type:'seal'}]));assert.equal(Q.solved('zone9',s),false);
- s=Q.transition('zone9',s,{type:'clear'}).state;for(const value of ['READ','THINK','WRITE'])s=Q.transition('zone9',s,{type:'card',value}).state;s=Q.transition('zone9',s,{type:'seal'}).state;assert.equal(Q.solved('zone9',s),true);
+ let s=solveQuest('zone9',['WRITE','THINK','READ'].map(value=>({type:'speak',value})).concat([{type:'seal'}]));assert.equal(Q.solved('zone9',s),false);
+ s=Q.transition('zone9',s,{type:'clear'}).state;for(const value of ['READ','THINK','WRITE'])s=Q.transition('zone9',s,{type:'speak',value}).state;s=Q.transition('zone9',s,{type:'seal'}).state;assert.equal(Q.solved('zone9',s),true);
 });
 test('sky-island melody needs four ordered notes and supports clearing wrong notes',()=>{
  let s=solveQuest('zone10',['C','G','E','C'].map(value=>({type:'note',value})).concat([{type:'play'}]));assert.equal(Q.solved('zone10',s),false);
- s=Q.transition('zone10',s,{type:'clear'}).state;for(const value of ['C','E','G','C'])s=Q.transition('zone10',s,{type:'note',value}).state;s=Q.transition('zone10',s,{type:'play'}).state;assert.equal(Q.solved('zone10',s),true);
+ s=Q.transition('zone10',s,{type:'speak',value:'MUSIC'}).state;s=Q.transition('zone10',s,{type:'clear'}).state;for(const value of ['C','E','G','C'])s=Q.transition('zone10',s,{type:'note',value}).state;s=Q.transition('zone10',s,{type:'play'}).state;assert.equal(Q.solved('zone10',s),true);
 });
 test('realm checkpoints sanitize unknown fields and reject malformed or impossible configurations',()=>{
  for(const [id,state]of Object.entries(questDoneStates)){assert.equal(Q.solved(id,Q.validateState(id,state)),true);assert.equal(Q.transition(id,state,{type:'clear'}).state!==state,true);}

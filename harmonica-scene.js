@@ -27,6 +27,10 @@
     const lines=['第 1 孔 · BLOW 吹 / DRAW 吸','放開滑鍵    C4       D4','按下滑鍵    C♯4      D♯4','氣道切換另一組簧片 → 升半音'];
     q.font='bold 36px sans-serif';for(let i=0;i<4;i++){q.fillStyle=i%2?'#efc86c':'#a3dadd';q.fillText(lines[i],512,270+i*95,920);}
     for(let n=0;n<12;n++){q.fillStyle=n%2?'#d7b469':'#69b8bd';q.fillRect(160+n*60,630,44,18+(n%3)*18);}
+   }else if(kind==='hand'){
+    q.fillStyle='#d5a16e';q.beginPath();q.moveTo(345,540);q.lineTo(300,475);q.lineTo(292,383);q.quadraticCurveTo(298,355,323,362);q.lineTo(338,430);q.lineTo(340,280);q.quadraticCurveTo(349,250,371,274);q.lineTo(380,414);q.lineTo(390,262);q.quadraticCurveTo(402,236,423,265);q.lineTo(421,420);q.lineTo(444,286);q.quadraticCurveTo(459,265,475,293);q.lineTo(457,458);q.lineTo(501,365);q.quadraticCurveTo(522,349,535,374);q.lineTo(476,525);q.quadraticCurveTo(450,570,400,568);q.closePath();q.fill();
+    q.fillStyle='#25363a';q.fillRect(326,459,360,80);q.fillStyle='#d6b675';q.fillRect(326,450,360,8);q.fillRect(326,540,360,8);for(let n=0;n<12;n++){q.fillStyle='#e2c27e';q.fillRect(345+n*27,477,15,44);}
+    q.fillStyle='#f3deb0';q.font='bold 29px sans-serif';q.textAlign='center';q.fillText('雙手握住琴身 · HOLD THE BODY',512,665,900);
    }else if(kind==='direction'){
     q.strokeStyle='#d8b46a';q.lineWidth=6;q.beginPath();q.moveTo(150,470);q.lineTo(870,260);q.stroke();q.fillStyle='#9ed3d2';for(let n=0;n<12;n++){q.beginPath();q.arc(150+n*65,470-n*19,13,0,Math.PI*2);q.fill();}
     q.font='bold 38px sans-serif';q.fillStyle='#f1d399';q.fillText('LEFT  ←  低音                 高音  →  RIGHT',512,585,915);q.font='26px sans-serif';q.fillText('吹嘴朝向演奏者 · 按鈕在右手側',512,646);
@@ -157,7 +161,8 @@
   for(const x of [-5.3,5.3]){mesh('round','teal',x,.48,7,3,.55,.95);b('wood',x,.18,7,2.6,.35,.65);b('gold',x,.66,7.45,3,.035,.05);}
   target('small','完整口琴 · SMALL',0,1.7,.2,3,1.6,1);
   target('mouth','吹嘴與氣流 · MOUTH',-8,1.7,5,3,1.6,1);
-  target('hand','分層簧片展示 · HAND',-8,1.85,-11.55,3,2,1);
+  panel('hand','HAND · 握琴姿勢','雙手持握口琴琴身',-8,3.45,-14.2,3.6,2.35);
+  target('hand','握琴姿勢圖示 · HAND',-8,2.85,-13.65,3.8,2.5,1.3);
   target('left','低音方向 · LEFT',-10,1.8,-1.4,2,1.7,1);
   target('right','高音方向 · RIGHT',10,1.8,-1.4,2,1.7,1);
   target('high','滑鍵變音台 · HIGH',8,1.8,-11.55,3,1.7,1);

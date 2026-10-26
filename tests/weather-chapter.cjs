@@ -35,7 +35,7 @@ test('weather vocabulary is in the supplied GEPT reference and unique among new 
 });
 
 test('weather branch opens only after the cloud observatory puzzle and returns to its parent',()=>{
- let s=Q.initial('zone7');s=Q.transition('zone7',s,{type:'object',value:'MOON'}).state;s=Q.transition('zone7',s,{type:'rotate'}).state;s=Q.transition('zone7',s,{type:'align'}).state;
+ let s=Q.initial('zone7');s=Q.transition('zone7',s,{type:'object',value:'MOON'}).state;s=Q.transition('zone7',s,{type:'speak',value:'MOON'}).state;s=Q.transition('zone7',s,{type:'rotate'}).state;s=Q.transition('zone7',s,{type:'align'}).state;
  assert.equal(Q.solved('zone7',s),true);assert.equal(Q.canTravel('zone7','zone21',{}),false);assert.equal(Q.canTravel('zone7','zone21',{zone7:s}),true);
  assert.equal(Q.canTravel('zone21','zone7',{}),true);assert.equal(Q.canTravel('zone21','zone3',{}),false);
  const map=Q.sanitizeMap({zone21:at(5)});assert.equal(map.zone21.stage,5);
@@ -53,7 +53,7 @@ test('weather station geometry is deterministic, finite, targetable and keeps th
  assert.equal(f.landscapes[0][2],'zone21');assert.equal(f.landscapes[0][3],f.weatherSky,'the weather yard uses its generated local panorama');
  f.g.traverse(o=>{if(!o.isMesh)return;meshes++;for(const value of o.geometry.attributes.position.array)assert.ok(Number.isFinite(value));if(o.isInstancedMesh){instances+=o.count;for(const value of o.instanceMatrix.array)assert.ok(Number.isFinite(value));}});
  assert.ok(meshes<180,meshes);assert.ok(instances>120,instances);assert.equal(f.world.interactables.length,10);
- let yardGrassUsed=false,hasOversizedRoof=false;f.g.traverse(o=>{if(o.isMesh&&o.material?.map===f.yardTexture)yardGrassUsed=true;if(o.geometry?.type==='BoxGeometry'&&o.position.y>3.5&&o.geometry.parameters.width*o.scale.x>8&&o.geometry.parameters.depth*o.scale.z>5)hasOversizedRoof=true;});assert.ok(yardGrassUsed,'yard grass is rendered from the dedicated grass texture');assert.equal(hasOversizedRoof,false,'the measuring field remains open to the sky');
+ let yardGrassUsed=false,hasOversizedRoof=false,rainBeads=0;f.g.traverse(o=>{if(o.isMesh&&o.material?.map===f.yardTexture)yardGrassUsed=true;if(o.geometry?.type==='BoxGeometry'&&o.position.y>3.5&&o.geometry.parameters.width*o.scale.x>8&&o.geometry.parameters.depth*o.scale.z>5)hasOversizedRoof=true;if(o.userData?.sceneRole==='raincoat-water-bead')rainBeads++;});assert.ok(yardGrassUsed,'yard grass is rendered from the dedicated grass texture');assert.equal(hasOversizedRoof,false,'the measuring field remains open to the sky');assert.equal(rainBeads,3,'the WET clue is visible on the physical raincoat');
  assert.doesNotMatch(fs.readFileSync(path.join(base,'weather-scene.js'),'utf8'),/CanvasTexture|OPEN AIR OBSERVATORY|WEATHER OBSERVATION|CLOUD WINDOW|RAIN GAUGE|WIND METER|THERMOMETER/);
  for(let i=0;i<=8;i++)assert.ok(f.world.interactables.some(o=>o.userData.id===C.hint(at(i)).targetId),C.hint(at(i)).targetId);
  const blocked=(x,z)=>S.colliders().some(c=>x>c.minX-.3&&x<c.maxX+.3&&z>c.minZ-.3&&z<c.maxZ+.3);

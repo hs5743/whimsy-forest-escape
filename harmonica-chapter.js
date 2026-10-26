@@ -4,8 +4,8 @@
  const words=['SMALL','MOUTH','HAND','LEFT','RIGHT','HIGH','PLAY','SONG'];
  const blow=[60,64,67,72,72,76,79,84,84,88,91,96],draw=[62,65,69,71,74,77,81,83,86,89,93,95];
  const melody=[{hole:1,air:'BLOW',slide:false},{hole:1,air:'DRAW',slide:false},{hole:2,air:'BLOW',slide:false},{hole:2,air:'DRAW',slide:false},{hole:3,air:'BLOW',slide:false}];
- const allowed=[['','SLIDE','DIATONIC','RECORDER'],['','MOUTHPIECE','COVER','BUTTON'],['','REED','COVER','VALVE'],['','LEFT','RIGHT'],['','LEFT','RIGHT'],['','HALF','OCTAVE','VOLUME']];
- const correct=['SLIDE','MOUTHPIECE','REED','LEFT','RIGHT','HALF'],experiments=['BLOW:0','DRAW:0','BLOW:1','DRAW:1'];
+ const allowed=[['','SLIDE','DIATONIC','RECORDER'],['','MOUTHPIECE','COVER','BUTTON'],['','HAND','HEAD','FOOT','REED','COVER','VALVE'],['','LEFT','RIGHT'],['','LEFT','RIGHT'],['','HALF','OCTAVE','VOLUME']];
+ const correct=['SLIDE','MOUTHPIECE','HAND','LEFT','RIGHT','HALF'],experiments=['BLOW:0','DRAW:0','BLOW:1','DRAW:1'];
  const initial=()=>({stage:0,spoken:[],choices:['','','','','',''],explored:[],melody:[]});
  const eq=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
  function note(hole,air,slide){if(!Number.isInteger(hole)||hole<1||hole>12||!['BLOW','DRAW'].includes(air)||typeof slide!=='boolean')return null;if(hole===12&&air==='DRAW'&&slide)return 98;return (air==='BLOW'?blow:draw)[hole-1]+(slide?1:0);}
@@ -13,7 +13,8 @@
  function proof(s,n){return n<6?s.choices[n]===correct[n]&&(n!==5||s.explored.length===4):n===6?s.melody.length===5:true;}
  function validate(raw){
   if(!raw||!Number.isInteger(raw.stage)||raw.stage<0||raw.stage>8||!Array.isArray(raw.spoken)||raw.spoken.length>8||raw.spoken.some((w,i)=>w!==words[i])||!Array.isArray(raw.choices)||raw.choices.length!==6||raw.choices.some((v,i)=>!allowed[i].includes(v))||!Array.isArray(raw.explored)||raw.explored.length>4||new Set(raw.explored).size!==raw.explored.length||raw.explored.some(x=>!experiments.includes(x))||!Array.isArray(raw.melody)||raw.melody.length>5||raw.melody.some((v,i)=>!eq(v,melody[i])))return null;
-  const s={stage:Math.min(raw.stage,raw.spoken.length),spoken:[...raw.spoken],choices:[...raw.choices],explored:[...raw.explored],melody:raw.melody.map(v=>({...v}))};
+  const choices=[...raw.choices];if(choices[2]==='REED')choices[2]='HAND';
+  const s={stage:Math.min(raw.stage,raw.spoken.length),spoken:[...raw.spoken],choices,explored:[...raw.explored],melody:raw.melody.map(v=>({...v}))};
   for(let n=0;n<s.stage;n++)if(!proof(s,n)){s.stage=n;break;}s.spoken=s.spoken.slice(0,s.stage);return s;
  }
  const solved=raw=>validate(raw)?.stage===8;
@@ -35,7 +36,7 @@
  const clues=[
  ['在入口選出有側邊滑鍵的半音階口琴，再口說 SMALL。','它體積小，卻能演奏半音；常見 12 孔款有 48 片簧片。'],
  ['找出嘴巴接觸與氣流進出的吹嘴，再口說 MOUTH。','吹嘴孔通往琴格與簧片，不是側邊滑鍵。'],
- ['在分層展示找出會振動發聲的金屬簧片，再口說 HAND。','琴蓋保護內部；琴格分隔氣道；簧片發聲；常见音閥協助控制漏氣。'],
+ ['觀察握琴姿勢圖示，選出演奏者用來握住口琴的 HAND，再口說 HAND。','口琴由雙手持握；內部的金屬簧片受氣流振動發聲。圖示說明姿勢，遊戲不偵測手部動作。'],
  ['從演奏者視角找較低音的左側，再口說 LEFT。','此館採常見 C 調獨奏排列：左低、右高。'],
  ['找出較高音的右側，再口說 RIGHT。','吹嘴朝向自己，滑鍵按鈕在右手側。'],
  ['在變音台試第 1 孔四種吹吸／滑鍵組合，選按鍵變化，再口說 HIGH。','C→C♯、D→D♯：滑鍵切換另一組簧片，升高半音。'],

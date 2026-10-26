@@ -2355,6 +2355,19 @@
     window.completeOnboardingAndEnterGame = completeOnboardingAndEnterGame;
     window.directEnterGame = completeOnboardingAndEnterGame;
 
+    function openWorldMapFocusedAt(zoneId) {
+      const open=(attempts=0)=>{
+        const zm=window.world3D?.zoneManager,modal=document.getElementById('worldMapModal');
+        if(!zm||!modal){if(attempts<30)setTimeout(()=>open(attempts+1),80);return;}
+        curWorldMapTab='route';modal.style.display='flex';renderWorldMapRoute();
+        const tabs=[...document.querySelectorAll('#worldMapRouteList .atlas-region-tab')];
+        const zone=zm.zones[zoneId],region=zoneId==='zone12'?'新港校園':null;
+        tabs.find(tab=>tab.textContent.trim()===region)?.click();
+        if(zone){const marker=[...document.querySelectorAll('#worldMapRouteList .atlas-node')].find(node=>node.getAttribute('aria-label')?.startsWith(zone.name+'，'));marker?.click();}
+      };
+      open();
+    }
+
     function quickJumpToZone(zoneId) {
       completeOnboardingAndEnterGame();
       const tryJump = (attempts = 0) => {
@@ -2362,11 +2375,8 @@
           if (zoneId === 'learningHub') {
             window.world3D.switchZone('learningHub', { directAccess: true });
             setTimeout(() => window.LearningHub?.open?.(), 120);
-          } else {
-            window.world3D.switchZone(zoneId, { directAccess: true });
-            if (zoneId === 'zone12') {
-              window.world3D.showToast('🏫 已直達新港國小實境展館！請向左右環視探索校園。');
-            }
+          } else if(zoneId==='zone12') {
+            openWorldMapFocusedAt(zoneId);
           }
         } else if (zoneId === 'learningHub' && window.LearningHub?.open && attempts >= 5) {
           window.LearningHub.open();
@@ -2778,6 +2788,9 @@
       }).forEach(z => {
         const isUnlocked = zm.isZoneUnlocked(z.id);
         const isCurrent = (z.id === curZone.id);
+        const puzzles=window.world3D?.gameState?.realmPuzzles||{};
+        const routeAvailable=window.RealmQuests?.canTravel?window.RealmQuests.canTravel(zm.currentZoneId,z.id,puzzles,{zone1Complete:window.world3D?.gameState?.escaped===true}):true;
+        const routeTarget=isUnlocked&&!routeAvailable?(z.parentZone||curZone.parentZone||null):z.id;
 
         const card = document.createElement('div');
         card.className = `realm-card ${isCurrent ? 'current' : ''} ${isUnlocked ? 'unlocked' : 'locked'}`;
@@ -2792,7 +2805,7 @@
               <div class="realm-sub">${z.englishName} • <span class="realm-topic-tag">${z.topic}</span></div>
             </div>
             <div class="realm-badge ${isUnlocked ? 'badge-open' : 'badge-lock'}">
-              ${isUnlocked ? '已解鎖' : z.parentZone ? z.parentZone==='zone5' ? '完成車站驗票任務解鎖' : z.parentZone==='zone3' ? '完成花園照護任務解鎖' : z.parentZone==='zone12' ? '完成新港迎賓任務解鎖' : z.parentZone==='zone4' ? '完成操場任務解鎖' : z.parentZone==='zone7' ? '完成雲頂觀測任務解鎖' : z.parentZone==='zone21' ? '完成氣象觀測任務解鎖' : '完成市集採買解鎖' : `Lv.${z.reqLevel} 解鎖`}
+              ${isUnlocked ? routeAvailable ? '已解鎖 · 可前往' : '已解鎖 · 請由入口前往' : (zm.getZoneUnlockReasons?.(z.id)||[]).join(' · ') || (z.parentZone ? '完成前置任務解鎖' : `達到 Lv.${z.reqLevel} 並完成前一站解鎖`)}
             </div>
           </div>
           <div class="realm-desc-text">${z.desc}</div>
@@ -2804,9 +2817,9 @@
             ${isCurrent ? `
               <button type="button" class="realm-action-btn btn-here" disabled>📍 目前冒險中</button>
             ` : isUnlocked ? `
-              <button type="button" class="realm-action-btn btn-teleport" onclick="travelToZone('${z.id}')">🚀 施法傳送前往</button>
+              <button type="button" class="realm-action-btn btn-teleport" onclick="travelToZone('${routeTarget||z.id}')">${routeAvailable?'🚀 施法傳送前往':'🧭 先前往入口：'+(zm.zones[routeTarget]?.name||'主線區域')}</button>
             ` : `
-              <button type="button" class="realm-action-btn btn-locked" disabled>🔒 等級未達 Lv.${z.reqLevel}</button>
+              <button type="button" class="realm-action-btn btn-locked" disabled>🔒 尚未完成前置條件</button>
             `}
           </div>
         `;
@@ -2818,7 +2831,7 @@
       if (!window.world3D) return;
       const zm = window.world3D.zoneManager;
       if (zm && !window.world3D.devMode && !zm.isZoneUnlocked(zoneId)) {
-        window.world3D.showToast(`🔒 冒險者等級未達 Lv.${zm.zones[zoneId]?.reqLevel || 1}，請先完成前序空間！`);
+        window.world3D.showToast('🔒 '+(zm.getZoneUnlockReasons?.(zoneId)||[]).join('；'));
         return;
       }
       const success = window.world3D.switchZone(zoneId, { directAccess: true });

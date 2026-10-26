@@ -98,7 +98,7 @@
   label('1960 分校 / 1963 獨立設校',-11.6,2.1,-12.6,5,Math.PI/2);label('2021 新教學大樓落成剪綵',-11.6,2.75,-12.6,4,Math.PI/2);
   target('classroom','教室門口 · CLASSROOM',5,1.55,-10.8,2.5,2.5,.8);
   for(let n=0;n<6;n++)b('white',7,1.12+n*.012,-15,1,.012,.7);label('PAPER · 圖卡材料',7,2.05,-15.4,2.3);target('paper','紙張桌 · PAPER',7,1.5,-14.8);
-  b('white',2,1.12,-15,1.25,.035,.85);for(let n=0;n<5;n++)b(['red','gold','blue','green','wood'][n],2.7,1.16,-15.3+n*.1,.36,.025,.025);label('DRAW · 舞獅圖卡',2,2.05,-15.4,2.3);target('draw','畫圖桌 · DRAW',2,1.5,-14.8);
+  b('white',2,1.12,-15,1.25,.035,.85);for(let n=0;n<5;n++)b(['red','gold','blue','green','wood'][n],2.7,1.16,-15.3+n*.1,.36,.025,.025);label('FIND · 舞獅圖卡',2,2.05,-15.4,2.3);target('draw','圖卡桌 · FIND',2,1.5,-14.8);
   const card=label('LION · 迎賓圖卡',2,1.8,-15.2,1.5);card.visible=false;
 
   // Tiled gate piers and guardhouse, with an open centre for the playable entrance.

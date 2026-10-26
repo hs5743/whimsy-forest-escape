@@ -62,6 +62,7 @@ test('workshop is bounded, walkable through its school door and exposes one phys
  group.traverse(o=>{if(!o.isMesh)return;meshes++;for(const value of o.geometry.attributes.position.array)assert.ok(Number.isFinite(value));if(o.material?.map===floor)usesFloor=true;if(o.material?.map===wall)usesWall=true;if(o.material?.map===wood)usesWood=true;if(o.material?.map===peg)usesPegboard=true;if(o.material?.map===mat)usesMat=true;});
  assert.ok(meshes<120,meshes);assert.equal(world.interactables.length,9);assert.equal(new Set(world.interactables.map(o=>o.userData.id)).size,9);
  assert.ok(usesFloor&&usesWall&&usesWood&&usesPegboard&&usesMat);for(let n=0;n<=8;n++)assert.ok(world.interactables.some(o=>o.userData.id===C.hint(at(n)).targetId),C.hint(at(n)).targetId);
+ assert.equal(world.animators.length,1,'paired gear models have a dedicated visible speed animation');const before=[];group.traverse(o=>{if(o.isGroup&&Math.abs(o.position.x)>4.5&&o.position.y===1.16)before.push(o);});assert.equal(before.length,4);world.animators[0](1);const speeds=before.map(o=>Math.abs(o.rotation.y));assert.deepEqual(speeds.sort((a,b)=>a-b),[1.25,1.25,2.1,2.1]);
  assert.equal(context.MakerspaceScene.bounds.maxZ,12.5);assert.ok(context.MakerspaceScene.colliders().length>=8);
 });
 

@@ -7,11 +7,11 @@
  const lessons=[
   ['階梯書架','The books are on the shelf.','沿著橘色階梯側邊的書架找一排故事書；放書的層架是 SHELF。'],
   ['故事封面','This is an exciting story.','看看故事展示架上的封面圖卡。封面引出一個 STORY。'],
-  ['閱讀座位','The student is reading.','橘色與綠色閱讀座位留給來讀書的學生；選 STUDENT。'],
-  ['服務櫃台','The teacher can help us.','在圖書館服務桌詢問借閱方式；提供協助的是 TEACHER。'],
+  ['閱讀座位','Students read here.','觀察橘色與綠色閱讀座位和旁邊的書架，選出在這裡閱讀的 STUDENT；本關沒有學生 NPC。'],
+  ['服務櫃台','This is the teacher’s desk.','觀察圖書館服務桌與教學用品，選 TEACHER；這裡是靜態展示，沒有老師 NPC 對話。'],
   ['共讀桌','We study together.','木桌旁有座位與閱讀材料；學生在這裡一起 STUDY。'],
   ['安靜閱讀角','Please be quiet.','進入靠窗閱讀角時放輕聲音，保持 QUIET。'],
-  ['故事心情卡','This story is not boring.','比較兩張讀後心情卡：故事不是無聊的，選 BORING 完成否定句線索。'],
+  ['故事心情卡','This story is boring.','比較兩張讀後心情卡，選出令人覺得無聊的故事，再口說 BORING。'],
   ['精彩結局','The ending is exciting!','最後一頁翻開彩色結局插圖；令人期待、精彩的是 EXCITING。']
  ];
  const initial=()=>({stage:0,spoken:[],choices:Array(8).fill('')});

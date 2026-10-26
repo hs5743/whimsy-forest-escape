@@ -1,12 +1,15 @@
 /* School-inspired adventure; facts and fictional tasks are documented separately. */
 (function(root){
  'use strict';
- const words=['SCHOOL','LISTEN','CLASSROOM','PAPER','DRAW','DRUM','LION','WELCOME'];
+ const words=['SCHOOL','LISTEN','CLASSROOM','PAPER','FIND','DRUM','LION','WELCOME'];
  const initial=()=>({stage:0,spoken:[],history:null,drawing:null,rhythm:[]});
  const rhythmOK=s=>JSON.stringify(s.rhythm)==='[1,1,2]';
  function validate(raw){
-  if(!raw||!Number.isInteger(raw.stage)||raw.stage<0||raw.stage>8||!Array.isArray(raw.spoken)||raw.spoken.length>8||raw.spoken.some((w,i)=>w!==words[i])||![null,1960,1963,2021].includes(raw.history)||![null,'LION','RABBIT','FISH'].includes(raw.drawing)||!Array.isArray(raw.rhythm)||raw.rhythm.length>3||raw.rhythm.some(n=>n!==1&&n!==2))return null;
-  const s={stage:Math.min(raw.stage,raw.spoken.length),spoken:[...raw.spoken],history:raw.history,drawing:raw.drawing,rhythm:[...raw.rhythm]};
+  if(!raw||!Number.isInteger(raw.stage)||raw.stage<0||raw.stage>8||!Array.isArray(raw.spoken)||raw.spoken.length>8||![null,1960,1963,2021].includes(raw.history)||![null,'LION','RABBIT','FISH'].includes(raw.drawing)||!Array.isArray(raw.rhythm)||raw.rhythm.length>3||raw.rhythm.some(n=>n!==1&&n!==2))return null;
+  // Older saves used DRAW for the picture-selection step; preserve that earned step as FIND.
+  const spoken=raw.spoken.map((word,index)=>index===4&&word==='DRAW'?'FIND':word);
+  if(spoken.some((word,index)=>word!==words[index]))return null;
+  const s={stage:Math.min(raw.stage,spoken.length),spoken,history:raw.history,drawing:raw.drawing,rhythm:[...raw.rhythm]};
   if(s.stage>2&&s.history!==1963)s.stage=2;if(s.stage>4&&s.drawing!=='LION')s.stage=4;if(s.stage>6&&!rhythmOK(s))s.stage=6;s.spoken=s.spoken.slice(0,s.stage);return s;
  }
  const solved=raw=>validate(raw)?.stage===8;
@@ -15,12 +18,12 @@
   if(s.stage===8)return {state:s,message:'迎賓準備完成！可以返回冒險操場。'};
   if(a?.type==='speak'){if(!canSpeak(s,a.word))message='先完成線索與前一個口說步驟。';else if(a.verifiedWord!==a.word)message='請先口說 '+a.word+' 並通過辨識。';else{s.spoken.push(a.word);s.stage++;message=s.stage===8?'Welcome! 舞獅迎賓任務完成！':'口說 '+a.word+' 通過！下一個線索是 '+words[s.stage]+'。';}}
   else if(a?.type==='history'&&s.stage===2&&[1960,1963,2021].includes(a.value)){s.history=a.value;message=a.value===1963?'答對了！1963 年獨立設校。接著到右側教室口說 CLASSROOM。':'1960 年是設分校；2021 年是新教學大樓落成。再找找獨立設校的年份。';}
-  else if(a?.type==='drawing'&&s.stage===4&&['LION','RABBIT','FISH'].includes(a.value)){s.drawing=a.value;message=a.value==='LION'?'獅子圖卡選好了，口說 DRAW 才會完成製作。':'迎賓主題是舞獅，請找獅子圖案。';}
+  else if(a?.type==='drawing'&&s.stage===4&&['LION','RABBIT','FISH'].includes(a.value)){s.drawing=a.value;message=a.value==='LION'?'獅子圖卡選好了，口說 FIND 才會完成選圖；DRAW 可在此選修練習。':'迎賓主題是舞獅，請找獅子圖案。';}
   else if(a?.type==='beat'&&s.stage===6&&[1,2].includes(a.value)){if(s.rhythm.length===3)s.rhythm=[];s.rhythm.push(a.value);message=s.rhythm.length===3?(rhythmOK(s)?'鼓點正確！靠近獅頭，口說 LION。':'鼓點不同，按重試後照「咚、咚、鏘」再敲一次。'):'鼓點 '+s.rhythm.length+' / 3';}
   else if(a?.type==='resetBeat'&&s.stage===6){s.rhythm=[];message='鼓點已清空，依咚、咚、鏘重試。';}
   return {state:s,message};
  }
- function hint(raw){const s=validate(raw)||initial(),targets=['school_school','school_listen','school_classroom','school_paper','school_draw','school_drum','school_lion','school_welcome'],clues=[['在校門迎賓桌口說 SCHOOL，接下校園任務。','新竹縣竹北市新港國小邀請小小探險家協助迎賓。'],['穿過北側左邊門口，到閱讀角口說 LISTEN。','聽校史線索，注意分校與獨立設校的年份。'],['在閱讀角選出獨立設校年份，再到右側門口口說 CLASSROOM。','1960 設分校；1963 獨立設校；2021 新教學大樓落成剪綵。'],['在教室的紙張桌口說 PAPER，領取圖卡材料。','右側桌上有一疊白紙。'],['選獅子圖案，再到畫圖桌口說 DRAW。','圖卡要配合學校舞獅迎賓主題。'],['回庭院的鼓台口說 DRUM，準備節奏。','閱讀示範：咚、咚、鏘。'],['在鼓台敲咚、咚、鏘，再靠近獅頭口說 LION。','鼓點錯了可以重試，前面的口說進度保留。'],['到庭院迎賓台口說 WELCOME。','讓獅頭向來賓點頭，完成迎賓！'],['新港迎賓完成！半音階口琴館與校慶彩繪工坊已開放。','從北側校舍可走進口琴展示館，或沿教學樓右側的紫色門前往彩繪工坊。也可由南側校門回操場。']];return {key:'zone12:'+JSON.stringify(s),word:null,targetId:s.stage===2&&s.history!==1963?'school_listen':s.stage===6&&!rhythmOK(s)?'school_drum':targets[s.stage]||'school_harmonica_entry',clues:clues[s.stage]};}
+ function hint(raw){const s=validate(raw)||initial(),targets=['school_school','school_listen','school_classroom','school_paper','school_draw','school_drum','school_lion','school_welcome'],clues=[['在校門迎賓桌口說 SCHOOL，接下校園任務。','新竹縣竹北市新港國小邀請小小探險家協助迎賓。'],['穿過北側左邊門口，到閱讀角口說 LISTEN。','聽校史線索，注意分校與獨立設校的年份。'],['在閱讀角選出獨立設校年份，再到右側門口口說 CLASSROOM。','1960 設分校；1963 獨立設校；2021 新教學大樓落成剪綵。'],['在教室的紙張桌口說 PAPER，領取圖卡材料。','右側桌上有一疊白紙。'],['選獅子圖案，再在圖卡桌口說 FIND，完成「找出獅子圖卡」任務。','DRAW 是選修練習；主線只要求選圖與口說 FIND，不要求真的畫圖。'],['回庭院的鼓台口說 DRUM，準備節奏。','閱讀示範：咚、咚、鏘。'],['在鼓台敲咚、咚、鏘，再靠近獅頭口說 LION。','鼓點錯了可以重試，前面的口說進度保留。'],['到庭院迎賓台口說 WELCOME。','讓獅頭向來賓點頭，完成迎賓！'],['新港迎賓完成！半音階口琴館與校慶彩繪工坊已開放。','從北側校舍可走進口琴展示館，或沿教學樓右側的紫色門前往彩繪工坊。也可由南側校門回操場。']];return {key:'zone12:'+JSON.stringify(s),word:null,targetId:s.stage===2&&s.history!==1963?'school_listen':s.stage===6&&!rhythmOK(s)?'school_drum':targets[s.stage]||'school_harmonica_entry',clues:clues[s.stage]};}
  const api={words,initial,validate,solved,transition,hint,canSpeak};root.SchoolChapter=api;if(typeof module!=='undefined')module.exports=api;
   if(!root.document)return;
  const $=id=>root.document.getElementById(id),world=()=>root.world3D;let place='journal',english='',focus=null;
@@ -33,11 +36,11 @@
  function button(text,fn){const b=root.document.createElement('button');b.type='button';b.textContent=text;b.onclick=fn;return b;}
  function render(message=''){
   const s=validate(state())||initial(),area=$('realmQuestControls');area.replaceChildren();$('realmQuestKicker').textContent='冒險操場支線 · 新港國小';$('realmQuestWin').hidden=s.stage!==8;$('realmQuestNext').textContent='舞獅迎賓完成！可前往半音階口琴展示館或右側的校慶彩繪工坊，也可從南側校門回操場。';$('realmQuestResult').textContent=message;
-  const info={school:['校門 · 接下迎賓任務','SCHOOL','Welcome to our school.','以新竹縣竹北市新港國小特色改編的英語冒險。校園空間為遊戲設計。'],listen:['閱讀角 · 校史線索','LISTEN','The school became independent in 1963.','新港於 1960 年設分校，1963 年獨立設校；2021 年新教學大樓落成剪綵。找出獨立設校年份。'],classroom:['教室門口','CLASSROOM','Go to the classroom.','先在閱讀角找出正確年份，再說出 CLASSROOM 進行圖卡任務。'],paper:['紙張桌 · 領取材料','PAPER','Take the paper.','口說 PAPER 後才會取得迎賓圖卡材料。'],draw:['畫圖桌 · 舞獅圖卡','DRAW','Draw a lion.','選出迎賓主題的圖案，再口說 DRAW 完成圖卡。'],drum:['鼓台 · 節奏準備','DRUM','This is a drum.','先口說 DRUM；再按「咚、咚、鏘」敲出迎賓鼓點。'],lion:['獅頭 · 迎賓排練','LION','This is a lion.','新竹縣政府 2023 年校慶報導介紹了新港的龍鳳舞獅特色。完成鼓點，再口說 LION。'],welcome:['迎賓台 · 最後試煉','WELCOME','Welcome to our school!','口說 WELCOME，完成圖卡、鼓點與獅頭的迎賓準備。']};
+  const info={school:['校門 · 接下迎賓任務','SCHOOL','Welcome to our school.','以新竹縣竹北市新港國小特色改編的英語冒險。校園空間為遊戲設計。'],listen:['閱讀角 · 校史線索','LISTEN','The school became independent in 1963.','新港於 1960 年設分校，1963 年獨立設校；2021 年新教學大樓落成剪綵。找出獨立設校年份。'],classroom:['教室門口','CLASSROOM','Go to the classroom.','先在閱讀角找出正確年份，再說出 CLASSROOM 進行圖卡任務。'],paper:['紙張桌 · 領取材料','PAPER','Take the paper.','口說 PAPER 後才會取得迎賓圖卡材料。'],draw:['圖卡桌 · 找出舞獅圖案','FIND','Find the lion picture.','選出迎賓主題的獅子圖案，再口說 FIND 完成選圖。DRAW 保留為不影響主線的選修口說。'],drum:['鼓台 · 節奏準備','DRUM','This is a drum.','先口說 DRUM；再按「咚、咚、鏘」敲出迎賓鼓點。'],lion:['獅頭 · 迎賓排練','LION','This is a lion.','新竹縣政府 2023 年校慶報導介紹了新港的龍鳳舞獅特色。完成鼓點，再口說 LION。'],welcome:['迎賓台 · 最後試煉','WELCOME','Welcome to our school!','口說 WELCOME，完成圖卡、鼓點與獅頭的迎賓準備。']};
   const i=info[place];$('realmQuestTitle').textContent=i?.[0]||'新港國小：舞獅迎賓任務';english=i?.[2]||'Welcome to our school!';$('realmQuestEnglish').textContent=english;$('realmQuestBrief').textContent=(i?.[3]||hint(s).clues.join(' '))+' 口說完成 '+s.stage+' / 8。';
   if(i&&s.stage<8){if(s.spoken.includes(i[1])){const p=root.document.createElement('p');p.textContent='✓ '+i[1]+' 已口說通過。下一步：'+words[s.stage]+'。';area.append(p);}else{const b=button('口說 '+i[1]+' · 完成此步驟',()=>beginSpeech(i[1]));b.disabled=!canSpeak(s,i[1]);area.append(b);}}
   if(place==='listen'&&s.stage===2)for(const value of [1960,1963,2021])area.append(button(value+' 年',()=>commit({type:'history',value})));
-  if(place==='draw'&&s.stage===4)for(const value of ['LION','RABBIT','FISH'])area.append(button({LION:'獅子圖卡',RABBIT:'兔子圖卡',FISH:'魚圖卡'}[value],()=>commit({type:'drawing',value})));
+  if(place==='draw'&&s.stage===4){for(const value of ['LION','RABBIT','FISH'])area.append(button({LION:'獅子圖卡',RABBIT:'兔子圖卡',FISH:'魚圖卡'}[value],()=>commit({type:'drawing',value})));area.append(button('選修口說 DRAW（不影響主線）',()=>world().openSpeechCard('DRAW',()=>{}, {requireRecognition:true})));}
   if(place==='drum')area.append(button('聽鼓點示範 · 咚 咚 鏘',()=>{for(const [i,value]of [1,1,2].entries())world().scheduleZoneAction(()=>playBeat(value),i*450);}));
   if(place==='drum'&&s.stage===6){for(const value of [1,2])area.append(button(value===1?'咚 · 鼓':'鏘 · 鈸',()=>commit({type:'beat',value})));area.append(button('重試鼓點',()=>commit({type:'resetBeat'})));const p=root.document.createElement('p');p.textContent='目前鼓點：'+s.rhythm.map(n=>n===1?'咚':'鏘').join('、');area.append(p);}
   if(place==='journal'){const p=root.document.createElement('p');p.textContent='已口說：'+(s.spoken.join(' → ')||'尚未開始');area.append(p);area.append(button('返回冒險操場',()=>{close();if(world().zoneManager.switchZone('zone4'))world().adventureProgress?.save(true);}));}

@@ -83,6 +83,8 @@
   const coat=new T.Mesh(new T.ExtrudeGeometry(coatShape,{depth:.12,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:.02,bevelThickness:.02}),mat.yellow);coat.position.set(6.4,1.48,4.31);coat.castShadow=true;coat.receiveShadow=true;group.add(coat);
   mesh('cone','red',6.4,2.25,4.37,.22,.24,.14,Math.PI,0,0);mesh('box','deep',6.4,1.48,4.45,.028,.72,.028);
   for(const y of [1.72,1.92,2.1])mesh('sphere','brass',6.4,y,4.49,.038,.038,.038);
+  // Blue water beads on the displayed coat give the WET vocabulary step a visible clue.
+  for(const [x,y] of [[6.08,1.57],[6.4,1.84],[6.72,1.55]]){const bead=mesh('sphere','blue',x,y,4.49,.075,.11,.045,0,0,0,group,true);bead.userData.sceneRole='raincoat-water-bead';}
   for(const x of [6.22,6.58])mesh('box','blue',x,1.48,4.46,.18,.12,.035,0,0,x<6.4?-.14:.14);
   // Short bench for the observer and a covered storage case on the service path.
   mesh('box','wood',-.1,.55,5.35,2.45,.13,.72);for(const x of [-1.08,.88])for(const z of [5.08,5.62])mesh('cyl','steel',x,.28,z,.045,.56,.045);

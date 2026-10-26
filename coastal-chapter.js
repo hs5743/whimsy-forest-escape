@@ -12,7 +12,7 @@
   ['有趣的發現','It is very interesting.','仔細看看潮池和招潮蟹洞留下的線索；這個發現很有趣，選 INTERESTING。'],
   ['描述方位','The sea is in front of the station.','站在入口觀察站面向海岸，海面就在觀測站前方。選 IN FRONT OF。'],
   ['仔細觀察','Look at the sea.','使用觀景望遠鏡從安全步道仔細觀察，不走進泥灘，也不碰觸生物。'],
-  ['整理垃圾','Do not leave trash here.','找到分類回收桶，把垃圾放進桶內；不要留在海岸上。']
+  ['辨認海岸垃圾','Do not leave trash here.','觀察步道旁的垃圾分類桶，在面板選出 TRASH 並口說通過；此步不會把垃圾模型實際移入桶內。']
  ];
  const initial=()=>({stage:0,spoken:[],choices:Array(8).fill('')});
  function validate(raw){if(!raw||!Number.isInteger(raw.stage)||raw.stage<0||raw.stage>8||!Array.isArray(raw.spoken)||raw.spoken.length>8||raw.spoken.some((v,i)=>v!==words[i])||!Array.isArray(raw.choices)||raw.choices.length!==8||raw.choices.some((v,i)=>!choices[i].includes(v)))return null;const s={stage:Math.min(raw.stage,raw.spoken.length),spoken:raw.spoken.slice(),choices:raw.choices.slice()};for(let i=0;i<s.stage;i++)if(s.choices[i]!==words[i]){s.stage=i;break;}s.spoken=s.spoken.slice(0,s.stage);return s;}

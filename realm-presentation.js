@@ -20,10 +20,11 @@
   symbols.push('<path d="M3 21V8l9-6 9 6v13H3ZM12 2v19M3 8h18M7 21v-6m10 6v-6M8 12h8"/>');
   symbols.push('<path d="M3 17h18M5 14h14l-2-4H7l-2 4Zm3 0v4m8-4v4m-7-9 2-3 2 3m2-5v3m-7-2-2-2m11 0 2-2"/>','<path d="M4 17c3-7 5-7 8 0s5 7 8 0M3 20h18M7 8l5-5 5 5M12 3v7"/>');
   symbols.push('<path d="M4 20V9l8-6 8 6v11M3 9h18M8 20v-5h8v5M12 3V1m-5 4-2-2m12 2 2-2"/>');
-  const lockLabel=zone=>zone.parentZone==='zone5'?'完成車站驗票任務解鎖':zone.parentZone==='zone3'?'完成花園照護任務解鎖':zone.parentZone==='zone12'?'完成新港迎賓任務解鎖':zone.parentZone==='zone4'?'完成操場任務解鎖':zone.parentZone==='zone7'?'完成雲頂觀測任務解鎖':zone.parentZone==='zone21'?'完成氣象觀測任務解鎖':'完成市集採買解鎖';
+  const lockLabel=zone=>zone.requirements?.length?zone.requirements.join(' · '):zone.parentZone?'完成 '+(names[zone.parentZone]||zone.parentZone)+' 任務':'完成前一站的秘境任務';
   function model(zm,profile) {
     const completed=new Set((profile?.completedWords || []).map(w=>String(w).toUpperCase()));
-    return Object.values(zm.zones).map((zone,i)=>({...zone,position:positions[i] || [50,50],current:zone.id===zm.currentZoneId,unlocked:zm.isZoneUnlocked(zone.id),done:zone.words.filter(w=>completed.has(w.toUpperCase())).length,total:zone.words.length}));
+    const puzzles=zm.world?.gameState?.realmPuzzles||{},zone1Complete=zm.world?.gameState?.escaped===true;
+    return Object.values(zm.zones).map((zone,i)=>({...zone,position:positions[i] || [50,50],current:zone.id===zm.currentZoneId,unlocked:zm.isZoneUnlocked(zone.id),routeAvailable:root.RealmQuests?.canTravel?root.RealmQuests.canTravel(zm.currentZoneId,zone.id,puzzles,{zone1Complete}):true,requirements:zm.getZoneUnlockReasons?.(zone.id)||[],done:zone.words.filter(w=>completed.has(w.toUpperCase())).length,total:zone.words.length}));
   }
   const regions=[
     {id:'town',name:'城鎮慶典',caption:'採買・料理・數字',ids:['zone1','zone2','zone11','zone19'],color:'#527b70'},
@@ -60,7 +61,10 @@
       copy.append(el('span','atlas-progress',zone.isLearningHub?'自由選題・口說・句型・收藏':'已學單字 '+zone.done+' / '+zone.total+' · '+zone.topic));
       if(zone.parentZone){const parent=zones.find(z=>z.id===zone.parentZone);if(parent)copy.append(button('atlas-parent','入口：'+short(parent)+' →',()=>{draw(regionFor(parent,zones),parent);buttons.get(parent.id)?.focus?.();}));}
       if(!zone.parentZone&&!zone.isLearningHub){const main=zones.filter(z=>!z.parentZone&&!z.isLearningHub),i=main.findIndex(z=>z.id===zone.id);for(const [label,dest] of [['前站',main[i-1]],['下一站',main[i+1]]])if(dest)copy.append(button('atlas-parent',label+'：'+short(dest)+' →',()=>{draw(regionFor(dest,zones),dest);buttons.get(dest.id)?.focus?.();}));}
-      detail.append(copy);const action=button('atlas-travel',zone.current?'目前位置':zone.unlocked?'傳送前往':zone.parentZone?lockLabel(zone):'Lv.'+zone.reqLevel+' 解鎖',()=>{if(zm.isZoneUnlocked(zone.id))travel(zone.id);});action.disabled=zone.current||!zone.unlocked;detail.append(action);
+      const currentZone=zones.find(z=>z.current),routeTarget=zone.parentZone||(currentZone?.parentZone)||null;
+      const destination=zone.unlocked&&!zone.routeAvailable?routeTarget:zone.id;
+      const actionText=zone.current?'目前位置':!zone.unlocked?'尚未開放：'+lockLabel(zone):zone.routeAvailable?'傳送前往':destination?'先前往入口：'+short(zones.find(z=>z.id===destination)||{id:destination,name:destination}):'請沿主線前進';
+      detail.append(copy);const action=button('atlas-travel',actionText,()=>{if(destination&&zm.isZoneUnlocked(destination))travel(destination);});action.disabled=zone.current||!zone.unlocked||!destination;detail.append(action);
     }
     function draw(region,focusZone){
       buttons.clear();summary.replaceChildren();map.replaceChildren();
@@ -85,7 +89,7 @@
         node.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'+(custom[item.id]||symbols[iconIndex]||symbols[0])+'</svg>';
         node.append(el('span','',region?short(item):item.name));
         const members=region?[]:zones.filter(z=>regionFor(z,zones).id===item.id);
-        const state=region?(item.current?'目前位置':item.unlocked?(item.isLearningHub?'自由學習':item.done+'/'+item.total):'未解鎖'):members.filter(z=>z.unlocked).length+'/'+members.length+' 已開放';
+        const state=region?(item.current?'目前位置':item.unlocked?(item.isLearningHub?'自由學習':item.routeAvailable?item.done+'/'+item.total:'已解鎖・由入口進入'):'未解鎖'):members.filter(z=>z.unlocked).length+'/'+members.length+' 已開放';
         node.append(el('small','',state));node.setAttribute('aria-label',(region?item.name:item.name+'分區')+'，'+state);node.setAttribute('aria-pressed','false');
         if(!region&&members.some(z=>z.current))node.className+=' is-current';buttons.set(item.id,node);map.append(node);
       });

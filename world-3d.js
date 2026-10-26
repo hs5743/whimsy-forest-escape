@@ -1649,6 +1649,13 @@ class World3D {
     };
   }
 
+  openQuestSpeechCard(wordKey, onComplete) {
+    this.openSpeechCard(wordKey, () => {
+      this.realmQuests?.recordSpokenWord?.(wordKey);
+      onComplete?.();
+    }, { requireRecognition: true });
+  }
+
   awardWordPractice(word, amount, teacher, zone) {
     if(!this.devMode && window.cloudSyncManager){
       const result=window.cloudSyncManager.recordWordPass(word,amount,teacher,zone);

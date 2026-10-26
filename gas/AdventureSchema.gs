@@ -76,12 +76,15 @@
 /* School-inspired adventure; facts and fictional tasks are documented separately. */
 (function(root){
  'use strict';
- const words=['SCHOOL','LISTEN','CLASSROOM','PAPER','DRAW','DRUM','LION','WELCOME'];
+ const words=['SCHOOL','LISTEN','CLASSROOM','PAPER','FIND','DRUM','LION','WELCOME'];
  const initial=()=>({stage:0,spoken:[],history:null,drawing:null,rhythm:[]});
  const rhythmOK=s=>JSON.stringify(s.rhythm)==='[1,1,2]';
  function validate(raw){
-  if(!raw||!Number.isInteger(raw.stage)||raw.stage<0||raw.stage>8||!Array.isArray(raw.spoken)||raw.spoken.length>8||raw.spoken.some((w,i)=>w!==words[i])||![null,1960,1963,2021].includes(raw.history)||![null,'LION','RABBIT','FISH'].includes(raw.drawing)||!Array.isArray(raw.rhythm)||raw.rhythm.length>3||raw.rhythm.some(n=>n!==1&&n!==2))return null;
-  const s={stage:Math.min(raw.stage,raw.spoken.length),spoken:[...raw.spoken],history:raw.history,drawing:raw.drawing,rhythm:[...raw.rhythm]};
+  if(!raw||!Number.isInteger(raw.stage)||raw.stage<0||raw.stage>8||!Array.isArray(raw.spoken)||raw.spoken.length>8||![null,1960,1963,2021].includes(raw.history)||![null,'LION','RABBIT','FISH'].includes(raw.drawing)||!Array.isArray(raw.rhythm)||raw.rhythm.length>3||raw.rhythm.some(n=>n!==1&&n!==2))return null;
+  // Older saves used DRAW for the picture-selection step; preserve that earned step as FIND.
+  const spoken=raw.spoken.map((word,index)=>index===4&&word==='DRAW'?'FIND':word);
+  if(spoken.some((word,index)=>word!==words[index]))return null;
+  const s={stage:Math.min(raw.stage,spoken.length),spoken,history:raw.history,drawing:raw.drawing,rhythm:[...raw.rhythm]};
   if(s.stage>2&&s.history!==1963)s.stage=2;if(s.stage>4&&s.drawing!=='LION')s.stage=4;if(s.stage>6&&!rhythmOK(s))s.stage=6;s.spoken=s.spoken.slice(0,s.stage);return s;
  }
  const solved=raw=>validate(raw)?.stage===8;
@@ -90,12 +93,12 @@
   if(s.stage===8)return {state:s,message:'迎賓準備完成！可以返回冒險操場。'};
   if(a?.type==='speak'){if(!canSpeak(s,a.word))message='先完成線索與前一個口說步驟。';else if(a.verifiedWord!==a.word)message='請先口說 '+a.word+' 並通過辨識。';else{s.spoken.push(a.word);s.stage++;message=s.stage===8?'Welcome! 舞獅迎賓任務完成！':'口說 '+a.word+' 通過！下一個線索是 '+words[s.stage]+'。';}}
   else if(a?.type==='history'&&s.stage===2&&[1960,1963,2021].includes(a.value)){s.history=a.value;message=a.value===1963?'答對了！1963 年獨立設校。接著到右側教室口說 CLASSROOM。':'1960 年是設分校；2021 年是新教學大樓落成。再找找獨立設校的年份。';}
-  else if(a?.type==='drawing'&&s.stage===4&&['LION','RABBIT','FISH'].includes(a.value)){s.drawing=a.value;message=a.value==='LION'?'獅子圖卡選好了，口說 DRAW 才會完成製作。':'迎賓主題是舞獅，請找獅子圖案。';}
+  else if(a?.type==='drawing'&&s.stage===4&&['LION','RABBIT','FISH'].includes(a.value)){s.drawing=a.value;message=a.value==='LION'?'獅子圖卡選好了，口說 FIND 才會完成選圖；DRAW 可在此選修練習。':'迎賓主題是舞獅，請找獅子圖案。';}
   else if(a?.type==='beat'&&s.stage===6&&[1,2].includes(a.value)){if(s.rhythm.length===3)s.rhythm=[];s.rhythm.push(a.value);message=s.rhythm.length===3?(rhythmOK(s)?'鼓點正確！靠近獅頭，口說 LION。':'鼓點不同，按重試後照「咚、咚、鏘」再敲一次。'):'鼓點 '+s.rhythm.length+' / 3';}
   else if(a?.type==='resetBeat'&&s.stage===6){s.rhythm=[];message='鼓點已清空，依咚、咚、鏘重試。';}
   return {state:s,message};
  }
- function hint(raw){const s=validate(raw)||initial(),targets=['school_school','school_listen','school_classroom','school_paper','school_draw','school_drum','school_lion','school_welcome'],clues=[['在校門迎賓桌口說 SCHOOL，接下校園任務。','新竹縣竹北市新港國小邀請小小探險家協助迎賓。'],['穿過北側左邊門口，到閱讀角口說 LISTEN。','聽校史線索，注意分校與獨立設校的年份。'],['在閱讀角選出獨立設校年份，再到右側門口口說 CLASSROOM。','1960 設分校；1963 獨立設校；2021 新教學大樓落成剪綵。'],['在教室的紙張桌口說 PAPER，領取圖卡材料。','右側桌上有一疊白紙。'],['選獅子圖案，再到畫圖桌口說 DRAW。','圖卡要配合學校舞獅迎賓主題。'],['回庭院的鼓台口說 DRUM，準備節奏。','閱讀示範：咚、咚、鏘。'],['在鼓台敲咚、咚、鏘，再靠近獅頭口說 LION。','鼓點錯了可以重試，前面的口說進度保留。'],['到庭院迎賓台口說 WELCOME。','讓獅頭向來賓點頭，完成迎賓！'],['新港迎賓完成！半音階口琴館與校慶彩繪工坊已開放。','從北側校舍可走進口琴展示館，或沿教學樓右側的紫色門前往彩繪工坊。也可由南側校門回操場。']];return {key:'zone12:'+JSON.stringify(s),word:null,targetId:s.stage===2&&s.history!==1963?'school_listen':s.stage===6&&!rhythmOK(s)?'school_drum':targets[s.stage]||'school_harmonica_entry',clues:clues[s.stage]};}
+ function hint(raw){const s=validate(raw)||initial(),targets=['school_school','school_listen','school_classroom','school_paper','school_draw','school_drum','school_lion','school_welcome'],clues=[['在校門迎賓桌口說 SCHOOL，接下校園任務。','新竹縣竹北市新港國小邀請小小探險家協助迎賓。'],['穿過北側左邊門口，到閱讀角口說 LISTEN。','聽校史線索，注意分校與獨立設校的年份。'],['在閱讀角選出獨立設校年份，再到右側門口口說 CLASSROOM。','1960 設分校；1963 獨立設校；2021 新教學大樓落成剪綵。'],['在教室的紙張桌口說 PAPER，領取圖卡材料。','右側桌上有一疊白紙。'],['選獅子圖案，再在圖卡桌口說 FIND，完成「找出獅子圖卡」任務。','DRAW 是選修練習；主線只要求選圖與口說 FIND，不要求真的畫圖。'],['回庭院的鼓台口說 DRUM，準備節奏。','閱讀示範：咚、咚、鏘。'],['在鼓台敲咚、咚、鏘，再靠近獅頭口說 LION。','鼓點錯了可以重試，前面的口說進度保留。'],['到庭院迎賓台口說 WELCOME。','讓獅頭向來賓點頭，完成迎賓！'],['新港迎賓完成！半音階口琴館與校慶彩繪工坊已開放。','從北側校舍可走進口琴展示館，或沿教學樓右側的紫色門前往彩繪工坊。也可由南側校門回操場。']];return {key:'zone12:'+JSON.stringify(s),word:null,targetId:s.stage===2&&s.history!==1963?'school_listen':s.stage===6&&!rhythmOK(s)?'school_drum':targets[s.stage]||'school_harmonica_entry',clues:clues[s.stage]};}
  const api={words,initial,validate,solved,transition,hint,canSpeak};root.SchoolChapter=api;if(typeof module!=='undefined')module.exports=api;
   })(globalThis);
 /* C-solo 12-hole chromatic harmonica learning adventure. */
@@ -104,8 +107,8 @@
  const words=['SMALL','MOUTH','HAND','LEFT','RIGHT','HIGH','PLAY','SONG'];
  const blow=[60,64,67,72,72,76,79,84,84,88,91,96],draw=[62,65,69,71,74,77,81,83,86,89,93,95];
  const melody=[{hole:1,air:'BLOW',slide:false},{hole:1,air:'DRAW',slide:false},{hole:2,air:'BLOW',slide:false},{hole:2,air:'DRAW',slide:false},{hole:3,air:'BLOW',slide:false}];
- const allowed=[['','SLIDE','DIATONIC','RECORDER'],['','MOUTHPIECE','COVER','BUTTON'],['','REED','COVER','VALVE'],['','LEFT','RIGHT'],['','LEFT','RIGHT'],['','HALF','OCTAVE','VOLUME']];
- const correct=['SLIDE','MOUTHPIECE','REED','LEFT','RIGHT','HALF'],experiments=['BLOW:0','DRAW:0','BLOW:1','DRAW:1'];
+ const allowed=[['','SLIDE','DIATONIC','RECORDER'],['','MOUTHPIECE','COVER','BUTTON'],['','HAND','HEAD','FOOT','REED','COVER','VALVE'],['','LEFT','RIGHT'],['','LEFT','RIGHT'],['','HALF','OCTAVE','VOLUME']];
+ const correct=['SLIDE','MOUTHPIECE','HAND','LEFT','RIGHT','HALF'],experiments=['BLOW:0','DRAW:0','BLOW:1','DRAW:1'];
  const initial=()=>({stage:0,spoken:[],choices:['','','','','',''],explored:[],melody:[]});
  const eq=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
  function note(hole,air,slide){if(!Number.isInteger(hole)||hole<1||hole>12||!['BLOW','DRAW'].includes(air)||typeof slide!=='boolean')return null;if(hole===12&&air==='DRAW'&&slide)return 98;return (air==='BLOW'?blow:draw)[hole-1]+(slide?1:0);}
@@ -113,7 +116,8 @@
  function proof(s,n){return n<6?s.choices[n]===correct[n]&&(n!==5||s.explored.length===4):n===6?s.melody.length===5:true;}
  function validate(raw){
   if(!raw||!Number.isInteger(raw.stage)||raw.stage<0||raw.stage>8||!Array.isArray(raw.spoken)||raw.spoken.length>8||raw.spoken.some((w,i)=>w!==words[i])||!Array.isArray(raw.choices)||raw.choices.length!==6||raw.choices.some((v,i)=>!allowed[i].includes(v))||!Array.isArray(raw.explored)||raw.explored.length>4||new Set(raw.explored).size!==raw.explored.length||raw.explored.some(x=>!experiments.includes(x))||!Array.isArray(raw.melody)||raw.melody.length>5||raw.melody.some((v,i)=>!eq(v,melody[i])))return null;
-  const s={stage:Math.min(raw.stage,raw.spoken.length),spoken:[...raw.spoken],choices:[...raw.choices],explored:[...raw.explored],melody:raw.melody.map(v=>({...v}))};
+  const choices=[...raw.choices];if(choices[2]==='REED')choices[2]='HAND';
+  const s={stage:Math.min(raw.stage,raw.spoken.length),spoken:[...raw.spoken],choices,explored:[...raw.explored],melody:raw.melody.map(v=>({...v}))};
   for(let n=0;n<s.stage;n++)if(!proof(s,n)){s.stage=n;break;}s.spoken=s.spoken.slice(0,s.stage);return s;
  }
  const solved=raw=>validate(raw)?.stage===8;
@@ -135,7 +139,7 @@
  const clues=[
  ['在入口選出有側邊滑鍵的半音階口琴，再口說 SMALL。','它體積小，卻能演奏半音；常見 12 孔款有 48 片簧片。'],
  ['找出嘴巴接觸與氣流進出的吹嘴，再口說 MOUTH。','吹嘴孔通往琴格與簧片，不是側邊滑鍵。'],
- ['在分層展示找出會振動發聲的金屬簧片，再口說 HAND。','琴蓋保護內部；琴格分隔氣道；簧片發聲；常见音閥協助控制漏氣。'],
+ ['觀察握琴姿勢圖示，選出演奏者用來握住口琴的 HAND，再口說 HAND。','口琴由雙手持握；內部的金屬簧片受氣流振動發聲。圖示說明姿勢，遊戲不偵測手部動作。'],
  ['從演奏者視角找較低音的左側，再口說 LEFT。','此館採常見 C 調獨奏排列：左低、右高。'],
  ['找出較高音的右側，再口說 RIGHT。','吹嘴朝向自己，滑鍵按鈕在右手側。'],
  ['在變音台試第 1 孔四種吹吸／滑鍵組合，選按鍵變化，再口說 HIGH。','C→C♯、D→D♯：滑鍵切換另一組簧片，升高半音。'],
@@ -167,7 +171,7 @@
   if(s.stage===8)return {state:s,message:'花園已復甦！可返回守護獸花園，或再聽單字示範。'};
   if(a?.type==='choice'&&a.index===s.stage&&a.value!==''&&choices[s.stage].includes(a.value)){s.choices[s.stage]=a.value;message=proof(s,s.stage)?'線索正確！接著口說 '+words[s.stage]+'。':'再觀察圖示與英文線索，試另一個答案。';}
   else if(a?.type==='condition'&&s.stage===4&&['water','light'].includes(a.key)&&[0,1,2,3].includes(a.value)){s[a.key]=a.value;message=proof(s,4)?'水分與光線都在 2 格；口說 GROW，讓幼苗長大。':'照護卡：兩格水分、兩格光線。調好後還要口說 GROW。';}
-  else if(a?.type==='collect'&&s.stage===6&&[0,1,2].includes(a.index)){if(!s.collected.includes(a.index))s.collected.push(a.index);message=s.collected.length===3?'三件遺落物已分類，口說 PICK UP 才完成整理。':'已分類 '+s.collected.length+' / 3 件。';}
+  else if(a?.type==='collect'&&s.stage===6&&[0,1,2].includes(a.index)){if(!s.collected.includes(a.index))s.collected.push(a.index);message=s.collected.length===3?'三件遺落物都已在任務板登記，口說 PICK UP 才完成整理紀錄。':'已登記 '+s.collected.length+' / 3 件遺落物。';}
   else if(a?.type==='speak'){if(!canSpeak(s,a.word))message='先完成當前線索，不能跳過前面的步驟。';else if(a.verifiedWord!==a.word)message='請先口說 '+a.word+' 並通過辨識。';else{s.spoken.push(a.word);s.stage++;message=s.stage===8?'The garden is beautiful! 溫室復甦完成。':'口說通過！下一步：'+words[s.stage]+'。';}}
   return {state:s,message};
  }
@@ -177,8 +181,8 @@
   ['訪花的小幫手','A bee visits the flower.','蜜蜂有六隻腳與觸角，飛到花朵間採集花蜜與花粉。選出黃色、黑色條紋的小昆蟲。'],
   ['花間的翅膀','Look at the butterfly.','看右側昆蟲展示：寬大的對稱翅膀上有斑點。找出蝴蝶，再口說 BUTTERFLY。'],
   ['讓幼苗長大','Plants need water and light to grow.','這盆魔法幼苗的照護卡標示：水分 2 格、光線 2 格。數值是本關的解謎設定，不是所有植物共同的澆水標準。調好後口說 GROW。'],
-  ['溫柔聞花香','I can smell the flowers.','看香草台的小圖卡：輕輕靠近聞花香，讓花朵留在枝上。選出溫柔觀察的方法，再口說 SMELL。'],
-  ['整理花園','Pick up the litter.','地上有三件遺落物：紙張、空瓶與包裝。逐一分類，再完整說出 PICK UP；只說 PICK 或 UP 不會完成。'],
+  ['溫柔聞花香','I can smell the flowers.','查看香草台的觀察提示，選出不拉扯花朵的聞香方式，再口說 SMELL；本步不會模擬嗅覺。'],
+  ['整理花園','Pick up the litter.','在任務板依序確認地上的紙張、空瓶與包裝；此處是登記清理項目，並不會搬動物件。三項都確認後，完整口說 PICK UP。'],
   ['留一張花園明信片','The garden is beautiful.','選出形容整理後花園的句子，再口說 BEAUTIFUL。恭喜你讓溫室重新綻放！']
  ];
  function hint(raw){const s=validate(raw)||initial();return {key:'zone14:'+JSON.stringify(s),word:null,targetId:'greenhouse_'+(places[s.stage]||'exit'),clues:s.stage===8?['溫室任務完成，由入口返回守護獸花園。','也可以回大廳複習八個新字。']:[lessons[s.stage][2],'先完成線索，再口說 '+words[s.stage]+'。']};}
@@ -215,13 +219,13 @@
  }
  const lessons=[
   ['觀測任務','We study the weather.','氣象觀測員邀請你整理今天的紀錄。先查看觀測台工作單，認出本次任務主題，再口說 WEATHER。'],
-  ['雲況觀察','It is cloudy today.','觀察圓頂天窗：厚雲遮住大部分天空，陽光變得柔和。選 CLOUDY，然後口說 CLOUDY。'],
-  ['雨量紀錄','Rain falls into the gauge.','看雨量筒中落下的水滴。這裡觀察的是從天空落下的水，不是風，選 RAIN 再口說 RAIN。'],
-  ['今日天氣日誌','It is rainy today.','查看日誌上的句子。RAIN 是雨；RAINY 用來形容下雨的天氣。日誌要填入形容詞 RAINY。'],
-  ['日照觀測','It is sunny now.','日照板旁的天空轉晴，太陽照亮觀測台。選 SUNNY 描述晴朗的天氣。'],
+  ['雲況觀察','It is cloudy today.','觀察圓形雲況盤上的雲朵圖示；依圖選 CLOUDY，再口說 CLOUDY。此處辨認圖示，不代表即時天候。'],
+  ['雨量紀錄','Rain falls into the gauge.','觀察雨量筒與刻度，選出代表降雨的 RAIN，再口說 RAIN；場景沒有即時降雨動畫。'],
+  ['今日天氣日誌','It is rainy today.','在天氣日誌面板完成雨天詞彙練習。RAIN 是「雨」，RAINY 用來形容下雨的天氣；選 RAINY 再口說。'],
+  ['日照觀測','It is sunny today.','觀察日照感測器與面板上的日照標記，選 SUNNY 描述晴朗天氣；天空不會因答案改變。'],
   ['風力觀測','It is windy on the hill.','風杯正在旋轉，風向袋也被吹起。選 WINDY 描述風勢明顯的天氣。'],
-  ['溫度讀值','It is hot today.','溫度計停在 31°C。依照牌上的圖例，這個讀值是 HOT，不是 COLD。'],
-  ['雨滴觸感','The raincoat is wet.','觀察雨衣表面的水珠。摸起來有水、不是乾燥的，選 WET 並口說 WET。']
+  ['溫度讀值','It is hot today.','觀察百葉箱中的溫度感測器和紅色溫度標記，選 HOT；場景沒有可讀的 31°C 數字，因此不以特定溫度過關。'],
+  ['雨衣上的水珠標記','The raincoat is wet.','觀察雨衣上的藍色水珠標記，選 WET 並口說通過；這是詞彙提示，不模擬觸摸或真實濕度。']
  ];
  function hint(raw){const s=validate(raw)||initial();return {key:'zone21:'+JSON.stringify(s),word:null,targetId:'weather_'+(places[s.stage]||'exit'),clues:s.stage===8?['今日天氣紀錄已完成。','沿南側出口返回雲頂觀測站，或回大廳複習八個新字。']:[lessons[s.stage][2],'觀測完成後，還要口說 '+words[s.stage]+'。']};}
  const api={words,places,choices,lessons,initial,validate,solved,canSpeak,transition,hint};root.WeatherChapter=api;if(typeof module!=='undefined')module.exports=api;
@@ -240,7 +244,7 @@
   ['有趣的發現','It is very interesting.','仔細看看潮池和招潮蟹洞留下的線索；這個發現很有趣，選 INTERESTING。'],
   ['描述方位','The sea is in front of the station.','站在入口觀察站面向海岸，海面就在觀測站前方。選 IN FRONT OF。'],
   ['仔細觀察','Look at the sea.','使用觀景望遠鏡從安全步道仔細觀察，不走進泥灘，也不碰觸生物。'],
-  ['整理垃圾','Do not leave trash here.','找到分類回收桶，把垃圾放進桶內；不要留在海岸上。']
+  ['辨認海岸垃圾','Do not leave trash here.','觀察步道旁的垃圾分類桶，在面板選出 TRASH 並口說通過；此步不會把垃圾模型實際移入桶內。']
  ];
  const initial=()=>({stage:0,spoken:[],choices:Array(8).fill('')});
  function validate(raw){if(!raw||!Number.isInteger(raw.stage)||raw.stage<0||raw.stage>8||!Array.isArray(raw.spoken)||raw.spoken.length>8||raw.spoken.some((v,i)=>v!==words[i])||!Array.isArray(raw.choices)||raw.choices.length!==8||raw.choices.some((v,i)=>!choices[i].includes(v)))return null;const s={stage:Math.min(raw.stage,raw.spoken.length),spoken:raw.spoken.slice(),choices:raw.choices.slice()};for(let i=0;i<s.stage;i++)if(s.choices[i]!==words[i]){s.stage=i;break;}s.spoken=s.spoken.slice(0,s.stage);return s;}
@@ -259,11 +263,11 @@
  const lessons=[
   ['階梯書架','The books are on the shelf.','沿著橘色階梯側邊的書架找一排故事書；放書的層架是 SHELF。'],
   ['故事封面','This is an exciting story.','看看故事展示架上的封面圖卡。封面引出一個 STORY。'],
-  ['閱讀座位','The student is reading.','橘色與綠色閱讀座位留給來讀書的學生；選 STUDENT。'],
-  ['服務櫃台','The teacher can help us.','在圖書館服務桌詢問借閱方式；提供協助的是 TEACHER。'],
+  ['閱讀座位','Students read here.','觀察橘色與綠色閱讀座位和旁邊的書架，選出在這裡閱讀的 STUDENT；本關沒有學生 NPC。'],
+  ['服務櫃台','This is the teacher’s desk.','觀察圖書館服務桌與教學用品，選 TEACHER；這裡是靜態展示，沒有老師 NPC 對話。'],
   ['共讀桌','We study together.','木桌旁有座位與閱讀材料；學生在這裡一起 STUDY。'],
   ['安靜閱讀角','Please be quiet.','進入靠窗閱讀角時放輕聲音，保持 QUIET。'],
-  ['故事心情卡','This story is not boring.','比較兩張讀後心情卡：故事不是無聊的，選 BORING 完成否定句線索。'],
+  ['故事心情卡','This story is boring.','比較兩張讀後心情卡，選出令人覺得無聊的故事，再口說 BORING。'],
   ['精彩結局','The ending is exciting!','最後一頁翻開彩色結局插圖；令人期待、精彩的是 EXCITING。']
  ];
  const initial=()=>({stage:0,spoken:[],choices:Array(8).fill('')});
@@ -300,14 +304,14 @@
   ['','TURN','STOP'],['','WORK','PLAY'],['','READY','WET'],['','START','CLOSE']
  ];
  const lessons=[
-  ['小車本體','This is a robot.','工作桌上的小車有車身、輪子與感測器；這是一台 ROBOT。'],
-  ['組裝工作墊','We make a robot.','把車身與輪子零件放到防滑工作墊上，動手 MAKE 一台小車。'],
-  ['小齒輪轉速','The small gear is fast.','比較正在轉動的小齒輪；轉得快的是 FAST。'],
-  ['大齒輪轉速','The large gear is slow.','比較較大的齒輪；轉得慢的是 SLOW。'],
-  ['轉向伺服器','The robot can turn.','看小車前輪與轉向伺服器；要改變方向時，機器人會 TURN。'],
-  ['共用工作桌','We work together.','工具、零件和空位都留給同組使用；大家一起 WORK。'],
-  ['電池檢查座','The robot is ready.','確認電池已放妥，安全護蓋也扣好；準備好的狀態是 READY。'],
-  ['啟動區','Let’s start!','把小車對準地面測試線，確認四周清空後再 START。']
+  ['機器人模型','This is a robot.','觀察工作桌上的機器人展示模型，辨認 ROBOT；本關不會組裝或操控它。'],
+  ['工作台上的零件','We make things in the makerspace.','觀察桌上已擺好的小車模型與零件圖示，再從面板選出 MAKE；本關不會真的組裝零件。'],
+  ['高速小齒輪','The small gear spins fast.','觀察正在轉動的成對齒輪；轉得較快的是小齒輪，選 FAST。這是教學模型，並非測速設備。'],
+  ['慢速大齒輪','The large gear spins slowly.','觀察另一組成對齒輪；轉得較慢的是大齒輪，選 SLOW。這是教學模型，並非測速設備。'],
+  ['轉向示意','The robot can turn.','看小車模型的前輪方向與轉向示意圖，選出改變方向的 TURN；此步是圖示辨認。'],
+  ['共用工作桌','We work together.','觀察共用工作桌上的工具與多人座位圖示，選出一起工作的 WORK。'],
+  ['電池檢查座','The robot is ready.','依面板上的電池與安全護蓋示意選出 READY；不會實際拆裝電池。'],
+  ['啟動區','Let’s start!','查看桌上小車模型旁的啟動標記，選出 START；本關不會啟動或操控小車。']
  ];
  const initial=()=>({stage:0,spoken:[],choices:Array(8).fill('')});
  function validate(raw){
@@ -320,7 +324,7 @@
  function canSpeak(raw,word){const s=validate(raw)||initial();return s.stage<8&&word===words[s.stage]&&proof(s,s.stage);}
  function transition(raw,action){
   const s=validate(raw)||initial();let message='先觀察工坊裡的實物線索，再口說完成目前步驟。';
-  if(s.stage===8)return{state:s,message:'機器人測試完成！你已經組裝、檢查並啟動小車。'};
+  if(s.stage===8)return{state:s,message:'創客工坊詞彙辨識完成！你已依序觀察模型並口說八個新字。'};
   if(action?.type==='choice'&&action.index===s.stage&&choices[s.stage].includes(action.value)){
    s.choices[s.stage]=action.value;message=proof(s,s.stage)?'線索正確！接著口說 '+words[s.stage]+'。':'再看看工作桌上的零件與操作線索，換一個答案。';
   }else if(action?.type==='speak'){
@@ -382,14 +386,14 @@
  const words=['BLACKBOARD','PICTURE','PENCIL','RULER','GLUE','MARKER','ART','ENGLISH'];
  const places=['blackboard','mural','pencil','ruler','glue','marker','art','english'];
  const lessons=[
-  ['黑板 · 設計工作單','The blackboard shows our art plan.','找到牆上的黑板，看看舞獅彩繪的步驟，再口說 BLACKBOARD。'],
-  ['舞獅壁畫 · 配色靈感','Look at the lion picture.','沿著工作室後牆觀察龍、鳳與獅子的彩繪壁畫，再口說 PICTURE。'],
-  ['鉛筆 · 描繪輪廓','I draw with a pencil.','在桌面工具杯找到削好的鉛筆；先描輪廓，再口說 PENCIL。'],
-  ['尺 · 量出旗布寬度','The ruler is long.','把桌上的長尺貼齊布旗邊緣，量好圖案位置，再口說 RULER。'],
-  ['膠水 · 黏合紙鱗片','Use glue to join the paper scales.','找到安全固體膠，把紙鱗片黏上舞獅彩旗，再口說 GLUE。'],
-  ['彩色筆 · 添上細節','Color the lion with a marker.','在色彩工具架挑出彩色筆，為圖案補上眼睛與鱗片，再口說 MARKER。'],
-  ['美術桌 · 完成創作','Art is fun.','看看畫紙、布料與顏料組成的作品桌，完成最後的彩繪，再口說 ART。'],
-  ['雙語小展台 · 分享作品','Read the English cards.','找到作品旁的英語學習卡，準備向同學介紹舞獅圖畫，再口說 ENGLISH。']
+  ['黑板 · 設計工作單','The blackboard shows our art plan.','點選牆上的黑板，觀察舞獅彩繪工作單，再口說 BLACKBOARD。'],
+  ['舞獅壁畫 · 配色靈感','Look at the lion picture.','點選工作室後牆的龍、鳳與獅子彩繪壁畫，再口說 PICTURE。'],
+  ['鉛筆 · 描繪工具','I draw with a pencil.','點選桌面工具杯裡的鉛筆，辨認畫圖工具，再口說 PENCIL；這是展品辨認，不會實際繪圖。'],
+  ['尺 · 測量工具','The ruler is long.','點選工作桌上的長尺，觀察刻度並口說 RULER；不需移動或量測旗布。'],
+  ['膠水 · 黏合工具','Use glue to join the paper.','點選桌面上的固體膠，辨認黏合紙張的工具，再口說 GLUE；本步不會實際黏貼紙鱗片。'],
+  ['彩色筆 · 著色工具','Color the picture with a marker.','點選色彩工具架上的彩色筆，再口說 MARKER；此步辨認工具，不會替圖案著色。'],
+  ['美術桌 · 工具與作品','Art is fun.','點選展示桌，觀察畫紙、布料與顏料，辨認 ART 並口說通過；作品是場景陳列，不會在本關生成新畫作。'],
+  ['雙語小展台 · 英語標示','Read the English cards.','點選作品旁的英語學習卡，辨認 ENGLISH 並口說完成；本步是詞彙展示，不會進行 NPC 對話。']
  ];
  const initial=()=>({stage:0,spoken:[],found:null});
  function validate(raw){
@@ -401,20 +405,20 @@
  function canSpeak(raw,word){const s=validate(raw)||initial();return s.stage<8&&word===words[s.stage]&&s.found===word;}
  function transition(raw,action){
   const s=validate(raw)||initial();let message='沿著工作桌和展示牆尋找目前步驟的實物線索，再口說完成。';
-  if(s.stage===8)return{state:s,message:'舞獅彩繪工坊完成！作品已準備好，從入口返回新港校園。'};
+  if(s.stage===8)return{state:s,message:'舞獅彩繪工坊展品探索完成！八個步驟都已找到對應展品並口說通過，沿入口返回新港校園。'};
   if(action?.type==='touch'){
-   if(action.index===s.stage){s.found=words[s.stage];message='找到 '+words[s.stage]+'！仔細看它的用途，再口說 '+words[s.stage]+'。';}
+   if(action.index===s.stage){s.found=words[s.stage];message='點選 '+words[s.stage]+' 展品！觀察它的用途，再口說 '+words[s.stage]+'。';}
    else message='這不是目前步驟的工具。查看工作單上的英文線索，再找一次。';
   }else if(action?.type==='speak'){
    if(!canSpeak(s,action.word))message='先在工坊找到 '+words[s.stage]+'，再口說完成這個步驟。';
    else if(action.verifiedWord!==action.word)message='請先口說 '+action.word+' 並通過辨識。';
-   else{s.spoken.push(action.word);s.stage++;s.found=null;message=s.stage===8?'Excellent! 舞獅彩繪作品完成。':'口說通過！下一項工具是 '+words[s.stage]+'。';}
+   else{s.spoken.push(action.word);s.stage++;s.found=null;message=s.stage===8?'Excellent! 舞獅彩繪工具辨識完成。':'口說通過！下一項展品是 '+words[s.stage]+'。';}
   }
   return{state:s,message};
  }
  function hint(raw){
   const s=validate(raw)||initial();
-  return{key:'zone20:'+JSON.stringify(s),word:null,targetId:'artwork_'+(places[s.stage]||'exit'),clues:s.stage===8?['彩繪作品完成，沿南側校園走廊返回新港國小。','也可以留在工坊聽句子，或前往英語學習大廳自由複習。']:[lessons[s.stage][2],'摸到正確物件後，還要口說 '+words[s.stage]+' 才能完成。']};
+  return{key:'zone20:'+JSON.stringify(s),word:null,targetId:'artwork_'+(places[s.stage]||'exit'),clues:s.stage===8?['工坊展品探索完成，沿南側校園走廊返回新港國小。','也可以留在工坊聽句子，或前往英語學習大廳自由複習。']:[lessons[s.stage][2],'點選正確展品後，還要口說 '+words[s.stage]+' 才能完成。']};
  }
  const api={words,places,lessons,initial,validate,solved,canSpeak,transition,hint};root.ArtWorkshopChapter=api;if(typeof module!=='undefined')module.exports=api;
  })(globalThis);
@@ -422,28 +426,38 @@
 (function(root){
   'use strict';
   const specs={
-    zone2:{title:'市集採買：四枚金幣',english:'Two apples and one milk, please.',brief:'野餐清單：蘋果兩顆、牛奶一瓶。蘋果每顆 1 枚、牛奶每瓶 2 枚、麵包每個 2 枚。你有 4 枚金幣；裝好購物籃再結帳。',clues:['先看看清單上的食物數量與價格。','兩顆蘋果花 2 枚，一瓶牛奶花 2 枚；想想籃子裡要留下哪些食物。']},
-    zone3:{title:'花園照護：三位小夥伴',english:'Water the tree. Feed the rabbit. Help the bird.',brief:'樹木缺水，小兔子想吃葉子，青鳥想吃種子。先選照護工具，再點選要幫忙的夥伴。',clues:['每位夥伴需要的東西不一樣。','水給 TREE，葉子給 RABBIT，種子給 BIRD；先選工具再選夥伴。']},
-    zone4:{title:'運動接力：跨越終點',english:'Take the ball. Run, jump, then play soccer.',brief:'選好接力器材，再依跑道上的指示完成三個動作。不計時，可以慢慢看線索。',clues:['先選能踢的器材，再看英語動作順序。','需要 BALL；動作依序是 RUN、JUMP、SOCCER。']},
-    zone5:{title:'車站解謎：準時上車',english:'The train leaves at eight thirty. Go to platform two.',brief:'車票寫著 08:30、月台 2。調整鐘面的時與分，選對月台再驗票。',clues:['車票的時間與月台必須同時符合。','Eight thirty 是 08:30，platform two 是月台 2。']},
-    zone6:{title:'海港導航：避礁靠岸',english:'Sail to the lighthouse. Keep away from the rocks.',brief:'從左下方的小船出發，使用四個方向航行到右上方燈塔。礁石不能通過，岸邊也不能越界。',clues:['看看海圖中礁石的位置，找一條連續的水路。','先沿左側往北，到最上方後往東；船每次只移動一格。']},
-    zone7:{title:'觀測站：對準東方月亮',english:'Find the moon in the east.',brief:'觀測筆記：東方的月亮是星門鑰匙。選擇天體，再轉動觀測儀；北 0°、東 90°、南 180°、西 270°。',clues:['筆記同時提到天體與方向。','選 MOON，把觀測儀轉到東方 90°，再確認對準。']},
-    zone8:{title:'冰雪準備：溫暖出發',english:'Wear a coat, gloves and boots. Keep warm.',brief:'帶上外套、手套與雪靴。營火需要溫暖的 2 格熱度，太冷或太熱都不能出發。',clues:['裝備與營火都要準備好，才適合走進雪地。','留下外套、手套、雪靴，取消短褲與涼鞋；把熱度調到 2 格。']},
-    zone9:{title:'智慧殿堂：修復故事卷軸',english:'Read first. Think next. Write last.',brief:'卷軸的步驟散開了。依英文線索把三張卡依序放回；放錯可以取回重排。',clues:['First、next、last 告訴你先後順序。','先 READ，再 THINK，最後 WRITE；排好後蓋上印章。']},
-    zone10:{title:'虹光空島：奏響回家之歌',english:'Listen to the music. Sing the song.',brief:'彩虹琴譜：C → E → G → C。先聽四個音，再用琴鍵重現旋律，讓回家的虹橋亮起。',clues:['聽示範旋律，留意最後一個音與第一個音相同。','依序按 C、E、G、C；按錯可以清空琴譜重來。']}
+    zone2:{title:'市集採買：四枚金幣',english:'Two apples and one milk, please.',brief:'野餐清單：蘋果兩顆、牛奶一瓶。蘋果每顆 1 枚、牛奶每瓶 2 枚、麵包每個 2 枚。你有 4 枚金幣；先找到食物並口說，再裝好購物籃結帳。BANANA 是延伸練習，不列入本次訂單。',clues:['先到蘋果攤口說兩次 APPLE，再到牛奶攤口說一次 MILK。','選兩顆蘋果、一瓶牛奶與零個麵包，總價正好 4 枚；完成口說後才能結帳。']},
+    zone3:{title:'花園照護：三位小夥伴',english:'Water the tree. Feed the rabbit. Help the bird.',brief:'樹木缺水，小兔子想吃葉子，青鳥想吃種子。先在任務板選照護用品，再到場景找到夥伴並口說名稱；只有用品配對正確才算完成照護。',clues:['水給 TREE、葉子給 RABBIT、種子給 BIRD。','選好用品後，逐一找到樹、兔子與青鳥，口說 TREE、RABBIT、BIRD。']},
+    zone4:{title:'運動接力：跨越終點',english:'Take the ball. Run, jump, then play soccer.',brief:'先在任務板選 BALL，再到場景依序口說 BALL、RUN、JUMP、SOCCER。順序錯誤時接力會從 RUN 重新開始；不計時，可以慢慢看線索。',clues:['選 BALL 後，到足球區口說 BALL。','沿跑道找到 RUN 與 JUMP，依序口說，再口說 SOCCER 完成接力。']},
+    zone5:{title:'車站解謎：準時上車',english:'The train leaves at eight thirty. Go to platform two.',brief:'車票寫著 08:30、月台 2。先到鐘樓口說 TIME、到列車口說 TRAIN，再調整鐘面與月台並驗票。',clues:['先找到天文時鐘與星光列車，分別口說 TIME、TRAIN。','Eight thirty 是 08:30，platform two 是月台 2；完成口說後才能驗票上車。']},
+    zone6:{title:'海港導航：避礁靠岸',english:'Sail to the lighthouse. Keep away from the rocks.',brief:'先在碼頭找到小艇並口說 BOAT，再依海圖使用方向鍵航行到右上方燈塔。抵達後口說 WIND，避開礁石並留在海圖範圍內。',clues:['看看海圖中礁石的位置，找一條連續的水路。','到達燈塔後口說 WIND；船每次只移動一格。']},
+    zone7:{title:'觀測站：對準東方月亮',english:'Find the moon in the east.',brief:'先在日晷儀前口說 MOON，再根據觀測筆記調整方向；北 0°、東 90°、南 180°、西 270°。',clues:['筆記同時提到天體與方向。','口說 MOON，把觀測儀轉到東方 90°，再確認對準。']},
+    zone8:{title:'冰雪準備：溫暖出發',english:'Wear a coat, gloves and boots. Keep warm.',brief:'在裝備面板逐一口說並選擇外套、手套與雪靴；再到營火前口說 WARM。最後把火候調到 2 格才可出發。',clues:['短褲與涼鞋可作為辨認干擾項，但不需要選取。','需要 COAT、GLOVES、BOOTS；到營火口說 WARM，並把熱度調到 2 格。']},
+    zone9:{title:'智慧殿堂：修復故事卷軸',english:'Read first. Think next. Write last.',brief:'找到大典、沉思之泉與書寫台，依序口說 READ、THINK、WRITE，讓卷軸記下正確步驟；放錯可以取回重排。',clues:['First、next、last 告訴你先後順序。','逐一找到場景中的三個目標並口說 READ、THINK、WRITE；完成後回面板蓋章。']},
+    zone10:{title:'虹光空島：奏響回家之歌',english:'Listen to the music. Sing the song.',brief:'先到浮空星琴前口說 MUSIC，解鎖琴鍵練習；聽示範後用琴鍵重現 C → E → G → C，讓回家的虹橋亮起。',clues:['先找到星琴並口說 MUSIC。','聽示範旋律，留意最後一個音與第一個音相同；再依序按 C、E、G、C。']}
   };
   specs.zone15={title:'星光國際機場：啟航任務',english:'Welcome to the airport.',brief:'確認飛機、機票、行李與登機時刻表；每一步要口說完成。',clues:['先在航廈迎賓櫃檯接下啟航任務。','觀察線索後，口說完成每一步。']};
   specs.zone14={title:'玻璃溫室：花園復甦任務',english:'The garden is beautiful.',brief:'觀察昆蟲、照護幼苗與整理環境；每一步要口說完成。',clues:['先在入口接下花園委託。','探索線索後，口說完成每一步。']};
   specs.zone21={title:'雲雨氣象觀測台：尋回天氣紀錄',english:'We study the weather.',brief:'讀取雲況、雨量、日照、風力與溫度儀器；每一站都要先解讀線索，再口說過關。',clues:['先到工作單接下觀測任務。','查看目前儀器線索，再口說目標單字。']};
   specs.zone16={title:'香山潮間帶：沿著步道觀察海岸',english:'Walk and look. Keep the coast clean.',brief:'沿架高步道觀察海岸地景與泥灘棲地；尊重潮間帶生物，只在安全步道上觀察。',clues:['先在入口領取濕地觀察卡。','讀取每個現場線索，再口說新詞。']};
   specs.zone17={title:'新港國小圖書館：故事階梯尋書任務',english:'Choose a book and enjoy the story.',brief:'走進挑高圖書館，探索階梯書架、閱讀座位與故事心情卡；每一步都要口說完成。',clues:['沿著橘色階梯找到圖書館線索。','觀察空間線索，再口說目標單字。']};
-  specs.zone18={title:'新港國小創客工坊：小小機器人任務',english:'We make a robot.',brief:'在遊戲化科技創作工坊裡組裝小車、比較速度與測試轉向；先看實物線索，再口說完成每一步。',clues:['先完成新港國小迎賓任務，校園工坊才會開放。','依工作桌上的零件線索完成英語口說。']};
+  specs.zone18={title:'新港國小創客工坊：小小機器人任務',english:'We study a robot.',brief:'在遊戲化科技創作工坊裡觀察機器人、轉動齒輪和工作台；先看實物線索，再選答案並口說完成每一步。',clues:['先完成新港國小迎賓任務，校園工坊才會開放。','比較工作桌上成對齒輪的轉速，再依現場線索完成英語口說。']};
   specs.zone19={title:'魔法數字嘉年華：星環計數任務',english:'Thirteen stars shine.',brief:'沿著舊城市集的冒險星圖，進入夜間嘉年華。觀察每一站的燈環和星星籌碼，選出數量，再口說數字詞完成關卡。',clues:['先完成陽光微風市集採買，嘉年華入口才會開啟。','每站都有實際可數的燈或星星籌碼；先選數量，再口說正確的數字。']};
   specs.zone20={title:'新港校慶：舞獅彩繪工坊',english:'Let’s make art for the school festival.',brief:'在實體工作室找到黑板、舞獅壁畫與美術工具；每一個新字都要先找到物件，再口說辨識通過。',clues:['先完成新港國小舞獅迎賓任務，校慶工坊才會開放。','依工作桌與展示牆上的實物線索，找到工具後再口說完成。']};
   specs.zone13={title:'半音階口琴：掌心音樂展示館',english:'Play a song on the harmonica.',brief:'造型、簧片、滑鍵與吹吸練習。',clues:['找到完整口琴。','探索線索後，口說完成每一步。']};
   specs.zone12={title:'新港國小：舞獅迎賓任務',english:'Welcome to our school!',brief:'校史尋寶、迎賓圖卡、鼓點與舞獅口說任務。',clues:['到校門迎賓桌接下任務。','口說辨識通過才完成步驟。']};
   specs.zone11={title:'魔法餐廳：一碗熱湯的冒險',english:'Two eggs and one pumpkin, please.',brief:'穿梭三個房間，依訂單準備食材並送餐。',clues:['先到訂單台接單。','依英語線索找鑰匙、取食材、料理與送餐。']};
-  const defaults={zone2:{cart:[0,0,0],paid:false},zone3:{tool:'WATER',care:[false,false,false]},zone4:{equipment:'',stage:0},zone5:{hour:6,minute:0,platform:1,boarded:false},zone6:{x:0,y:2},zone7:{object:'STAR',angle:0,aligned:false},zone8:{gear:[],heat:0,ready:false},zone9:{order:[],sealed:false},zone10:{notes:[],played:false}};
+  const defaults={
+    zone2:{cart:[0,0,0],paid:false,spoken:{APPLE:0,MILK:0}},
+    zone3:{tool:'WATER',care:[false,false,false],pendingCare:null,spoken:[]},
+    zone4:{equipment:'',stage:0,ballSpoken:false,pendingMove:null},
+    zone5:{hour:6,minute:0,platform:1,boarded:false,spoken:[]},
+    zone6:{x:0,y:2,boatSpoken:false,windSpoken:false},
+    zone7:{object:'STAR',angle:0,aligned:false,moonSpoken:false},
+    zone8:{gear:[],heat:0,ready:false,spokenGear:[],warmSpoken:false},
+    zone9:{order:[],spoken:[],sealed:false},
+    zone10:{notes:[],played:false,musicSpoken:false}
+  };
   defaults.zone15={stage:0,spoken:[],choices:['','','','','','','',''],gate:0,call:0,collected:[]};
   defaults.zone14={stage:0,spoken:[],choices:['','','','','','','',''],water:0,light:0,collected:[]};
   defaults.zone21={stage:0,spoken:[],choices:['','','','','','','','']};
@@ -473,15 +487,15 @@
     if(id==='zone11')return root.RestaurantChapter?.solved(s)||false;
     if(!s)return false;
     switch(id){
-      case 'zone2':return s.paid===true&&eq(s.cart,[2,1,0]);
-      case 'zone3':return eq(s.care,[true,true,true]);
-      case 'zone4':return s.equipment==='BALL'&&s.stage===3;
-      case 'zone5':return s.boarded===true&&s.hour===8&&s.minute===30&&s.platform===2;
-      case 'zone6':return s.x===3&&s.y===0;
-      case 'zone7':return s.aligned===true&&s.object==='MOON'&&s.angle===90;
-      case 'zone8':return s.ready===true&&s.heat===2&&eq([...s.gear].sort(),['BOOTS','COAT','GLOVES']);
-      case 'zone9':return s.sealed===true&&eq(s.order,['READ','THINK','WRITE']);
-      case 'zone10':return s.played===true&&eq(s.notes,['C','E','G','C']);
+      case 'zone2':return s.paid===true&&eq(s.cart,[2,1,0])&&s.spoken?.APPLE>=2&&s.spoken?.MILK>=1;
+      case 'zone3':return eq(s.care,[true,true,true])&&['TREE','RABBIT','BIRD'].every(word=>s.spoken?.includes(word));
+      case 'zone4':return s.equipment==='BALL'&&s.ballSpoken===true&&s.stage===3;
+      case 'zone5':return s.boarded===true&&s.hour===8&&s.minute===30&&s.platform===2&&['TIME','TRAIN'].every(w=>s.spoken?.includes(w));
+      case 'zone6':return s.x===3&&s.y===0&&s.boatSpoken===true&&s.windSpoken===true;
+      case 'zone7':return s.aligned===true&&s.object==='MOON'&&s.angle===90&&s.moonSpoken===true;
+      case 'zone8':return s.ready===true&&s.heat===2&&eq([...s.gear].sort(),['BOOTS','COAT','GLOVES'])&&s.warmSpoken===true;
+      case 'zone9':return s.sealed===true&&eq(s.order,['READ','THINK','WRITE'])&&eq(s.spoken,['READ','THINK','WRITE']);
+      case 'zone10':return s.played===true&&eq(s.notes,['C','E','G','C'])&&s.musicSpoken===true;
       default:return false;
     }
   }
@@ -500,18 +514,18 @@
     if(!raw||!defaults[id])return null;
     let ok=false;
     switch(id){
-      case 'zone2':ok=Array.isArray(raw.cart)&&raw.cart.length===3&&raw.cart.every(n=>isInt(n,0,3))&&typeof raw.paid==='boolean';break;
-      case 'zone3':ok=['WATER','LEAF','SEEDS'].includes(raw.tool)&&Array.isArray(raw.care)&&raw.care.length===3&&raw.care.every(b=>typeof b==='boolean');break;
-      case 'zone4':ok=['','BALL','BOOK','CLOCK'].includes(raw.equipment)&&isInt(raw.stage,0,3);break;
-      case 'zone5':ok=[6,8,10].includes(raw.hour)&&[0,30,45].includes(raw.minute)&&isInt(raw.platform,1,3)&&typeof raw.boarded==='boolean';break;
-      case 'zone6':ok=isInt(raw.x,0,3)&&isInt(raw.y,0,2)&&!((raw.x===1&&raw.y===1)||(raw.x===2&&raw.y===2));break;
-      case 'zone7':ok=['STAR','MOON','SUN'].includes(raw.object)&&[0,90,180,270].includes(raw.angle)&&typeof raw.aligned==='boolean';break;
-      case 'zone8':ok=Array.isArray(raw.gear)&&raw.gear.length<=5&&new Set(raw.gear).size===raw.gear.length&&raw.gear.every(g=>['COAT','GLOVES','BOOTS','SHORTS','SANDALS'].includes(g))&&isInt(raw.heat,0,3)&&typeof raw.ready==='boolean';break;
-      case 'zone9':ok=Array.isArray(raw.order)&&raw.order.length<=3&&new Set(raw.order).size===raw.order.length&&raw.order.every(w=>['READ','THINK','WRITE'].includes(w))&&typeof raw.sealed==='boolean';break;
-      case 'zone10':ok=Array.isArray(raw.notes)&&raw.notes.length<=4&&raw.notes.every(n=>['C','E','G'].includes(n))&&typeof raw.played==='boolean';break;
+      case 'zone2':ok=Array.isArray(raw.cart)&&raw.cart.length===3&&raw.cart.every(n=>isInt(n,0,3))&&typeof raw.paid==='boolean'&&(!raw.spoken||(Number.isInteger(raw.spoken.APPLE)&&isInt(raw.spoken.APPLE,0,2)&&Number.isInteger(raw.spoken.MILK)&&isInt(raw.spoken.MILK,0,1)));break;
+      case 'zone3':ok=['WATER','LEAF','SEEDS'].includes(raw.tool)&&Array.isArray(raw.care)&&raw.care.length===3&&raw.care.every(b=>typeof b==='boolean')&&(raw.pendingCare===undefined||raw.pendingCare===null||isInt(raw.pendingCare,0,2))&&(raw.spoken===undefined||(Array.isArray(raw.spoken)&&new Set(raw.spoken).size===raw.spoken.length&&raw.spoken.every(w=>['TREE','RABBIT','BIRD'].includes(w))));break;
+      case 'zone4':ok=['','BALL','BOOK','CLOCK'].includes(raw.equipment)&&isInt(raw.stage,0,3)&&(raw.ballSpoken===undefined||typeof raw.ballSpoken==='boolean')&&(raw.pendingMove===undefined||raw.pendingMove===null||['RUN','JUMP','SOCCER'].includes(raw.pendingMove));break;
+      case 'zone5':ok=[6,8,10].includes(raw.hour)&&[0,30,45].includes(raw.minute)&&isInt(raw.platform,1,3)&&typeof raw.boarded==='boolean'&&(raw.spoken===undefined||(Array.isArray(raw.spoken)&&new Set(raw.spoken).size===raw.spoken.length&&raw.spoken.every(w=>['TIME','TRAIN'].includes(w))));break;
+      case 'zone6':ok=isInt(raw.x,0,3)&&isInt(raw.y,0,2)&&!((raw.x===1&&raw.y===1)||(raw.x===2&&raw.y===2))&&(raw.boatSpoken===undefined||typeof raw.boatSpoken==='boolean')&&(raw.windSpoken===undefined||typeof raw.windSpoken==='boolean');break;
+      case 'zone7':ok=['STAR','MOON','SUN'].includes(raw.object)&&[0,90,180,270].includes(raw.angle)&&typeof raw.aligned==='boolean'&&(raw.moonSpoken===undefined||typeof raw.moonSpoken==='boolean');break;
+      case 'zone8':ok=Array.isArray(raw.gear)&&raw.gear.length<=5&&new Set(raw.gear).size===raw.gear.length&&raw.gear.every(g=>['COAT','GLOVES','BOOTS','SHORTS','SANDALS'].includes(g))&&isInt(raw.heat,0,3)&&typeof raw.ready==='boolean'&&(raw.spokenGear===undefined||(Array.isArray(raw.spokenGear)&&raw.spokenGear.length<=8&&raw.spokenGear.every(g=>['COAT','GLOVES','BOOTS','SHORTS','SANDALS'].includes(g))))&&(raw.warmSpoken===undefined||typeof raw.warmSpoken==='boolean');break;
+      case 'zone9':ok=Array.isArray(raw.order)&&raw.order.length<=3&&new Set(raw.order).size===raw.order.length&&raw.order.every(w=>['READ','THINK','WRITE'].includes(w))&&typeof raw.sealed==='boolean'&&(raw.spoken===undefined||(Array.isArray(raw.spoken)&&new Set(raw.spoken).size===raw.spoken.length&&raw.spoken.every(w=>['READ','THINK','WRITE'].includes(w))));break;
+      case 'zone10':ok=Array.isArray(raw.notes)&&raw.notes.length<=4&&raw.notes.every(n=>['C','E','G'].includes(n))&&typeof raw.played==='boolean'&&(raw.musicSpoken===undefined||typeof raw.musicSpoken==='boolean');break;
     }
     if(!ok)return null;
-    const s=initial(id);for(const key of Object.keys(s))s[key]=clone(raw[key]);
+    const s=initial(id);for(const key of Object.keys(s))if(Object.prototype.hasOwnProperty.call(raw,key))s[key]=clone(raw[key]);
     // A stale success flag cannot bypass a changed configuration.
     for(const key of ['paid','boarded','aligned','ready','sealed','played'])if(key in s&&!solved(id,s))s[key]=false;
     return s;
@@ -535,41 +549,84 @@
     switch(id){
       case 'zone2':
         if(action.type==='quantity'&&isInt(action.index,0,2)&&isInt(action.value,0,3))s.cart[action.index]=action.value;
-        if(action.type==='pay'){s.paid=eq(s.cart,[2,1,0]);message=s.paid?'購物清單與 4 枚金幣剛好相符！':'還不能結帳：請核對食物數量與金幣總額。';}break;
+        if(action.type==='speak'&&action.value==='APPLE'&&s.spoken.APPLE<2)s.spoken.APPLE++;
+        if(action.type==='speak'&&action.value==='MILK'&&s.spoken.MILK<1)s.spoken.MILK++;
+        if(action.type==='pay'){s.paid=eq(s.cart,[2,1,0])&&s.spoken.APPLE>=2&&s.spoken.MILK>=1;message=s.paid?'購物清單、口說食物與 4 枚金幣剛好相符！':s.spoken.APPLE<2||s.spoken.MILK<1?'先到蘋果攤口說兩次 APPLE、到牛奶攤口說一次 MILK，再回來結帳。':'還不能結帳：請核對食物數量與金幣總額。';}break;
       case 'zone3':
         if(action.type==='tool'&&['WATER','LEAF','SEEDS'].includes(action.value))s.tool=action.value;
-        if(action.type==='care'&&isInt(action.index,0,2)){if(s.tool===['WATER','LEAF','SEEDS'][action.index]){s.care[action.index]=true;message='這位夥伴已經得到需要的照護！';}else message='這位夥伴需要別的東西；可以換一個工具再試。';}break;
+        if(action.type==='care'&&isInt(action.index,0,2))message='請到花園裡找到夥伴並口說牠的英文名稱，才算完成照護。';
+        if(action.type==='speak'&&['TREE','RABBIT','BIRD'].includes(action.value)){const i={TREE:0,RABBIT:1,BIRD:2}[action.value],tool=['WATER','LEAF','SEEDS'][i];if(s.tool===tool){s.care[i]=true;if(!s.spoken.includes(action.value))s.spoken.push(action.value);message=action.value+' 已完成口說與照護！';}else message=action.value+' 需要 '+tool+'；先選正確照護用品，再重新口說。';}break;
       case 'zone4':
-        if(action.type==='equipment'&&['BALL','BOOK','CLOCK'].includes(action.value)){s.equipment=action.value;s.stage=0;}
-        if(action.type==='move'&&['RUN','JUMP','SOCCER'].includes(action.value)){if(s.equipment!=='BALL')message='接力還需要一顆球，先選器材。';else if(action.value===['RUN','JUMP','SOCCER'][s.stage]){s.stage++;message='完成第 '+s.stage+' 個動作！';}else {s.stage=0;message='順序有一點不同，再從 RUN 開始試試。';}}break;
+        if(action.type==='equipment'&&['BALL','BOOK','CLOCK'].includes(action.value)){s.equipment=action.value;if(action.value!=='BALL'){s.ballSpoken=false;s.stage=0;}}
+        if(action.type==='move'&&['RUN','JUMP','SOCCER'].includes(action.value))message='請到跑道或足球區口說這個動作，才會推進接力。';
+        if(action.type==='speak'&&action.value==='BALL')s.ballSpoken=true;
+        if(action.type==='speak'&&['RUN','JUMP','SOCCER'].includes(action.value)){if(s.equipment!=='BALL'||!s.ballSpoken)message='先選擇 BALL 並到足球區口說 BALL。';else if(action.value===['RUN','JUMP','SOCCER'][s.stage]){s.stage++;message='口說完成 '+action.value+'！接力進度 '+s.stage+' / 3。';}else{s.stage=0;message='順序不符，進度回到起點；請從 RUN 重新口說。';}}break;
       case 'zone5':
         if(action.type==='set'&&((action.key==='hour'&&[6,8,10].includes(action.value))||(action.key==='minute'&&[0,30,45].includes(action.value))||(action.key==='platform'&&isInt(action.value,1,3))))s[action.key]=action.value;
-        if(action.type==='board'){s.boarded=s.hour===8&&s.minute===30&&s.platform===2;message=s.boarded?'時間與月台正確，車票驗證成功！':'時間或月台與車票不同，再看看車票。';}break;
+        if(action.type==='speak'&&['TIME','TRAIN'].includes(action.value)&&!s.spoken.includes(action.value))s.spoken.push(action.value);
+        if(action.type==='board'){s.boarded=s.hour===8&&s.minute===30&&s.platform===2&&['TIME','TRAIN'].every(w=>s.spoken.includes(w));message=s.boarded?'時間、月台與口說單字都正確，車票驗證成功！':!['TIME','TRAIN'].every(w=>s.spoken.includes(w))?'先到鐘樓口說 TIME、到列車口說 TRAIN，再回來驗票。':'時間或月台與車票不同，再看看車票。';}break;
       case 'zone6':{
         const delta={north:[0,-1],south:[0,1],west:[-1,0],east:[1,0]}[action.value];
-        if(action.type==='sail'&&delta){const x=s.x+delta[0],y=s.y+delta[1];if(!isInt(x,0,3)||!isInt(y,0,2))message='岸邊不能通過，換個方向航行。';else if((x===1&&y===1)||(x===2&&y===2))message='前方有礁石，請找另一條水路。';else {s.x=x;s.y=y;message='已航行一格。';}}break;
+        if(action.type==='speak'&&action.value==='BOAT')s.boatSpoken=true;
+        if(action.type==='speak'&&action.value==='WIND'){if(s.x===3&&s.y===0)s.windSpoken=true;else message='抵達燈塔後才能口說 WIND。';}
+        if(action.type==='sail'&&delta){if(!s.boatSpoken)message='先到碼頭口說 BOAT，再開始看海圖航行。';else {const x=s.x+delta[0],y=s.y+delta[1];if(!isInt(x,0,3)||!isInt(y,0,2))message='岸邊不能通過，換個方向航行。';else if((x===1&&y===1)||(x===2&&y===2))message='前方有礁石，請找另一條水路。';else {s.x=x;s.y=y;message='已航行一格。';}}}break;
       }
       case 'zone7':
         if(action.type==='object'&&['STAR','MOON','SUN'].includes(action.value))s.object=action.value;
         if(action.type==='rotate')s.angle=(s.angle+90)%360;
-        if(action.type==='align'){s.aligned=s.object==='MOON'&&s.angle===90;message=s.aligned?'觀測儀已對準東方月亮！':'天體或方向與筆記不同，再觀察一次。';}break;
+        if(action.type==='speak'&&action.value==='MOON')s.moonSpoken=true;
+        if(action.type==='align'){s.aligned=s.object==='MOON'&&s.angle===90&&s.moonSpoken;message=s.aligned?'觀測儀已對準並口說辨識東方月亮！':!s.moonSpoken?'先到日晷口說 MOON，再確認觀測方向。':'天體或方向與筆記不同，再觀察一次。';}break;
       case 'zone8':
-        if(action.type==='gear'&&['COAT','GLOVES','BOOTS','SHORTS','SANDALS'].includes(action.value))s.gear=s.gear.includes(action.value)?s.gear.filter(g=>g!==action.value):[...s.gear,action.value];
+        if(action.type==='gear'&&['COAT','GLOVES','BOOTS','SHORTS','SANDALS'].includes(action.value))message='請先口說裝備名稱，再選擇裝備。';
+        if(action.type==='speak'&&['COAT','GLOVES','BOOTS','SHORTS','SANDALS'].includes(action.value)){s.gear=s.gear.includes(action.value)?s.gear.filter(g=>g!==action.value):[...s.gear,action.value];if(!s.spokenGear.includes(action.value))s.spokenGear.push(action.value);message='已口說並更新裝備：'+action.value+'。';}
+        if(action.type==='speak'&&action.value==='WARM')s.warmSpoken=true;
         if(action.type==='heat'&&[-1,1].includes(action.value))s.heat=Math.min(3,Math.max(0,s.heat+action.value));
-        if(action.type==='depart'){s.ready=s.heat===2&&eq([...s.gear].sort(),['BOOTS','COAT','GLOVES']);message=s.ready?'保暖裝備與營火都準備好了！':'請核對保暖裝備，並讓營火維持 2 格熱度。';}break;
+        if(action.type==='depart'){s.ready=s.heat===2&&eq([...s.gear].sort(),['BOOTS','COAT','GLOVES'])&&s.warmSpoken;message=s.ready?'保暖裝備、營火與 WARM 口說都準備好了！':!s.warmSpoken?'先到營火前口說 WARM，再準備出發。':'請核對保暖裝備，並讓營火維持 2 格熱度。';}break;
       case 'zone9':
-        if(action.type==='card'&&['READ','THINK','WRITE'].includes(action.value)&&!s.order.includes(action.value)&&s.order.length<3)s.order.push(action.value);
-        if(action.type==='clear')s.order=[];
+        if(action.type==='card'&&['READ','THINK','WRITE'].includes(action.value))message='請口說故事卡上的英文動詞，卡片才會放回卷軸。';
+        if(action.type==='speak'&&['READ','THINK','WRITE'].includes(action.value)&&!s.order.includes(action.value)&&s.order.length<3){s.order.push(action.value);s.spoken.push(action.value);message='已口說並放入 '+action.value+'。';}
+        if(action.type==='clear'){s.order=[];s.spoken=[];}
         if(action.type==='seal'){s.sealed=eq(s.order,['READ','THINK','WRITE']);message=s.sealed?'卷軸恢復了正確的故事步驟！':'順序與 first、next、last 不同，可以取回重排。';}break;
       case 'zone10':
-        if(action.type==='note'&&['C','E','G'].includes(action.value)&&s.notes.length<4)s.notes.push(action.value);
+        if(action.type==='speak'&&action.value==='MUSIC')s.musicSpoken=true;
+        if(action.type==='note'&&['C','E','G'].includes(action.value)&&s.musicSpoken&&s.notes.length<4)s.notes.push(action.value);
         if(action.type==='clear')s.notes=[];
-        if(action.type==='play'){s.played=eq(s.notes,['C','E','G','C']);message=s.played?'回家的旋律響起，虹橋亮了！':'旋律有一點不同，先聽示範再清空重彈。';}break;
+        if(action.type==='play'){s.played=s.musicSpoken&&eq(s.notes,['C','E','G','C']);message=s.played?'回家的旋律響起，虹橋亮了！':!s.musicSpoken?'先到浮空星琴前口說 MUSIC，再彈奏旋律。':'旋律有一點不同，先聽示範再清空重彈。';}break;
     }
     return {state:s,message:solved(id,s)?'秘境任務完成！ '+message:message};
   }
-  function canTravel(from,to,map,{restore=false,dev=false}={}){if(restore||dev)return true;if(to==='learningHub'||from==='learningHub')return true;if(to==='zone15')return from==='zone5'&&solved('zone5',map?.zone5);if(from==='zone15')return to==='zone5';if(to==='zone19')return solved('zone2',map?.zone2);if(from==='zone19')return to==='zone2';if(to==='zone20'||to==='zone18'||to==='zone17')return solved('zone12',map?.zone12);if(from==='zone20'||from==='zone18'||from==='zone17')return to==='zone12';if(to==='zone16')return solved('zone21',map?.zone21);if(from==='zone16')return to==='zone21';if(to==='zone21')return solved('zone7',map?.zone7);if(from==='zone21')return to==='zone7'||(to==='zone16'&&solved('zone21',map?.zone21));if(to==='zone14')return solved('zone3',map?.zone3);if(from==='zone14')return to==='zone3';if(to==='zone13')return solved('zone12',map?.zone12);if(from==='zone13')return to==='zone12';if(to==='zone12')return solved('zone4',map?.zone4);if(from==='zone12')return to==='zone4'||(['zone17','zone18','zone20'].includes(to)&&solved('zone12',map?.zone12));if(to==='zone11')return solved('zone2',map?.zone2);if(from==='zone11')return to==='zone2';return !specs[from]||Number(to.slice(4))<=Number(from.slice(4))||solved(from,map?.[from]);}
-  const api={specs,initial,solved,validateState,sanitizeMap,transition,canTravel};root.RealmQuests=api;if(typeof module!=='undefined')module.exports=api;
+  const branchParents={zone11:'zone2',zone12:'zone4',zone13:'zone12',zone14:'zone3',zone15:'zone5',zone16:'zone21',zone17:'zone12',zone18:'zone12',zone19:'zone2',zone20:'zone12',zone21:'zone7'};
+  function prerequisitesFor(zoneId){
+    const id=String(zoneId||'');if(!/^zone\d+$/.test(id)||id==='zone1')return [];
+    const chain=[],seen=new Set();let cursor=id;
+    while(cursor!=='zone1'&&!seen.has(cursor)){
+      seen.add(cursor);const parent=branchParents[cursor]||(Number(cursor.slice(4))>1?'zone'+(Number(cursor.slice(4))-1):null);
+      if(!parent)break;chain.unshift(parent);cursor=parent;
+    }
+    return [...new Set(chain)];
+  }
+  function canTravel(from,to,map,{restore=false,dev=false,zone1Complete=false}={}){
+    if(restore||dev)return true;
+    if(to==='learningHub'||from==='learningHub')return true;
+    const target=String(to||'');
+    const targetNumber=Number(target.slice(4));
+    if(!/^zone\d+$/.test(target)||!Number.isInteger(targetNumber))return false;
+    const source=String(from||''),fromNumber=Number(source.slice(4)),sourceParent=branchParents[source];
+    if(sourceParent){
+      if(target===sourceParent)return true;
+      if(branchParents[target]===source)return solved(source,map?.[source]);
+      if(branchParents[target]&&branchParents[target]===sourceParent)return solved(sourceParent,map?.[sourceParent]);
+      return false;
+    }
+    if(!branchParents[target]&&/^zone\d+$/.test(source)&&fromNumber>=targetNumber)return true;
+    if(branchParents[target]&&source!==branchParents[target])return false;
+    // Portals check their immediate story edge; the manager additionally checks the full
+    // saved route lineage so direct map travel cannot leap over unfinished mainline stops.
+    const prerequisite=branchParents[target]||(targetNumber>1?'zone'+(targetNumber-1):null);
+    if(!prerequisite)return true;
+    return prerequisite==='zone1'?zone1Complete===true:solved(prerequisite,map?.[prerequisite]);
+  }
+  const api={specs,initial,solved,validateState,sanitizeMap,transition,canTravel,prerequisitesFor};root.RealmQuests=api;if(typeof module!=='undefined')module.exports=api;
   })(globalThis);
 /* Puzzle checkpoints are separate from the learning-record service. */
 (function(root) {
@@ -638,4 +695,4 @@
   const api={migrateWeather,flags,ownerKey,validate,capture,applySavedPosition,CheckpointStore};root.AdventureProgress=api;
   if(typeof module!=='undefined')module.exports=api;
   })(globalThis);
-var ADVENTURE_CHECKPOINT_ZONES={"zone1":{"id":"zone1","words":["LIGHT","BOOK","KEY","RED","BLUE","STAR","CAT","FISH","DOOR","FLOWER","OPEN","SUN"]},"zone2":{"id":"zone2","words":["APPLE","BANANA","BREAD","MILK","SWEET","OPEN"]},"zone3":{"id":"zone3","words":["RABBIT","BIRD","TREE","WATER","OPEN"]},"zone4":{"id":"zone4","words":["SOCCER","BALL","RUN","JUMP","OPEN"]},"zone5":{"id":"zone5","words":["TIME","CLOCK","TRAIN","MORNING","OPEN"]},"zone6":{"id":"zone6","words":["SHIP","BOAT","WIND","FISH","WATER","OPEN"]},"zone7":{"id":"zone7","words":["STAR","MOON","CLOUD","SUN","SKY","OPEN"]},"zone8":{"id":"zone8","words":["SNOW","COLD","WINTER","WHITE","WARM","CLIMB"]},"zone9":{"id":"zone9","words":["LIBRARY","READ","WRITE","THINK","SMART","FLY"]},"zone10":{"id":"zone10","words":["ISLAND","RAINBOW","MUSIC","SING","DANCE","DREAM"]},"zone11":{"id":"zone11","words":["EGG","PUMPKIN","LEMON","SOUP","WASH","PUT","COOK","SPOON"]},"zone12":{"id":"zone12","words":["SCHOOL","CLASSROOM","PAPER","DRAW","LISTEN","DRUM","LION","WELCOME"]},"zone13":{"id":"zone13","words":["SMALL","MOUTH","HAND","LEFT","RIGHT","HIGH","PLAY","SONG"]},"learningHub":{"id":"learningHub","words":[]},"zone14":{"id":"zone14","words":["GARDEN","GREEN","BEE","BUTTERFLY","GROW","SMELL","PICK UP","BEAUTIFUL"]},"zone21":{"id":"zone21","words":["WEATHER","CLOUDY","RAIN","RAINY","SUNNY","WINDY","HOT","WET"]},"zone16":{"id":"zone16","words":["BEACH","SEA","SCIENCE","DIFFERENT","INTERESTING","IN FRONT OF","LOOK","TRASH"]},"zone17":{"id":"zone17","words":["SHELF","STORY","STUDENT","TEACHER","STUDY","QUIET","BORING","EXCITING"]},"zone18":{"id":"zone18","words":["ROBOT","MAKE","FAST","SLOW","TURN","WORK","READY","START"]},"zone19":{"id":"zone19","words":["THIRTEEN","FOURTEEN","FIFTEEN","SIXTEEN","SEVENTEEN","EIGHTEEN","NINETEEN","TWENTY"]},"zone20":{"id":"zone20","words":["BLACKBOARD","PICTURE","PENCIL","RULER","GLUE","MARKER","ART","ENGLISH"]},"zone15":{"id":"zone15","words":["AIRPORT","PLANE","TICKET","BAG","WAIT","HURRY","TAXI","LATE"]}};
+var ADVENTURE_CHECKPOINT_ZONES={"zone1":{"id":"zone1","words":["LIGHT","BOOK","KEY","RED","BLUE","STAR","CAT","FISH","DOOR","FLOWER","OPEN","SUN"]},"zone2":{"id":"zone2","words":["APPLE","BANANA","BREAD","MILK","SWEET","OPEN"]},"zone3":{"id":"zone3","words":["RABBIT","BIRD","TREE","WATER","OPEN"]},"zone4":{"id":"zone4","words":["SOCCER","BALL","RUN","JUMP","OPEN"]},"zone5":{"id":"zone5","words":["TIME","CLOCK","TRAIN","MORNING","OPEN"]},"zone6":{"id":"zone6","words":["SHIP","BOAT","WIND","FISH","WATER","OPEN"]},"zone7":{"id":"zone7","words":["STAR","MOON","CLOUD","SUN","SKY","OPEN"]},"zone8":{"id":"zone8","words":["SNOW","COLD","WINTER","WHITE","WARM","CLIMB"]},"zone9":{"id":"zone9","words":["LIBRARY","READ","WRITE","THINK","SMART","FLY"]},"zone10":{"id":"zone10","words":["ISLAND","RAINBOW","MUSIC","SING","DANCE","DREAM"]},"zone11":{"id":"zone11","words":["EGG","PUMPKIN","LEMON","SOUP","WASH","PUT","COOK","SPOON"]},"zone12":{"id":"zone12","words":["SCHOOL","LISTEN","CLASSROOM","PAPER","FIND","DRUM","LION","WELCOME"]},"zone13":{"id":"zone13","words":["SMALL","MOUTH","HAND","LEFT","RIGHT","HIGH","PLAY","SONG"]},"learningHub":{"id":"learningHub","words":[]},"zone14":{"id":"zone14","words":["GARDEN","GREEN","BEE","BUTTERFLY","GROW","SMELL","PICK UP","BEAUTIFUL"]},"zone21":{"id":"zone21","words":["WEATHER","CLOUDY","RAIN","RAINY","SUNNY","WINDY","HOT","WET"]},"zone16":{"id":"zone16","words":["BEACH","SEA","SCIENCE","DIFFERENT","INTERESTING","IN FRONT OF","LOOK","TRASH"]},"zone17":{"id":"zone17","words":["SHELF","STORY","STUDENT","TEACHER","STUDY","QUIET","BORING","EXCITING"]},"zone18":{"id":"zone18","words":["ROBOT","MAKE","FAST","SLOW","TURN","WORK","READY","START"]},"zone19":{"id":"zone19","words":["THIRTEEN","FOURTEEN","FIFTEEN","SIXTEEN","SEVENTEEN","EIGHTEEN","NINETEEN","TWENTY"]},"zone20":{"id":"zone20","words":["BLACKBOARD","PICTURE","PENCIL","RULER","GLUE","MARKER","ART","ENGLISH"]},"zone15":{"id":"zone15","words":["AIRPORT","PLANE","TICKET","BAG","WAIT","HURRY","TAXI","LATE"]}};

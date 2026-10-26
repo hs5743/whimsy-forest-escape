@@ -134,17 +134,17 @@ class SpatialZoneManager {
     };
 
     this.zones.zone11={id:'zone11',name:'魔法餐廳：一碗熱湯的冒險',englishName:'Magic Restaurant',icon:'🍲',topic:'Food, Actions & Prepositions',reqLevel:2,parentZone:'zone2',desc:'陽光微風市集的街角餐廳。完成採買後接受店主委託，穿梭餐廳、廚房與儲藏室，準備熱湯，再回市集繼續冒險。',words:['EGG','PUMPKIN','LEMON','SOUP','WASH','PUT','COOK','SPOON'],spawnPos:[0,1.6,7],spawnYaw:0};
-    this.zones.zone12={id:'zone12',name:'新港國小：舞獅迎賓任務',englishName:'Xin-gang School Adventure',icon:'🏫',topic:'School, Art & Lion Dance',reqLevel:4,parentZone:'zone4',desc:'以新竹縣竹北市新港國小的校史與龍鳳舞獅特色改編。走訪閱讀角、校史展示、繪畫桌與鼓台，觀察舞獅壁畫，並在迎賓庭院完成口說任務。',words:['SCHOOL','CLASSROOM','PAPER','DRAW','LISTEN','DRUM','LION','WELCOME'],spawnPos:[0,1.6,8.4],spawnYaw:0};
+    this.zones.zone12={id:'zone12',name:'新港國小：舞獅迎賓任務',englishName:'Xin-gang School Adventure',icon:'🏫',topic:'School, Art & Lion Dance',reqLevel:4,parentZone:'zone4',desc:'以新竹縣竹北市新港國小的校史與龍鳳舞獅特色改編。走訪閱讀角、校史展示、舞獅圖卡桌與鼓台，觀察舞獅壁畫，並在迎賓庭院完成口說任務。',words:['SCHOOL','LISTEN','CLASSROOM','PAPER','FIND','DRUM','LION','WELCOME'],spawnPos:[0,1.6,8.4],spawnYaw:0};
     this.zones.zone13={id:'zone13',name:'半音階口琴：掌心音樂展示館',englishName:'Chromatic Harmonica Gallery',icon:'🎵',topic:'Harmonica, Sound & Playing',reqLevel:4,parentZone:'zone12',desc:'從新港校園音樂翼走進口琴展示館。探索完整口琴、分層簧片、滑鍵半音與吹吸練習，用八個新英語詞完成小小展演。',words:['SMALL','MOUTH','HAND','LEFT','RIGHT','HIGH','PLAY','SONG'],spawnPos:[0,1.6,9.4],spawnYaw:0};
     const learningHub={id:'learningHub',name:'英語探險家學習大廳',englishName:'Explorer Language Lounge',icon:'📚',topic:'自由選題 · 單字 · 句型 · 複習',reqLevel:1,isLearningHub:true,desc:'與狐狸館長、貓頭鷹老師和兔子教練反覆練習，收藏想學的單字，累積口說、句型與跨日複習紀錄。完成後返回原來的冒險。',words:[],spawnPos:[0,1.6,8],spawnYaw:0};
     this.zones.learningHub=learningHub;
-    this.zones.zone14={id:'zone14',name:'玻璃溫室：花園復甦任務',englishName:'Glass Conservatory',icon:'🌿',topic:'Garden, Insects & Caring',reqLevel:2,parentZone:'zone3',desc:'從守護獸花園走入透光的玻璃溫室。觀察蜜蜂與蝴蝶、調整幼苗生長條件並整理花園；每一步都要口說過關。',words:['GARDEN','GREEN','BEE','BUTTERFLY','GROW','SMELL','PICK UP','BEAUTIFUL'],spawnPos:[0,1.6,11.5],spawnYaw:0};
-    this.zones.zone21={id:'zone21',name:'雲雨氣象觀測台：尋回天氣紀錄',englishName:'Cloudtop Weather Station',icon:'🌦️',topic:'Weather, Sky & Temperature',reqLevel:2,parentZone:'zone7',desc:'從雲頂觀測站的氣象星盤延伸到戶外觀測台。讀取雲況、雨量、日照、風力與溫度儀器；每個新字都要先看線索，再口說通過。',words:['WEATHER','CLOUDY','RAIN','RAINY','SUNNY','WINDY','HOT','WET'],spawnPos:[0,1.6,11.2],spawnYaw:0};
-    this.zones.zone16={id:'zone16',name:'香山潮間帶：尋找海岸生命',englishName:'Xiangshan Tidal Wetland',icon:'🦀',topic:'Coast, Field Science & Nature Care',reqLevel:2,parentZone:'zone21',desc:'沿著架高賞蟹步道觀察潮間帶泥灘與海岸地景，練習比較、定位、仔細觀察與守護棲地；每個新詞都要先讀線索再口說通過。',words:['BEACH','SEA','SCIENCE','DIFFERENT','INTERESTING','IN FRONT OF','LOOK','TRASH'],spawnPos:[0,1.6,11.2],spawnYaw:0};
-    this.zones.zone17={id:'zone17',name:'新港國小圖書館：故事階梯尋書任務',englishName:'Xin-gang School Library',icon:'📖',topic:'Library, Reading & Story Feelings',reqLevel:2,parentZone:'zone12',desc:'從舞獅迎賓任務走上校園圖書館的橘色階梯。探索挑高閱讀空間、藍色欄板、階梯下書架、木桌與彩色閱讀座；先看線索，再口說完成每一步。',words:['SHELF','STORY','STUDENT','TEACHER','STUDY','QUIET','BORING','EXCITING'],spawnPos:[0,1.6,10.6],spawnYaw:0};
-    this.zones.zone18={id:'zone18',name:'新港國小創客工坊：小小機器人任務',englishName:'Xin-gang School Makerspace',icon:'🤖',topic:'Robots, Making & Movement',reqLevel:2,parentZone:'zone12',desc:'從校園教學樓走進遊戲化的科技創作工坊。組裝小車、比較速度、試轉向與確認啟動；每個步驟都要先看實物線索，再口說通過。此工坊為教學想像場景，並非學校實景復刻。',words:['ROBOT','MAKE','FAST','SLOW','TURN','WORK','READY','START'],spawnPos:[0,1.6,10.8],spawnYaw:0};
+    this.zones.zone14={id:'zone14',name:'玻璃溫室：花園復甦任務',englishName:'Glass Conservatory',icon:'🌿',topic:'Garden, Insects & Caring',reqLevel:3,parentZone:'zone3',desc:'從守護獸花園走入透光的玻璃溫室。觀察蜜蜂與蝴蝶、調整幼苗生長條件並整理花園；每一步都要口說過關。',words:['GARDEN','GREEN','BEE','BUTTERFLY','GROW','SMELL','PICK UP','BEAUTIFUL'],spawnPos:[0,1.6,11.5],spawnYaw:0};
+    this.zones.zone21={id:'zone21',name:'雲雨氣象觀測台：尋回天氣紀錄',englishName:'Cloudtop Weather Station',icon:'🌦️',topic:'Weather, Sky & Temperature',reqLevel:7,parentZone:'zone7',desc:'從雲頂觀測站的氣象星盤延伸到戶外觀測台。讀取雲況、雨量、日照、風力與溫度儀器；每個新字都要先看線索，再口說通過。',words:['WEATHER','CLOUDY','RAIN','RAINY','SUNNY','WINDY','HOT','WET'],spawnPos:[0,1.6,11.2],spawnYaw:0};
+    this.zones.zone16={id:'zone16',name:'香山潮間帶：尋找海岸生命',englishName:'Xiangshan Tidal Wetland',icon:'🦀',topic:'Coast, Field Science & Nature Care',reqLevel:7,parentZone:'zone21',desc:'沿著架高賞蟹步道觀察潮間帶泥灘與海岸地景，練習比較、定位、仔細觀察與守護棲地；每個新詞都要先讀線索再口說通過。',words:['BEACH','SEA','SCIENCE','DIFFERENT','INTERESTING','IN FRONT OF','LOOK','TRASH'],spawnPos:[0,1.6,11.2],spawnYaw:0};
+    this.zones.zone17={id:'zone17',name:'新港國小圖書館：故事階梯尋書任務',englishName:'Xin-gang School Library',icon:'📖',topic:'Library, Reading & Story Feelings',reqLevel:4,parentZone:'zone12',desc:'從舞獅迎賓任務走上校園圖書館的橘色階梯。探索挑高閱讀空間、藍色欄板、階梯下書架、木桌與彩色閱讀座；先看線索，再口說完成每一步。',words:['SHELF','STORY','STUDENT','TEACHER','STUDY','QUIET','BORING','EXCITING'],spawnPos:[0,1.6,10.6],spawnYaw:0};
+    this.zones.zone18={id:'zone18',name:'新港國小創客工坊：小小機器人任務',englishName:'Xin-gang School Makerspace',icon:'🤖',topic:'Robots, Making & Movement',reqLevel:4,parentZone:'zone12',desc:'從校園教學樓走進遊戲化的科技創作工坊。觀察機器人、成對轉動的齒輪與工作台，再依實物線索選擇答案並口說；此工坊為教學想像場景，並非學校實景復刻。',words:['ROBOT','MAKE','FAST','SLOW','TURN','WORK','READY','START'],spawnPos:[0,1.6,10.8],spawnYaw:0};
     this.zones.zone19={id:'zone19',name:'魔法數字嘉年華：星環計數任務',englishName:'Number Carnival',icon:'🎪',topic:'Numbers, Counting & Carnival Games',reqLevel:2,parentZone:'zone2',desc:'完成陽光微風市集採買後，從冒險星圖前往夜色嘉年華支線。數清燈環、星星籌碼與遊戲攤位，依序學會 THIRTEEN 到 TWENTY；每一步都要先看實物數量，再口說通過。',words:['THIRTEEN','FOURTEEN','FIFTEEN','SIXTEEN','SEVENTEEN','EIGHTEEN','NINETEEN','TWENTY'],spawnPos:[0,1.6,10.5],spawnYaw:0};
-    this.zones.zone20={id:'zone20',name:'新港校慶：舞獅彩繪工坊',englishName:'Xin-gang School Art Workshop',icon:'🦁',topic:'School, Art Tools & Lion Dance',reqLevel:4,parentZone:'zone12',desc:'完成新港國小舞獅迎賓後，走進校慶彩繪工坊。探索黑板、鉛筆、量尺、膠水與色彩工具，完成一幅龍鳳舞獅作品；每一步都要先找到實物，再口說通過。工坊是依學校舞獅特色設計的遊戲支線，不是校舍實景復刻。',words:['BLACKBOARD','PICTURE','PENCIL','RULER','GLUE','MARKER','ART','ENGLISH'],spawnPos:[0,1.6,10.2],spawnYaw:0};
+    this.zones.zone20={id:'zone20',name:'新港校慶：舞獅彩繪工坊',englishName:'Xin-gang School Art Workshop',icon:'🦁',topic:'School, Art Tools & Lion Dance',reqLevel:4,parentZone:'zone12',desc:'完成新港國小舞獅迎賓後，走進校慶彩繪工坊。依序觀察黑板、舞獅壁畫、鉛筆、量尺、膠水與彩色筆，辨認工具、作品和英語標示；每一步都要先找到對應展品，再口說通過。支線依學校舞獅特色設計，不是校舍實景復刻。',words:['BLACKBOARD','PICTURE','PENCIL','RULER','GLUE','MARKER','ART','ENGLISH'],spawnPos:[0,1.6,10.2],spawnYaw:0};
     this.zones.zone15={id:'zone15',name:'星光國際機場：啟航任務',englishName:'Starlight Airport',icon:'✈️',topic:'Airport, Travel & Time',reqLevel:5,parentZone:'zone5',desc:'從星光鐘樓車站轉乘前往國際機場。確認飛機、登機證、行李與時刻表，用八個新英語詞完成啟航任務。',words:['AIRPORT','PLANE','TICKET','BAG','WAIT','HURRY','TAXI','LATE'],spawnPos:[0,1.6,11.5],spawnYaw:0};
     if(!options.metadataOnly)this.initTextures();
     else {this.textureSources=new Map();this.textureStatus=new Map();}
@@ -1163,25 +1163,28 @@ class SpatialZoneManager {
     return this.zones[this.currentZoneId] || this.zones['zone1'];
   }
 
-  // 檢查空間是否已解鎖
+  // Return the exact blockers so the atlas, map, and entrances explain the same gate.
+  getZoneUnlockReasons(zoneId) {
+    const zone=this.zones[zoneId];if(!zone)return ['找不到這個關卡'];
+    if(zone.isLearningHub)return [];
+    const profile=window.cloudSyncManager?.profile||{};
+    const userLevel=Math.max(Number(profile.level)||1,Number(profile.accessLevel)||1);
+    const reasons=[];
+    if(userLevel<zone.reqLevel)reasons.push('冒險者等級需達 Lv.'+zone.reqLevel);
+    const puzzles=this.world?.gameState?.realmPuzzles||{};
+    const prerequisites=window.RealmQuests?.prerequisitesFor?.(zoneId)||(()=>{
+      const previous=zone.parentZone||(Number(zoneId.slice(4))>1?'zone'+(Number(zoneId.slice(4))-1):null);return previous?[previous]:[];
+    })();
+    const missing=prerequisites.filter(id=>id==='zone1'?this.world?.gameState?.escaped!==true:!window.RealmQuests?.solved(id,puzzles[id]));
+    if(missing.length){
+      const first=this.zones[missing[0]]?.name||missing[0],remaining=missing.length-1;
+      reasons.push('先完成「'+first+'」的秘境任務'+(remaining?'（還有 '+remaining+' 個前置關卡）':''));
+    }
+    return reasons;
+  }
+
   isZoneUnlocked(zoneId) {
-    const zone = this.zones[zoneId];
-    if (!zone) return false;
-    const userLevel = (window.cloudSyncManager && window.cloudSyncManager.profile) 
-      ? Math.max(window.cloudSyncManager.profile.level, window.cloudSyncManager.profile.accessLevel || 1)
-      : 1;
-    if(zoneId==='zone15')return userLevel>=zone.reqLevel && !!window.AirportChapter && !!window.RealmQuests?.solved('zone5',this.world.gameState.realmPuzzles?.zone5);
-    if(zoneId==='zone14')return userLevel>=zone.reqLevel && !!window.GreenhouseChapter && !!window.RealmQuests?.solved('zone3',this.world.gameState.realmPuzzles?.zone3);
-    if(zoneId==='zone21')return userLevel>=zone.reqLevel && !!window.WeatherChapter && !!window.RealmQuests?.solved('zone7',this.world.gameState.realmPuzzles?.zone7);
-    if(zoneId==='zone16')return userLevel>=zone.reqLevel && !!window.CoastChapter && !!window.RealmQuests?.solved('zone21',this.world.gameState.realmPuzzles?.zone21);
-    if(zoneId==='zone17')return userLevel>=zone.reqLevel && !!window.LibraryChapter && !!window.SchoolChapter?.solved(this.world.gameState.realmPuzzles?.zone12);
-    if(zoneId==='zone18')return userLevel>=zone.reqLevel && !!window.MakerspaceChapter && !!window.SchoolChapter?.solved(this.world.gameState.realmPuzzles?.zone12);
-    if(zoneId==='zone19')return userLevel>=zone.reqLevel && !!window.CarnivalChapter && !!window.RealmQuests?.solved('zone2',this.world.gameState.realmPuzzles?.zone2);
-    if(zoneId==='zone20')return userLevel>=zone.reqLevel && !!window.ArtWorkshopChapter && !!window.RealmQuests?.solved('zone12',this.world.gameState.realmPuzzles?.zone12);
-    if(zoneId==='zone13')return userLevel>=zone.reqLevel && !!window.HarmonicaChapter && !!window.SchoolChapter?.solved(this.world.gameState.realmPuzzles?.zone12);
-    if(zoneId==='zone12')return userLevel>=zone.reqLevel && !!window.RealmQuests?.solved('zone4',this.world.gameState.realmPuzzles?.zone4);
-    if(zoneId==='zone11')return userLevel>=zone.reqLevel && !!window.RealmQuests?.solved('zone2',this.world.gameState.realmPuzzles?.zone2);
-    return userLevel >= zone.reqLevel;
+    return this.getZoneUnlockReasons(zoneId).length===0;
   }
 
   // The learning lounge has no scavenger clues; branch zones retain their unlock gates.
@@ -1297,16 +1300,17 @@ class SpatialZoneManager {
     if (!this.zones[zoneId]) return false;
     const leavingHub=this.currentZoneId==='learningHub'&&zoneId!=='learningHub';
     const hubReturn=leavingHub?window.LearningHub.returnTarget():null;
-    if(leavingHub&&!options.restore&&!options.directAccess&&zoneId!==hubReturn.zone){this.world.showToast('請先返回原本的冒險，再沿秘境路線前進。');return false;}
+    if(leavingHub&&!options.restore&&zoneId!==hubReturn.zone){this.world.showToast('請先返回原本的冒險，再沿秘境路線前進。');return false;}
     if(zoneId==='learningHub'&&this.currentZoneId!=='learningHub'&&!options.restore&&!window.LearningHub.remember(this.world))return false;
     window.LearningHub?.close();
-    if (!options.directAccess && window.RealmQuests && !window.RealmQuests.canTravel(this.currentZoneId, zoneId, this.world.gameState.realmPuzzles, {restore:options.restore===true,dev:this.world.devMode})) {
-      this.world.showToast(zoneId==='zone11'?'店主：先完成陽光微風市集的採買並結帳，再來幫忙準備熱湯！':'出口還在等待秘境任務。點「秘境任務」閱讀線索、完成機關，再往下一關出發。');
+    if (window.RealmQuests && !window.RealmQuests.canTravel(this.currentZoneId, zoneId, this.world.gameState.realmPuzzles, {restore:options.restore===true,dev:this.world.devMode,zone1Complete:this.world.gameState.escaped===true})) {
+      const blockers=typeof this.getZoneUnlockReasons==='function'?this.getZoneUnlockReasons(zoneId):[];
+      this.world.showToast(zoneId==='zone11'?'店主：先完成陽光微風市集的採買並結帳，再來幫忙準備熱湯！':blockers.length?'🔒 '+blockers.join('；'):'出口還在等待秘境任務。點「秘境任務」閱讀線索、完成機關，再往下一關出發。');
       return false;
     }
-    if (!this.world.devMode && !options.directAccess && !this.isZoneUnlocked(zoneId)) {
+    if (!this.world.devMode && !options.restore && !this.isZoneUnlocked(zoneId)) {
       if (this.world) {
-        this.world.showToast(`🔒 冒險者等級未達 Lv.${this.zones[zoneId].reqLevel}，請先完成前序空間！`);
+        this.world.showToast('🔒 '+this.getZoneUnlockReasons(zoneId).join('；'));
       }
       return false;
     }
@@ -1722,7 +1726,7 @@ class SpatialZoneManager {
 
     // 蔬果與烘焙攤位 (自然有機分布)
     this.buildDetailedMarketStall(group, -4.5, 0, -1.0, 'apple', '🍎 甜美紅蘋果攤 (APPLE)', 'stall_apple', () => {
-      this.world.openSpeechCard('APPLE', () => {
+      this.world.openQuestSpeechCard('APPLE', () => {
         this.world.addInventory('ITEM_APPLE', '🍎 甜脆紅蘋果', '#ef4444');
       });
     }, 0.2);
@@ -1740,7 +1744,7 @@ class SpatialZoneManager {
     }, 0.2);
 
     this.buildDetailedCart(group, 3.5, 0, -3.5, 'milk', '🥛 香濃鮮牛奶 (MILK)', 'cart_milk', () => {
-      this.world.openSpeechCard('MILK', () => {
+      this.world.openQuestSpeechCard('MILK', () => {
         this.world.addInventory('ITEM_MILK', '🥛 牧場鮮牛奶', '#60a5fa');
       });
     }, -0.15);
@@ -1886,19 +1890,19 @@ class SpatialZoneManager {
 
     // 守護白兔 (RABBIT)
     this.buildSculptedRabbit(group, 3.8, 0, 0.6, '🐰 正在草地上蹦跳的兔子 (RABBIT)', 'RABBIT', () => {
-      this.world.openSpeechCard('RABBIT', () => {
+      this.world.openQuestSpeechCard('RABBIT', () => {
       });
     });
 
     // 歌唱青鳥 (BIRD)
     this.buildBirdOnPedestal(group, -4.5, 0, 1.5, '🐦 枝頭歌唱的青鳥 (BIRD)', 'BIRD', () => {
-      this.world.openSpeechCard('BIRD', () => {
+      this.world.openQuestSpeechCard('BIRD', () => {
       });
     });
 
     // 精靈古樹 (TREE)
     this.buildAncientWorldTree(group, 4.8, 0, -4.5, '🌳 茂密的精靈古樹 (TREE)', 'TREE', () => {
-      this.world.openSpeechCard('TREE', () => {
+      this.world.openQuestSpeechCard('TREE', () => {
       });
     });
 
@@ -2025,19 +2029,19 @@ class SpatialZoneManager {
 
     // 足球與標準球門 (BALL / SOCCER) - 位於北側禁區
     this.buildSoccerGoalAndBall(group, 0, 0, -8.5, '⚽ 綠茵場上的足球 (SOCCER / BALL)', 'BALL', () => {
-      this.world.openSpeechCard('BALL', () => {
+      this.world.openQuestSpeechCard('BALL', () => {
       });
     });
 
     // 直道起跑點、助跑塊與接力棒 (RUN) - 位於西直道第 1 分道
     this.buildStartingBlocks(group, -7.3, 0, 4.0, '🏃 起跑線加速奔跑 (RUN)', 'RUN', () => {
-      this.world.openSpeechCard('RUN', () => {
+      this.world.openQuestSpeechCard('RUN', () => {
       });
     });
 
     // 跳躍運動區 (JUMP) - 位於內場跳高墊、跳箱與沙坑
     this.buildJumpEquipment(group, 2.8, 0, 3.2, '🦘 體育跳箱與跳躍 (JUMP)', 'JUMP', () => {
-      this.world.openSpeechCard('JUMP', () => {
+      this.world.openQuestSpeechCard('JUMP', () => {
       });
     });
 
@@ -2330,13 +2334,13 @@ class SpatialZoneManager {
 
     // 巨型天文時鐘塔 (TIME / CLOCK)
     this.buildAstronomicalClockTower(group, -2.8, 0, -8.5, '🕰️ 月台巨型天文時鐘 (TIME / CLOCK)', 'TIME', () => {
-      this.world.openSpeechCard('TIME', () => {
+      this.world.openQuestSpeechCard('TIME', () => {
       });
     });
 
     // 3D 蒸汽特快車頭 (TRAIN) - 具備實體碰撞
     this.buildSteamLocomotive(group, 5.2, 0, -3.2, '🚂 魔法星光特快列車 (TRAIN)', 'TRAIN', () => {
-      this.world.openSpeechCard('TRAIN', () => {
+      this.world.openQuestSpeechCard('TRAIN', () => {
       });
     });
 
@@ -2347,9 +2351,8 @@ class SpatialZoneManager {
     });
 
     // 客車登車大門 (OPEN) - 迎賓紅毯通往車廂 (通往大魔導士殿堂)
-    this.buildTrainCarriageDoorPortal(group, 4.8, 0, 2.2, '🚂 登上通往大魔導士殿堂的列車門 (OPEN)', 'OPEN', () => {
-      this.world.showToast('🎉 汽笛長鳴！恭喜完成全維度英語護照試煉！');
-      if (this.world) this.world.triggerEscapeCelebration();
+    this.buildTrainCarriageDoorPortal(group, 4.8, 0, 2.2, '🚂 車廂登車門 · OPEN 口說練習', 'OPEN', () => {
+      this.world.showToast('OPEN 口說練習完成。前往蔚藍秘境海港，請走北側貨運閘門。');
     });
 
     // 北側鐵道專線閘門 (前往 Zone 6 蔚藍秘境海港)
@@ -2907,7 +2910,7 @@ class SpatialZoneManager {
       onClick: () => {
         this.world.openSpeechCard(exitWord, () => {
           if (onUnlocked) onUnlocked();
-        });
+        }, { requireRecognition: true });
       }
     };
     portal.add(hitBox);
@@ -3259,7 +3262,7 @@ class SpatialZoneManager {
       onClick: () => {
         this.world.openSpeechCard(exitWord, () => {
           if (onUnlocked) onUnlocked();
-        });
+        }, { requireRecognition: true });
       }
     };
     portal.add(hitBox);
@@ -3557,7 +3560,7 @@ class SpatialZoneManager {
       onClick: () => {
         this.world.openSpeechCard(exitWord, () => {
           if (onUnlocked) onUnlocked();
-        });
+        }, { requireRecognition: true });
       }
     };
     portal.add(hitBox);
@@ -3840,7 +3843,7 @@ class SpatialZoneManager {
       onClick: () => {
         this.world.openSpeechCard(exitWord, () => {
           if (onUnlocked) onUnlocked();
-        });
+        }, { requireRecognition: true });
       }
     };
     portal.add(hitBox);
@@ -4223,7 +4226,7 @@ class SpatialZoneManager {
       { no: 'EXP-01', time: '21:00', dest: 'MAGE CITADEL (終點)', status: 'BOARDING', color: '#10b981' },
       { no: 'LOC-02', time: '22:30', dest: 'ATHLETIC STADIUM', status: 'ON TIME', color: '#38bdf8' },
       { no: 'LOC-03', time: '06:15', dest: 'SUNLIT BAZAAR', status: 'ON TIME', color: '#38bdf8' },
-      { no: 'EXP-04', time: '08:00', dest: 'APPRENTICE TOWER', status: 'WAITING', color: '#f59e0b' }
+      { no: 'EXP-04', time: '08:30', dest: 'HARBOR LINE · PLATFORM 2', status: 'BOARDING', color: '#f59e0b' }
     ];
 
     ctx.font = 'bold 15px monospace';
@@ -4746,14 +4749,26 @@ class SpatialZoneManager {
 
     lighthouse.add(beamGroup);
 
-    // 互動點 POI: WIND
-    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(3.2, 4.0, 3.2), new THREE.MeshBasicMaterial({ visible: false }));
-    hitBox.position.set(0, 2.2, 2.5);
+    // 可由地面直接辨認與點選的風向指示，避免屋頂風向標被塔身遮住。
+    const indicator = new THREE.Group();
+    indicator.position.set(4.25, 0, 0);
+    const indicatorBase = new THREE.Mesh(new THREE.CylinderGeometry(.24,.32,.18,10), stoneMat);
+    indicatorBase.position.y=.09;indicator.add(indicatorBase);
+    const indicatorPole = new THREE.Mesh(new THREE.CylinderGeometry(.045,.065,1.65,8), ironMat);
+    indicatorPole.position.y=.98;indicator.add(indicatorPole);
+    const indicatorArm = new THREE.Mesh(new THREE.BoxGeometry(1.05,.075,.12), brassMat);
+    indicatorArm.position.y=1.64;indicator.add(indicatorArm);
+    const indicatorArrow = new THREE.Mesh(new THREE.ConeGeometry(.18,.5,4), redTrimMat);
+    indicatorArrow.rotation.z=-Math.PI/2;indicatorArrow.position.set(.63,1.64,0);indicator.add(indicatorArrow);
+    lighthouse.add(indicator);
+    // 互動點 POI: WIND，移到基座外緣的地面指示模型上。
+    const hitBox = new THREE.Mesh(new THREE.BoxGeometry(1.8, 2.3, 1.8), new THREE.MeshBasicMaterial({ visible: false }));
+    hitBox.position.set(4.25, 1.35, 0);
     hitBox.userData = {
       id: 'poi_WIND',
-      label: '🌬️ 燈塔航海風向標 (WIND)',
+      label: '🌬️ 地面風向指示 · WIND',
       onClick: () => {
-        this.world.openSpeechCard('WIND', () => {
+        this.world.openQuestSpeechCard('WIND', () => {
           this.checkZoneCompletionStatus();
         });
       }
@@ -4828,7 +4843,7 @@ class SpatialZoneManager {
       id: 'poi_BOAT',
       label: '🛶 碼頭木造巡邏小艇 (BOAT)',
       onClick: () => {
-        this.world.openSpeechCard('BOAT', () => {
+        this.world.openQuestSpeechCard('BOAT', () => {
           this.checkZoneCompletionStatus();
         });
       }
@@ -6284,7 +6299,7 @@ class SpatialZoneManager {
       id: 'vocab_moon',
       label: '🌙 凝望蒼月潮汐日晷儀 (MOON)',
       onClick: () => {
-        this.world.openSpeechCard('MOON', () => {
+        this.world.openQuestSpeechCard('MOON', () => {
           this.checkZoneCompletionStatus();
         });
       }
@@ -7809,7 +7824,7 @@ class SpatialZoneManager {
       id: 'interact_WARM',
       label: '🔥 伸手靠近極光暖心魔爐 (WARM)',
       onClick: () => {
-        this.world.openSpeechCard('WARM', () => {
+        this.world.openQuestSpeechCard('WARM', () => {
           this.checkZoneCompletionStatus();
         });
       }
@@ -8602,7 +8617,7 @@ class SpatialZoneManager {
       id: 'floating_grimoire_lectern',
       label: '📖 遠古懸浮魔法大典 (READ)',
       onClick: () => {
-        this.world.openSpeechCard('READ', () => {
+        this.world.openQuestSpeechCard('READ', () => {
           this.checkZoneCompletionStatus();
         });
       }
@@ -8692,7 +8707,7 @@ class SpatialZoneManager {
       id: 'archmage_scribe_desk',
       label: '✍️ 大魔導士金羽書寫台 (WRITE)',
       onClick: () => {
-        this.world.openSpeechCard('WRITE', () => {
+        this.world.openQuestSpeechCard('WRITE', () => {
           this.checkZoneCompletionStatus();
         });
       }
@@ -8772,7 +8787,7 @@ class SpatialZoneManager {
       id: 'pool_of_reflection',
       label: '💡 深思水晶沉思之泉 (THINK)',
       onClick: () => {
-        this.world.openSpeechCard('THINK', () => {
+        this.world.openQuestSpeechCard('THINK', () => {
           this.checkZoneCompletionStatus();
         });
       }
@@ -9671,7 +9686,7 @@ class SpatialZoneManager {
       id: 'crystal_melody_piano',
       label: '🎵 [E] 浮空涼亭天籟水晶星琴 (MUSIC)',
       onClick: () => {
-        this.world.openSpeechCard('MUSIC', () => {
+        this.world.openQuestSpeechCard('MUSIC', () => {
           this.checkZoneCompletionStatus();
         });
       }

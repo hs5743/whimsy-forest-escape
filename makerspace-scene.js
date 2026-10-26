@@ -61,9 +61,12 @@
    return g;
   }
   function gear(x,y,z,r,teeth,color){
-   mesh('cyl',color,x,y,z,r*2,.16,r*2);
-   for(let i=0;i<teeth;i++){const a=i*2*Math.PI/teeth;box(color,x+Math.cos(a)*r*.91,y,z+Math.sin(a)*r*.91,.13,.16,.13,0,-a,0);}
-   mesh('cyl','dark',x,y+.09,z,.16,.025,.16);
+   const assembly=new T.Group();assembly.position.set(x,y,z);
+   mesh('cyl',color,0,0,0,r*2,.16,r*2,0,0,0,assembly);
+   const toothBatch=new T.InstancedMesh(geo.box,mat[color],teeth),tooth=new T.Object3D();
+   for(let i=0;i<teeth;i++){const a=i*2*Math.PI/teeth;tooth.position.set(Math.cos(a)*r*.91,0,Math.sin(a)*r*.91);tooth.rotation.set(0,-a,0);tooth.scale.set(.13,.16,.13);tooth.updateMatrix();toothBatch.setMatrixAt(i,tooth.matrix);}
+   toothBatch.instanceMatrix.needsUpdate=true;toothBatch.castShadow=true;toothBatch.receiveShadow=true;assembly.add(toothBatch);
+   mesh('cyl','dark',0,.09,0,.16,.025,.16,0,0,0,assembly);group.add(assembly);return assembly;
   }
   function pegTool(x,y,z,handle,angle=0){box('steel',x,y,z,.09,.48,.09,0,0,angle);mesh('cyl',handle,x,y-.19,z,.075,.24,.075,0,0,angle);mesh('cyl','aluminum',x,y+.12,z,.11,.07,.11,0,0,angle);}
   function printer(x,z){
@@ -149,8 +152,9 @@
   }
   for(const x of [-1.9,1.9])for(const z of [-4.72,-3.28])mesh('cyl','aluminum',x,1.04,z,.09,.12,.09);
   // Test stations: a paired fast/slow gear set, a steering servo and a protected battery cradle.
-  box('dark',-5,1.05,0,1.75,.12,1.1);gear(-5.42,1.16,0,.42,12,'yellow');gear(-4.76,1.16,0,.25,10,'blue');
-  box('white',5,1.05,0,1.75,.12,1.1);gear(4.58,1.16,0,.46,12,'blue');gear(5.28,1.16,0,.25,10,'orange');
+  box('dark',-5,1.05,0,1.75,.12,1.1);const slowGearLeft=gear(-5.42,1.16,0,.42,12,'yellow'),fastGearLeft=gear(-4.76,1.16,0,.25,10,'blue');
+  box('white',5,1.05,0,1.75,.12,1.1);const slowGearRight=gear(4.58,1.16,0,.46,12,'blue'),fastGearRight=gear(5.28,1.16,0,.25,10,'orange');
+  manager.world.animators?.push(time=>{slowGearLeft.rotation.y=time*1.25;fastGearLeft.rotation.y=-time*2.1;slowGearRight.rotation.y=time*1.25;fastGearRight.rotation.y=-time*2.1;});
   box('blue',5,1.08,-4,1.1,.17,.74);mesh('cyl','steel',5,1.2,-4,.27,.09,.27);
   for(const a of [0,Math.PI/2,Math.PI,Math.PI*1.5]){const arm=box('aluminum',5+Math.cos(a)*.46,1.2,-4+Math.sin(a)*.46,.38,.06,.08);arm.rotation.y=-a;}
   box('dark',0,1.07,4.8,1.75,.16,1.15);box('yellow',0,1.17,4.8,.73,.12,.54);box('dark',0,1.25,4.8,.52,.06,.39);
@@ -166,13 +170,13 @@
   // Return door has a small glazed safety panel and physical handle, not just a floating sign.
   box('wood',0,1.55,12.35,3.7,3.1,.12);box('blue',0,1.58,12.26,3.46,2.92,.08);box('glass',-.72,2.1,12.2,1.05,1.3,.035);box('aluminum',.96,1.53,12.16,.08,.22,.07);
   target('robot','小型輪式機器人',0,1.25,-4,3.2,2.5,2.4);
-  target('make','組裝零件與工作墊',-5,1.25,-4,4.4,2.1,2.5);
+  target('make','零件展示工作台',-5,1.25,-4,4.4,2.1,2.5);
   target('fast','高速小齒輪',-5,1.25,0,3.2,2,2.4);
   target('slow','慢速大齒輪',5,1.25,0,3.2,2,2.4);
   target('turn','轉向伺服器',5,1.25,-4,2.8,2.1,2.5);
   target('work','共用工作桌',-5,1.2,4.8,4.4,2.2,2.4);
   target('ready','電池檢查座',0,1.25,4.8,2.8,2.2,2.4);
-  target('start','小車測試線',0,1.2,8.1,3.3,2.2,3.6);
+  target('start','啟動標記與教學模型',0,1.2,8.1,3.3,2.2,3.6);
   const exit=new T.Mesh(geo.box,new T.MeshBasicMaterial({visible:false}));exit.position.set(0,1.5,11.7);exit.scale.set(3.5,2.8,1.2);exit.userData={id:'maker_exit',name:'返回新港國小校園',label:'返回新港國小校園',hint:'沿著工坊入口返回校園教學樓。',onClick:leave};group.add(exit);w.interactables.push(exit);
   // Batch repeated fixed geometry by shared material so detailed pegboards and benches do not inflate draw calls.
   const batches=new Map();for(const o of staticMeshes){o.updateMatrix();const key=o.geometry.uuid+':'+o.material.uuid;if(!batches.has(key))batches.set(key,[]);batches.get(key).push(o);}

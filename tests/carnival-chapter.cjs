@@ -29,7 +29,7 @@ test('carnival hint names the current vocabulary and its matching physical stati
 test('market route stays locked until the market quest is solved and returns to its parent',()=>{
  const ctx=vm.createContext({});for(const f of ['restaurant-chapter.js','carnival-chapter.js','realm-quests.js'])vm.runInContext(fs.readFileSync(path.join(base,f),'utf8'),ctx);
  const R=ctx.RealmQuests;assert.equal(R.canTravel('zone2','zone19',{}),false);assert.equal(R.canTravel('zone19','zone2',{}),true);
- const market={cart:[2,1,0],paid:true};assert.equal(R.solved('zone2',market),true);assert.equal(R.canTravel('zone2','zone19',{zone2:market}),true);
+ const market={cart:[2,1,0],paid:true,spoken:{APPLE:2,MILK:1}};assert.equal(R.solved('zone2',market),true);assert.equal(R.canTravel('zone2','zone19',{zone2:market}),true);
  const map=R.sanitizeMap({zone19:complete(C.initial())});assert.equal(R.solved('zone19',map.zone19),true);
 });
 
