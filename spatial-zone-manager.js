@@ -103,7 +103,7 @@ class SpatialZoneManager {
         topic: 'Winter, Climate & Arctic Nature',
         reqLevel: 8,
         desc: '懸浮於大陸極峰的萬年寒冰聖域，翡翠綠與紫羅蘭色的極光在夜空中輕盈起伏！',
-        words: ['SNOW', 'COLD', 'WINTER', 'WHITE', 'WARM', 'CLIMB'],
+        words: ['SNOW', 'COLD', 'WINTER', 'WHITE', 'COAT', 'WARM', 'CLIMB'],
         spawnPos: [0, 1.6, 7.5],
         spawnYaw: 0
       },

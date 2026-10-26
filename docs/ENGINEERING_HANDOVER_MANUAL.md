@@ -87,7 +87,7 @@ zone12 校舍、zone14 溫室、zone15 氣象觀測台、zone16 潮間帶、zone
 
 ## 驗證結果與限制
 
-- `npm test`：351/351 通過；涵蓋舊存檔遷移、完整前置路徑、口說 gate、分支完成狀態、GEPT 詞彙與場景模型構造。
+- `npm test`：352/352 通過；涵蓋舊存檔遷移、完整前置路徑、口說 gate、分支完成狀態、GEPT 詞彙與場景模型構造。
 - `npm run build:gas`：完成 schema 和單檔後台重建。這只表示本機產生器輸出同步；Apps Script 編輯器中的正式程式與部署仍須依本次實際發布結果確認。
 - `git diff --check`：通過。
 - 自動化測試可代替 reducer 流程檢查，但不能證明真實學生麥克風被瀏覽器識別成功，也不能取代雲端逐關遊玩。正式頁面部署後，須分開記錄頁面載入、關卡入口、口說辨識及存檔驗收；沒有成功的 Web Speech API 回應時不得標為語音驗收通過。
@@ -107,4 +107,5 @@ zone12 校舍、zone14 溫室、zone15 氣象觀測台、zone16 潮間帶、zone
 - GitHub Pages `pages build and deployment` 工作流程 run `40257956056` 對應上述提交，狀態 `completed / success`。
 - 實際開啟正式網址 `https://hs5743.github.io/whimsy-forest-escape/`，頁面標題為「英語魔法探險家：秘境逃脫任務」，場景素材顯示已就緒並載入機場抵達提示。這證明首頁與主場景資源可載入；未走完 21 關，也未完成關卡內真實口說與存檔驗證。
 - `npm run build:gas` 已同步產生本機後台發布檔，但沒有修改 Apps Script 編輯器或建立新 Apps Script 部署；GitHub Pages 推送不會自動更新 GAS。後台驗收仍須讀取目前正式執行版本確認。
-- 本次自動化驗收為 `npm test` 351/351 通過、`git diff --check` 通過。測試不等同真實麥克風辨識。
+- 本次自動化驗收為 `npm test` 352/352 通過、`git diff --check` 通過。測試不等同真實麥克風辨識。
+- 已重新核對使用者提供的 18 頁 GEPT Kids PDF（SHA-256 `cd07356a9a30e157a04eb1fae4a35d95900433a004164425177d13ccd9b28c37`）：確認 `SHIP` 位於第 12 頁、`COAT` 位於第 1 頁，並修正專案索引漏收 `SHIP` 的問題。zone8 加入 `COAT` 核心詞；`CLOUD / THINK / ISLAND / GLOVES / BOOTS / SANDALS` 已在索引明確列為延伸／干擾詞，並加入範圍回歸測試。

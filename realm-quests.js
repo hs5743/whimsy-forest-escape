@@ -8,7 +8,7 @@
     zone5:{title:'車站解謎：準時上車',english:'The train leaves at eight thirty. Go to platform two.',brief:'車票寫著 08:30、月台 2。先到鐘樓口說 TIME、到列車口說 TRAIN，再調整鐘面與月台並驗票。',clues:['先找到天文時鐘與星光列車，分別口說 TIME、TRAIN。','Eight thirty 是 08:30，platform two 是月台 2；完成口說後才能驗票上車。']},
     zone6:{title:'海港導航：避礁靠岸',english:'Sail to the lighthouse. Keep away from the rocks.',brief:'先在碼頭找到小艇並口說 BOAT，再依海圖使用方向鍵航行到右上方燈塔。抵達後口說 WIND，避開礁石並留在海圖範圍內。',clues:['看看海圖中礁石的位置，找一條連續的水路。','到達燈塔後口說 WIND；船每次只移動一格。']},
     zone7:{title:'觀測站：對準東方月亮',english:'Find the moon in the east.',brief:'先在日晷儀前口說 MOON，再根據觀測筆記調整方向；北 0°、東 90°、南 180°、西 270°。',clues:['筆記同時提到天體與方向。','口說 MOON，把觀測儀轉到東方 90°，再確認對準。']},
-    zone8:{title:'冰雪準備：溫暖出發',english:'Wear a coat, gloves and boots. Keep warm.',brief:'在裝備面板逐一口說並選擇外套、手套與雪靴；再到營火前口說 WARM。最後把火候調到 2 格才可出發。',clues:['短褲與涼鞋可作為辨認干擾項，但不需要選取。','需要 COAT、GLOVES、BOOTS；到營火口說 WARM，並把熱度調到 2 格。']},
+    zone8:{title:'冰雪準備：溫暖出發',english:'Wear a coat, gloves and boots. Keep warm.',brief:'在裝備面板逐一口說並選擇外套 COAT、手套 GLOVES 與雪靴 BOOTS（手套、雪靴是延伸詞）；再到營火前口說 WARM。最後把火候調到 2 格才可出發。',clues:['短褲與涼鞋可作為辨認干擾項，但不需要選取。','需要 COAT、GLOVES、BOOTS；GLOVES 與 BOOTS 是延伸詞。到營火口說 WARM，並把熱度調到 2 格。']},
     zone9:{title:'智慧殿堂：修復故事卷軸',english:'Read first. Think next. Write last.',brief:'找到大典、沉思之泉與書寫台，依序口說 READ、THINK、WRITE，讓卷軸記下正確步驟；放錯可以取回重排。',clues:['First、next、last 告訴你先後順序。','逐一找到場景中的三個目標並口說 READ、THINK、WRITE；完成後回面板蓋章。']},
     zone10:{title:'虹光空島：奏響回家之歌',english:'Listen to the music. Sing the song.',brief:'先到浮空星琴前口說 MUSIC，解鎖琴鍵練習；聽示範後用琴鍵重現 C → E → G → C，讓回家的虹橋亮起。',clues:['先找到星琴並口說 MUSIC。','聽示範旋律，留意最後一個音與第一個音相同；再依序按 C、E、G、C。']}
   };
@@ -247,7 +247,7 @@
           svg('<svg viewBox="0 0 160 160" role="img" aria-label="觀測方向 '+s.angle+' 度"><circle cx="80" cy="80" r="65" fill="#eef4fe" stroke="#485879"/><text x="65" y="28">N 0°</text><text x="115" y="83">E 90°</text><text x="60" y="143">S 180°</text><text x="0" y="83">W 270°</text><path d="M 80 40 L 72 68 L 80 62 L 88 68 Z" fill="#be7a31" transform="rotate('+s.angle+' 80 80)"/><circle cx="80" cy="80" r="5" fill="#be7a31"/></svg>');
           text('觀測儀 '+s.angle+'° · MOON '+(s.moonSpoken?'已口說':'尚未口說'));row(speechButton('🌙 口說 MOON','MOON'),button('順時針轉 90°',{type:'rotate'}),button('確認對準',{type:'align'}));break;
         case 'zone8':
-          row(...[['COAT','🧥 外套 Coat'],['GLOVES','🧤 手套 Gloves'],['BOOTS','🥾 雪靴 Boots'],['SHORTS','🩳 短褲 Shorts'],['SANDALS','🩴 涼鞋 Sandals']].map(([value,label])=>speechButton((s.gear.includes(value)?'✓ ':'')+label,value)));
+          row(...[['COAT','🧥 外套 Coat'],['GLOVES','🧤 手套 Gloves（延伸詞）'],['BOOTS','🥾 雪靴 Boots（延伸詞）'],['SHORTS','🩳 短褲 Shorts'],['SANDALS','🩴 涼鞋 Sandals（延伸詞）']].map(([value,label])=>speechButton((s.gear.includes(value)?'✓ ':'')+label,value)));
           text('營火熱度 '+['□ □ □','■ □ □','■ ■ □','■ ■ ■'][s.heat]+' · '+['太冷','微暖','溫暖','太熱'][s.heat]+' · WARM '+(s.warmSpoken?'已口說':'尚未口說'));row(speechButton('🔥 口說 WARM','WARM'),button('加一份木柴 +1',{type:'heat',value:1}),button('減少木柴 −1',{type:'heat',value:-1}),button('準備出發',{type:'depart'}));break;
         case 'zone9':
           text('故事卷軸：'+(s.order.join(' → ')||'等待口說三張卡'));
