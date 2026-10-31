@@ -4,7 +4,7 @@
 class World3D {
   constructor() {
     this.settings = GamePolish.loadSettings(window.localStorage);
-    this.devMode = ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname) && new URLSearchParams(location.search).get("dev") === "1";
+    this.devMode = (["localhost", "127.0.0.1", "[::1]", "hs5743.github.io"].includes(location.hostname) || location.protocol === "file:") && new URLSearchParams(location.search).get("dev") === "1";
     this.zoneTimers = new Set();
     this.frameCadence = new GamePolish.FrameCadence();
     this.scene = null;

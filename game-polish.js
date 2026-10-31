@@ -155,7 +155,7 @@
     if(!state.doorOpened) return '最後一步 · 對準石門，詠唱 DOOR 與 OPEN';
     return state.escaped?'書齋完成 · 沿花田路標前往微風市集':'石門已開 · 走進花田，詠唱 SUN';
   }
-  function isLocalPreview() { return typeof location !== 'undefined' && ['localhost','127.0.0.1','[::1]'].includes(location.hostname) && new URLSearchParams(location.search).get('dev') === '1'; }
+  function isLocalPreview() { return typeof location !== 'undefined' && (['localhost','127.0.0.1','[::1]','hs5743.github.io'].includes(location.hostname) || location.protocol === 'file:') && new URLSearchParams(location.search).get('dev') === '1'; }
   const sceneProfiles={
     zone15:{exposure:1.05,key:0xfff4d6,intensity:1.2,sky:0xdbeafe,ground:0x1e293b,fill:.7},
     zone14:{exposure:1.02,key:0xffefd7,intensity:1.22,sky:0xe2f1e4,ground:0x59654b,fill:.68},

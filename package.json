@@ -4,6 +4,7 @@
   "description": "3D WebGL / Three.js English Learning Adventure Game",
   "private": true,
   "scripts": {
+    "dev": "node scripts/dev-server.cjs",
     "test": "node --test tests/*.cjs",
     "build:gas": "node scripts/build-gas-schema.cjs && node scripts/build-learning-schema.cjs && node scripts/build-gas-bundle.cjs"
   },
